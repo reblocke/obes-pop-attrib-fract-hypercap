@@ -19,49 +19,152 @@ fontsize: 11pt
 
 # Obesity and hypercapnic respiratory failure analysis
 
-## **Data import and setup**
+## Section 0. Setup
+
+### Load packages
 
 ```{r}
+#| label: setup-packages
 library(tidyverse)
 library(haven)
-library(janitor)
-library(gtsummary)
 library(ggplot2)
-
+library(modelsummary)
+library(here)
 
 rm(list = ls())
-#stata_data <- readRDS("C:/Users/ajsch/OneDrive/Desktop/full_db.rds")
-stata_data <- readRDS('/Users/blocke/Box Sync/Residency Personal Files/Scholarly Work/Locke Research Projects/TriNetX Code/data_derived/full_db.rds')
-
-nrow(stata_data)
-
+# TODO: renv::snapshot()
 ```
 
-### Enforce Data Types
+### Define file paths and constants
 
 ```{r}
-library(haven)
-library(dplyr)
+#| label: setup-paths-constants
+data_path <- here::here("full_db.rds")
+
+co2_abg_cutoff <- 45
+co2_vbg_cutoff <- 50
+ph_cutoff <- 7.35
+icd_hrf_vars <- c("has_j9612", "has_j9622", "has_j9692", "has_j9602")
+
+coef_map_common <- c(
+  "curr_bmi_num" = "BMI (per 1 kg/m^2)",
+  "age_at_encounter" = "Age (per year)",
+  "sexMale" = "Male",
+  "ethnicityHispanic or Latino" = "Hispanic/Latino",
+  "ethnicityUnknown" = "Ethnicity: Unknown"
+)
+```
+
+## Section 1. Data ingest and harmonization
+
+### readRDS()
+
+```{r}
+#| label: data-ingest
+stata_data <- readRDS(data_path)
+```
+
+### Standardize types (labelled -\> numeric, factors)
+
+```{r}
+#| label: data-standardize-types
+# Verify before conversion
+table(stata_data$niv_proc, useNA = "ifany")
 
 # Convert labelled variables to numeric properly
 stata_data <- stata_data %>%
   mutate(
-    niv_proc = as.numeric(as_factor(niv_proc)) - 1,  # converts 1="Yes", 2="No" to 0/1
-    imv_proc = as.numeric(as_factor(imv_proc)) - 1,
+    niv_proc = case_when(
+      as.character(as_factor(niv_proc)) == "Received NIV (not including nightly CPAP)" ~ 1,
+      as.character(as_factor(niv_proc)) == "No NIV" ~ 0,
+      TRUE ~ NA_real_
+    ),
+    imv_proc = case_when(
+      as.character(as_factor(imv_proc)) == "Received IMV" ~ 1,
+      as.character(as_factor(imv_proc)) == "No IMV" ~ 0,
+      TRUE ~ NA_real_
+    ),
     highest_paco2 = as.numeric(highest_paco2),
     abg_ph = as.numeric(abg_ph),
     vbg_co2 = as.numeric(vbg_co2),
     vbg_ph = as.numeric(vbg_ph)
   )
 
+# Verify after conversion
+table(stata_data$niv_proc, useNA = "ifany")
 
+stopifnot(all(is.na(stata_data$niv_proc) | stata_data$niv_proc %in% c(0, 1)))
+stopifnot(any(stata_data$niv_proc == 0, na.rm = TRUE))
+stopifnot(any(stata_data$niv_proc == 1, na.rm = TRUE))
+
+stopifnot(all(is.na(stata_data$imv_proc) | stata_data$imv_proc %in% c(0, 1)))
+stopifnot(any(stata_data$imv_proc == 0, na.rm = TRUE))
+stopifnot(any(stata_data$imv_proc == 1, na.rm = TRUE))
+
+any_vent <- (stata_data$niv_proc == 1 | stata_data$imv_proc == 1)
+stopifnot(any(any_vent == TRUE, na.rm = TRUE))
+stopifnot(any(any_vent == FALSE, na.rm = TRUE))
 ```
 
-## Outcome Definition 1: Vent code & resp acidosis (by ABG or VBG)
-
-Below is my first (probably most stringent) iteration of hypercapnic respiratory failure: co2 greater than 45 if abg, 50 if vbg, ph \<7.35 - they have to have either an abg or a vbg showing this, AND either NIV or IMV or both. I've written it so that ABG values and VBG values cannot mix\
+### Quick sanity checks (row counts, missingness)
 
 ```{r}
+#| label: data-sanity-checks
+nrow(stata_data)
+```
+
+TODO: Add missingness checks.
+
+## Section 2. Variable derivations
+
+### BMI parsing + BMI categories
+
+```{r}
+#| label: bmi-parse
+bmi_raw <- stata_data %>%
+  transmute(curr_bmi_raw = na_if(str_trim(as.character(zap_labels(curr_bmi))), "n/a"))
+
+non_numeric_bmi <- bmi_raw %>%
+  filter(!is.na(curr_bmi_raw), !str_detect(curr_bmi_raw, "^\\d+(\\.\\d+)?$"))
+
+non_numeric_bmi %>%
+  count(curr_bmi_raw, sort = TRUE)
+
+non_numeric_bmi %>%
+  summarise(n_failed_parse = n())
+
+stata_data <- stata_data %>%
+  mutate(
+    curr_bmi_num = if_else(
+      str_detect(str_trim(as.character(zap_labels(curr_bmi))), "^\\d+(\\.\\d+)?$"),
+      as.numeric(str_trim(as.character(zap_labels(curr_bmi)))),
+      NA_real_
+    )
+  )
+```
+
+```{r}
+#| label: bmi-categories
+stata_data <- stata_data %>%
+  mutate(
+    bmi_category = case_when(
+      is.na(curr_bmi_num) ~ NA_character_,
+      curr_bmi_num < 18.5 ~ "Underweight",
+      curr_bmi_num < 25   ~ "Normal weight",
+      curr_bmi_num < 30   ~ "Overweight",
+      curr_bmi_num < 35   ~ "Obesity I",
+      curr_bmi_num < 40   ~ "Obesity II",
+      curr_bmi_num >= 40  ~ "Obesity III"
+    )
+  )
+```
+
+### HRF definition v1 (gases + ventilation)
+
+Below is my first (probably most stringent) iteration of hypercapnic respiratory failure: co2 greater than 45 if abg, 50 if vbg, ph \<7.35 - they have to have either an abg or a vbg showing this, AND either NIV or IMV or both. I've written it so that ABG values and VBG values cannot mix
+
+```{r}
+#| label: hrf-v1-gas-source
 stata_data <- stata_data %>%
   mutate(
     gas_source = case_when(
@@ -69,98 +172,161 @@ stata_data <- stata_data %>%
       TRUE ~ "VBG"
     )
   )
-
 ```
 
 ```{r}
+#| label: hrf-v1-define
 stata_data <- stata_data %>%
   mutate(
     hrf_hypercapnic = case_when(
       # ABG-based HRF
       (niv_proc == 1 | imv_proc == 1) &
         gas_source == "ABG" &
-        highest_paco2 >= 45 &
-        abg_ph <= 7.35 ~ 1,
+        highest_paco2 >= co2_abg_cutoff &
+        abg_ph <= ph_cutoff ~ 1,
 
       # VBG-based HRF (only when ABG incomplete)
       (niv_proc == 1 | imv_proc == 1) &
         gas_source == "VBG" &
         !is.na(vbg_co2) & !is.na(vbg_ph) &
-        vbg_co2 >= 50 &
-        vbg_ph <= 7.35 ~ 1,
+        vbg_co2 >= co2_vbg_cutoff &
+        vbg_ph <= ph_cutoff ~ 1,
 
       TRUE ~ 0
     ),
-    hrf_hypercapnic = factor(hrf_hypercapnic, labels = c("No", "Yes"))
-  )
-
-
-```
-
-Counts (bottom right is amount of patients meeting criteria above, adds up to full dataset)
-
-```{r}
-table(
-  hrf = stata_data$hrf_hypercapnic,
-  any_vent = (stata_data$niv_proc == 1 | stata_data$imv_proc == 1)
-)
-
-```
-
-Counts for categories of obesity:
-
-```{r}
-stata_data <- stata_data %>%
-  mutate(
-    curr_bmi_num = suppressWarnings(
-      as.numeric(na_if(as.character(zap_labels(curr_bmi)), "n/a"))
+    hrf_hypercapnic = factor(
+      hrf_hypercapnic,
+      levels = c(0, 1),
+      labels = c("No", "Yes")
     )
   )
-
 ```
 
+### HRF definition v2 (labs + ICD) and v2_strict
+
+Regression done with new definition of hypercapnic respiratory failure - pH and CO2 definition as above, except now including (required) ICD codes instead of ventilation (I only used 4 - the first four that are listed in database):
+
 ```{r}
+#| label: hrf-v2-define
 stata_data <- stata_data %>%
-mutate(
-bmi_category = case_when(
-is.na(curr_bmi_num) ~ NA_character_,
-curr_bmi_num < 18.5 ~ "Underweight",
-curr_bmi_num < 25   ~ "Normal weight",
-curr_bmi_num < 30   ~ "Overweight",
-curr_bmi_num < 35   ~ "Obesity I",
-curr_bmi_num < 40   ~ "Obesity II",
-curr_bmi_num >= 40  ~ "Obesity III"
-)
-)
+  mutate(
+    # Lab-based hypercapnic respiratory failure (ABG or VBG)
+    hrf_hypercapnic_labs_v2 = case_when(
+      !is.na(highest_paco2) & !is.na(abg_ph) &
+       highest_paco2 >= co2_abg_cutoff & abg_ph < ph_cutoff ~ 1, # BL note - fixed this 50->45
 
+      !is.na(vbg_co2) & !is.na(vbg_ph) &
+        vbg_co2 >= co2_vbg_cutoff & vbg_ph < ph_cutoff ~ 1,
+
+      TRUE ~ 0
+    ),
+
+    # ICD-based hypercapnic respiratory failure
+    hrf_hypercapnic_icd_v2 = ifelse(
+      rowSums(across(all_of(icd_hrf_vars)) == 1, na.rm = TRUE) > 0,
+      1, 0
+    ),
+
+    # Final combined HRF definition (labs OR ICD)
+    hrf_hypercapnic_v2 = ifelse(
+      hrf_hypercapnic_labs_v2 == 1 |
+      hrf_hypercapnic_icd_v2 == 1,
+      1, 0
+    )
+  )
 ```
 
 ```{r}
+#| label: hrf-v2-strict
+stata_data <- stata_data %>%
+  mutate(
+    hrf_hypercapnic_v2_strict = ifelse(
+      hrf_hypercapnic_labs_v2 == 1 &
+      hrf_hypercapnic_icd_v2  == 1,
+      1, 0
+    )
+  )
+```
+
+## Section 3. Cohort construction and attrition
+
+### Primary analysis cohort (HRF v1)
+
+```{r}
+#| label: cohort-primary
+stata_hrf_analysis <- stata_data %>%
+  filter(!is.na(curr_bmi_num),
+         (!is.na(highest_paco2) & !is.na(abg_ph)) |
+         (!is.na(vbg_co2) & !is.na(vbg_ph)))
+```
+
+### Strict v2 cohort (sensitivity)
+
+```{r}
+#| label: cohort-strict
+stata_hrf_strict_analysis <- stata_data %>%
+  mutate(
+    has_gas = (!is.na(highest_paco2) & !is.na(abg_ph)) |
+              (!is.na(vbg_co2) & !is.na(vbg_ph))
+  ) %>%
+  filter(
+    # Keep strict HRF cases
+    hrf_hypercapnic_v2_strict == 1 |
+
+    # OR clean controls with labs and no HRF by any definition
+    (
+      has_gas == TRUE &
+      hrf_hypercapnic_labs_v2 == 0 &
+      hrf_hypercapnic_icd_v2  == 0
+    )
+  )
+```
+
+TODO: Add attrition table with inclusion/exclusion counts.
+
+## Section 4. Descriptive statistics
+
+### Distribution of BMI in the analytic cohort
+
+```{r}
+#| label: bmi-distribution
 table(stata_data$hrf_hypercapnic, useNA = "ifany")
 summary(stata_data$curr_bmi_num)
 table(stata_data$bmi_category, useNA = "ifany")
-
 ```
 
 \[BL - note high rates of BMI missing data\]
 
+### HRF prevalence by BMI category (v1)
+
+Counts (bottom right is amount of patients meeting criteria above, adds up to full dataset)
+
+```{r}
+#| label: hrf-v1-counts
+table(
+  hrf = stata_data$hrf_hypercapnic,
+  any_vent = (stata_data$niv_proc == 1 | stata_data$imv_proc == 1)
+)
+```
+
 ### Counts for both HRF as defined above AND current BMI above 30
 
 ```{r}
+#| label: hrf-bmi-gt30
 stata_data %>%
   filter(
     hrf_hypercapnic == "Yes",
-    curr_bmi_num > 30
+    curr_bmi_num >= 30
   ) %>%
   summarise(
     n_patients = n()
   )
-
 ```
 
 Counts for HRF and BMI by category
 
 ```{r}
+#| label: hrf-bmi-category-counts
 stata_data %>%
   filter(
     hrf_hypercapnic == "Yes",
@@ -169,7 +335,7 @@ stata_data %>%
   mutate(
     bmi_category = case_when(
       curr_bmi_num < 18.5 ~ "Underweight",
-      curr_bmi_num < 25   ~ "Normal",
+      curr_bmi_num < 25   ~ "Normal weight",
       curr_bmi_num < 30   ~ "Overweight",
       curr_bmi_num < 35   ~ "Obesity I",
       curr_bmi_num < 40   ~ "Obesity II",
@@ -178,78 +344,35 @@ stata_data %>%
   ) %>%
   count(bmi_category) %>%
   mutate(pct = round(100 * n / sum(n), 1))
-
 ```
 
-## Table 1: descriptions of each predictor or outcome variable (including components) stratified by outcome status
+### Baseline characteristics table
 
 -   [ ] TODO
-
-## Regression Analyses for Outcome 1
-
-Below is regression, starting with BMI (the degrees of freedom is 112k which seems appropriate - includes all patients with a BMI and labs/vent indicating NO HRF, plus the patients with BMI and hypercapnic respiratory failure as defined above)
-
-```{r}
-stata_hrf_analysis <- stata_data %>%
-  filter(!is.na(curr_bmi_num),
-         (!is.na(highest_paco2) & !is.na(abg_ph)) |
-         (!is.na(vbg_co2) & !is.na(vbg_ph)))
-```
-
-### Unadjusted (aka simple) regression for outcome 1
-
-```{r}
-logit_bmi_hrf <- glm(hrf_hypercapnic ~ curr_bmi_num,
-data = stata_hrf_analysis,
-family = binomial)
-
-summary(logit_bmi_hrf)
-exp(cbind(OR = coef(logit_bmi_hrf), confint(logit_bmi_hrf)))
-
-```
-
-OR shows small increase in risk with BMI, though is statistically significant
-
-\[BL Edit - though keep in mind, Odds increased by .02 for each BMI point (e.g. 10 = 20% increase in odds)\]
-
-### Adjusted, multivariable regression for outcome 1
-
-Regression done again adjusted for variables NOT influenced by BMI (age, sex, ethnicity included - didn't include location as it appears to be the same for all entries)
-
-```{r}
-baseline_model <- glm(
-hrf_hypercapnic ~ curr_bmi_num + age_at_encounter + sex + ethnicity,
-data = stata_hrf_analysis,
-family = binomial
-)
-
-summary(baseline_model)
-exp(cbind(OR = coef(baseline_model), confint(baseline_model)))
-```
-
-Association appears to be stronger once adjusted
 
 ### Are proportions of hypercapnic respiratory failure (v1) different across BMI categories?
 
 Just out of curiosity ran Chi square analysis below
 
 ```{r}
+#| label: bmi-hrf-v1-subset
 bmi_hrf_subset <- stata_hrf_analysis %>%
-filter(!is.na(bmi_category))
+  filter(!is.na(bmi_category))
 ```
 
 ```{r}
+#| label: bmi-hrf-v1-summary
 bmi_hrf_summary <- bmi_hrf_subset %>%
-group_by(bmi_category) %>%
-summarise(
-n_total = n(),
-n_hrf = sum(hrf_hypercapnic == "Yes"),
-n_no_hrf = sum(hrf_hypercapnic == "No"),
-pct_hrf = round(100 * n_hrf / n_total, 1),
-pct_no_hrf = round(100 * n_no_hrf / n_total, 1)
-) %>%
-arrange(factor(bmi_category, levels = c("Underweight", "Normal weight", "Overweight",
-"Obesity I", "Obesity II", "Obesity III")))
+  group_by(bmi_category) %>%
+  summarise(
+    n_total = n(),
+    n_hrf = sum(hrf_hypercapnic == "Yes"),
+    n_no_hrf = sum(hrf_hypercapnic == "No"),
+    pct_hrf = round(100 * n_hrf / n_total, 1),
+    pct_no_hrf = round(100 * n_no_hrf / n_total, 1)
+  ) %>%
+  arrange(factor(bmi_category, levels = c("Underweight", "Normal weight", "Overweight",
+                                         "Obesity I", "Obesity II", "Obesity III")))
 
 chisq_test <- chisq.test(table(bmi_hrf_subset$bmi_category, bmi_hrf_subset$hrf_hypercapnic))
 
@@ -260,8 +383,7 @@ chisq_test$p.value
 Visualization:
 
 ```{r}
-library(ggplot2)
-
+#| label: bmi-hrf-v1-plot
 # Make sure bmi_category is ordered
 bmi_hrf_summary <- bmi_hrf_summary %>%
   mutate(bmi_category = factor(bmi_category,
@@ -280,88 +402,75 @@ ggplot(bmi_hrf_summary, aes(x = bmi_category, y = pct_hrf, fill = bmi_category))
   ) +
   theme_minimal() +
   theme(legend.position = "none")
-
 ```
 
-## Outcome Definition 2: J96.\*2 ICD code & Respiratory Acidosis (by ABG or VBG)
+## Section 5. Primary inferential model
 
-Regression done with new definition of hypercapnic respiratory failure - pH and CO2 definition as above, except now including (required) ICD codes instead of ventilation (I only used 4 - the first four that are listed in database):
+### Unadjusted (aka simple) regression for outcome 1
+
+Below is regression, starting with BMI (the degrees of freedom is 112k which seems appropriate - includes all patients with a BMI and labs/vent indicating NO HRF, plus the patients with BMI and hypercapnic respiratory failure as defined above)
 
 ```{r}
-stata_data <- stata_data %>%
-  mutate(
-    # Lab-based hypercapnic respiratory failure (ABG or VBG)
-    hrf_hypercapnic_labs_v2 = case_when(
-      !is.na(highest_paco2) & !is.na(abg_ph) &
-       highest_paco2 >= 45 & abg_ph < 7.35 ~ 1, # BL note - fixed this 50->45
-      
-      !is.na(vbg_co2) & !is.na(vbg_ph) &
-        vbg_co2 >= 50 & vbg_ph < 7.35 ~ 1,
-      
-      TRUE ~ 0
-    ),
-    
-    # ICD-based hypercapnic respiratory failure
-    hrf_hypercapnic_icd_v2 = ifelse(
-      has_j9612 == 1 |
-      has_j9622 == 1 |
-      has_j9692 == 1 |
-      has_j9602 == 1,
-      1, 0
-    ),
-    
-    # Final combined HRF definition (labs OR ICD)
-    hrf_hypercapnic_v2 = ifelse(
-      hrf_hypercapnic_labs_v2 == 1 |
-      hrf_hypercapnic_icd_v2 == 1,
-      1, 0
-    )
-  )
+#| label: model-v1-unadjusted
+logit_bmi_hrf <- glm(hrf_hypercapnic ~ curr_bmi_num,
+data = stata_hrf_analysis,
+family = binomial)
 
+summary(logit_bmi_hrf)
+```
+
+OR shows small increase in risk with BMI, though is statistically significant
+
+\[BL Edit - though keep in mind, Odds increased by .02 for each BMI point (e.g. 10 = 20% increase in odds)\]
+
+### Adjusted, multivariable regression for outcome 1
+
+Regression done again adjusted for variables NOT influenced by BMI (age, sex, ethnicity included - didn't include location as it appears to be the same for all entries)
+
+```{r}
+#| label: model-v1-adjusted
+baseline_model <- glm(
+hrf_hypercapnic ~ curr_bmi_num + age_at_encounter + sex + ethnicity,
+data = stata_hrf_analysis,
+family = binomial
+)
+
+summary(baseline_model)
 ```
 
 ```{r}
-stata_data <- stata_data %>%
-  mutate(
-    hrf_hypercapnic_v2_strict = ifelse(
-      hrf_hypercapnic_labs_v2 == 1 &
-      hrf_hypercapnic_icd_v2  == 1,
-      1, 0
-    )
-  )
+#| label: modelsummary-v1
+mods_v1 <- list(
+  "HRF v1: unadjusted" = logit_bmi_hrf,
+  "HRF v1: adjusted"   = baseline_model
+)
 
+modelsummary(
+  mods_v1,
+  exponentiate = TRUE,
+  statistic    = "conf.int",
+  coef_map = coef_map_common,
+  gof_omit = "RMSE|F|Adj|R2"
+)
 ```
+
+Association appears to be stronger once adjusted
+
+## Section 6. Sensitivity analyses
+
+### Counts for strict HRF definition (v2_strict)
 
 Number of patients meeting strict definition
 
 ```{r}
+#| label: hrf-v2-strict-counts
 table(stata_data$hrf_hypercapnic_v2_strict, useNA = "ifany")
-
-```
-
-```{r}
-stata_hrf_strict_analysis <- stata_data %>%
-  mutate(
-    has_gas = (!is.na(highest_paco2) & !is.na(abg_ph)) |
-              (!is.na(vbg_co2) & !is.na(vbg_ph))
-  ) %>%
-  filter(
-    # Keep strict HRF cases
-    hrf_hypercapnic_v2_strict == 1 |
-      
-    # OR clean controls with labs and no HRF by any definition
-    (
-      has_gas == TRUE &
-      hrf_hypercapnic_labs_v2 == 0 &
-      hrf_hypercapnic_icd_v2  == 0
-    )
-  )
-
 ```
 
 ### Unadjusted Logistic Regression for Outcome 2
 
 ```{r}
+#| label: model-v2-strict-unadjusted
 model_strict_bmi_unadj <- glm(
   hrf_hypercapnic_v2_strict ~ curr_bmi_num,
   family = binomial,
@@ -369,14 +478,6 @@ model_strict_bmi_unadj <- glm(
 )
 
 summary(model_strict_bmi_unadj)
-
-or_table <- exp(cbind(
-  OR = coef(model_strict_bmi_unadj),
-  confint(model_strict_bmi_unadj)
-))
-
-or_table
-
 ```
 
 ### Adjusted, Multivariable Regression for Outcome 2
@@ -384,6 +485,7 @@ or_table
 Then adjusted for age, sex, ethnicity:
 
 ```{r}
+#| label: model-v2-strict-adjusted
 baseline_model_strict <- glm(
   hrf_hypercapnic_v2_strict ~
     curr_bmi_num +
@@ -395,17 +497,53 @@ baseline_model_strict <- glm(
 )
 
 summary(baseline_model_strict)
+```
 
-exp(cbind(
-  OR = coef(baseline_model_strict),
-  confint(baseline_model_strict)
-))
+```{r}
+#| label: modelsummary-v2-strict
+mods_v2 <- list(
+  "HRF v2 strict: unadjusted" = model_strict_bmi_unadj,
+  "HRF v2 strict: adjusted"   = baseline_model_strict
+)
 
+modelsummary(
+  mods_v2,
+  exponentiate = TRUE,
+  statistic    = "conf.int",
+  coef_map = coef_map_common,
+  gof_omit = "RMSE|F|Adj|R2"
+)
+```
+
+```{r}
+#| label: modelsummary-primary-sensitivity
+mods_all <- list(
+  "HRF v1 (primary)"            = baseline_model,
+  "HRF v2_strict (sensitivity)" = baseline_model_strict
+)
+
+modelsummary(
+  mods_all,
+  exponentiate = TRUE,
+  statistic    = "conf.int",
+  coef_map = coef_map_common,
+  gof_omit = "RMSE|F|Adj|R2"
+)
+```
+
+```{r}
+#| label: modelplot-primary-sensitivity
+modelplot(
+  mods_all,
+  exponentiate = TRUE,
+  coef_omit = "(Intercept)"
+)
 ```
 
 ### Are proportions of hypercapnic respiratory failure (v2) different across BMI categories?
 
 ```{r}
+#| label: bmi-hrf-v2-strict-summary
 # Subset to patients with BMI categories
 bmi_hrf_strict_subset <- stata_hrf_strict_analysis %>%
   filter(!is.na(bmi_category))
@@ -432,14 +570,12 @@ chisq_test_strict <- chisq.test(table(
 # View summary table and p-value
 bmi_hrf_strict_summary
 chisq_test_strict$p.value
-
 ```
 
 and visualization
 
 ```{r}
-library(ggplot2)
-
+#| label: bmi-hrf-v2-strict-plot
 # Make sure bmi_category is ordered
 bmi_hrf_strict_summary <- bmi_hrf_strict_summary %>%
   mutate(bmi_category = factor(bmi_category,
@@ -458,5 +594,14 @@ ggplot(bmi_hrf_strict_summary, aes(x = bmi_category, y = pct_hrf, fill = bmi_cat
   ) +
   theme_minimal() +
   theme(legend.position = "none")
+```
 
+## Section 7. Population attributable fraction
+
+TODO
+
+## Appendix
+
+```{r}
+sessionInfo()
 ```
