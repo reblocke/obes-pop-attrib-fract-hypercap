@@ -32,7 +32,6 @@ library(modelsummary)
 library(here)
 
 rm(list = ls())
-# TODO: renv::snapshot()
 ```
 
 ### Define file paths and constants
@@ -348,7 +347,7 @@ stata_data %>%
 
 ### Baseline characteristics table
 
--   [ ] TODO
+-   [ ] TODO - should have all predictors (in any model) and components of the outcome
 
 ### Are proportions of hypercapnic respiratory failure (v1) different across BMI categories?
 
