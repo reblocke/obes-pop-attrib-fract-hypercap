@@ -1,2 +1,15 @@
-/data_derived
+/data_derived/
 full_db.rds
+.Rhistory
+
+# Local restricted/raw data
+/data/raw/*
+!/data/raw/.gitkeep
+
+# Quarto render outputs generated for local review
+/reports/*.html
+/reports/*.pdf
+/reports/*.log
+/reports/*.tex
+/reports/*.knit.md
+/reports/*_files/
