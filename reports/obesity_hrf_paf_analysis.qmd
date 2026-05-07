@@ -10,7 +10,6 @@ format:
   pdf:
     toc: true
     number-sections: true
-    pdf-standard: ua-2
 execute:
   echo: true
   warning: false

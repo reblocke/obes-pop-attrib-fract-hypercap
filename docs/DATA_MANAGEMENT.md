@@ -28,7 +28,7 @@ To reproduce the analysis on another machine:
 1. Restore or regenerate `full_db.rds` from the upstream preprocessing workflow.
 2. Place it at `data/raw/full_db.rds`.
 3. Confirm required R packages are available.
-4. Run `make render` from the repository root.
+4. Run `make render` from the repository root to create the configured report outputs, including PDF.
 
 If a future maintainer wants a locked package environment, initialize `renv` explicitly after approval:
 

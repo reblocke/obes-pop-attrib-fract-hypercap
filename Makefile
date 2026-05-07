@@ -1,6 +1,9 @@
-.PHONY: render render-pdf render-archival test renv-init
+.PHONY: render render-html render-pdf render-archival test renv-init
 
 render:
+	quarto render reports/obesity_hrf_paf_analysis.qmd
+
+render-html:
 	quarto render reports/obesity_hrf_paf_analysis.qmd --to html
 
 render-pdf:

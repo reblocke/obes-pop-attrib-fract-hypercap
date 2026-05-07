@@ -89,3 +89,30 @@ Verification:
 - `make render-archival` succeeds for the archival HTML report.
 - `make test` reports that no `tests/testthat` directory exists yet.
 - No `renv.lock` or `renv/` directory was created during verification.
+
+## 2026-05-07 - Align PDF output, cutoff, and flag wording
+
+Task completed:
+
+- Made `make render` call the full Quarto render so configured outputs include PDF.
+- Added `make render-html` for quick HTML-only local checks.
+- Removed `pdf-standard: ua-2` from report YAML so local PDF output does not depend on the unavailable `latex-lab` TeX package update.
+- Aligned the archival strict lab definition to pH `<= 7.35`.
+- Updated agent validation wording from `has_any_gas` to canonical `has_any_gas_pair`.
+- Updated README, data-management docs, and implementation ticket wording to describe PDF output as expected.
+
+Commands run:
+
+- `make render`
+- `make render-pdf`
+- `make render-html`
+- `make render-archival`
+- `make test`
+
+Verification:
+
+- `make render` succeeds and creates configured HTML and PDF outputs for the main report.
+- `make render-pdf` succeeds and creates `reports/obesity_hrf_paf_analysis.pdf`.
+- `make render-html` succeeds when run sequentially.
+- `make render-archival` succeeds after aligning the archival strict lab cutoff to pH `<= 7.35`.
+- `make test` reports that no `tests/testthat` directory exists yet.

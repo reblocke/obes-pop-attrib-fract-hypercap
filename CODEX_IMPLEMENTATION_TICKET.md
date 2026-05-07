@@ -98,6 +98,8 @@ c(
 quarto render reports/obesity_hrf_paf_analysis.qmd
 ```
 
+This command is expected to create the configured report outputs, including PDF. Use `make render-html` only for quick local checks.
+
 If it fails, troubleshoot in this order:
 
 1. Data path error: confirm `full_db.rds` location.
@@ -118,7 +120,7 @@ This file is archival and should not be used as the main source of truth after t
 
 ### Undefined attrition flags
 
-The exploratory report attempted to use `has_bmi` and `has_any_gas` before creating them. The refactor must create and use:
+The exploratory report attempted to use `has_bmi` and `has_any_gas_pair` before creating them. The refactor must create and use:
 
 - `has_bmi`
 - `has_abg_pair`
@@ -167,7 +169,7 @@ After rendering, inspect the report for the following:
 - [ ] Source dataset N matches the expected order of magnitude (~833,476 rows in the current draft).
 - [ ] BMI missingness is reported.
 - [ ] ABG/VBG pair availability is reported.
-- [ ] Attrition table has no zero rows caused by missing `has_bmi`/`has_any_gas` variables.
+- [ ] Attrition table has no zero rows caused by missing `has_bmi`/`has_any_gas_pair` variables.
 - [ ] Primary cohort N is plausible relative to the prior draft (~112,009, allowing for differences due to safer definitions).
 - [ ] HRF v1 table includes `No`, `Yes`, and `NA`/unclassifiable counts.
 - [ ] Baseline table renders.

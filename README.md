@@ -46,13 +46,19 @@ Do not add `install.packages()` calls to committed `.qmd` or `.R` files.
 
 ## Render
 
-Render the main report as HTML:
+Render the main report in all configured formats, including PDF:
 
 ```bash
 make render
 ```
 
-Render the main report as PDF when the local TeX installation is ready:
+Render only the HTML report for quick local checks:
+
+```bash
+make render-html
+```
+
+Render only the PDF report:
 
 ```bash
 make render-pdf
@@ -68,4 +74,4 @@ If no tests have been added yet, `make test` will report that no `tests/testthat
 
 ## Expected Checks
 
-After rendering, confirm that the report shows source dataset size, BMI and gas-pair missingness, attrition, respiratory-status counts, baseline characteristics, BMI-category HRF plots, primary and sensitivity logistic models, the hypercapnia subgroup model, the named PIF table, and the BMI-risk curve.
+After rendering, confirm that the report shows source dataset size, BMI and gas-pair missingness, attrition, respiratory-status counts, baseline characteristics, BMI-category HRF plots, primary and sensitivity logistic models, the hypercapnia subgroup model, the named PIF table, the BMI-risk curve, and PDF output.

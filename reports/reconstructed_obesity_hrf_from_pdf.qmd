@@ -10,7 +10,6 @@ format:
   pdf:
     toc: true
     number-sections: true
-    pdf-standard: ua-2
 execute:
   echo: true
   warning: true
@@ -299,14 +298,14 @@ Regression done with new definition of hypercapnic respiratory failure: pH and C
 ```{r hrf-v2}
 stata_data <- stata_data %>%
   mutate(
-    # Lab-based hypercapnic respiratory failure (ABG or VBG)
-    hrf_hypercapnic_labs_v2 = case_when(
-      !is.na(highest_paco2) & !is.na(abg_ph) &
-        highest_paco2 >= co2_abg_cutoff & abg_ph < ph_cutoff ~ 1,
-      !is.na(vbg_co2) & !is.na(vbg_ph) &
-        vbg_co2 >= co2_vbg_cutoff & vbg_ph < ph_cutoff ~ 1,
-      TRUE ~ 0
-    ),
+      # Lab-based hypercapnic respiratory failure (ABG or VBG)
+      hrf_hypercapnic_labs_v2 = case_when(
+        !is.na(highest_paco2) & !is.na(abg_ph) &
+          highest_paco2 >= co2_abg_cutoff & abg_ph <= ph_cutoff ~ 1,
+        !is.na(vbg_co2) & !is.na(vbg_ph) &
+          vbg_co2 >= co2_vbg_cutoff & vbg_ph <= ph_cutoff ~ 1,
+        TRUE ~ 0
+      ),
 
     # ICD-based hypercapnic respiratory failure
     hrf_hypercapnic_icd_v2 = ifelse(
