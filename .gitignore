@@ -1,3 +1,6 @@
+# macOS Finder metadata
+.DS_Store
+
 /data_derived/
 full_db.rds
 .Rhistory
@@ -13,3 +16,4 @@ full_db.rds
 /reports/*.tex
 /reports/*.knit.md
 /reports/*_files/
+reports/.RData

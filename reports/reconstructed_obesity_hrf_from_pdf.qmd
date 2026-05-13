@@ -16,11 +16,13 @@ execute:
   message: true
 ---
 
+```{=html}
 <!--
 Recovered from the rendered PDF `AS-edits-5-6---obesity-hrf.pdf`.
 Outputs and console messages were not preserved as executable chunks; they will be regenerated when this QMD is rendered with the source data.
 Line wrapping was normalized where the PDF broke long lines.
 -->
+```
 
 # Obesity and hypercapnic respiratory failure analysis
 
@@ -80,7 +82,7 @@ coef_map_common <- c(
 stata_data <- readRDS(data_path)
 ```
 
-### Standardize types (labelled -> numeric, factors)
+### Standardize types (labelled -\> numeric, factors)
 
 ```{r standardize-types}
 # Verify before conversion
@@ -247,7 +249,7 @@ stata_data <- stata_data %>%
 
 ### HRF definition v1 (gases + ventilation)
 
-Below is the first stringent iteration of hypercapnic respiratory failure: CO2 greater than 45 if ABG, 50 if VBG, pH <= 7.35, with either NIV or IMV. ABG and VBG values cannot mix.
+Below is the first stringent iteration of hypercapnic respiratory failure: CO2 greater than 45 if ABG, 50 if VBG, pH \<= 7.35, with either NIV or IMV. ABG and VBG values cannot mix.
 
 ```{r hrf-v1}
 stata_data <- stata_data %>%
@@ -475,7 +477,7 @@ summary(stata_data$curr_bmi_num)
 table(stata_data$bmi_category, useNA = "ifany")
 ```
 
-[BL - note high rates of BMI missing data]
+\[BL - note high rates of BMI missing data\]
 
 ### HRF prevalence by BMI category (v1)
 
@@ -643,7 +645,7 @@ logit_bmi_hrf <- glm(
 summary(logit_bmi_hrf)
 ```
 
-OR shows small increase in risk with BMI, though statistically significant. [BL Edit - odds increased by about 0.02 for each BMI point, e.g., 10 BMI points is about a 20% increase in odds.]
+OR shows small increase in risk with BMI, though statistically significant. \[BL Edit - odds increased by about 0.02 for each BMI point, e.g., 10 BMI points is about a 20% increase in odds.\]
 
 ### Adjusted, multivariable regression for outcome 1
 

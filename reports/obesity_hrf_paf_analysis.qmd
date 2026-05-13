@@ -16,6 +16,7 @@ execute:
   message: false
 ---
 
+```{=html}
 <!--
 Purpose
 - This is a maintainable refactor of the exploratory obesity/HRF analysis.
@@ -25,6 +26,7 @@ Purpose
 - It intentionally centralizes constants and helper functions before use.
 - It avoids treating missing gas data as "No HRF".
 -->
+```
 
 # Analysis plan
 

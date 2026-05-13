@@ -116,3 +116,33 @@ Verification:
 - `make render-html` succeeds when run sequentially.
 - `make render-archival` succeeds after aligning the archival strict lab cutoff to pH `<= 7.35`.
 - `make test` reports that no `tests/testthat` directory exists yet.
+
+## 2026-05-07 - Ignore Finder metadata and annotate refactor
+
+Task completed:
+
+- Added `.DS_Store` to `.gitignore`.
+- Removed tracked `.DS_Store` files from the Git index while leaving local Finder metadata files on disk.
+- Added novice-friendly section introductions and helper-function comments to `reports/obesity_hrf_paf_analysis.qmd`.
+- Preserved analysis logic, model formulas, scientific cutoffs, and report outputs.
+
+Commands run:
+
+- `git status --short --untracked-files=all`
+- `git ls-files '.DS_Store' '*/.DS_Store'`
+- `git rm --cached -f --ignore-unmatch .DS_Store Code/.DS_Store obesity_hrf_refactor_pack/.DS_Store`
+- `make render`
+- `make render-archival`
+- `make test`
+- `git status --porcelain=v1 --ignored=matching`
+- `git diff --check`
+- `git diff --cached --check`
+
+Verification:
+
+- `make render` succeeds and creates the configured main report outputs.
+- `make render-archival` succeeds for the archival HTML report.
+- `make test` reports that no `tests/testthat` directory exists yet.
+- `git ls-files '.DS_Store' '*/.DS_Store'` returns no tracked `.DS_Store` files.
+- `git diff --check` and `git diff --cached --check` report no whitespace errors.
+- `data/raw/full_db.rds`, rendered report outputs, and local `.DS_Store` files remain ignored.
