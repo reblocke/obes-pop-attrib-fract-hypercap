@@ -1,41 +1,42 @@
-# Data Management
+# Data management and analysis input
 
-## Source
+The canonical report loads an R serialized `full_db.rds` from
+`data/raw/full_db.rds`, falling back to root `full_db.rds`. Both paths are
+local/ignored. Restricted TriNetX data, row-level derivatives, render outputs
+and machine-specific paths must stay out of Git and be handled under approved
+access and release rules.
 
-The analysis expects a TriNetX-derived dataset created upstream by:
+## Lineage boundary
 
-```text
-https://github.com/reblocke/trinetx-preprocessing
-```
+`trinetx-preprocessing` is named in earlier instructions as the expected
+upstream source. The inspected upstream tracked `src/` and `docs/` contained no
+`full_db.rds` or `saveRDS` producer. This repository does not provide a
+producer commit, exact input snapshot, DTA/other-format conversion command,
+RDS serialization version, schema hash, or authorization receipt for the local
+analysis-ready file. A prior [worklog](../WORKLOG.md) records a successful local
+read/render, but not these identities. Obtain the source and conversion chain
+from the data steward; do not infer it from a matching filename or row count.
 
-The expected local filename is:
+## Fields used by the maintained report
 
-```text
-data/raw/full_db.rds
-```
+The [canonical QMD](../reports/obesity_hrf_paf_analysis.qmd) requires
+`curr_bmi`, `niv_proc`, `imv_proc`, `highest_paco2`, `abg_ph`, `vbg_co2`,
+`vbg_ph`, `age_at_encounter`, `sex`, `ethnicity`, and `has_j9612`, `has_j9622`,
+`has_j9692`, `has_j9602`. It parses BMI as numeric kg/m²; PaCO₂ and VBG CO₂
+are interpreted as mmHg, pH is unitless, age is years, and NIV/IMV labels
+are converted to binary with unrecognized values left missing. Sex and
+ethnicity become factors with explicit unknown levels. Gas-pair availability,
+BMI availability and missingness enter attrition; missing gases are not a
+negative HRF classification. The QMD does not require an identifier column or
+assert unique encounters, and the source collection window is not established.
+Refer to [analysis decisions](DECISIONS.md) for report-specific outcomes,
+cutoffs and counterfactuals rather than replacing them with an upstream rule.
 
-## Git Policy
+## Handoff
 
-- `data/raw/` is ignored except for `.gitkeep`.
-- `data_derived/` is ignored.
-- Rendered report outputs under `reports/` are ignored by default.
-- Do not commit raw TriNetX extracts, PHI, restricted data, large local databases, generated raw extracts, or machine-specific absolute paths.
-
-## Handoff Notes
-
-To reproduce the analysis on another machine:
-
-1. Restore or regenerate `full_db.rds` from the upstream preprocessing workflow.
-2. Place it at `data/raw/full_db.rds`.
-3. Confirm required R packages are available.
-4. Run `make render` from the repository root to create the configured report outputs, including PDF.
-
-If a future maintainer wants a locked package environment, initialize `renv` explicitly after approval:
-
-```bash
-make renv-init
-```
-
-This manual target installs `renv` if it is missing, then runs `renv::init()` and `renv::snapshot()`.
-
-Do not run `renv::snapshot()` automatically as part of routine rendering.
+Before reproducing, verify the authorized file identity and schema against
+the report's requirements, establish the permitted environment/storage and
+output-release review, and use the README's render routes. The `renv-init`
+target is a separate environment-construction step; routine rendering does not
+snapshot packages. No data or environment reconstruction is certified by this
+note.
