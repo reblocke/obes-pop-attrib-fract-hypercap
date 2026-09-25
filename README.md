@@ -65,11 +65,12 @@ The repository declares R >= 4.3 in its [instructions](AGENTS.md). The
 canonical QMD imports `dplyr`, `forcats`, `ggplot2`, `gtsummary`, `haven`, `here`,
 `modelsummary`, `purrr`, `stringr`, `tibble` and `tidyr`. No `renv.lock` is
 committed, so dependency versions and environment reconstruction are **not
-locked**. The 2026-05-07 worklog reports an HTML render under R 4.5.3 and
-Quarto 1.9.36, and a PDF failure from the then-local TeX Live update mismatch;
-those are historical observations, not current verification. On the executing
-host for this README review, R 4.6.1 and Quarto 1.10.18 are present but the
-listed R packages are absent. No render was attempted here.
+locked**. The [2026-05-07 setup entry](WORKLOG.md#2026-05-07-0831-mdt---refactor-obesityhrf-paf-repository-setup)
+records an HTML render under R 4.5.3 and Quarto 1.9.36, with an initial PDF
+failure from the then-local TeX Live update mismatch. A [later same-day entry](WORKLOG.md#2026-05-07---align-pdf-output-cutoff-and-flag-wording)
+records successful canonical HTML and PDF renders after a report-format change.
+These are dated local observations, not verification of the current environment
+or a new render.
 
 `make test` currently prints `No tests/testthat directory yet.`; that is not a
 passing test suite. `make renv-init` may install `renv`, initialize a project
