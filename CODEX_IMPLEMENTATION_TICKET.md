@@ -1,5 +1,11 @@
 # Codex implementation ticket: obesity-HRF PAF refactor and reproducibility cleanup
 
+> Historical R refactor ticket. The maintained R report and May 2026 render
+> observations are documented in `WORKLOG.md`; this is not the active Stata
+> import specification. See [Stata import](docs/STATA_IMPORT.md),
+> [analysis comparison](docs/ANALYSIS_COMPARISON.md), and
+> [current decisions](docs/DECISIONS.md). Original ticket text is preserved below.
+
 ## Background
 
 The current obesity/hypercapnic respiratory failure analysis has a rendered PDF draft and exploratory Quarto/R code. The trainee has made substantive progress, but the workflow has accumulated code smell: repeated derivations, undefined attrition flags, overlapping outcome definitions, and a first-pass PAF calculation that needs a named counterfactual and reproducible table/figure outputs.

@@ -1,6 +1,6 @@
 # Data management and analysis input
 
-The canonical report loads an R serialized `full_db.rds` from
+The canonical R report loads an R serialized `full_db.rds` from
 `data/raw/full_db.rds`, falling back to root `full_db.rds`. Both paths are
 local/ignored. Restricted TriNetX data, row-level derivatives, render outputs
 and machine-specific paths must stay out of Git and be handled under approved
@@ -9,15 +9,19 @@ access and release rules.
 ## Lineage boundary
 
 `trinetx-preprocessing` is named in earlier instructions as the expected
-upstream source. The inspected upstream tracked `src/` and `docs/` contained no
-`full_db.rds` or `saveRDS` producer. This repository does not provide a
-producer commit, exact input snapshot, DTA/other-format conversion command,
-RDS serialization version, schema hash, or authorization receipt for the local
-analysis-ready file. A prior [worklog](../WORKLOG.md) records a successful local
+upstream source. A candidate conversion route was subsequently found in the
+shared analysis repository:
+[`r/reports/90_stata_to_r.qmd`](https://github.com/reblocke/trinetx-hypercapnia-code/blob/d5d269168eafc7905c9238a5486fc03a62b55ec3/r/reports/90_stata_to_r.qmd).
+It imports `full_db.dta`, converts labelled columns to factors, and writes
+`full_db.rds`. This does not prove it produced the current local RDS.
+The producer commit, original snapshot/conversion chain and RDS serialization
+version for the local analysis-ready file remain unauthenticated. The new
+triangulation preflight records input/schema hashes in ignored storage; those
+hashes identify the inspected file but do not authenticate its lineage. A prior [worklog](../WORKLOG.md) records a successful local
 read/render, but not these identities. Obtain the source and conversion chain
 from the data steward; do not infer it from a matching filename or row count.
 
-## Fields used by the maintained report
+## Fields used by the canonical R report
 
 The [canonical QMD](../reports/obesity_hrf_paf_analysis.qmd) requires
 `curr_bmi`, `niv_proc`, `imv_proc`, `highest_paco2`, `abg_ph`, `vbg_co2`,
@@ -32,6 +36,36 @@ assert unique encounters, and the source collection window is not established.
 Refer to [analysis decisions](DECISIONS.md) for report-specific outcomes,
 cutoffs and counterfactuals rather than replacing them with an upstream rule.
 
+## Stata input and local evidence
+
+The Stata runner accepts the approved `full_db.dta` through `STATA_DATA_PATH`,
+defaulting to ignored `data/raw/full_db.dta`. It checks required columns before
+the inherited analysis loads the file:
+
+`OBESITY_rfs`, `bmi`, `age_at_encounter`, `sex`, `race_ethnicity`, `location`,
+`hypercap_resp_failure`, `has_abg`, and `hypercap_on_abg`.
+
+The inherited models expect numeric variables, with categorical codes/value
+labels usable by Stata factor notation. No field is reconstructed or recoded
+by the importer. The diagnosis composite includes four J96 codes and E66.2;
+`hypercap_on_abg` comes from the upstream `paco2_flag`. Source labels alone do
+not establish specimen identity or the claimed day-0 measurement window.
+Confirm the source variant, producer, keys, units, label semantics, and timing
+before a clinical run. Source compatibility checks do not authenticate a dataset.
+
+Shared documentation describes `full_db.dta` as an enriched suspicion cohort,
+not all acute-care encounters. The derived `bmi` uses current, prior, then
+height/weight fallback; the R exposure is current BMI only. Neither the Stata
+stage nor the R report verifies patient/encounter uniqueness or clusters its
+uncertainty by patient. See the [comparison](ANALYSIS_COMPARISON.md).
+
+All execution directories under `artifacts/stata/` and the local evidence
+bundle under `artifacts/evidence/` are ignored. Invocation receipts may contain
+restricted input paths and hashes; they remain local. Historical aggregate
+figures/tables are copied byte-for-byte with an inventory, not regenerated.
+Their producing input identities remain unverified. Raw logs and row-level
+extracts are not added to shared documentation.
+
 ## Handoff
 
 Before reproducing, verify the authorized file identity and schema against
@@ -40,3 +74,18 @@ output-release review, and use the README's render routes. The `renv-init`
 target is a separate environment-construction step; routine rendering does not
 snapshot packages. No data or environment reconstruction is certified by this
 note.
+
+
+## Patient-level triangulation input audit
+
+The separate triangulation preflight reads an explicit RDS/DTA and exports
+schema and aggregate characteristics without identifiers or model fitting.
+The local RDS audit found candidate fields, but original-key provenance,
+independent gas draws, specimen-specific encounter maxima and ICD-negative
+capture remain unresolved. No clinical impact fractions were estimated.
+See [the field-specific handoff](TRIANGULATION_INPUT_HANDOFF.md).
+
+Clinical estimation requires an evidence-backed manifest; matching column names
+or result-availability counts cannot supply missing semantics. The launcher then
+estimates once and freezes an aggregate-only bundle. Subsequent report/figure
+reviews validate saved hashes and do not reopen the clinical source.

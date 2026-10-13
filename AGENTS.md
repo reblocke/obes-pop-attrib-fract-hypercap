@@ -4,8 +4,9 @@
 
 - This repository supports a clinical epidemiology analysis of obesity, BMI, hypercapnia, and hypercapnic respiratory failure (HRF) using a TriNetX-derived dataset.
 - The input dataset is expected to be generated upstream by `https://github.com/reblocke/trinetx-preprocessing` and made available locally as `data/raw/full_db.rds`.
+- The separate preserved Stata track accepts an already prepared `full_db.dta` through `STATA_DATA_PATH` (default `data/raw/full_db.dta`). Do not convert inputs or reconstruct upstream fields during import/launcher work.
 - The primary deliverable is a Quarto report/manuscript analysis estimating model-standardized population attributable fractions / potential impact fractions (PAF/PIF) for BMI counterfactuals.
-- The primary language is **R**. Use Stata only when explicitly requested for a separate analysis or translation.
+- R/Quarto is the canonical gas-classifiable analysis. The explicitly imported Stata severe-obesity analysis is a distinct maintained track, not a translation. Python supports its launcher/tests only. Do not choose a primary ATS estimand or harmonize scientific definitions without an explicit scientific decision.
 - Do not invent results. If the data are unavailable, make code changes and state that render/validation could not be completed.
 
 ## Repository map
@@ -21,6 +22,11 @@ Preferred structure:
 - `tests/testthat/` - tests for any helper code extracted to `R/`.
 - `docs/` - decisions, workflow notes, codebook notes, and manuscript planning.
 - `WORKLOG.md` - running handoff log for coding-agent and trainee continuity.
+- `stata/do/36_subpop_hazard.do` - runnable preserved BMI-to-40 analysis.
+- `archive/stata/36_subpop_hazard.source.do` - immutable exact upstream source snapshot.
+- `artifacts/stata/` and `artifacts/evidence/` - ignored local execution/evidence directories.
+- `docs/ANALYSIS_COMPARISON.md` - methods, retained findings, exhibits, and unresolved questions.
+- `docs/STATA_IMPORT.md` - provenance, Stata commands, and verification limits.
 
 Current canonical analysis entrypoint:
 
@@ -56,9 +62,19 @@ If a `Makefile` is present, prefer:
 - `make render-pdf`
 - `make render-archival`
 - `make test`
+- `make stata-check` checks Stata 18+ and installed dependencies; no clinical input is opened.
+- `make stata` explicitly executes the preserved analysis against the supplied approved DTA.
+- `make stata-test` runs standard-library source/launcher tests without Stata or clinical data.
 - `make renv-init` only after maintainer approval to install/bootstrap `renv`, initialize the project library, and snapshot dependencies.
 
 ## Environment and dependencies
+
+For the Stata track, require explicit `STATA_EXE`, Stata >=18, `table1_mc`,
+`mkspline2`, and `cleanplots`. The archived-reference regression tests additionally use `xblc`. Do not install packages automatically.
+Use the copied unattended runner; require natural process completion and a
+fresh native return-code record. Preserve all run receipts in ignored storage.
+Read [docs/STATA_IMPORT.md](docs/STATA_IMPORT.md) for the commands, authorized
+precision repair, and archived failure. Missing evidence must not become a success claim.
 
 - Use R >= 4.3.
 - Use `renv` when a lockfile exists. Never place `install.packages()` in committed analysis code.
@@ -68,7 +84,19 @@ If a `Makefile` is present, prefer:
 - For random operations, set an explicit seed near the beginning, for example `set.seed(1234)`.
 - Do not add heavy workflow frameworks (`targets`, `drake`, databases, containers) unless requested or clearly justified.
 
-## Scientific definitions and guardrails
+## Canonical R scientific definitions and shared guardrails
+
+The cutoffs, HRF definitions, and respiratory-status derivations below describe
+the canonical R track. The Stata track retains its upstream diagnosis composite
+and ABG hypercapnia flag, obesity-source/BMI >=40 cohort, derived BMI, adjustment
+variables, spline specifications, and BMI-to-40 counterfactual. These differences
+are explicit in [docs/DECISIONS.md](docs/DECISIONS.md).
+Never silently apply an R definition to the imported Stata body. Its complete
+analysis block must match the archived source after reversing only the
+explicitly authorized substitutions recorded in `docs/stata_import_provenance.json`.
+The October 12 precision fix changes four plotting calls; estimation and PIF
+commands remain inherited. Record inherited defects rather than fixing them
+as part of an import or provenance update.
 
 ### Cutoffs
 
@@ -144,7 +172,7 @@ Do not leave compensated hypercapnia hidden inside a vague "No HRF" comparator w
 
 ## Figure standards
 
-- Use `ggplot2` and a consistent project-level theme helper.
+- Use `ggplot2` and a consistent project-level theme helper for R figures. Preserve native Stata plots during source import; review their profile/denominator, uncertainty, captions, and resolution before submission reuse.
 - Separate figure data preparation from plot construction.
 - Use explicit axis labels and units.
 - Avoid raw `theme_gray()` defaults for manuscript figures.
@@ -155,6 +183,13 @@ Do not leave compensated hypercapnia hidden inside a vague "No HRF" comparator w
 ## Testing and validation
 
 Before considering a change complete:
+
+For Stata import/launcher changes, verify snapshot/body hashes, run
+`make stata-test`, and perform a synthetic-only licensed-runtime smoke when
+available. Use generated data in ignored run directories, retain failures,
+and compare the unchanged original and imported source. Clinical reproduction
+is a separate explicitly requested task. The following checks apply when
+changing or validating the canonical R report:
 
 1. Confirm all required columns are validated before use.
 2. Render the QMD from a clean R session when data are available.
