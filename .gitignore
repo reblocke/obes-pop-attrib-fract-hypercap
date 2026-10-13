@@ -17,3 +17,13 @@ full_db.rds
 /reports/*.knit.md
 /reports/*_files/
 reports/.RData
+
+# Restricted Stata inputs, local aggregate evidence, and execution receipts
+full_db.dta
+/artifacts/stata/
+/artifacts/evidence/
+__pycache__/
+
+# Patient-level triangulation renders, figures, and local input manifests
+/artifacts/triangulation/
+/config/triangulation_input.local.json

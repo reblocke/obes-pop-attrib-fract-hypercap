@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "source_repository": "https://github.com/reblocke/trinetx-hypercapnia-code",
+  "source_commit": "d5d269168eafc7905c9238a5486fc03a62b55ec3",
+  "source_path": "stata/do/36_subpop_hazard.do",
+  "historical_filename": "Hypercapnia subpop hazard.do",
+  "source_sha256": "6e25200c421be03c7f05e6a93898cd7a7816eff015b0095bf4f5668606cf7482",
+  "archive_path": "archive/stata/36_subpop_hazard.source.do",
+  "runnable_path": "stata/do/36_subpop_hazard.do",
+  "analysis_marker": "/* -------------------\n ---- START DATA ANALYSIS --------\n ----------------------*/",
+  "analysis_block_sha256": "66310ff20160720940ddb491a4cb5f51183592a6c9e651347056f22ec6efc7f8",
+  "allowed_changes": [
+    "initialization",
+    "input and output paths",
+    "logging",
+    "invocation"
+  ],
+  "runner_source": "personal stata-core skill/scripts/stata_runner.py",
+  "runner_sha256": "c1e0414d6be681db7594e6f871b87f34213aa616355097a4c7fd841aa3d6b9ec",
+  "import_date": "2026-10-12",
+  "clinical_reproduction_performed": false,
+  "corrections": [
+    {
+      "id": "xblc-decimal-profile-20261012",
+      "date": "2026-10-12",
+      "authorization": "User requested fixing the xblc error in the runnable Stata copy.",
+      "scope": "Four fixed-profile plotting calls; estimation and PIF commands unchanged.",
+      "helper_path": "stata/ado/obesity_spline_profile.ado",
+      "helper_sha256": "e737de835b9b5dc045b240261716230e8b2d86bf2b8df5254de64139cad74c4a",
+      "analysis_replacements": [
+        {
+          "original": "levelsof bmi, local(bmi_levels)\n\nxblc `vlist_bmi', ///\n    covname(bmi) at(`bmi_levels') reference(40) eform ///\n    generate(bmi_x bmi_or bmi_lb bmi_ub) pr",
+          "replacement": "obesity_spline_profile `vlist_bmi', ///\n    covname(bmi) generate(bmi_x bmi_or bmi_lb bmi_ub)",
+          "occurrences": 2
+        },
+        {
+          "original": "levelsof age_at_encounter, local(age_levels)\n\nxblc `vlist_age', ///\n    covname(age_at_encounter) at(`age_levels') reference(60) eform ///\n    generate(age_x age_or age_lb age_ub) pr",
+          "replacement": "obesity_spline_profile `vlist_age', ///\n    covname(age_at_encounter) generate(age_x age_or age_lb age_ub)",
+          "occurrences": 2
+        }
+      ]
+    }
+  ],
+  "runnable_analysis_block_sha256": "cfe3ce6ce85546159fe56650285e03bd05f464d78687287c26522b77373cfd46"
+}

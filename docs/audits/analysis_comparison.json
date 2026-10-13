@@ -1,0 +1,656 @@
+{
+  "consistency_matrix": {
+    "metadata": {
+      "schema_version": 1,
+      "artifact_id": "obesity-analysis-comparison-20261012-consistency",
+      "mode": "audit_only",
+      "source_documents": [
+        {
+          "document_id": "S1",
+          "path": "archive/stata/36_subpop_hazard.source.do",
+          "sha256": "6e25200c421be03c7f05e6a93898cd7a7816eff015b0095bf4f5668606cf7482"
+        },
+        {
+          "document_id": "R1",
+          "path": "reports/obesity_hrf_paf_analysis.qmd",
+          "sha256": "5cb27746db6bb37b9ed187519a2a29cefbdfd83f0963e284b367a7c629a7658a"
+        },
+        {
+          "document_id": "R1-PDF",
+          "path": "reports/obesity_hrf_paf_analysis.pdf",
+          "sha256": "d2b78cbdb2b61220b0a90bd2a3e1270ab502a32f9e62a511d1d542b018c4a6cc"
+        },
+        {
+          "document_id": "R2",
+          "path": "Documents/AS-edits-9-8------obesity-hrf.pdf",
+          "sha256": "e53e44aced791599dd866ac519f8adc47efe056b8344f437db0df4ec424b8fe7"
+        },
+        {
+          "document_id": "H1",
+          "path": "reports/reconstructed_obesity_hrf_from_pdf.qmd",
+          "sha256": "849c68087e960ea0819f754430d1fb0e7353c116cefba12f47c9c73c1503d5e6"
+        },
+        {
+          "document_id": "STATA-16-ABG_Age_spline",
+          "path": "artifacts/evidence/stata-historical/reports/legacy/hypercapnia-subpop-hazard/16 Mar 2026/figures/ABG_Age_spline.tif",
+          "sha256": "874334b053946ab528ada452f766b76c092555b9cfb30f7cbd1e19a1a91c3b6f"
+        },
+        {
+          "document_id": "STATA-16-ABG_BMI_spline",
+          "path": "artifacts/evidence/stata-historical/reports/legacy/hypercapnia-subpop-hazard/16 Mar 2026/figures/ABG_BMI_spline.tif",
+          "sha256": "dc9accc3f7ee4508a1dd648ae9549f4330b4bb462f4fcbf5a17d384ca8ba60ab"
+        },
+        {
+          "document_id": "STATA-16-Overall-Cohort-chars",
+          "path": "artifacts/evidence/stata-historical/reports/legacy/hypercapnia-subpop-hazard/16 Mar 2026/tables/Overall Cohort chars.xlsx",
+          "sha256": "5bf8330b25b5bb3b36fa947e387cd27c4adee5dbccc6745881a09b038e3e95be"
+        },
+        {
+          "document_id": "STATA-17-ABG_Age_spline",
+          "path": "artifacts/evidence/stata-historical/reports/legacy/hypercapnia-subpop-hazard/17 Mar 2026/figures/ABG_Age_spline.tif",
+          "sha256": "874334b053946ab528ada452f766b76c092555b9cfb30f7cbd1e19a1a91c3b6f"
+        },
+        {
+          "document_id": "STATA-17-ABG_BMI_spline",
+          "path": "artifacts/evidence/stata-historical/reports/legacy/hypercapnia-subpop-hazard/17 Mar 2026/figures/ABG_BMI_spline.tif",
+          "sha256": "dc9accc3f7ee4508a1dd648ae9549f4330b4bb462f4fcbf5a17d384ca8ba60ab"
+        },
+        {
+          "document_id": "STATA-17-Overall-Cohort-chars",
+          "path": "artifacts/evidence/stata-historical/reports/legacy/hypercapnia-subpop-hazard/17 Mar 2026/tables/Overall Cohort chars.xlsx",
+          "sha256": "883dab3a75e6bb376ceddc10ccd75bc67e84fb0f104add1ed446923b153fc567"
+        },
+        {
+          "document_id": "STATA-DESIGN",
+          "path": "artifacts/evidence/stata-historical/design-note.source.do",
+          "sha256": "bc50c294c82ff2940be7d9b60483320fcbd2117dc38ae5346dac7b4a46f9c57b"
+        },
+        {
+          "document_id": "UPSTREAM-DTA-DEFS",
+          "path": "https://github.com/reblocke/trinetx-hypercapnia-code/blob/d5d269168eafc7905c9238a5486fc03a62b55ec3/stata/do/10_preprocessing.do",
+          "sha256": "2e45b83f499bd4d7ee319165d74ab5cb0a8f2f9214930ea22312e61df56f8c39"
+        },
+        {
+          "document_id": "UPSTREAM-CONVERTER",
+          "path": "https://github.com/reblocke/trinetx-hypercapnia-code/blob/d5d269168eafc7905c9238a5486fc03a62b55ec3/r/reports/90_stata_to_r.qmd",
+          "sha256": "1ab3d1cc469851eef1e2cb9deb7d90505c2d052139b8ff9f0b4b28a135889ccf"
+        },
+        {
+          "document_id": "UPSTREAM-DENOM",
+          "path": "https://github.com/reblocke/trinetx-hypercapnia-code/blob/d5d269168eafc7905c9238a5486fc03a62b55ec3/docs/GLP1_FULL_DB_ANALYSIS.md",
+          "sha256": "f4443063227b6093307a013b39704cb1c2c2901362deed9e5c3a75ebb1fcaeed"
+        },
+        {
+          "document_id": "S1-RUNNABLE-CORRECTED",
+          "path": "stata/do/36_subpop_hazard.do",
+          "sha256": "f7781d006bc424a637ebcd05fe32feb99a4eec9ab7634850498a31cde7d6ae52"
+        },
+        {
+          "document_id": "S1-PROFILE-HELPER",
+          "path": "stata/ado/obesity_spline_profile.ado",
+          "sha256": "e737de835b9b5dc045b240261716230e8b2d86bf2b8df5254de64139cad74c4a"
+        }
+      ],
+      "inputs_reviewed": [
+        "docs/stata_import_provenance.json",
+        "artifacts/evidence/stata-historical/inventory.json",
+        "artifacts/evidence/stata-historical/search-receipt.json",
+        "artifacts/evidence/canonical/receipt.json",
+        "artifacts/evidence/as-sept8/receipt.json",
+        "R1 PDF pp19,25,27; R2 PDF pp10,17,49,52 visually checked",
+        "Stata baseline cells Sheet1!B2:B3,B21:B23 inspected; ABG TIFF previews visually checked",
+        "synthetic-only original/imported execution receipts; no clinical rerun",
+        "2026-10-12 authorized xblc repair: four declared plotting substitutions; native integer/decimal and independent profile/covariance tests; archive and clinical findings unchanged"
+      ],
+      "missing_inputs": [
+        "September updated QMD",
+        "Retained Stata PIF result logs",
+        "Authenticated RDS/DTA input and clinical run manifests",
+        "Patient/encounter key and measurement-timing validation"
+      ],
+      "coverage_limits": [
+        "No clinical inputs opened or models rerun",
+        "No other host/private execution namespace searched",
+        "R1 native PDF receipt reused after hash check; R2 whole-document Poppler fallback used after failed native routing",
+        "Aggregate outputs lack complete producing-run/input lineage",
+        "Synthetic parity is only at printed precision, plus exact scientific-body identity",
+        "Corrected plotting helper verified with synthetic data only; retained empirical figures are still pre-fix artifacts"
+      ],
+      "venue_profile": "generic_biomedical",
+      "package_type": "analysis source and retained output comparison"
+    },
+    "canonical_terms": [
+      {
+        "concept_id": "PIF",
+        "preferred_term": "model-standardized impact fraction in the specified cohort",
+        "variants_found": [
+          "population attributable fraction",
+          "subpopulation impact fraction"
+        ],
+        "recommended_action": "Name target/outcome/intervention; avoid causal overclaiming."
+      }
+    ],
+    "concepts": [
+      {
+        "concept_id": "POPULATION",
+        "concept_type": "population",
+        "canonical_value": "Explicit study-specific populations; no universal denominator",
+        "mentions": [
+          {
+            "document": "S1",
+            "section": "cohort",
+            "text": "OBESITY_rfs==1 and BMI>=40; ABG subset for gas outcome",
+            "value": "OBESITY_rfs==1 and BMI>=40; ABG subset for gas outcome"
+          },
+          {
+            "document": "R1",
+            "section": "define-cohorts",
+            "text": "BMI recorded and HRF classifiable",
+            "value": "BMI recorded and HRF classifiable"
+          },
+          {
+            "document": "R2",
+            "section": "pp16-17",
+            "text": "112009 classifiable rows",
+            "value": "112009 classifiable rows"
+          }
+        ],
+        "consistency_status": "consistent",
+        "severity": "major",
+        "recommended_resolution": "Retain distinct targets; choose the abstract estimand separately.",
+        "sections_to_update": [
+          "docs/ANALYSIS_COMPARISON.md",
+          "docs/DECISIONS.md"
+        ],
+        "issue_type": "intended_difference"
+      },
+      {
+        "concept_id": "OUTCOME",
+        "concept_type": "outcome",
+        "canonical_value": "Study-specific diagnosis/gas versus support-plus-acidosis outcomes",
+        "mentions": [
+          {
+            "document": "S1",
+            "section": "models",
+            "text": "Diagnosis composite or ABG flag",
+            "value": "Diagnosis composite or ABG flag"
+          },
+          {
+            "document": "R1",
+            "section": "derive-analysis-variables",
+            "text": "Support plus either-source acidosis",
+            "value": "Support plus either-source acidosis"
+          }
+        ],
+        "consistency_status": "consistent",
+        "severity": "major",
+        "recommended_resolution": "Do not pool prevalence or PIFs across different outcomes.",
+        "sections_to_update": [
+          "docs/ANALYSIS_COMPARISON.md",
+          "docs/DECISIONS.md"
+        ],
+        "issue_type": "intended_difference"
+      },
+      {
+        "concept_id": "PH",
+        "concept_type": "outcome",
+        "canonical_value": "Canonical R pH<=7.35; trainee primary pH<7.35 remains unreconciled",
+        "mentions": [
+          {
+            "document": "R1",
+            "section": "constants/derivation",
+            "text": "pH<=7.35",
+            "value": "pH<=7.35"
+          },
+          {
+            "document": "R2",
+            "section": "p10",
+            "text": "pH<7.35",
+            "value": "pH<7.35"
+          }
+        ],
+        "consistency_status": "contradiction",
+        "severity": "major",
+        "recommended_resolution": "Recover the trainee source and adjudicate the boundary before regeneration.",
+        "sections_to_update": [
+          "docs/ANALYSIS_COMPARISON.md",
+          "docs/DECISIONS.md"
+        ],
+        "issue_type": "definition_drift"
+      },
+      {
+        "concept_id": "GAS_PRECEDENCE",
+        "concept_type": "outcome",
+        "canonical_value": "Canonical either-source positive; trainee ABG-first",
+        "mentions": [
+          {
+            "document": "R1",
+            "section": "derivation",
+            "text": "Either qualifying complete gas pair",
+            "value": "Either qualifying complete gas pair"
+          },
+          {
+            "document": "R2",
+            "section": "p10",
+            "text": "ABG-first if complete arterial pair exists",
+            "value": "ABG-first if complete arterial pair exists"
+          }
+        ],
+        "consistency_status": "contradiction",
+        "severity": "major",
+        "recommended_resolution": "Quantify changes only in a separately authorized analysis; preserve present versions.",
+        "sections_to_update": [
+          "docs/ANALYSIS_COMPARISON.md",
+          "docs/DECISIONS.md"
+        ],
+        "issue_type": "definition_drift"
+      },
+      {
+        "concept_id": "INTERVENTION",
+        "concept_type": "intervention",
+        "canonical_value": "Precisely named BMI interventions",
+        "mentions": [
+          {
+            "document": "S1",
+            "section": "margins",
+            "text": "Assign BMI40 within severe-obesity models",
+            "value": "Assign BMI40 within severe-obesity models"
+          },
+          {
+            "document": "R1",
+            "section": "pif-estimates",
+            "text": "Caps25/30/40; everyone25 proof of concept",
+            "value": "Caps25/30/40; everyone25 proof of concept"
+          },
+          {
+            "document": "R2",
+            "section": "pp40-52",
+            "text": "Everyone25/30; obesity>=30 to29.9; clamp18.5-25",
+            "value": "Everyone25/30; obesity>=30 to29.9; clamp18.5-25"
+          }
+        ],
+        "consistency_status": "consistent",
+        "severity": "major",
+        "recommended_resolution": "Compare definitions alongside estimates, without transplanting intervals.",
+        "sections_to_update": [
+          "docs/ANALYSIS_COMPARISON.md",
+          "docs/DECISIONS.md"
+        ],
+        "issue_type": "intended_difference"
+      },
+      {
+        "concept_id": "UNCERTAINTY",
+        "concept_type": "model",
+        "canonical_value": "Uncertainty methods and coverage are explicit",
+        "mentions": [
+          {
+            "document": "S1",
+            "section": "nlcom",
+            "text": "Model-based delta-method uncertainty",
+            "value": "Model-based delta-method uncertainty"
+          },
+          {
+            "document": "R1",
+            "section": "PIF output",
+            "text": "Intervals unavailable",
+            "value": "Intervals unavailable"
+          },
+          {
+            "document": "R2",
+            "section": "p49",
+            "text": "200 row-resampling full refits",
+            "value": "200 row-resampling full refits"
+          }
+        ],
+        "consistency_status": "missing_in_expected_section",
+        "severity": "major",
+        "recommended_resolution": "Obtain stable dependence-aware intervals for the chosen estimand later.",
+        "sections_to_update": [
+          "docs/ANALYSIS_COMPARISON.md",
+          "docs/DECISIONS.md"
+        ],
+        "issue_type": "missing_evidence"
+      },
+      {
+        "concept_id": "FIGURE_PROFILE",
+        "concept_type": "code_data_statement",
+        "canonical_value": "Do not equate fixed-profile and cohort-standardized curves",
+        "mentions": [
+          {
+            "document": "S1",
+            "section": "xblc plotting",
+            "text": "Other covariates fixed at zero with pr",
+            "value": "Other covariates fixed at zero with pr"
+          },
+          {
+            "document": "R1",
+            "section": "standardized curve",
+            "text": "Average over observed covariate distribution",
+            "value": "Average over observed covariate distribution"
+          }
+        ],
+        "consistency_status": "consistent",
+        "severity": "major",
+        "recommended_resolution": "Clarify denominators/profile and review plots before submission.",
+        "sections_to_update": [
+          "docs/ANALYSIS_COMPARISON.md",
+          "docs/DECISIONS.md"
+        ],
+        "issue_type": "intended_difference"
+      }
+    ],
+    "high_risk_drift": [
+      "PH",
+      "GAS_PRECEDENCE",
+      "UNCERTAINTY"
+    ]
+  },
+  "results_exhibit_story_audit": {
+    "metadata": {
+      "schema_version": 1,
+      "artifact_id": "obesity-analysis-comparison-20261012-results",
+      "mode": "audit_only",
+      "source_documents": [
+        {
+          "document_id": "S1",
+          "path": "archive/stata/36_subpop_hazard.source.do",
+          "sha256": "6e25200c421be03c7f05e6a93898cd7a7816eff015b0095bf4f5668606cf7482"
+        },
+        {
+          "document_id": "R1",
+          "path": "reports/obesity_hrf_paf_analysis.qmd",
+          "sha256": "5cb27746db6bb37b9ed187519a2a29cefbdfd83f0963e284b367a7c629a7658a"
+        },
+        {
+          "document_id": "R1-PDF",
+          "path": "reports/obesity_hrf_paf_analysis.pdf",
+          "sha256": "d2b78cbdb2b61220b0a90bd2a3e1270ab502a32f9e62a511d1d542b018c4a6cc"
+        },
+        {
+          "document_id": "R2",
+          "path": "Documents/AS-edits-9-8------obesity-hrf.pdf",
+          "sha256": "e53e44aced791599dd866ac519f8adc47efe056b8344f437db0df4ec424b8fe7"
+        },
+        {
+          "document_id": "H1",
+          "path": "reports/reconstructed_obesity_hrf_from_pdf.qmd",
+          "sha256": "849c68087e960ea0819f754430d1fb0e7353c116cefba12f47c9c73c1503d5e6"
+        },
+        {
+          "document_id": "STATA-16-ABG_Age_spline",
+          "path": "artifacts/evidence/stata-historical/reports/legacy/hypercapnia-subpop-hazard/16 Mar 2026/figures/ABG_Age_spline.tif",
+          "sha256": "874334b053946ab528ada452f766b76c092555b9cfb30f7cbd1e19a1a91c3b6f"
+        },
+        {
+          "document_id": "STATA-16-ABG_BMI_spline",
+          "path": "artifacts/evidence/stata-historical/reports/legacy/hypercapnia-subpop-hazard/16 Mar 2026/figures/ABG_BMI_spline.tif",
+          "sha256": "dc9accc3f7ee4508a1dd648ae9549f4330b4bb462f4fcbf5a17d384ca8ba60ab"
+        },
+        {
+          "document_id": "STATA-16-Overall-Cohort-chars",
+          "path": "artifacts/evidence/stata-historical/reports/legacy/hypercapnia-subpop-hazard/16 Mar 2026/tables/Overall Cohort chars.xlsx",
+          "sha256": "5bf8330b25b5bb3b36fa947e387cd27c4adee5dbccc6745881a09b038e3e95be"
+        },
+        {
+          "document_id": "STATA-17-ABG_Age_spline",
+          "path": "artifacts/evidence/stata-historical/reports/legacy/hypercapnia-subpop-hazard/17 Mar 2026/figures/ABG_Age_spline.tif",
+          "sha256": "874334b053946ab528ada452f766b76c092555b9cfb30f7cbd1e19a1a91c3b6f"
+        },
+        {
+          "document_id": "STATA-17-ABG_BMI_spline",
+          "path": "artifacts/evidence/stata-historical/reports/legacy/hypercapnia-subpop-hazard/17 Mar 2026/figures/ABG_BMI_spline.tif",
+          "sha256": "dc9accc3f7ee4508a1dd648ae9549f4330b4bb462f4fcbf5a17d384ca8ba60ab"
+        },
+        {
+          "document_id": "STATA-17-Overall-Cohort-chars",
+          "path": "artifacts/evidence/stata-historical/reports/legacy/hypercapnia-subpop-hazard/17 Mar 2026/tables/Overall Cohort chars.xlsx",
+          "sha256": "883dab3a75e6bb376ceddc10ccd75bc67e84fb0f104add1ed446923b153fc567"
+        },
+        {
+          "document_id": "STATA-DESIGN",
+          "path": "artifacts/evidence/stata-historical/design-note.source.do",
+          "sha256": "bc50c294c82ff2940be7d9b60483320fcbd2117dc38ae5346dac7b4a46f9c57b"
+        },
+        {
+          "document_id": "UPSTREAM-DTA-DEFS",
+          "path": "https://github.com/reblocke/trinetx-hypercapnia-code/blob/d5d269168eafc7905c9238a5486fc03a62b55ec3/stata/do/10_preprocessing.do",
+          "sha256": "2e45b83f499bd4d7ee319165d74ab5cb0a8f2f9214930ea22312e61df56f8c39"
+        },
+        {
+          "document_id": "UPSTREAM-CONVERTER",
+          "path": "https://github.com/reblocke/trinetx-hypercapnia-code/blob/d5d269168eafc7905c9238a5486fc03a62b55ec3/r/reports/90_stata_to_r.qmd",
+          "sha256": "1ab3d1cc469851eef1e2cb9deb7d90505c2d052139b8ff9f0b4b28a135889ccf"
+        },
+        {
+          "document_id": "UPSTREAM-DENOM",
+          "path": "https://github.com/reblocke/trinetx-hypercapnia-code/blob/d5d269168eafc7905c9238a5486fc03a62b55ec3/docs/GLP1_FULL_DB_ANALYSIS.md",
+          "sha256": "f4443063227b6093307a013b39704cb1c2c2901362deed9e5c3a75ebb1fcaeed"
+        },
+        {
+          "document_id": "S1-RUNNABLE-CORRECTED",
+          "path": "stata/do/36_subpop_hazard.do",
+          "sha256": "f7781d006bc424a637ebcd05fe32feb99a4eec9ab7634850498a31cde7d6ae52"
+        },
+        {
+          "document_id": "S1-PROFILE-HELPER",
+          "path": "stata/ado/obesity_spline_profile.ado",
+          "sha256": "e737de835b9b5dc045b240261716230e8b2d86bf2b8df5254de64139cad74c4a"
+        }
+      ],
+      "inputs_reviewed": [
+        "docs/stata_import_provenance.json",
+        "artifacts/evidence/stata-historical/inventory.json",
+        "artifacts/evidence/stata-historical/search-receipt.json",
+        "artifacts/evidence/canonical/receipt.json",
+        "artifacts/evidence/as-sept8/receipt.json",
+        "R1 PDF pp19,25,27; R2 PDF pp10,17,49,52 visually checked",
+        "Stata baseline cells Sheet1!B2:B3,B21:B23 inspected; ABG TIFF previews visually checked",
+        "synthetic-only original/imported execution receipts; no clinical rerun",
+        "2026-10-12 authorized xblc repair: four declared plotting substitutions; native integer/decimal and independent profile/covariance tests; archive and clinical findings unchanged"
+      ],
+      "missing_inputs": [
+        "September updated QMD",
+        "Retained Stata PIF result logs",
+        "Authenticated RDS/DTA input and clinical run manifests",
+        "Patient/encounter key and measurement-timing validation"
+      ],
+      "coverage_limits": [
+        "No clinical inputs opened or models rerun",
+        "No other host/private execution namespace searched",
+        "R1 native PDF receipt reused after hash check; R2 whole-document Poppler fallback used after failed native routing",
+        "Aggregate outputs lack complete producing-run/input lineage",
+        "Synthetic parity is only at printed precision, plus exact scientific-body identity",
+        "Corrected plotting helper verified with synthetic data only; retained empirical figures are still pre-fix artifacts"
+      ],
+      "venue_profile": "generic_biomedical"
+    },
+    "storyline": {
+      "primary_question": "Two distinct conditional BMI impact-fraction questions; ATS primary not selected",
+      "primary_result": "R1/R2 PIFs are retained output; S1 PIF values unavailable in inspected locations",
+      "secondary_results": [
+        "Stata baseline table and ABG profile curves inspected",
+        "R1/R2 total N agrees but HRF event counts differ"
+      ],
+      "exploratory_results": [
+        "Historical everyone-to25/30 scenarios"
+      ],
+      "reader_likely_takeaway": "Related but non-equivalent estimands require explicit selection and provenance",
+      "claimed_takeaway": "Import preserves scientific source; clinical results were not rerun",
+      "match": "complete"
+    },
+    "methods_results_alignment": {
+      "methods_without_results": [
+        "Stata diagnosis and ABG PIF numerical results unavailable"
+      ],
+      "results_without_methods": [
+        "September results lack separately available updated QMD; printed code inspected"
+      ],
+      "analyses_first_appearing_in_results": []
+    },
+    "exhibit_inventory": [
+      {
+        "exhibit_id": "S2-BMI",
+        "type": "figure",
+        "title_or_caption": "ABG hypercapnia: BMI spline",
+        "intended_takeaway": "Increasing conditional plotted probability across BMI40-75",
+        "reader_likely_takeaway": "Increasing conditional plotted probability across BMI40-75",
+        "self_explanatory": "partial",
+        "cited_in_text": true,
+        "cited_in_order": true,
+        "supports_primary_claim": "partial",
+        "missing_elements": [
+          "denominator",
+          "fixed covariate profile",
+          "interval method",
+          "verified run lineage"
+        ],
+        "redundancy_with_text": "low",
+        "recommended_fix": "Preserve; clarify profile and review before submission. Do not derive PIF from image."
+      },
+      {
+        "exhibit_id": "S2-AGE",
+        "type": "figure",
+        "title_or_caption": "ABG hypercapnia: age spline",
+        "intended_takeaway": "Increasing conditional plotted probability over age",
+        "reader_likely_takeaway": "Increasing conditional plotted probability over age",
+        "self_explanatory": "partial",
+        "cited_in_text": true,
+        "cited_in_order": true,
+        "supports_primary_claim": "partial",
+        "missing_elements": [
+          "fixed covariate profile",
+          "verified run lineage"
+        ],
+        "redundancy_with_text": "low",
+        "recommended_fix": "Preserve as historical; assess necessity for the eventual primary question."
+      },
+      {
+        "exhibit_id": "S2-TABLE",
+        "type": "table",
+        "title_or_caption": "Overall Cohort chars",
+        "intended_takeaway": "148321 selected encounters and observed diagnosis/ABG flags",
+        "reader_likely_takeaway": "148321 selected encounters and observed diagnosis/ABG flags",
+        "self_explanatory": "partial",
+        "cited_in_text": true,
+        "cited_in_order": true,
+        "supports_primary_claim": "partial",
+        "missing_elements": [
+          "model-specific denominators",
+          "run/input identities"
+        ],
+        "redundancy_with_text": "low",
+        "recommended_fix": "Use only as retained baseline findings, not as a PIF table."
+      },
+      {
+        "exhibit_id": "R1-F1",
+        "type": "figure",
+        "title_or_caption": "HRF by BMI category",
+        "intended_takeaway": "Crude HRF pattern differs across BMI categories",
+        "reader_likely_takeaway": "Crude HRF pattern differs across BMI categories",
+        "self_explanatory": "partial",
+        "cited_in_text": true,
+        "cited_in_order": true,
+        "supports_primary_claim": "partial",
+        "missing_elements": [
+          "uncertainty"
+        ],
+        "redundancy_with_text": "low",
+        "recommended_fix": "Keep descriptive interpretation; do not infer adjusted nonlinearity from crude bars."
+      },
+      {
+        "exhibit_id": "R1-F2",
+        "type": "figure",
+        "title_or_caption": "Strict HRF by BMI category",
+        "intended_takeaway": "Strict selected-cohort category pattern",
+        "reader_likely_takeaway": "Strict selected-cohort category pattern",
+        "self_explanatory": "partial",
+        "cited_in_text": true,
+        "cited_in_order": true,
+        "supports_primary_claim": "partial",
+        "missing_elements": [
+          "same-denominator comparison"
+        ],
+        "redundancy_with_text": "low",
+        "recommended_fix": "Explain exclusion of lab/ICD discordance."
+      },
+      {
+        "exhibit_id": "R1-F3",
+        "type": "figure",
+        "title_or_caption": "Model-standardized impact fraction estimates",
+        "intended_takeaway": "Different named interventions imply different model-standardized differences",
+        "reader_likely_takeaway": "Different named interventions imply different model-standardized differences",
+        "self_explanatory": "partial",
+        "cited_in_text": true,
+        "cited_in_order": true,
+        "supports_primary_claim": "partial",
+        "missing_elements": [
+          "PIF intervals",
+          "unclipped title"
+        ],
+        "redundancy_with_text": "low",
+        "recommended_fix": "Regenerate after scientific decisions; separate proof-of-concept row."
+      },
+      {
+        "exhibit_id": "R1-F4",
+        "type": "figure",
+        "title_or_caption": "Adjusted predicted HRF risk across BMI",
+        "intended_takeaway": "Standardized risk increases under linear-logit model",
+        "reader_likely_takeaway": "Standardized risk increases under linear-logit model",
+        "self_explanatory": "partial",
+        "cited_in_text": true,
+        "cited_in_order": true,
+        "supports_primary_claim": "partial",
+        "missing_elements": [
+          "intervals",
+          "functional-form check"
+        ],
+        "redundancy_with_text": "low",
+        "recommended_fix": "Assess shape and uncertainty for the chosen estimand."
+      },
+      {
+        "exhibit_id": "R2-PIF",
+        "type": "table",
+        "title_or_caption": "September PIF result table p52",
+        "intended_takeaway": "Four intervention-specific estimates with bootstrap intervals",
+        "reader_likely_takeaway": "Four intervention-specific estimates with bootstrap intervals",
+        "self_explanatory": "partial",
+        "cited_in_text": true,
+        "cited_in_order": true,
+        "supports_primary_claim": "partial",
+        "missing_elements": [
+          "updated QMD",
+          "stable interval replication",
+          "patient dependence"
+        ],
+        "redundancy_with_text": "low",
+        "recommended_fix": "Retain as historical evidence with actual 200 refits; do not transplant to R1."
+      }
+    ],
+    "statistical_reporting": {
+      "denominators": "partial",
+      "uncertainty": "partial",
+      "model_specification": "partial",
+      "multiplicity_handling": "absent"
+    },
+    "interpretation_leakage": [
+      "Do not equate diagnosis HRF with support-plus-acidosis HRF",
+      "Do not interpret selected-source PIF as all-hospital preventable burden",
+      "Stata profile curves are not cohort-standardized curves"
+    ],
+    "abstract_alignment": {
+      "status": "absent",
+      "mismatches": [
+        "No standalone abstract or selected primary estimand exists"
+      ]
+    },
+    "recommended_exhibit_plan": {
+      "main_exhibits": [
+        "Proposed intervention-specific risk/PIF exhibit after primary estimand and uncertainty decisions"
+      ],
+      "supplemental_exhibits": [
+        "Descriptive or profile curves if relevant and corrected in separately authorized work"
+      ],
+      "remove_or_merge": []
+    }
+  }
+}
