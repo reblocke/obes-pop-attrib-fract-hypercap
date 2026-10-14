@@ -1,8 +1,24 @@
-# Data management and analysis input
+# Primary input and historical data contracts
 
-The canonical R report loads an R serialized `full_db.rds` from
-`data/raw/full_db.rds`, falling back to root `full_db.rds`. Both paths are
-local/ignored. Restricted TriNetX data, row-level derivatives, render outputs
+The primary patient-level analysis uses an explicit authenticated input plus the version-2 study manifest. Its required fields, optional calendar-day module and source-acceptance boundary are specified in [the saved plan](BMI_HYPERCAPNIA_TRIANGULATION_PLAN.md), [current decisions](DECISIONS.md), [source assessment](TRIANGULATION_SOURCE_ASSESSMENT.md) and `config/triangulation_input.example.json`.
+
+Default render commands consume a selected saved aggregate RUN. They never use `data/raw/full_db.rds` as a fallback. Clinical estimation remains explicit and requires qualified primary source requirements. Calendar-day source may be pending, with six unassessed result positions; missing evidence cannot become zero.
+
+Current upstream acceptance records are reused within their scope. A stale local failed-build handoff does not reopen that upstream task. The local RDS still needs a producer/variant/conversion binding and original-key/field mapping. Existing exact-code raw source selection can avoid syndrome-positive catalog filters; normal results alone do not prove complete frames. No pH pairing or medication-status evidence is required for this study.
+
+Aggregate version-2 runs retain scenario/registry definitions, denominators, timing and BMI-bin diagnostics, source/input hashes and environment, with no identifiers/model rows/individual predictions. Version-1 results retain the historical BMI-to-40 definition and frozen rendering source. All run artifacts remain ignored.
+
+The original data-management history below concerns the now archived R and preserved historical Stata tracks, not authority to execute the new primary analysis.
+
+# Historical data management and analysis input
+
+The [unchanged original R report](../archive/2026-10-13-bmi-to-40/reports/obesity_hrf_paf_analysis.qmd)
+formerly loaded `data/raw/full_db.rds`, falling back to root `full_db.rds`.
+Those paths are local/ignored. The [repaired historical R report](../archive/r/obesity_hrf_paf_analysis.qmd)
+now requires an explicit input through `make legacy-r INPUT=...`; it has no
+fallback. The primary patient-level workflow instead uses explicit input and
+manifest paths for estimation, or an explicit saved RUN for rendering, as
+described above. Restricted TriNetX data, row-level derivatives, render outputs
 and machine-specific paths must stay out of Git and be handled under approved
 access and release rules.
 
@@ -21,9 +37,9 @@ hashes identify the inspected file but do not authenticate its lineage. A prior 
 read/render, but not these identities. Obtain the source and conversion chain
 from the data steward; do not infer it from a matching filename or row count.
 
-## Fields used by the canonical R report
+## Fields used by the historical R report
 
-The [canonical QMD](../reports/obesity_hrf_paf_analysis.qmd) requires
+The [archived R QMD](../archive/r/obesity_hrf_paf_analysis.qmd) requires
 `curr_bmi`, `niv_proc`, `imv_proc`, `highest_paco2`, `abg_ph`, `vbg_co2`,
 `vbg_ph`, `age_at_encounter`, `sex`, `ethnicity`, and `has_j9612`, `has_j9622`,
 `has_j9692`, `has_j9602`. It parses BMI as numeric kg/m²; PaCO₂ and VBG CO₂

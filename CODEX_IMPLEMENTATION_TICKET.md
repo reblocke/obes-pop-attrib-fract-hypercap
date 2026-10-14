@@ -1,3 +1,5 @@
+> Historical implementation ticket. Its former primary-report paths and commands describe the original setup. Current authority is `docs/BMI_HYPERCAPNIA_TRIANGULATION_PLAN.md`; the primary entrypoint is `reports/bmi_hypercapnia_triangulation.qmd`. Older R sources are now in `archive/r/`, with unchanged originals/provenance in `archive/2026-10-13-bmi-to-40/`. Do not execute this old ticket as a new task.
+
 # Codex implementation ticket: obesity-HRF PAF refactor and reproducibility cleanup
 
 > Historical R refactor ticket. The maintained R report and May 2026 render

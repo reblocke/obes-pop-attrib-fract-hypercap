@@ -1,4 +1,4 @@
-# Separate patient-level association workflow. No input is read on sourcing.
+# Primary patient-level association workflow. No input is read on sourcing.
 triangulation_columns <- c(
   "patient_id", "encounter_id", "encounter_date", "age_at_encounter",
   "encounter_type", "bmi", "sex", "race_ethnicity", "location",
@@ -12,6 +12,32 @@ triangulation_outcomes <- c(
   icd = "ICD composite", abg = "ABG >=45", any_gas = "ABG >=45 or VBG >=50"
 )
 triangulation_adjustment <- c("bmi", "age_at_encounter", "sex", "race_ethnicity", "location")
+triangulation_index_day_columns <- c(
+  "abg_pco2_index_day", "vbg_pco2_index_day",
+  "abg_index_day_available", "vbg_index_day_available"
+)
+triangulation_counterfactual <- "BMI >30 reduced by 1 kg/m2; BMI <=30 unchanged; no floor"
+triangulation_scenario_id <- "bmi_gt30_minus1_v1"
+
+triangulation_registry <- function() {
+  within_frame <- data.frame(
+    outcome = c("icd", "abg", "abg", "any_gas", "any_gas"),
+    ascertainment_window = c("encounter", "encounter", "index_calendar_day", "encounter", "index_calendar_day"),
+    analysis_role = c("primary", "primary", "sensitivity", "primary", "sensitivity"),
+    stringsAsFactors = FALSE
+  )
+  registry <- do.call(rbind, lapply(names(triangulation_frames), function(frame) {
+    data.frame(frame = frame, within_frame, stringsAsFactors = FALSE)
+  }))
+  registry$cell_id <- with(registry, paste(frame, outcome, ascertainment_window, sep = "/"))
+  registry$display_order <- seq_len(nrow(registry))
+  rownames(registry) <- NULL
+  registry
+}
+
+tri_encounter_key <- function(data) paste(nchar(data$patient_id), data$patient_id, data$encounter_id, sep = ":")
+
+shift_bmi_above30 <- function(bmi) ifelse(bmi > 30, bmi - 1, bmi)
 
 require_tri_packages <- function(packages) {
   missing <- packages[!vapply(packages, requireNamespace, logical(1), quietly = TRUE)]
@@ -22,6 +48,9 @@ validate_triangulation_input <- function(data) {
   if (!is.data.frame(data)) stop("Input must be a data frame.")
   missing <- setdiff(triangulation_columns, names(data))
   if (length(missing)) stop("Missing columns: ", paste(missing, collapse = ", "))
+  day_present <- triangulation_index_day_columns %in% names(data)
+  if (any(day_present) && !all(day_present)) stop("Incomplete index-calendar-day columns.")
+  day <- if (all(day_present)) data[c("patient_id", "encounter_id", triangulation_index_day_columns)] else NULL
   data <- as.data.frame(data[triangulation_columns])
   for (name in c("patient_id", "encounter_id")) {
     if (!is.character(data[[name]]) || anyNA(data[[name]]) || any(!nzchar(trimws(data[[name]])))) {
@@ -52,13 +81,44 @@ validate_triangulation_input <- function(data) {
     if (any(available & !(data[[paste0("has_", gas)]] %in% 1))) {
       stop(gas, " result exists without a confirmed draw flag; resolve the source mapping.")
     }
+    if (!is.null(day)) {
+      value <- day[[paste0(gas, "_pco2_index_day")]]
+      availability <- day[[paste0(gas, "_index_day_available")]]
+      if (!is.numeric(value) || is.factor(value) || any(!is.na(value) & (!is.finite(value) | value <= 0))) {
+        stop(gas, " index-day result must be positive finite numeric or NA.")
+      }
+      if (!(is.numeric(availability) || is.logical(availability)) || is.factor(availability) ||
+          any(!is.na(availability) & !availability %in% c(0, 1))) stop("Index-day availability must be 0/1/NA.")
+      if (any((availability %in% 1) != !is.na(value))) stop("Index-day availability and maximum disagree.")
+      if (any(!is.na(value) & (!available | !(data[[paste0("has_", gas)]] %in% 1)))) {
+        stop("Index-day gas requires an encounter result and confirmed draw.")
+      }
+      if (any(value > data[[paste0(gas, "_pco2")]] + 1e-8, na.rm = TRUE)) stop("Index-day maximum exceeds encounter maximum.")
+    }
   }
   n_input <- nrow(data)
   data <- unique(data)
   keys <- data[c("patient_id", "encounter_id")]
   data$.key_conflict <- duplicated(keys) | duplicated(keys, fromLast = TRUE)
+  # Deduplication/index ambiguity use primary fields only. Discordant early
+  # evidence cannot alter a primary index or promote another encounter.
+  data$.index_day_conflict <- FALSE
+  if (!is.null(day)) {
+    day <- unique(day)
+    day_keys <- tri_encounter_key(day)
+    conflict <- duplicated(day_keys) | duplicated(day_keys, fromLast = TRUE)
+    position <- match(tri_encounter_key(data), day_keys)
+    data$.index_day_conflict <- day_keys[position] %in% day_keys[conflict]
+    for (name in triangulation_index_day_columns) {
+      data[[name]] <- day[[name]][position]
+      data[[name]][data$.index_day_conflict] <- NA
+    }
+  } else {
+    for (name in triangulation_index_day_columns) data[[name]] <- rep(NA_real_, nrow(data))
+  }
   attr(data, "exact_duplicates_removed") <- n_input - nrow(data)
   attr(data, "n_conflicting_keys") <- nrow(unique(keys[data$.key_conflict, , drop = FALSE]))
+  attr(data, "index_day_source_status") <- if (is.null(day)) "pending" else "qualified"
   data
 }
 
@@ -74,6 +134,10 @@ derive_triangulation_variables <- function(data) {
   has_result <- !is.na(data$abg_pco2) | !is.na(data$vbg_pco2)
   positive <- data$abg_pco2 >= 45 | data$vbg_pco2 >= 50
   data$any_gas <- ifelse(positive %in% TRUE, 1L, ifelse(has_result, 0L, NA_integer_))
+  data$abg_index_calendar_day <- ifelse(is.na(data$abg_pco2_index_day), NA_integer_, as.integer(data$abg_pco2_index_day >= 45))
+  day_result <- !is.na(data$abg_pco2_index_day) | !is.na(data$vbg_pco2_index_day)
+  day_positive <- data$abg_pco2_index_day >= 45 | data$vbg_pco2_index_day >= 50
+  data$any_gas_index_calendar_day <- ifelse(day_positive %in% TRUE, 1L, ifelse(day_result, 0L, NA_integer_))
   data
 }
 
@@ -138,16 +202,16 @@ detect_tri_separation <- function(x, y) {
   solution$objval > 1e-7
 }
 
-standardize_bmi40 <- function(fit, model_data) {
+standardize_bmi_shift <- function(fit, model_data) {
   # Standardize both scenarios to the SAME observed model cases. Do not
   # re-select indexes, frames, or outcomes after changing BMI.
   counterfactual <- model_data
-  counterfactual$bmi <- pmin(model_data$bmi, 40)
+  counterfactual$bmi <- shift_bmi_above30(model_data$bmi)
   support <- range(model_data$bmi)
   result <- list(
     p_observed = NA_real_, p_counterfactual = NA_real_, absolute_difference = NA_real_,
     impact_fraction = NA_real_, impact_conf_low = NA_real_, impact_conf_high = NA_real_,
-    se_log_probability_ratio = NA_real_, n_bmi_shifted = sum(model_data$bmi > 40),
+    se_log_probability_ratio = NA_real_, n_bmi_shifted = sum(model_data$bmi > 30),
     n_counterfactual_outside_support = sum(counterfactual$bmi < support[1] | counterfactual$bmi > support[2]),
     impact_status = "not_estimable", impact_reason = ""
   )
@@ -191,33 +255,45 @@ standardize_bmi40 <- function(fit, model_data) {
            "impact_conf_low", "impact_conf_high", "se_log_probability_ratio")] <-
     list(p0, p1, p0 - p1, 1 - p1 / p0, interval[1], interval[2], se)
   result$impact_status <- "estimated"
-  if (!result$n_bmi_shifted) result$impact_reason <- "No BMI above 40: observed and counterfactual scenarios are identical"
+  if (!result$n_bmi_shifted) result$impact_reason <- "No BMI above 30: observed and counterfactual scenarios are identical"
   result
 }
 
-fit_triangulation_cell <- function(indexes, frame, outcome) {
-  observed <- !is.na(indexes[[outcome]])
+fit_triangulation_cell <- function(indexes, frame, outcome, ascertainment_window = "encounter", source_status = "qualified") {
+  outcome_field <- if (ascertainment_window == "encounter") outcome else paste0(outcome, "_index_calendar_day")
+  observed <- !is.na(indexes[[outcome_field]])
   complete <- complete.cases(indexes[triangulation_adjustment])
   model_data <- indexes[observed & complete, , drop = FALSE]
   result <- data.frame(
-    frame = frame, outcome = outcome, n_index_resolved = nrow(indexes),
+    frame = frame, outcome = outcome, ascertainment_window = ascertainment_window,
+    analysis_role = if (ascertainment_window == "encounter") "primary" else "sensitivity",
+    cell_id = paste(frame, outcome, ascertainment_window, sep = "/"), source_status = source_status,
+    n_index_resolved = nrow(indexes),
     n_outcome_known = sum(observed), n_outcome_missing = sum(!observed),
     n_missing_adjustment = sum(observed & !complete), n_model = nrow(model_data),
-    n_events = sum(model_data[[outcome]] == 1), beta = NA_real_, se = NA_real_,
+    n_events = sum(model_data[[outcome_field]] == 1), beta = NA_real_, se = NA_real_,
     odds_ratio = NA_real_, conf_low = NA_real_, conf_high = NA_real_,
     status = "not_estimable", reason = "", warnings = "",
     p_observed = NA_real_, p_counterfactual = NA_real_, absolute_difference = NA_real_,
     impact_fraction = NA_real_, impact_conf_low = NA_real_, impact_conf_high = NA_real_,
-    se_log_probability_ratio = NA_real_, n_bmi_shifted = sum(model_data$bmi > 40),
+    se_log_probability_ratio = NA_real_, n_bmi_shifted = sum(model_data$bmi > 30),
+    pct_bmi_shifted = if (nrow(model_data)) 100 * mean(model_data$bmi > 30) else NA_real_,
+    n_index_day_conflicts = if (ascertainment_window == "encounter") 0L else sum(indexes$.index_day_conflict),
     n_counterfactual_outside_support = NA_integer_,
     impact_status = "not_estimable", impact_reason = "Model not estimated",
-    counterfactual = "BMI above 40 set to 40; BMI <=40 unchanged", stringsAsFactors = FALSE
+    counterfactual = triangulation_counterfactual, scenario_id = triangulation_scenario_id, stringsAsFactors = FALSE
   )
+  if (source_status == "pending") {
+    result[c("n_outcome_known", "n_outcome_missing", "n_missing_adjustment", "n_model", "n_events", "n_bmi_shifted", "pct_bmi_shifted", "n_index_day_conflicts")] <- NA_real_
+    result$status <- result$impact_status <- "awaiting_source_evidence"
+    result$reason <- result$impact_reason <- "Authenticated index-calendar-day source evidence unavailable"
+    return(result)
+  }
   fail <- function(reason) { result$reason <- reason; result$impact_reason <- reason; result }
   if (!nrow(model_data)) return(fail("No complete model cases"))
-  if (length(unique(model_data[[outcome]])) != 2L) return(fail("Outcome has no variation"))
+  if (length(unique(model_data[[outcome_field]])) != 2L) return(fail("Outcome has no variation"))
   if (length(unique(model_data$bmi)) < 2L) return(fail("BMI has no variation"))
-  model_data$.outcome <- model_data[[outcome]]
+  model_data$.outcome <- model_data[[outcome_field]]
   formula <- .outcome ~ bmi + age_at_encounter + factor(sex) + factor(race_ethnicity) + factor(location)
   matrix <- tryCatch(stats::model.matrix(formula, model_data), error = function(e) e)
   if (inherits(matrix, "error")) return(fail(paste("Model matrix:", conditionMessage(matrix))))
@@ -242,37 +318,89 @@ fit_triangulation_cell <- function(indexes, frame, outcome) {
   if (!all(is.finite(c(beta, se, exp(beta), interval))) || se <= 0 || any(interval <= 0)) return(fail("Nonfinite or invalid estimate/interval"))
   result[c("beta", "se", "odds_ratio", "conf_low", "conf_high")] <- list(beta, se, exp(beta), interval[1], interval[2])
   result$status <- "estimated"
-  standardized <- tryCatch(standardize_bmi40(fit, model_data), error = function(e) e)
+  standardized <- tryCatch(standardize_bmi_shift(fit, model_data), error = function(e) e)
   if (inherits(standardized, "error")) {
     result$impact_reason <- paste("Standardization:", conditionMessage(standardized))
   } else {
     result[names(standardized)] <- standardized
   }
+  attr(result, "bmi_diagnostics") <- tri_bmi_diagnostics(model_data, fit, result$cell_id)
   result
+}
+
+tri_bmi_diagnostics <- function(model_data, fit, cell_id) {
+  empty <- data.frame(cell_id = character(), bin_low = numeric(), bin_high = numeric(),
+                      n = integer(), events = integer(), observed_fraction = numeric(), mean_fitted = numeric())
+  if (!nrow(model_data)) return(empty)
+  bin <- 5 * floor(model_data$bmi / 5)
+  prediction <- stats::predict(fit, newdata = model_data, type = "response")
+  do.call(rbind, lapply(sort(unique(bin)), function(low) {
+    rows <- bin == low
+    data.frame(cell_id = cell_id, bin_low = low, bin_high = low + 5,
+      n = sum(rows), events = sum(model_data$.outcome[rows]),
+      observed_fraction = mean(model_data$.outcome[rows]), mean_fitted = mean(prediction[rows]))
+  }))
+}
+
+tri_bmi_summary <- function(indexes, result) {
+  pending <- result$source_status == "pending"
+  field <- if (result$ascertainment_window == "encounter") result$outcome else paste0(result$outcome, "_index_calendar_day")
+  cases <- indexes[!is.na(indexes[[field]]) & complete.cases(indexes[triangulation_adjustment]), , drop = FALSE]
+  quantiles <- if (nrow(cases) && !pending) unname(stats::quantile(cases$bmi, c(0, .25, .5, .75, 1))) else rep(NA_real_, 5)
+  data.frame(cell_id = result$cell_id, n = if (pending) NA_integer_ else nrow(cases),
+    minimum = quantiles[1], q25 = quantiles[2], median = quantiles[3], q75 = quantiles[4], maximum = quantiles[5],
+    n_below30 = if (pending) NA_integer_ else sum(cases$bmi < 30),
+    n_at30 = if (pending) NA_integer_ else sum(cases$bmi == 30),
+    n_above30 = if (pending) NA_integer_ else sum(cases$bmi > 30),
+    n_near40 = if (pending) NA_integer_ else sum(cases$bmi >= 39 & cases$bmi < 41),
+    n_at_least50 = if (pending) NA_integer_ else sum(cases$bmi >= 50))
+}
+
+tri_timing_audit <- function(indexes, frame, source_status) {
+  do.call(rbind, lapply(c("abg", "any_gas"), function(outcome) {
+    if (source_status == "pending") return(data.frame(frame = frame, outcome = outcome,
+      primary_state = "not_assessed", index_day_state = "awaiting_source_evidence", n = NA_integer_))
+    state <- function(x) factor(ifelse(is.na(x), "unknown", ifelse(x == 1, "positive", "available_negative")),
+      levels = c("positive", "available_negative", "unknown"))
+    counts <- as.data.frame(table(primary_state = state(indexes[[outcome]]),
+      index_day_state = state(indexes[[paste0(outcome, "_index_calendar_day")]])))
+    names(counts)[3] <- "n"
+    data.frame(frame = frame, outcome = outcome, counts, stringsAsFactors = FALSE)
+  }))
 }
 
 run_triangulation <- function(data) {
   clean <- validate_triangulation_input(data)
   duplicates <- attr(clean, "exact_duplicates_removed")
   conflicts <- attr(clean, "n_conflicting_keys")
+  day_status <- attr(clean, "index_day_source_status")
   derived <- derive_triangulation_variables(clean)
   frames <- lapply(names(triangulation_frames), function(frame) select_frame_indexes(derived, frame))
   names(frames) <- names(triangulation_frames)
-  results <- do.call(rbind, lapply(names(frames), function(frame) {
-    do.call(rbind, lapply(names(triangulation_outcomes), function(outcome) {
-      fit_triangulation_cell(frames[[frame]]$indexes, frame, outcome)
-    }))
-  }))
+  registry <- triangulation_registry()
+  cells <- lapply(seq_len(nrow(registry)), function(i) {
+    spec <- registry[i, ]
+    fit_triangulation_cell(frames[[spec$frame]]$indexes, spec$frame, spec$outcome,
+      spec$ascertainment_window, if (spec$analysis_role == "primary") "qualified" else day_status)
+  })
+  diagnostics <- lapply(cells, attr, which = "bmi_diagnostics")
+  diagnostics <- diagnostics[!vapply(diagnostics, is.null, logical(1))]
+  bmi_diagnostics <- if (length(diagnostics)) do.call(rbind, diagnostics) else tri_bmi_diagnostics(data.frame(), NULL, "")
+  bmi_summary <- do.call(rbind, lapply(seq_along(cells), function(i) tri_bmi_summary(frames[[cells[[i]]$frame]]$indexes, cells[[i]])))
+  results <- do.call(rbind, lapply(cells, function(x) { attr(x, "bmi_diagnostics") <- NULL; x }))
   frame_counts <- do.call(rbind, lapply(frames, `[[`, "counts"))
   rownames(results) <- rownames(frame_counts) <- NULL
-  stopifnot(nrow(results) == 9L, !anyDuplicated(results[c("frame", "outcome")]))
+  stopifnot(nrow(results) == 15L, !anyDuplicated(results$cell_id))
   results <- merge(results, frame_counts[setdiff(names(frame_counts), "n_index_resolved")], by = "frame", sort = FALSE)
-  results <- results[order(match(results$frame, names(triangulation_frames)), match(results$outcome, names(triangulation_outcomes))), ]
+  results <- results[match(registry$cell_id, results$cell_id), ]
   rownames(results) <- NULL
+  available <- results$source_status == "qualified"
   stopifnot(all(results$n_frame_patients == results$n_index_resolved + results$n_index_unresolved),
-            all(results$n_index_resolved == results$n_outcome_known + results$n_outcome_missing),
-            all(results$n_outcome_known == results$n_model + results$n_missing_adjustment))
-  list(results = results, frame_counts = frame_counts, scope = data.frame(
+            all(results$n_index_resolved[available] == results$n_outcome_known[available] + results$n_outcome_missing[available]),
+            all(results$n_outcome_known[available] == results$n_model[available] + results$n_missing_adjustment[available]))
+  list(results = results, registry = registry, frame_counts = frame_counts,
+    timing_audit = do.call(rbind, lapply(names(frames), function(frame) tri_timing_audit(frames[[frame]]$indexes, frame, day_status))),
+    bmi_diagnostics = bmi_diagnostics, bmi_summary = bmi_summary, scope = data.frame(
     input_encounters = nrow(data), exact_duplicates_removed = duplicates,
     distinct_encounter_versions = nrow(clean), n_conflicting_keys = conflicts,
     in_scope = sum(derived$in_scope %in% TRUE),
@@ -284,11 +412,12 @@ load_triangulation_input <- function(input_path, manifest_path) {
   require_tri_packages(c("jsonlite", "digest", "haven"))
   if (!nzchar(input_path) || !nzchar(manifest_path)) stop("Clinical mode requires explicit input and reviewed manifest paths.")
   if (!file.exists(input_path) || !file.exists(manifest_path)) stop("Input or manifest does not exist.")
+  manifest_hash <- digest::digest(file = manifest_path, algo = "sha256")
   manifest <- jsonlite::read_json(manifest_path, simplifyVector = TRUE)
-  required <- c("schema_version", "input_sha256", "source_identity", "reviewed_by", "reviewed_on", "evidence_reference", "columns", "binary_codes", "encounter_type_codes", "category_values", "semantics")
-  if (length(setdiff(required, names(manifest))) || !identical(manifest$schema_version, 1L)) stop("Invalid manifest schema; use the example template.")
+  required <- c("schema_version", "input_sha256", "source_identity", "reviewed_by", "reviewed_on", "evidence_reference", "columns", "binary_codes", "encounter_type_codes", "category_values", "semantics", "source_qualification", "source_evidence_files", "index_day")
+  if (length(setdiff(required, names(manifest))) || !identical(manifest$schema_version, 2L)) stop("Invalid manifest schema; new estimation requires version 2.")
   for (name in c("source_identity", "reviewed_by", "reviewed_on", "evidence_reference")) {
-    if (!is.character(manifest[[name]]) || length(manifest[[name]]) != 1 || !nzchar(manifest[[name]]) || grepl("PENDING", manifest[[name]], fixed = TRUE)) stop("Manifest review metadata incomplete: ", name)
+    if (!is.character(manifest[[name]]) || length(manifest[[name]]) != 1 || !nzchar(trimws(manifest[[name]])) || grepl("pending", manifest[[name]], ignore.case = TRUE)) stop("Manifest review metadata incomplete: ", name)
   }
   expected <- c(
     keys = "original_patient_and_encounter", date = "encounter_start_Date",
@@ -297,6 +426,26 @@ load_triangulation_input <- function(input_path, manifest_path) {
     icd_negative = "documented_composite_absent_with_capture", adjustment = "legacy_stata_codes_and_missingness"
   )
   for (name in names(expected)) if (!identical(manifest$semantics[[name]], unname(expected[[name]]))) stop("Unreviewed semantics: ", name)
+  gates <- c("lineage", "population_scope", "keys_chronology", "bmi_adjustment", "gas_draws", "gas_units_windows", "icd_capture")
+  if (!setequal(names(manifest$source_qualification), gates) ||
+      !all(vapply(gates, function(name) identical(manifest$source_qualification[[name]], "accepted"), logical(1)))) {
+    stop("Primary source qualification incomplete; authenticate the specific unresolved requirement.")
+  }
+  evidence <- manifest$source_evidence_files
+  if (!all(c("lineage", "population", "fields") %in% names(evidence))) stop("Missing identity-bound source evidence files.")
+  for (name in names(evidence)) {
+    entry <- evidence[[name]]
+    if (!is.character(entry$path) || length(entry$path) != 1L || grepl("PENDING", entry$path, fixed = TRUE) ||
+        !is.character(entry$sha256) || length(entry$sha256) != 1L || !grepl("^[a-fA-F0-9]{64}$", entry$sha256)) stop("Invalid source evidence reference: ", name)
+    path <- entry$path
+    if (!grepl("^(/|[A-Za-z]:)", path)) path <- file.path(dirname(manifest_path), path)
+    if (!file.exists(path) || !identical(digest::digest(file = path, algo = "sha256"), tolower(entry$sha256))) stop("Source evidence file hash mismatch: ", name)
+  }
+  day_status <- manifest$index_day$status
+  if (length(day_status) != 1L || !day_status %in% c("pending", "qualified")) stop("Index-day source status must be pending or qualified.")
+  if (day_status == "qualified" && (!"index_day" %in% names(evidence) ||
+      !identical(manifest$index_day$semantics, "max_valid_specimen_PCO2_on_encounter_start_calendar_date"))) stop("Unreviewed index-calendar-day evidence.")
+  if (day_status == "pending" && length(manifest$index_day$columns)) stop("Pending index-day source cannot supply mapped columns.")
   hash <- digest::digest(file = input_path, algo = "sha256")
   if (!identical(hash, tolower(manifest$input_sha256))) stop("Input SHA-256 does not match the reviewed manifest.")
   ext <- tolower(tools::file_ext(input_path))
@@ -305,6 +454,12 @@ load_triangulation_input <- function(input_path, manifest_path) {
   if (!setequal(names(mapping), triangulation_columns) || anyDuplicated(mapping) || !all(mapping %in% names(raw))) stop("Incomplete, duplicate, or unavailable source column mapping.")
   data <- as.data.frame(raw[unname(mapping[triangulation_columns])])
   names(data) <- triangulation_columns
+  if (day_status == "qualified") {
+    day_mapping <- unlist(manifest$index_day$columns, use.names = TRUE)
+    if (!setequal(names(day_mapping), triangulation_index_day_columns) || anyDuplicated(day_mapping) ||
+        any(day_mapping %in% mapping) || !all(day_mapping %in% names(raw))) stop("Incomplete or duplicate index-day source mapping.")
+    data[triangulation_index_day_columns] <- raw[unname(day_mapping[triangulation_index_day_columns])]
+  }
   # Decode reviewed values explicitly, never factor-level integers.
   source_values <- function(x) if (inherits(x, "haven_labelled")) as.character(haven::zap_labels(x)) else as.character(x)
   decode <- function(x, codes, name) {
@@ -320,6 +475,13 @@ load_triangulation_input <- function(input_path, manifest_path) {
     x[x %in% "NA"] <- NA_character_
     data[[name]] <- as.integer(x)
   }
+  if (day_status == "qualified") for (name in c("abg_index_day_available", "vbg_index_day_available")) {
+    codes <- unlist(manifest$index_day$binary_codes[[name]], use.names = TRUE)
+    if (!length(codes) || any(!codes %in% c("0", "1", "NA"))) stop("Invalid index-day binary mapping.")
+    x <- decode(data[[name]], codes, name)
+    x[x %in% "NA"] <- NA_character_
+    data[[name]] <- as.integer(x)
+  }
   setting_codes <- unlist(manifest$encounter_type_codes, use.names = TRUE)
   if (!length(setting_codes) || any(!setting_codes %in% c("EMER", "IMP", "OTHER", "NA"))) stop("Invalid encounter_type_codes target; use EMER/IMP/OTHER/NA.")
   data$encounter_type <- decode(data$encounter_type, setting_codes, "encounter_type")
@@ -330,57 +492,8 @@ load_triangulation_input <- function(input_path, manifest_path) {
     if (!length(allowed) || any(!is.na(data[[name]]) & !data[[name]] %in% allowed)) stop("Unreviewed categories in ", name)
   }
   validate_triangulation_input(data)
+  if (!identical(hash, digest::digest(file = input_path, algo = "sha256")) ||
+      !identical(manifest_hash, digest::digest(file = manifest_path, algo = "sha256"))) stop("Input or manifest changed during loading.")
   # Preserve exact duplicates until the analysis records their removal count.
-  list(data = data, manifest = manifest, input_sha256 = hash)
-}
-
-plot_triangulation <- function(results, artificial = FALSE) {
-  require_tri_packages("ggplot2")
-  plot_data <- results
-  plot_data$frame_label <- factor(unname(triangulation_frames[plot_data$frame]), levels = unname(triangulation_frames))
-  plot_data$outcome_label <- factor(unname(triangulation_outcomes[plot_data$outcome]), levels = rev(unname(triangulation_outcomes)))
-  ok <- plot_data$impact_status == "estimated"
-  values <- c(0, plot_data$impact_conf_low[ok], plot_data$impact_conf_high[ok])
-  width <- max(diff(range(values)), .05)
-  lo <- min(values) - .08 * width
-  hi <- max(values) + .08 * width
-  text_x <- hi + .10 * width
-  limit_hi <- hi + 1.8 * width
-  plot_data$label <- ifelse(ok,
-    sprintf("%.1f%% (%.1f to %.1f)   n=%s", 100 * plot_data$impact_fraction, 100 * plot_data$impact_conf_low, 100 * plot_data$impact_conf_high, format(plot_data$n_model, big.mark = ",", trim = TRUE)),
-    paste0("Not estimable   n=", plot_data$n_model))
-  ticks <- sort(unique(c(pretty(c(lo, hi), n = 4), 0)))
-  ticks <- ticks[ticks >= lo & ticks <= hi]
-  ggplot2::ggplot(plot_data, ggplot2::aes(y = outcome_label)) +
-    ggplot2::geom_vline(xintercept = 0, linetype = "dashed", colour = "grey45", linewidth = .45) +
-    ggplot2::geom_segment(data = plot_data[ok, ], ggplot2::aes(x = impact_conf_low, xend = impact_conf_high, yend = outcome_label), linewidth = .65, colour = "#184F64") +
-    ggplot2::geom_point(data = plot_data[ok, ], ggplot2::aes(x = impact_fraction), size = 2.6, shape = 18, colour = "#184F64") +
-    ggplot2::geom_text(ggplot2::aes(x = text_x, label = label), hjust = 0, size = 3.4, colour = "grey15") +
-    ggplot2::facet_grid(frame_label ~ ., scales = "fixed") +
-    ggplot2::scale_x_continuous(limits = c(lo, limit_hi), breaks = ticks, labels = function(x) paste0(format(100 * x, trim = TRUE, digits = 3), "%")) +
-    ggplot2::labs(
-      title = if (artificial) "ARTIFICIAL FIXTURE - layout and workflow validation" else "Hypercapnia under the BMI-to-40 scenario",
-      subtitle = "BMI above 40 set to 40 kg/m2; points and delta-method 95% intervals",
-      x = "Potential impact fraction", y = NULL,
-      caption = paste("Rows: ICD composite, arterial CO2 >=45, and arterial >=45 or venous >=50 mm Hg.",
-                      "First qualifying 2022 adult ED/inpatient index per frame; overlapping frames.",
-                      "Adjustment: age, sex, race/ethnicity, location; same model cases in both scenarios.",
-                      "BMI <=40 unchanged. Intervals condition on covariates; no causal prevention claim.", sep = "\n")
-    ) +
-    ggplot2::theme_minimal(base_size = 11) +
-    ggplot2::theme(panel.grid.minor = ggplot2::element_blank(), panel.grid.major.y = ggplot2::element_blank(),
-      strip.text.y = ggplot2::element_text(angle = 0, face = "bold", size = 10),
-      plot.title = ggplot2::element_text(face = "bold", size = 13),
-      plot.subtitle = ggplot2::element_text(size = 10), plot.caption = ggplot2::element_text(hjust = 0, size = 8.5),
-      plot.margin = ggplot2::margin(12, 18, 12, 12), panel.spacing = grid::unit(1, "lines"))
-}
-
-export_triangulation_figure <- function(plot, output_dir) {
-  dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
-  base <- file.path(output_dir, "bmi_hypercapnia_forest")
-  devices <- list(svg = grDevices::svg, pdf = grDevices::cairo_pdf,
-                  png = function(...) grDevices::png(..., units = "in", res = 300, type = "cairo"),
-                  jpg = function(...) grDevices::jpeg(..., units = "in", res = 300, quality = 95, type = "cairo"))
-  for (ext in names(devices)) ggplot2::ggsave(paste0(base, ".", ext), plot, device = devices[[ext]], width = 9, height = 7, units = "in", bg = "white")
-  invisible(base)
+  list(data = data, manifest = manifest, input_sha256 = hash, manifest_sha256 = manifest_hash)
 }

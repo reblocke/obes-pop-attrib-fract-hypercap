@@ -1,3 +1,9 @@
+# Current primary analysis and historical comparison
+
+As confirmed on 2026-10-13, the primary report is [patient-level triangulation](../reports/bmi_hypercapnia_triangulation.qmd): observed BMI >30 reduced by one kg/m² with no floor, nine encounter-wide primary plus six index-calendar-day gas sensitivity cells. Its paired PIFs describe distinct model-evaluable populations with fixed original indexes and adjustment. Artificial verification does not provide clinical estimates.
+
+The former BMI-to-40 triangulation is preserved in the [dated source archive](../archive/2026-10-13-bmi-to-40/provenance.json) and version-1 saved bundles. The historical R1, R2, Stata and reconstruction comparisons below retain their original estimands/evidence; do not substitute their estimates or confidence intervals into the new figure. The older R source is now repaired/archived, with the unchanged original still available for reconstruction.
+
 # Comparison of the obesity impact-fraction analyses
 
 Reviewed October 12, 2026. The Stata and R tracks estimate different conditional
@@ -11,9 +17,9 @@ No clinical model or report was rerun for this comparison.
 | --- | --- | --- |
 | S1 | [Preserved Stata source](../archive/stata/36_subpop_hazard.source.do), upstream commit `d5d269168eafc7905c9238a5486fc03a62b55ec3` | Source-implemented severe-obesity analysis; [runnable duplicate](../stata/do/36_subpop_hazard.do) preserves the estimators/PIF calculations with four declared profile-plotting substitutions |
 | S2 | Upstream `reports/legacy/hypercapnia-subpop-hazard/16 Mar 2026/` and `17 Mar 2026/` tables/figures | Retained aggregate output inspected; producing input/run provenance unverified |
-| R1 | [Canonical R QMD](../reports/obesity_hrf_paf_analysis.qmd) and its retained local PDF | Source-implemented analysis and retained output inspected; exact input/render lineage unverified |
+| R1 | [Archived repaired R QMD](../archive/r/obesity_hrf_paf_analysis.qmd) and its retained local PDF | Source-implemented analysis and retained output inspected; exact input/render lineage unverified |
 | R2 | [September trainee PDF](../Documents/AS-edits-9-8------obesity-hrf.pdf) | Retained output inspected; corresponding updated QMD unavailable; not adopted canonical source |
-| H1 | [Archival reconstruction](../reports/reconstructed_obesity_hrf_from_pdf.qmd) | Earlier everyone-to-BMI-25 calculation and recovered workflow; archival |
+| H1 | [Archival reconstruction](../archive/r/reconstructed_obesity_hrf_from_pdf.qmd) | Earlier everyone-to-BMI-25 calculation and recovered workflow; archival |
 | H2 | `Code/obesity hrf.qmd`, `Code/BL edits - obesity hrf.qmd`, `Code/reconstructed_obesity_hrf_from_pdf.qmd`, `Code/refactored_obesity_hrf_paf_analysis.qmd` | Historical exploratory/edit/reconstruction/refactor sources; not parallel current entrypoints |
 
 The September commit added a PDF, not an updated canonical QMD. Earlier sources
