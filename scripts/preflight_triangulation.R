@@ -1,7 +1,7 @@
 #!/usr/bin/env Rscript
 # Schema/aggregate audit only: no selection, model fitting, or identifier export.
 args <- commandArgs(trailingOnly = TRUE)
-if (length(args) != 1L) stop("Usage: Rscript scripts/preflight_triangulation.R INPUT")
+if (!length(args) %in% c(1L, 2L)) stop("Usage: Rscript scripts/preflight_triangulation.R INPUT [MANIFEST]")
 source("R/bmi_hypercapnia_triangulation.R")
 source("R/triangulation_reporting.R")
 require_tri_packages(c("jsonlite", "digest"))
@@ -31,6 +31,17 @@ characteristics <- lapply(selected, function(name) {
              maximum = if (numeric_source && any(!is.na(x))) max(x, na.rm = TRUE) else NA_real_)
 })
 if (length(characteristics)) utils::write.csv(do.call(rbind, characteristics), file.path(output, "aggregate_characteristics.csv"), row.names = FALSE, na = "")
+# Presence of normal results is a coverage diagnostic, not lineage proof.
+gas_names <- intersect(c("paco2", "highest_paco2", "vbg_co2", "highest_vbg_co2", "abg_pco2", "vbg_pco2"), names(data))
+gas_counts <- lapply(gas_names, function(name) {
+  x <- data[[name]]
+  if (!is.numeric(x) || is.factor(x)) return(NULL)
+  cutoff <- if (grepl("vbg", name)) 50 else 45
+  data.frame(column = name, cutoff = cutoff, n_below = sum(x < cutoff, na.rm = TRUE),
+    n_at = sum(x == cutoff, na.rm = TRUE), n_above = sum(x > cutoff, na.rm = TRUE), n_unavailable = sum(is.na(x)))
+})
+gas_counts <- gas_counts[!vapply(gas_counts, is.null, logical(1))]
+if (length(gas_counts)) utils::write.csv(do.call(rbind, gas_counts), file.path(output, "gas_threshold_coverage.csv"), row.names = FALSE)
 # Small, explicitly selected categorical code dictionaries only.
 category_names <- intersect(c("sex", "race_ethnicity", "ethnicity", "location", "encounter_type", "has_abg", "has_vbg", "hypercap_resp_failure"), names(data))
 categories <- lapply(category_names, function(name) {
@@ -50,6 +61,22 @@ receipt <- list(status = "schema_audited_not_authenticated", input_sha256 = tri_
                 provenance_authenticated = FALSE, clinical_results_qualified = FALSE,
                 schema_sha256 = tri_sha256(file.path(output, "schema.csv")),
                 audit_source_sha256 = tri_sha256("scripts/preflight_triangulation.R"))
+qualification_error <- NULL
+if (length(args) == 2L) {
+  loaded <- tryCatch(load_triangulation_input(input, args[2]), error = function(e) e)
+  if (inherits(loaded, "error")) {
+    qualification_error <- conditionMessage(loaded)
+    receipt$status <- "source_qualification_failed"
+    receipt$qualification_error <- qualification_error
+  } else {
+    receipt$status <- "reviewed_primary_input_identity_and_mapping_passed"
+    receipt$provenance_authenticated <- TRUE
+    receipt$manifest_sha256 <- tri_sha256(args[2])
+    receipt$index_day_source_status <- loaded$manifest$index_day$status
+    receipt$qualification_scope <- "Identity-bound reviewed declarations; no independent raw-source comparison performed by this CLI"
+  }
+}
 jsonlite::write_json(receipt, file.path(output, "preflight_receipt.json"), auto_unbox = TRUE, pretty = TRUE)
-writeLines(c("# Input preflight — not authenticated", "", "This audit describes schema and aggregates only. It does not establish producer lineage, original keys, draw semantics, specimen identity, measurement windows or diagnosis-negative capture.", "", "No clinical models were fitted. Source evidence is still required for every semantic claim in the input manifest.", "", paste("Rows:", nrow(data), "; columns:", ncol(data)), paste("Required names absent:", paste(receipt$required_names_absent, collapse = ", ")), "", "See docs/TRIANGULATION_INPUT_HANDOFF.md for the field-specific upstream request."), file.path(output, "preflight_review.md"))
+writeLines(c("# Input preflight", "", paste("Status:", receipt$status), "", "Schema and aggregates do not establish producer lineage or population completeness. With a manifest, this CLI additionally verifies reviewed mappings and referenced evidence-file hashes; it does not perform an independent raw-source comparison.", "", "No clinical models were fitted. Normal gas records do not alone prove complete frame coverage.", "", paste("Rows:", nrow(data), "; columns:", ncol(data)), paste("Required names absent:", paste(receipt$required_names_absent, collapse = ", ")), "", "See docs/TRIANGULATION_SOURCE_ASSESSMENT.md and docs/TRIANGULATION_INPUT_HANDOFF.md for the bounded source assessment."), file.path(output, "preflight_review.md"))
 cat("Preflight saved:", output, "\nStatus:", receipt$status, "\nModels fitted: 0\n")
+if (!is.null(qualification_error)) stop("Qualification failed; receipt retained: ", qualification_error)

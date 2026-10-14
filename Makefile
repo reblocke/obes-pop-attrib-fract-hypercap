@@ -1,17 +1,35 @@
-.PHONY: render render-html render-pdf render-archival test renv-init stata-check stata stata-test
+.PHONY: render render-html render-pdf render-archival legacy-r legacy-r-html legacy-r-pdf historical-test test renv-init stata-check stata stata-test
 .PHONY: triangulation-test triangulation-fixture triangulation-render triangulation-preflight triangulation-review
 
 render:
-	quarto render reports/obesity_hrf_paf_analysis.qmd
+	@test -n "$(RUN)" || (echo 'Set RUN to an explicit saved aggregate run.'; exit 1)
+	Rscript --vanilla scripts/render_triangulation.R review "$(RUN)" all
 
 render-html:
-	quarto render reports/obesity_hrf_paf_analysis.qmd --to html
+	@test -n "$(RUN)" || (echo 'Set RUN to an explicit saved aggregate run.'; exit 1)
+	Rscript --vanilla scripts/render_triangulation.R review "$(RUN)" html
 
 render-pdf:
-	quarto render reports/obesity_hrf_paf_analysis.qmd --to pdf
+	@test -n "$(RUN)" || (echo 'Set RUN to an explicit saved aggregate run.'; exit 1)
+	Rscript --vanilla scripts/render_triangulation.R review "$(RUN)" pdf
 
 render-archival:
-	quarto render reports/reconstructed_obesity_hrf_from_pdf.qmd --to html
+	quarto render archive/r/reconstructed_obesity_hrf_from_pdf.qmd --to html
+
+legacy-r:
+	@test -n "$(INPUT)" || (echo 'Set an explicit historical INPUT.'; exit 1)
+	Rscript --vanilla scripts/render_historical.R "$(INPUT)" all
+
+legacy-r-html:
+	@test -n "$(INPUT)" || (echo 'Set an explicit historical INPUT.'; exit 1)
+	Rscript --vanilla scripts/render_historical.R "$(INPUT)" html
+
+legacy-r-pdf:
+	@test -n "$(INPUT)" || (echo 'Set an explicit historical INPUT.'; exit 1)
+	Rscript --vanilla scripts/render_historical.R "$(INPUT)" pdf
+
+historical-test:
+	Rscript --vanilla tests/run_historical_tests.R
 
 test:
 	@if [ -d tests/testthat ]; then \
@@ -45,7 +63,7 @@ triangulation-render:
 
 triangulation-preflight:
 	@test -n "$(INPUT)" || (echo 'Set an explicit INPUT path.'; exit 1)
-	Rscript --vanilla scripts/preflight_triangulation.R "$(INPUT)"
+	Rscript --vanilla scripts/preflight_triangulation.R "$(INPUT)" $(if $(MANIFEST),"$(MANIFEST)")
 
 triangulation-review:
 	@test -n "$(RUN)" || (echo 'Set an explicit saved RUN directory.'; exit 1)

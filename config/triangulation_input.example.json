@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "input_sha256": "PENDING_SHA256_OF_EXACT_INPUT",
   "source_identity": "PENDING_PRODUCER_COMMIT_VARIANT_AND_SNAPSHOT",
   "reviewed_by": "PENDING_DATA_STEWARD",
@@ -22,15 +22,34 @@
     "icd_hypercapnia": "hypercap_resp_failure"
   },
   "binary_codes": {
-    "has_abg": {"0": "0", "1": "1"},
-    "has_vbg": {"0": "0", "1": "1"},
-    "icd_hypercapnia": {"0": "0", "1": "1"}
+    "has_abg": {
+      "0": "0",
+      "1": "1"
+    },
+    "has_vbg": {
+      "0": "0",
+      "1": "1"
+    },
+    "icd_hypercapnia": {
+      "0": "0",
+      "1": "1"
+    }
   },
-  "encounter_type_codes": {"PENDING_EMER_CODE": "EMER", "PENDING_IMP_CODE": "IMP", "PENDING_OTHER_CODES": "OTHER"},
+  "encounter_type_codes": {
+    "PENDING_EMER_CODE": "EMER",
+    "PENDING_IMP_CODE": "IMP",
+    "PENDING_OTHER_CODES": "OTHER"
+  },
   "category_values": {
-    "sex": ["PENDING_REVIEWED_SOURCE_VALUES"],
-    "race_ethnicity": ["PENDING_REVIEWED_SOURCE_VALUES"],
-    "location": ["PENDING_REVIEWED_SOURCE_VALUES"]
+    "sex": [
+      "PENDING_REVIEWED_SOURCE_VALUES"
+    ],
+    "race_ethnicity": [
+      "PENDING_REVIEWED_SOURCE_VALUES"
+    ],
+    "location": [
+      "PENDING_REVIEWED_SOURCE_VALUES"
+    ]
   },
   "semantics": {
     "keys": "original_patient_and_encounter",
@@ -41,5 +60,35 @@
     "icd": "J96.02|J96.12|J96.22|J96.92|E66.2",
     "icd_negative": "documented_composite_absent_with_capture",
     "adjustment": "legacy_stata_codes_and_missingness"
+  },
+  "source_qualification": {
+    "lineage": "PENDING_REVIEW",
+    "population_scope": "PENDING_REVIEW",
+    "keys_chronology": "PENDING_REVIEW",
+    "bmi_adjustment": "PENDING_REVIEW",
+    "gas_draws": "PENDING_REVIEW",
+    "gas_units_windows": "PENDING_REVIEW",
+    "icd_capture": "PENDING_REVIEW"
+  },
+  "source_evidence_files": {
+    "lineage": {
+      "path": "PENDING_EXISTING_REVIEWED_LINEAGE_RECEIPT",
+      "sha256": "PENDING_SHA256"
+    },
+    "population": {
+      "path": "PENDING_EXISTING_REVIEWED_POPULATION_RECEIPT",
+      "sha256": "PENDING_SHA256"
+    },
+    "fields": {
+      "path": "PENDING_EXISTING_REVIEWED_FIELDS_RECEIPT",
+      "sha256": "PENDING_SHA256"
+    }
+  },
+  "index_day": {
+    "status": "pending",
+    "columns": {},
+    "binary_codes": {},
+    "semantics": "max_valid_specimen_PCO2_on_encounter_start_calendar_date",
+    "note": "When qualified, map abg_pco2_index_day/vbg_pco2_index_day and abg_index_day_available/vbg_index_day_available; add index_day evidence file/hash. Do not map pending fields."
   }
 }

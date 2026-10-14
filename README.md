@@ -1,199 +1,146 @@
-# Obesity and hypercapnic respiratory failure: BMI impact fractions
+# BMI and hypercapnia: patient-level evidence triangulation
 
-This workspace contains two historical BMI impact-fraction analysis tracks and
-a separate patient-level BMI–hypercapnia triangulation workflow.
-The canonical R/Quarto report studies **encounter observations** with recorded
-BMI and classifiable hypercapnic respiratory failure (HRF). The imported Stata
-analysis studies the obesity source branch with BMI >=40, comparing observed
-BMI with BMI assigned to 40 for diagnosis-coded HRF and ABG hypercapnia.
-Both use model-standardized probabilities. A causal interpretation requires
-additional assumptions not established here. These historical tracks remain
-separate. The triangulation workflow's primary estimand, confirmed October 13,
-2026, is the model-standardized potential impact fraction for setting BMI >40
-to 40, leaving BMI ≤40 unchanged, across three sampling frames and three
-hypercapnia outcomes. It compares predictions on the same patients with fixed
-original membership, indexes, and adjustment values. This describes modeled
-burden above BMI 40 and documented hypercapnia at the selected encounter, not
-incidence or total obesity burden. Per-BMI-point odds ratios are supporting
-output. Read its
-[approved plan](docs/BMI_HYPERCAPNIA_TRIANGULATION_PLAN.md), the historical
-[methods and findings comparison](docs/ANALYSIS_COMPARISON.md), and
-[analysis decisions](docs/DECISIONS.md) before comparing their results.
+This R/Quarto research workflow is for clinical collaborators running or reviewing the patient-level BMI–hypercapnia analysis. Its primary output is a report of the **model-standardized potential impact fraction under a one-unit BMI reduction among patients with observed BMI >30 kg/m²**. BMI ≤30 is unchanged; there is no floor at 30. The same cell-specific model cases supply observed and shifted predictions with fixed sampling-frame membership, selected encounters and adjustment values.
 
-| Report | Role | Render target |
-| --- | --- | --- |
-| [`reports/bmi_hypercapnia_triangulation.qmd`](reports/bmi_hypercapnia_triangulation.qmd) | Separate patient-level 3×3 BMI-to-40 PIF workflow; paired model-standardized probabilities, explicit outcome availability, and first qualifying encounter per frame | `make triangulation-fixture` for artificial HTML/PDF; explicit `make triangulation-render INPUT=... MANIFEST=...` for accepted clinical input |
-| [`reports/obesity_hrf_paf_analysis.qmd`](reports/obesity_hrf_paf_analysis.qmd) | Maintained analysis, including attrition, descriptive/model tables, BMI plots and PIFs | HTML and PDF configured; `make render-html`, `make render-pdf`, or both via `make render` |
-| [`reports/reconstructed_obesity_hrf_from_pdf.qmd`](reports/reconstructed_obesity_hrf_from_pdf.qmd) | Archival reconstruction of an earlier PDF-derived draft, not the maintained analysis | `make render-archival` produces HTML only |
-| [`stata/do/36_subpop_hazard.do`](stata/do/36_subpop_hazard.do) | Runnable duplicate of the historical BMI-to-40 analysis, with estimators/PIFs preserved and decimal plotting repaired | `make stata-check`; explicit `make stata` |
-| [`Documents/AS-edits-9-8------obesity-hrf.pdf`](Documents/AS-edits-9-8------obesity-hrf.pdf) | September trainee output with refitting-bootstrap intervals; corresponding updated QMD unavailable | Existing output only; not the canonical R source |
+The three intentionally different frames are BMI ≥40, ABG obtained, and ABG or VBG obtained. Each selects the first qualifying 2022 adult emergency/inpatient encounter per original patient. Nine encounter-wide primary cells and six index-calendar-day gas sensitivities use one registry. The fraction depends on each model-evaluable population's BMI distribution, percentage shifted and outcome probability. It is not a constant fraction attributable to a BMI unit. Causal prevention and incidence reduction are not established.
 
-## Input and provenance
+**Status (2026-10-13):** the primary workflow, artificial HTML/PDF reports and three exhibit alternatives have been verified locally. Clinical input qualification remains pending; artificial results do not reproduce clinical findings. The [source assessment](docs/TRIANGULATION_SOURCE_ASSESSMENT.md) identifies the remaining checks. Older R and Stata analyses remain distinct runnable historical archives.
 
-The triangulation workflow requires an explicitly supplied, authenticated RDS or
-DTA input plus a reviewed SHA-256/source/field-mapping manifest
-([incomplete template](config/triangulation_input.example.json)),
-with patient/encounter identifiers, dates, derived `bmi`, gas-draw and gas-result
-evidence, the five-code ICD composite, and the old Stata adjustment variables.
-It selects adults with 2022 ED/inpatient encounters, once per patient within each
-frame (BMI ≥40, ABG drawn, either ABG/VBG drawn). Each of nine linear-logit models
-uses the old Stata adjustment set and its own complete-case estimation sample
-for both observed and counterfactual predictions. The PIF interval uses a delta
-method for the log probability ratio with full coefficient covariance and fixed
-empirical covariates; no bootstrap or joint nine-cell inference is included.
-Negative PIFs remain visible. Its report and artificial-data checks do not
-qualify clinical results. See the
-[plan](docs/BMI_HYPERCAPNIA_TRIANGULATION_PLAN.md) for index selection, missing
-gas rules, and the exact model. The following input history describes the
-existing canonical PAF/PIF report.
+## Prerequisites
 
-From the repository root, the canonical report calls `readRDS()` on the first
-existing path: `data/raw/full_db.rds` (preferred), then root `full_db.rds`
-(legacy fallback). The file is restricted and absent from Git. Keep input
-records and machine-local paths out of tracked files; approved local inputs
-remain ignored.
+Run commands from the repository root in a shell with Make, R ≥4.3 and Quarto available. Primary R dependencies must already be installed: `lpSolve`, `jsonlite`, `digest`, `haven`, `ggplot2`, `knitr` and `rmarkdown`. The dedicated test runner uses `testthat` when available and the same shared base-R checks when it is absent.
 
-The current documents name `trinetx-preprocessing` as the expected upstream
-source, and an older local [worklog](WORKLOG.md) records that an RDS was read for
-a prior render. That does **not** identify a producer commit, exact source
-snapshot, conversion/serialization step or schema identity for this particular
-`full_db.rds`. A candidate converter exists in `trinetx-hypercapnia-code` at
-`r/reports/90_stata_to_r.qmd`; it writes an RDS after importing a DTA and
-converting labelled vectors to factors. Its existence does not authenticate
-this particular input. The input must be authenticated and its transformation chain
-supplied by the data steward before a new reproduction claim. The
-[data-management note](docs/DATA_MANAGEMENT.md) records the required field
-contract and this gap; it is not a substitute for source provenance.
+PDF report rendering additionally requires a working XeLaTeX toolchain and the Arial font available to Quarto. The HTML-only route below skips LaTeX report compilation; R still exports the figure PDF masters and PDF gallery.
 
-The report checks required clinical fields, not a stable patient/encounter key
-or row uniqueness. Treat its rows as encounter observations as coded; do not
-infer independent patients or a verified join grain. No source capture period,
-lookback or release coverage is established here. The report converts labelled
-NIV/IMV and covariates, parses BMI (kg/m²), uses PaCO₂/VBG CO₂ (mmHg) and pH,
-and keeps missing gas information unclassifiable rather than negative. Its
-primary model uses recorded BMI, age at encounter, sex and ethnicity; it does
-not verify that upstream case definitions match its own. See the
-[canonical QMD](reports/obesity_hrf_paf_analysis.qmd) and
-[decisions](docs/DECISIONS.md) for exact calculations.
+The artificial workflow has been exercised on macOS with R 4.6.1 and Quarto 1.10.18. Other environments have not been qualified here. There is no committed `renv.lock`; actual versions are recorded per run. Commands do not automatically install packages. `make renv-init` remains a separately approved environment task, not a quick-start step.
 
-## Environment and commands
+## Quick start with artificial data
 
-The separate triangulation workflow has dedicated targets:
+No clinical data or manifest is needed for this demonstration:
 
 ```bash
-make triangulation-test     # helper checks using artificial records
-make triangulation-fixture  # estimate artificial data once; HTML/PDF and A/B/C figures
-make triangulation-preflight INPUT="/explicit/source.rds"  # schema/aggregate audit only
+make triangulation-test
+make triangulation-fixture
 ```
 
-After clinical input acceptance and applicable execution scope are established:
+The fixture estimates once and creates a fresh directory under `artifacts/triangulation/`, containing HTML/PDF reports and A/B/C figure exports. The launcher prints the run directory, status and log location. To produce an HTML report without LaTeX report compilation, use the existing launcher option instead of the full fixture command:
 
 ```bash
-make triangulation-render INPUT="/path/to/approved/input.rds" MANIFEST="/path/to/reviewed/manifest.json"
+Rscript --vanilla scripts/render_triangulation.R fixture html
 ```
 
-Clinical estimation is currently paused pending authenticated source semantics;
-see [the upstream field request](docs/TRIANGULATION_INPUT_HANDOFF.md). The local
-RDS schema audit alone does not qualify its gas-draw, specimen or ICD-capture
-fields. Keep definitions fixed rather than substituting legacy proxies.
+Both fixture routes use simulated data and label every report/figure accordingly. They demonstrate execution and output structure, not source acceptance or clinical reproduction.
 
-Each analysis saves a hash-checked aggregate-only bundle, CSV ledgers and source
-receipts. Both report formats and all figures read that bundle without refitting.
-To revise figures or reports without opening the clinical input:
+## Expected outputs and success checks
+
+Open `rendered/bmi_hypercapnia_triangulation.html` and `figure-gallery.html` inside the printed run directory. The full fixture command also produces the report PDF. All run artifacts are local/ignored and are absent from a fresh clone.
+
+| Within the run directory | Purpose |
+| --- | --- |
+| `aggregate_bundle.rds`, `aggregate_results.csv`, `specification_registry.csv`, `bundle_manifest.json` | Full-precision aggregate results, fifteen-cell/scenario definitions and file identities |
+| `frame_counts.csv`, `scope_counts.csv`, `timing_audit.csv`, `bmi_summary.csv`, `bmi_diagnostics.csv` | Denominator, timing-transition and BMI/model-shape audits |
+| `analysis_status.json`, `analysis_receipt.json`, `input_receipt.json`, `session_info.txt` | Analysis completion, one-estimation receipt, reviewed input declarations and actual runtime/package versions |
+| `rendered/`, `figures/`, `figure-gallery.html`, `figure-gallery.pdf` | Selected report formats, SVG/PDF/PNG/JPG candidates and comparison galleries |
+| `render_status.json`, `quarto-render.log` | Render completion/failure and expected-output/source-stability checks |
+
+A successful fixture exits zero, records `analysis_completed`, then `render_completed` with `expected_outputs_present=true` and `render_sources_unchanged=true`. Confirm the artificial-data banner. Inspect the ledger for source-pending or nonestimable cells: they retain explicit reasons and do not become zero estimates. Successful execution or matching hashes does not establish clinical or scientific acceptance. Failure receipts/logs remain in the fresh run directory.
+
+## Clinical data, access and source qualification
+
+Clinical inputs are not distributed with this repository. Authorized users supply an authenticated RDS or DTA and a reviewed version-2 manifest; an external data-access procedure is not documented here. Restricted inputs and local manifests remain ignored. See [data management](docs/DATA_MANAGEMENT.md) and the [existing-source handoff](docs/TRIANGULATION_INPUT_HANDOFF.md).
 
 ```bash
+make triangulation-preflight INPUT="/explicit/input.rds"
+make triangulation-preflight INPUT="/explicit/input.rds" MANIFEST="/reviewed/v2.json"
+make triangulation-render INPUT="/accepted/input.rds" MANIFEST="/reviewed/v2.json"
+```
+
+The [manifest template](config/triangulation_input.example.json) deliberately contains pending declarations and is rejected until actual review/evidence supplies them. All required primary fields, mappings and source gates must qualify. Preflight inspects schema/aggregates and, when given a manifest, verifies reviewed declarations and referenced evidence-file hashes; it does not independently reconcile raw source records. No arbitrary input fallback or source conversion occurs.
+
+Calendar-day evidence can remain pending: the six sensitivity cells retain explicit source-pending status and missing estimates/model counts. This differs from patient-level unknown measurements within a qualified source and from a nonestimable model.
+
+The [assessed upstream revision](https://github.com/reblocke/trinetx-preprocessing/blob/787fba64319c0285244e2e17a9e303c739f31a14/docs/CURRENT_STATE.md) records accepted encounter products with original keys and private linkage/coverage validation. It supersedes the older failed-build handoff within that accepted scope. Reuse existing products and their receipt chain; request additional source work only for a demonstrated unsupported required field.
+
+Compatibility-backed membership still needs reconciliation with this study's intended gas/BMI frames. Raw exact-code transport can retain normal and unusable gas records without syndrome-positive catalog filtering. Legacy `has_abg`/`has_vbg` remain result-derived and need reviewed testing-evidence mapping. Dates support the chosen calendar-day sensitivity; elapsed timestamps, pH pairing and medication activity are not requirements here. The primary clinical input remains unqualified as recorded in the dated [source assessment](docs/TRIANGULATION_SOURCE_ASSESSMENT.md).
+
+## Review a saved run without refitting
+
+Replace `<saved-run>` with the run directory printed by an earlier estimation. Default render targets require this explicit aggregate run:
+
+```bash
+make render RUN="artifacts/triangulation/<saved-run>"       # HTML and PDF
+make render-html RUN="artifacts/triangulation/<saved-run>"
+make render-pdf RUN="artifacts/triangulation/<saved-run>"
 make triangulation-review RUN="artifacts/triangulation/<saved-run>"
 ```
 
-Reviews use fresh nested directories and preserve the saved analysis. They include
-`figure-gallery.html`, a three-page PDF gallery, and A/B/C SVG/PDF/PNG/JPG exports.
-[The figure brief](docs/TRIANGULATION_FIGURE_BRIEF.md) defines comparisons and QC.
+Estimation runs once. Report/figure revisions validate the saved bundle and read its aggregates without clinical input access or model fitting. Each review creates a fresh `reviews/<review-id>/` directory inside the saved run and preserves previous artifacts.
 
-The render target requires explicit input and manifest paths; it does not select
-a fallback dataset. Artificial fixtures exercise implementation behavior only.
-They provide no clinical findings or qualification of an actual-data run.
+Version-2 bundles contain no patient identifiers, indexes, model rows or individual predictions. They retain the scenario/registry, denominator and diagnostic tables, input/source/evidence identities and environment. Shared patients do not become independent replications; no pooling or joint specification-curve inference is performed.
 
-The helper checks require the installed `lpSolve`, `jsonlite`, `digest`, and
-`haven` packages. Rendering additionally requires `ggplot2`, `knitr`,
-`rmarkdown`, Quarto, and a working PDF toolchain. No target installs packages.
-`make triangulation-test` runs the shared checks with base R assertions; the
-same checks are available through `make test` when `testthat` is installed.
-Run outputs are saved in fresh, ignored `artifacts/triangulation/` directories.
+## Analysis and project map
 
-Run these targets from the repository root only after an authorized input and
-working R/Quarto environment are available:
+Models use unchanged legacy-derived BMI, linear BMI/age and the Stata adjustment set: sex, combined race/ethnicity and region. Both probabilities average the same complete model cases. Outputs include paired probabilities, absolute differences, PIF with pointwise full-covariance delta-method limits conditional on empirical covariates, supporting BMI odds ratios, shifted percentage and support diagnostics.
 
-```bash
-make render-html      # canonical HTML
-make render-pdf       # canonical PDF; needs a working LaTeX installation
-make render           # both configured formats
-make render-archival  # archival HTML only
-```
+| Outcome | Encounter-wide primary | Index-calendar-day sensitivity |
+| --- | --- | --- |
+| ICD composite | J96.02, J96.12, J96.22, J96.92 or E66.2 | No duplicate timing cell |
+| ABG | PaCO₂ ≥45 mm Hg | Same threshold, collection date equals encounter-start date |
+| ABG or VBG | PaCO₂ ≥45 or PvCO₂ ≥50 mm Hg | Same thresholds and calendar-day window |
 
-Quarto normally writes `reports/obesity_hrf_paf_analysis.html` and `.pdf`
-beside the canonical QMD, or
-`reports/reconstructed_obesity_hrf_from_pdf.html` for the archival target.
-Check process completion and the rendered attrition, missingness, model and
-named PIF sections; an output file alone does not establish a valid analysis.
-The canonical source suppresses chunk warnings/messages in the rendered page,
-so inspect the render log too.
+Thresholds are inclusive. No pH/support criterion is added, and missing measurements remain unknown. Each fraction describes its model-evaluable subset; full-frame inference requires additional missing-data assumptions. Detailed definitions and scientific authority remain in the documents below.
 
-The repository declares R >= 4.3 in its [instructions](AGENTS.md). The
-canonical QMD imports `dplyr`, `forcats`, `ggplot2`, `gtsummary`, `haven`, `here`,
-`modelsummary`, `purrr`, `stringr`, `tibble` and `tidyr`. No `renv.lock` is
-committed, so dependency versions and environment reconstruction are **not
-locked**. The [2026-05-07 setup entry](WORKLOG.md#2026-05-07-0831-mdt---refactor-obesityhrf-paf-repository-setup)
-records an HTML render under R 4.5.3 and Quarto 1.9.36, with an initial PDF
-failure from the then-local TeX Live update mismatch. A [later same-day entry](WORKLOG.md#2026-05-07---align-pdf-output-cutoff-and-flag-wording)
-records successful canonical HTML and PDF renders after a report-format change.
-These are dated local observations, not verification of the current environment
-or a new render.
+| Start here | Role |
+| --- | --- |
+| [Primary QMD](reports/bmi_hypercapnia_triangulation.qmd) | Human-facing report from saved aggregates |
+| [Estimation](R/bmi_hypercapnia_triangulation.R) and [reporting](R/triangulation_reporting.R) helpers | Selection, fifteen-cell estimation, persistence and exhibits |
+| [Manifest template](config/triangulation_input.example.json) and [input handoff](docs/TRIANGULATION_INPUT_HANDOFF.md) | Required source binding/mapping and optional timing module |
+| [Approved plan](docs/BMI_HYPERCAPNIA_TRIANGULATION_PLAN.md) and [decisions](docs/DECISIONS.md) | Current estimand, methods and dated decisions |
+| [Source assessment](docs/TRIANGULATION_SOURCE_ASSESSMENT.md) and [audit response](docs/AUDIT_RESPONSE_2026-10-13.md) | Qualification evidence, remaining gaps and audit dispositions |
+| [Archive index](archive/README.md) and [historical comparison](docs/ANALYSIS_COMPARISON.md) | Preserved originals, repaired historical tracks and distinct estimands |
 
-The earlier canonical-report setup had no `tests/testthat` suite; its historical
-no-tests message was not a passing R test result. The new triangulation workflow
-adds focused artificial-data checks, separate from clinical qualification.
-`make stata-test` runs separate standard-library Python
-tests for import preservation and launcher boundaries. Python supports the
-launcher; the statistical analysis remains Stata.
-`make renv-init` may install `renv`, initialize a project
-library and snapshot dependencies. It has side effects and is reserved for a
-separate maintainer-approved environment task; it was not run for this README.
-No packages or locks were installed or changed during the Stata import.
+Earlier drafts in `Code/` are retained for reference and are not the primary entrypoint. [WORKLOG.md](WORKLOG.md) records execution and verification history; it does not replace source receipts or scientific decisions.
 
-## Stata entrypoint
+## Exhibit alternatives
 
-From the repository root, set `STATA_EXE` to your licensed Stata 18+ executable:
+[The figure brief](docs/TRIANGULATION_FIGURE_BRIEF.md) defines the comparison and QC:
+
+| Candidate | Reader's comparison |
+| --- | --- |
+| A — preferred forest/table | Magnitude, precision, N and percentage shifted across fifteen frame-grouped rows |
+| B — outcome-first panels | Frames and gas windows within a fixed outcome |
+| C — frame-by-outcome matrix | The triangulation design with paired timing estimates |
+
+All use one saved ledger and common linear axes containing zero and every finite confidence limit. Pending/nonestimable positions have no numerical marks. Exports include SVG/PDF masters, 300-dpi PNG/JPG, editable R sources, individual full-size views and HTML/PDF galleries. Current exports are 190 ×275 mm with at least 9.5-point data labels. Native-size/grayscale inspections and numerical reconciliation are recorded in local QC receipts. These are alternatives for one exhibit, not three independent findings.
+
+## Runnable historical archives
+
+The [archive index](archive/README.md) distinguishes originals, repaired replay sources and their estimands. Original sources and prior BMI-to-40 decisions are preserved byte-for-byte with hashes and source-commit provenance under `archive/2026-10-13-bmi-to-40/`.
+
+The [repaired historical R report](archive/r/obesity_hrf_paf_analysis.qmd) retains its original HRF outcomes, recorded-BMI/age/sex/ethnicity models and BMI-25/30/40 scenarios. Focused repairs preserve unknown ventilation, decode ICD values explicitly, propagate missing gas evidence and use correct parent cohorts for branch attrition. Its additional R packages are `dplyr`, `forcats`, `gtsummary`, `here`, `modelsummary`, `purrr`, `stringr`, `tibble` and `tidyr`.
 
 ```bash
-export STATA_EXE="/path/to/licensed/Stata"
-make stata-check       # version/packages only; no clinical input opened
-make stata-test        # source/launcher unit tests; no Stata required
+make historical-test         # artificial regression checks and original-source hashes
+make stata-test              # Stata source/launcher checks; no licensed runtime needed
+make legacy-r INPUT="/explicit/historical.rds"
+make legacy-r-html INPUT="/explicit/historical.rds"
+make legacy-r-pdf INPUT="/explicit/historical.rds"
+make render-archival          # unchanged reconstruction; original reproduction limits apply
 ```
 
-After the input identity and permitted execution are established, run explicitly:
+Version-1 nine-cell BMI-to-40 saved runs remain reviewable through `make render RUN=...` using their frozen reader/report/figures. They retain original labels and cannot authorize new estimation or enter a version-2 figure.
+
+The preserved Stata launcher and source tests also require Python 3. Its analysis uses explicit historical commands:
 
 ```bash
-STATA_DATA_PATH="/path/to/approved/full_db.dta" make stata
+STATA_EXE="/path/to/licensed/Stata" make stata-check
+STATA_EXE="/path/to/licensed/Stata" STATA_DATA_PATH="/approved/full_db.dta" make stata
 ```
 
-The default input is `data/raw/full_db.dta`. Required variables are documented in
-[data management](docs/DATA_MANAGEMENT.md). An RDS is not accepted or converted.
-Each run writes a new ignored directory under `artifacts/stata/` with source
-snapshots, logs, figures, tables, and completion evidence. Success requires natural
-process completion and native Stata return code zero. Exact native failure codes
-remain in `execution/result.json`; shell statuses are capped at 255.
-See [Stata import and commands](docs/STATA_IMPORT.md) for dependencies,
-synthetic verification, inherited failures, and provenance.
+Require Stata ≥18, `table1_mc`, `mkspline2` and `cleanplots`; reference smoke also uses `xblc`. No packages are installed automatically. The immutable source and runnable copy retain their source/body contract and previously authorized four-call plotting repair. See [Stata import and commands](docs/STATA_IMPORT.md).
 
-The ignored historical evidence bundle and its inventory live under
-`artifacts/evidence/stata-historical/`. Those local outputs are not included in a
-fresh clone; the comparison documents portable source identities and limitations.
+## Reproducibility and remaining limits
 
-## What remains to reproduce
+Artificial execution and verification are documented in [WORKLOG.md](WORKLOG.md), with code/input identities, environment and actual checks retained in local run manifests/receipts. The primary clinical run remains pending source qualification; successful artificial execution does not validate clinical results. Conditional model-based intervals do not quantify confounding, selection, incomplete source capture or uncertainty in the empirical covariate distribution.
 
-An authorized maintainer needs (1) the producer/source snapshot and exact RDS
-serialization/schema receipt, (2) approved access and output-sharing rules,
-(3) a reviewed locked R package environment and working PDF toolchain if PDF
-is required, and (4) a data-bound render plus scientific review. An earlier HTML
-render and a no-tests message do not close those gates. Repository code rights
-do not grant rights to the restricted input or to publish derived results.
+Primary outputs live under `artifacts/triangulation/`; historical R outputs under `artifacts/historical-r/`; Stata outputs under `artifacts/stata/`. Source originals are tracked; restricted inputs and generated data/reports/figures/receipts are not. Engineering completion, clinical input acceptance, scientific review and submission are separate milestones. Software licensing and preferred citation metadata have not been declared in this repository; restricted-data access and release permissions remain separate.

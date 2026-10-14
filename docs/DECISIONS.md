@@ -1,74 +1,63 @@
-# Analysis Decisions
+# Analysis decisions
 
-## Analysis tracks and authority
+## Primary analysis authority — confirmed 2026-10-13
 
-- `reports/obesity_hrf_paf_analysis.qmd` is the maintained analysis entrypoint.
-- `reports/reconstructed_obesity_hrf_from_pdf.qmd` is archival and should be rendered only when comparison with the prior PDF-derived report is needed.
-- `stata/do/36_subpop_hazard.do` is a separate maintained runnable duplicate of the upstream severe-obesity analysis. Its estimators/PIF calculations are preserved; four profile plotting calls now use the authorized decimal-precision helper. It is not a translation of the canonical R report.
-- The September trainee PDF is retained evidence of another R version, not an adopted specification or executable source.
-- `reports/bmi_hypercapnia_triangulation.qmd` is a separate patient-level workflow approved on 2026-10-12. Its revised primary counterfactual was **CONFIRMED on 2026-10-13: set observed BMI >40 to 40; leave BMI ≤40 unchanged**. The primary estimand is the model-standardized potential impact fraction (PIF), superseding the original odds-ratio-primary specification and the interim BMI-minus-one proposal. Per-BMI-point odds ratios remain supporting output. The [implementation plan](BMI_HYPERCAPNIA_TRIANGULATION_PLAN.md) records the full specification. This decision does not harmonize or replace the historical tracks; their comparison remains in [ANALYSIS_COMPARISON.md](ANALYSIS_COMPARISON.md).
-- Import provenance and execution requirements are in [STATA_IMPORT.md](STATA_IMPORT.md).
+`reports/bmi_hypercapnia_triangulation.qmd` is now the primary R/Quarto analysis. Default `make render`, `render-html` and `render-pdf` render an explicitly selected saved aggregate RUN. Estimation remains explicit through the dedicated triangulation command. The [saved plan](BMI_HYPERCAPNIA_TRIANGULATION_PLAN.md) defines scientific and implementation authority.
 
-## Patient-level BMI–hypercapnia triangulation
+**Current scenario:** reduce BMI by exactly 1 kg/m² for patients with observed BMI >30; BMI ≤30 remains unchanged. No floor is imposed at 30. Thus 30.2 becomes 29.2, 40 becomes 39, and 30 stays 30. Shift eligibility, sampling frames, selected encounters and adjustment values use observed data and remain fixed during prediction.
 
-- Population: adults aged ≥18 with 2022 emergency/inpatient encounters. Select each patient's first qualifying encounter independently in three overlapping frames: BMI ≥40; ABG drawn at any BMI; either ABG or VBG drawn at any BMI. Select the index before outcome/covariate completeness checks; never replace it with a later, more complete encounter.
-- Outcomes at that index: the five-code legacy ICD composite (J96.02, J96.12, J96.22, J96.92, E66.2); PaCO₂ ≥45 mm Hg; and PaCO₂ ≥45 or venous PCO₂ ≥50 mm Hg. Retain E66.2 without an exclusion sensitivity. No pH or ventilatory-support criterion is added.
-- The combined gas outcome is positive if either valid result is positive, available-gas negative if at least one valid result exists and all available results are below threshold, and unknown if neither is valid. An unmeasured gas is not itself negative. Draw membership and result availability remain distinct.
-- Exposure: the legacy derived `bmi`, without current-BMI substitution or reconstruction. Fit BMI and age linearly on the log-odds scale, adjusting for age at encounter, sex, combined race/ethnicity, and location as in the old Stata analysis.
-- Fit complete cases after index selection, one patient per cell. Average predictions twice over that exact estimation sample: observed BMI and `pmin(bmi, 40)`, holding original frame membership, index encounter, and adjustment values fixed. Do not re-filter membership or completeness under the counterfactual.
-- Primary outputs are `p_observed`, `p_counterfactual`, absolute probability difference `p_observed - p_counterfactual`, and `pif = 1 - p_counterfactual / p_observed`. This is burden associated with BMI above 40 under the model, not total obesity burden. Outcomes describe documented hypercapnia at the selected encounter; there is no incidence or follow-up analysis.
-- Construct 95% PIF intervals by the delta method for the log counterfactual/observed probability ratio using the full GLM coefficient covariance, then transform to the PIF scale. Hold the empirical covariate distribution fixed. Do not bootstrap, pool the nine cells, or treat them as independent replications. Statistical intervals do not capture confounding, selection bias, or misclassification.
-- Retain negative PIFs without truncation. If all modeled BMI values are ≤40, report an exact zero difference/PIF/interval with a no-change diagnostic. Report the count and percentage of counterfactual BMI values outside the fitted cell's observed BMI range; zero out-of-range values do not establish conditional positivity.
-- Report BMI odds ratios per 1 kg/m² with Wald intervals as supporting output only; no odds-ratio-to-PAF conversion. The primary figure uses three panels with a common linear percentage PIF axis, zero reference, direct intervals, and model denominators. Causal interpretation requires additional model/support/confounding assumptions; no GLP-1 treatment effect is established.
-- Reject unresolved identifiers/chronology and expose nonestimable models and denominator losses. No silent term removal, penalized-model substitution, later-encounter substitution, or file-order tie-breaking is authorized.
-- The implementation and artificial-data verification do not accept a clinical input, qualify actual results, or establish submission readiness. Those remain distinct execution and scientific-review steps.
+This supersedes the October 13 BMI-to-40 primary decision. The earlier unrestricted BMI-minus-one proposal was also superseded; the current BMI >30 eligibility rule distinguishes this new decision. Original dated plans, decisions, estimator and renderer remain preserved in the hashed `archive/2026-10-13-bmi-to-40/` snapshot. Existing numerical results are not relabeled or transformed into the new scenario.
 
-## Canonical R HRF definitions
+## Patient-level sampling and outcomes
 
-- Primary HRF v1 is ventilatory support with ABG or VBG evidence of hypercapnic acidosis.
-- ABG hypercapnia cutoff is PaCO2 >= 45 mmHg.
-- VBG hypercapnia cutoff is CO2 >= 50 mmHg.
-- Acidemia cutoff is pH <= 7.35.
-- Strict sensitivity HRF requires both lab hypercapnic acidosis and ICD evidence.
+- Population: adults aged ≥18, emergency/inpatient encounters starting in 2022, within the authenticated captured source.
+- Three intentionally different, overlapping frames: BMI ≥40; confirmed ABG testing at any BMI; confirmed ABG or VBG testing at any BMI. Differences in their populations and first indexes are part of the estimands, not a defect to remove.
+- Select the first qualifying encounter separately within each frame before checking outcome or covariate completeness. Conflicts, earliest-date ties and potentially earlier qualifying encounters remain unresolved; no later, more complete encounter is substituted.
+- Inclusive outcomes: the five-code ICD composite J96.02/J96.12/J96.22/J96.92/E66.2; PaCO₂ ≥45 mm Hg; PaCO₂ ≥45 or venous PCO₂ ≥50 mm Hg. Retain E66.2 and describe its obesity-containing ascertainment. No pH, ventilatory-support or E66.2-exclusion sensitivity is added.
+- Gas positivity requires any valid positive evidence; an available-gas negative requires at least one valid result with no available qualifying positive. With no valid result, the outcome is unknown. Unmeasured evidence does not establish absence. Draw evidence and usable results are separate.
+- Unit: one original patient per frame/cell. Frame N, resolved indexes, outcome-known N, model N and events are distinct. Complete cases after selection define the fitted population.
 
-## Canonical R missing gas data
+## Ascertainment registry — confirmed 2026-10-13
 
-- Missing ABG/VBG data are not coded as `No HRF`.
-- HRF v1 is `Yes` when criteria are met, `No` when a classifiable gas pair exists and HRF criteria are not met, and unclassifiable otherwise.
-- Attrition and denominator reporting should distinguish BMI availability, ABG pair availability, VBG pair availability, and any gas-pair availability.
+Nine encounter-wide primary cells plus six gas-only **index-calendar-day** sensitivity cells form one explicit registry keyed by frame × outcome × window. ICD is not duplicated. The sensitivity uses the original frame and index, then collection date equal to encounter-start date. It does not represent elapsed 24 hours. Later-only gases are unknown in the calendar-day analysis.
 
-## Canonical R respiratory status
+Discordant early summaries cannot create a primary duplicate/index conflict. They remain unknown and are counted separately. Qualified primary input can be analyzed while the timing source module is pending; the six unassessed positions retain missing estimates/model counts and `awaiting_source_evidence`. Patient-level unknown measurements and nonestimable models are different statuses.
 
-The descriptive respiratory-status variable should keep these groups separate:
+## Models and interpretation
 
-1. No hypercapnia.
-2. Compensated hypercapnia.
-3. HRF.
-4. Other classifiable gas pattern.
-5. Unclassifiable or missing.
+Retain the legacy derived `bmi` and the Stata adjustment set: linear BMI and age, factor sex, combined race/ethnicity and geographic region (`location`). Missing covariates do not acquire invented categories. No new covariates, nonlinear models, imputation or substitute estimator is adopted.
 
-This avoids hiding compensated hypercapnia inside a broad non-HRF comparator.
+Predict observed and shifted BMI over exactly the same complete cases. Report both mean probabilities, their absolute difference, PIF `1 - p_shifted/p_observed`, model N, and count/percentage shifted. The shared BMI shift does not equalize the frame-specific populations. **PIF under a one-unit reduction above 30** is the adopted term; it is not a constant fraction attributable to each BMI unit or an OR conversion. The per-1-kg/m² adjusted odds ratio remains supporting output.
 
-## Canonical R PAF/PIF estimands
+Use the full GLM coefficient covariance for the delta method on the log probability ratio, then back-transform pointwise 95% PIF limits. Empirical covariates are fixed. Retain negative fractions/limits. With no BMI >30, the difference, PIF and interval are exactly zero. Report counterfactual BMI outside the fitted marginal range; zero does not prove conditional support.
 
-- Use model-standardized predicted risks for observed and counterfactual BMI distributions.
-- Report `risk_observed`, `risk_counterfactual`, and `pif`.
-- Retain the proof-of-concept `set everyone to BMI 25` row for comparison with the exploratory draft.
-- Prefer named intervention-style rows:
-  - `BMI >25 set to 25`
-  - `BMI >30 set to 30`
-  - `BMI >40 set to 40`
-  - `BMI >=40 subgroup: BMI >40 set to 40`
+Do not pool estimates, count significant cells, or call them independent replications. No joint specification-curve inference or bootstrap is adopted. Documented index hypercapnia is the outcome; incidence reduction, treatment effects and causal prevention are not established. Descriptive BMI-bin/model checks inform review without automatically selecting another functional form.
 
-Use cautious language such as "model-standardized impact fraction under the specified counterfactual" unless causal assumptions are explicitly defended.
+## Source acceptance and reporting
 
-## Preserved Stata estimand
+Reuse upstream's accepted encounter/source products and receipt chain. The stale local September failed-build status is superseded by current upstream delivery evidence. Study input binding, population coverage and field mapping still require evidence. Existing exact-code transport can expose captured raw gas records without syndrome-positive catalog filtering; paired pH/sample identifiers and medication-activity evidence are not requirements here.
 
-- Retain `OBESITY_rfs == 1`, BMI >=40, and complete adjustment variables; the gas-outcome models additionally restrict to `has_abg == 1`.
-- Exposure is the upstream derived `bmi`, not the R report's parsed `curr_bmi`.
-- Compare observed BMI with BMI assigned to 40 over each fitted model's estimation sample.
-- Outcomes are the upstream `hypercap_resp_failure` diagnosis composite (four J96 codes plus E66.2) and `hypercap_on_abg` flag. No ventilatory-support or pH criterion is added by Stage 36.
-- Retain linear and three-knot restricted-cubic-spline models, adjustment for age, sex, combined race/ethnicity, and location, and `margins`/`nlcom` uncertainty.
-- These preserved definitions describe historical behavior; import preservation does not independently validate upstream coding, clinical meaning, causality, or transport to another population.
-- Potential defects and figure limitations are documented for review. Changes require a separate scientific decision and regenerated evidence.
-- On 2026-10-12 the user authorized the xblc precision repair. Four plotting calls now evaluate observed spline terms with the bundled helper, preserving the fixed-profile interpretation and log-odds confidence construction. Models, cohorts, knots, and PIF commands remain unchanged; verification is synthetic only.
+The [bounded source assessment](TRIANGULATION_SOURCE_ASSESSMENT.md) records repository evidence, local schema/aggregate checks and inaccessible private receipts. No replacement export is presumed necessary. Resolve existing-source mapping first and request upstream work only for demonstrated unsupported required fields.
+
+New estimation uses manifest/bundle version 2 with the precise scenario and fifteen-cell registry. Hashes bind the input, reviewed evidence files, aggregate artifacts and source versions. Hash checks do not establish scientific truth by themselves. Version-1 BMI-to-40 bundles remain reviewable through their frozen original reader/report/figures; they cannot enter the new display or authorize new estimation. Rendering never reopens clinical inputs or refits models.
+
+## Figures
+
+A shared-axis forest/table is preferred; retain outcome-first B and matrix C as alternatives. All use identical saved cells, PIF limits, model N and shifted percentages. Separate quantitative marks from numerical columns; retain common linear scales, zero and every finite endpoint. Source-pending and nonestimable cells have labeled empty positions. The figure QC skill governs native-size and grayscale inspection, captions, alt text and review receipts. Scientific acceptance/submission remains separate.
+
+## Runnable historical archives
+
+The user confirmed **runnable archives**, not deletion or reference-only retirement. Unchanged older R originals and prior triangulation sources are preserved with hashes/source-commit provenance. The repaired R replay is `archive/r/obesity_hrf_paf_analysis.qmd`; the unchanged earlier reconstruction is `archive/r/reconstructed_obesity_hrf_from_pdf.qmd`. Use explicit `make legacy-r INPUT=...` and its HTML/PDF variants. They do not supply primary-analysis estimates.
+
+Historical R repairs preserve its original formulas, BMI scenarios and outcomes while correcting:
+
+- Unknown ventilation with documented hypercapnic acidosis remains unclassifiable, rather than HRF-negative.
+- ICD flags decode actual reviewed 0/1 values, not factor positions. Any positive establishes the union; all observed negatives establish negative; partial/all unknown evidence remains unknown without positivity.
+- Missing gas evidence propagates to laboratory/physiologic outcomes.
+- Parallel sensitivity/subgroup cohorts report exclusions from their actual parent rather than a sequential previous branch.
+
+The historical R specifications retain ventilatory-support plus hypercapnic-acidosis HRF v1, strict lab + ICD sensitivity, PaCO₂ ≥45 / VBG ≥50, pH ≤7.35, recorded `curr_bmi`, age/sex/ethnicity adjustment, and its named BMI-25/30/40 scenarios. These are distinct from the primary patient-level analysis.
+
+Stata remains an explicit historical runnable track. Its immutable source is `archive/stata/36_subpop_hazard.source.do`, and its repaired runnable copy is `stata/do/36_subpop_hazard.do`. Preserve the obesity-source/BMI ≥40 cohort, legacy derived BMI, five-code composite/ABG flag, linear/spline specifications, demographic/region adjustment and BMI-to-40 PIF commands. The authorized October 12 repair changes only four plotting calls through the precision helper. Import provenance remains in `STATA_IMPORT.md` and `stata_import_provenance.json`.
+
+Engineering checks and artificial renders do not qualify actual clinical results or submission readiness.

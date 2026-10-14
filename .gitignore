@@ -27,3 +27,13 @@ __pycache__/
 # Patient-level triangulation renders, figures, and local input manifests
 /artifacts/triangulation/
 /config/triangulation_input.local.json
+
+# Archived-source replays and historical generated reports
+/artifacts/historical-r/
+/archive/**/*.html
+/archive/**/*.pdf
+/archive/**/*.log
+/archive/**/*.tex
+/archive/**/*.knit.md
+/archive/**/*_files/
+**/.RData

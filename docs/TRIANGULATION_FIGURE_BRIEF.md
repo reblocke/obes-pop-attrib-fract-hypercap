@@ -1,54 +1,35 @@
-# BMI-to-40 figure creation brief
+# One-unit BMI shift: figure creation brief
 
 ## What it is
 
-Three alternatives for the single ATS exhibit: compare the magnitude and
-precision of nine model-standardized potential impact fractions across three
-overlapping patient populations and three diagnostic definitions. Each cell
-uses one selected encounter per patient and its own complete-case denominator.
+Three scientific exhibit alternatives for the primary patient-level study. Compare cell-specific model-standardized PIF magnitudes/precision and ascertainment changes across intentionally different sampling frames. Fifteen fixed identities comprise nine encounter primary and six index-calendar-day gas sensitivities. Do not sort by significance or pool estimates.
 
 ## Title and framing
 
-Model-standardized hypercapnia under a BMI-to-40 scenario. BMI >40 is set to
-40 kg/m²; BMI ≤40 is unchanged. Artificial outputs have a prominent artificial
-data banner; clinical drafts retain their review status.
+**Modeled hypercapnia under a one-unit BMI reduction above 30**. Eligibility uses observed BMI >30; subtract exactly one with no floor. BMI ≤30 remains unchanged. The full cell-specific model sample supplies both prediction averages; shifted percentages explain how much of each population contributes.
 
 ## Layout
 
-A is a compact forest with separate outcome, interval, numerical and diagnostic
-columns. B places outcomes in three columns to compare frames within an outcome.
-C uses a literal frame-by-outcome 3×3 interval matrix. Fixed frame order is BMI
-≥40, ABG drawn, ABG-or-VBG drawn; outcome order is ICD, ABG, ABG-or-VBG.
-A is provisionally preferred, with selection justified by actual exported views.
+- A — preferred forest/table: three frame blocks and five rows each; one quantitative axis with separate PIF/CI and model-N/shifted columns.
+- B — outcome-first panels: three outcome columns, comparing frames and paired gas windows. ICD has one window only.
+- C — frame-by-outcome matrix: frame rows and outcome columns, with paired timing estimates in the gas cells.
+
+Keep frame order BMI ≥40, ABG obtained, either gas obtained. Within frame use ICD encounter, ABG encounter/day, either gas encounter/day. Figures preserve the same saved values and limits. Increased height prevents fifteen-row typography from colliding; do not force the old 180-mm height.
 
 ## Exact content
 
-Use one frozen aggregate bundle, one common linear percentage scale including
-zero/all finite endpoints, one-decimal PIF/95% interval labels and integer model
-N. Retain negative PIFs and asymmetric intervals. Unknown outcomes, unresolved
-indexes and counterfactual values outside the observed BMI range remain visible.
-A no-change estimate is genuine zero; a nonestimable cell has no numeric mark.
-The report supplies full reasons and full-precision standardized probabilities.
-All captions explain index selection, overlapping frames, adjustment, empirical
-covariates held fixed in intervals and association-based interpretation.
+PIF percentage, asymmetric pointwise delta-method 95% CI, model N and % with observed BMI >30. Numeric precision distinguishes small nonzero values from genuine zero. Zero/reference and every finite endpoint remain on a shared linear scale. Pending source has no estimates or measured model N. Nonestimable cells retain an empty quantitative position and an explanatory status. Detailed outcome/index missingness, BMI support and timing transitions stay in supporting tables.
 
-## Style
+Caption: first qualifying 2022 adult ED/inpatient index per frame; overlapping frames and different indexes; same complete cases in paired predictions; linear BMI/age, sex, race/ethnicity, region adjustment; fixed-covariate model uncertainty; available-gas limitations, exact thresholds and ICD codes. The contrast does not establish causal prevention or an incidence effect.
 
-Use interval segments and diamonds, dark teal/gray with redundant text and a
-zero reference. Frame/outcome identity does not depend on color. Align numerical
-columns outside the interval coordinate system; do not expand axes for labels.
-Use Arial with data labels at least 9 points at a 190-mm intended width. Candidate
-comparison is about reading structure rather than cosmetic color variants.
+## Style and rationale
+
+Filled/open points and direct window labels identify encounter/day ascertainment in grayscale. Related comparisons share axes. Numerical labels lie outside the quantitative axis. Frame headers identify population, while count/shift columns facilitate retrieval. The near-zero tick labels are spaced on rounded bounds rather than inserting a long endpoint label next to zero.
+
+Default exports are **190 ×275 mm**, PNG/JPG at 300 dpi and SVG/PDF masters, with editable R source. Data labels are at least 9.5 pt; report figures use a 270-mm device height and 96% of a 190-mm A4 text area to preserve readability with the page caption. Footnotes remain distinct from numerical labels.
 
 ## Output and verification
 
-Editable R source, SVG/PDF masters and 300-dpi PNG/JPG exports at 190-mm width;
-all candidates are 180-mm high. Individual native-size views and an
-HTML/PDF comparison gallery accompany the report. Every export is bound to the
-same aggregate CSV/bundle hash. Use the figure-and-medical-illustration-qc
-creation and unified audit workflow, retaining stable A/B/C artifact IDs.
+Use `figure-and-medical-illustration-qc` creation/forest/unified workflows. Compare all three against `figure_display_ledger.csv`, inspect individual native-size vector/raster exports and every report page, and review grayscale. Stress negative/cross-zero/wide intervals, source-pending and model failures, genuine zero, tiny nonzero values, large N and long explanations. Record clipping, collisions, symbols, interval visibility, actual font/dimensions, quantity agreement and export identities in the QC manifest/receipt. Separate completed checks from planned checks and record optional accessibility coverage limits.
 
-Test negative/wide/cross-zero intervals, genuine zero, nonestimable cells,
-long diagnostic text, unknown outcomes and outside-range counts. Record actual
-inspection separately from planned checks in each ignored run's QC manifest
-and report. Artificial design validation is distinct from clinical qualification.
+Saved runs and fresh review directories retain their prior exports. Version-1 BMI-to-40 reviews use the frozen historical sources and keep their original definitions/dimensions. Artificial figures are prominently labeled and supply no clinical results. Publication selection follows actual clinical estimates and author review.

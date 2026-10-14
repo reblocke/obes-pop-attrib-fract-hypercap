@@ -6,7 +6,7 @@
 - The input dataset is expected to be generated upstream by `https://github.com/reblocke/trinetx-preprocessing` and made available locally as `data/raw/full_db.rds`.
 - The separate preserved Stata track accepts an already prepared `full_db.dta` through `STATA_DATA_PATH` (default `data/raw/full_db.dta`). Do not convert inputs or reconstruct upstream fields during import/launcher work.
 - The primary deliverable is a Quarto report/manuscript analysis estimating model-standardized population attributable fractions / potential impact fractions (PAF/PIF) for BMI counterfactuals.
-- R/Quarto is the canonical gas-classifiable analysis. The explicitly imported Stata severe-obesity analysis is a distinct maintained track, not a translation. Python supports its launcher/tests only. Do not choose a primary ATS estimand or harmonize scientific definitions without an explicit scientific decision.
+- R/Quarto patient-level triangulation is the primary analysis, approved 2026-10-13: BMI >30 reduced by exactly 1 kg/m², without a floor. Older R and Stata reports are distinct runnable historical archives. Do not change that scientific decision or harmonize historical definitions silently.
 - Do not invent results. If the data are unavailable, make code changes and state that render/validation could not be completed.
 
 ## Repository map
@@ -30,11 +30,11 @@ Preferred structure:
 
 Current canonical analysis entrypoint:
 
-- `reports/obesity_hrf_paf_analysis.qmd`
+- `reports/bmi_hypercapnia_triangulation.qmd`
 
 Archival reconstruction:
 
-- `reports/reconstructed_obesity_hrf_from_pdf.qmd`
+- `archive/r/reconstructed_obesity_hrf_from_pdf.qmd`
 
 ## Commands
 
@@ -43,13 +43,13 @@ Use relative paths and run commands from the repo root.
 - Restore environment, if `renv.lock` exists:
   - `Rscript -e 'if (!requireNamespace("renv", quietly = TRUE)) install.packages("renv"); renv::restore()'`
 - Render the main report in all configured formats, including PDF:
-  - `quarto render reports/obesity_hrf_paf_analysis.qmd`
+  - `make render RUN="artifacts/triangulation/<saved-run>"`
 - Render the main report as HTML only for quick local checks:
-  - `quarto render reports/obesity_hrf_paf_analysis.qmd --to html`
+  - `make render-html RUN="artifacts/triangulation/<saved-run>"`
 - Render the main report as PDF only:
-  - `quarto render reports/obesity_hrf_paf_analysis.qmd --to pdf`
+  - `make render-pdf RUN="artifacts/triangulation/<saved-run>"`
 - Render a recovered exploratory report, if needed:
-  - `quarto render reports/reconstructed_obesity_hrf_from_pdf.qmd`
+  - `quarto render archive/r/reconstructed_obesity_hrf_from_pdf.qmd`
 - Run tests, if tests exist:
   - `Rscript -e 'testthat::test_dir("tests/testthat")'`
 - If adding packages, show but do not run automatically:
@@ -57,9 +57,13 @@ Use relative paths and run commands from the repo root.
 
 If a `Makefile` is present, prefer:
 
-- `make render`
-- `make render-html`
-- `make render-pdf`
+- `make render RUN=...`
+- `make render-html RUN=...`
+- `make render-pdf RUN=...`
+- `make triangulation-test` and `make triangulation-fixture` use artificial data only.
+- `make historical-test` verifies original defects and repaired archived R behavior.
+- `make legacy-r INPUT=...` explicitly renders the repaired historical R track.
+- Clinical estimation requires explicit `make triangulation-render INPUT=... MANIFEST=...` with authenticated version-2 evidence.
 - `make render-archival`
 - `make test`
 - `make stata-check` checks Stata 18+ and installed dependencies; no clinical input is opened.
@@ -79,15 +83,27 @@ precision repair, and archived failure. Missing evidence must not become a succe
 - Use R >= 4.3.
 - Use `renv` when a lockfile exists. Never place `install.packages()` in committed analysis code.
 - This repo currently has no committed `renv.lock`; do not initialize `renv` or create a lockfile without maintainer approval.
-- Core packages currently used: `dplyr`, `tidyr`, `purrr`, `stringr`, `forcats`, `haven`, `ggplot2`, `gtsummary`, `modelsummary`, `here`, `tibble`.
+- Core historical packages currently used: `dplyr`, `tidyr`, `purrr`, `stringr`, `forcats`, `haven`, `ggplot2`, `gtsummary`, `modelsummary`, `here`, `tibble`.
+- Primary helpers additionally use installed `lpSolve`, `jsonlite`, `digest`, `haven`, `ggplot2`, `knitr`, and `rmarkdown`; no automatic installation.
 - Show required `library()` calls in examples and chunks so code can run from a fresh R session.
 - For random operations, set an explicit seed near the beginning, for example `set.seed(1234)`.
 - Do not add heavy workflow frameworks (`targets`, `drake`, databases, containers) unless requested or clearly justified.
 
-## Canonical R scientific definitions and shared guardrails
+## Primary patient-level specification
+
+- Scope: adults ≥18, 2022 ED/inpatient, first qualifying encounter per patient separately within BMI ≥40, ABG obtained and either-gas-obtained frames. Indexes precede completeness checks.
+- Outcomes: five-code J96.02/J96.12/J96.22/J96.92/E66.2 composite; PaCO₂ ≥45; PaCO₂ ≥45 or PvCO₂ ≥50. No pH or support requirement.
+- Nine encounter primary plus six index-calendar-day gas sensitivity cells use one registry. Calendar-day conflicts do not alter primary indexes. Pending source evidence has missing counts/estimates, distinct from patient unknowns and model failures.
+- Use legacy derived BMI; linear BMI/age and sex/race-ethnicity/region adjustment. Shift observed BMI >30 by exactly −1; hold original membership/index/covariates and model cases fixed. No floor at 30.
+- Report paired probabilities, absolute difference, PIF with full-covariance delta-method limits, N and shifted percentage. Retain negative limits and exact no-change zeros.
+- Version-2 bundles are aggregate-only and immutable. Figure/report rerenders use an explicit saved RUN without reading clinical inputs or refitting. Version-1 BMI-to-40 reports use frozen source hashes and their original labels.
+- Reuse current upstream acceptance evidence; stale local failed-build documentation is superseded. Actual study input mapping/coverage still needs qualification. No new export is presumed necessary. See docs/TRIANGULATION_SOURCE_ASSESSMENT.md.
+- Apply the figure QC skill for primary scientific exports and record actual native-size/grayscale inspection.
+
+## Historical R scientific definitions and shared guardrails
 
 The cutoffs, HRF definitions, and respiratory-status derivations below describe
-the canonical R track. The Stata track retains its upstream diagnosis composite
+the archived R track. The Stata track retains its upstream diagnosis composite
 and ABG hypercapnia flag, obesity-source/BMI >=40 cohort, derived BMI, adjustment
 variables, spline specifications, and BMI-to-40 counterfactual. These differences
 are explicit in [docs/DECISIONS.md](docs/DECISIONS.md).
@@ -189,7 +205,7 @@ For Stata import/launcher changes, verify snapshot/body hashes, run
 available. Use generated data in ignored run directories, retain failures,
 and compare the unchanged original and imported source. Clinical reproduction
 is a separate explicitly requested task. The following checks apply when
-changing or validating the canonical R report:
+changing or validating the archived R report:
 
 1. Confirm all required columns are validated before use.
 2. Render the QMD from a clean R session when data are available.

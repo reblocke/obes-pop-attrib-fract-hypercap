@@ -1,6 +1,6 @@
 # ARTIFICIAL DATA ONLY. No source dataset, real identifier, or clinical result is
 # used here. This fixture is for executable checks and report-layout review.
-make_triangulation_fixture <- function(n_patients = 1200L, seed = 20261012L) {
+make_triangulation_fixture <- function(n_patients = 1200L, seed = 20261012L, with_index_day = TRUE) {
   stopifnot(length(n_patients) == 1L, is.finite(n_patients),
             n_patients >= 1L, n_patients == as.integer(n_patients))
   set.seed(seed)
@@ -24,7 +24,7 @@ make_triangulation_fixture <- function(n_patients = 1200L, seed = 20261012L) {
     encounter_type = sample(c("EMER", "IMP"), n, replace = TRUE),
     bmi = bmi[patient] + (visit - 1L) * rnorm(n, 0, 1.5),
     sex = sex[patient], race_ethnicity = race[patient],
-    location = sample(c("ED", "Inpatient"), n, replace = TRUE),
+    location = sample(c("Region A", "Region B"), n, replace = TRUE),
     has_abg = as.integer(draw_type %in% c("ABG", "Both")),
     has_vbg = as.integer(draw_type %in% c("VBG", "Both")),
     stringsAsFactors = FALSE
@@ -41,6 +41,12 @@ make_triangulation_fixture <- function(n_patients = 1200L, seed = 20261012L) {
   result$bmi[runif(n) < .025] <- NA_real_
   result$sex[runif(n) < .008] <- NA_character_
   result$icd_hypercapnia[runif(n) < .025] <- NA_integer_
+  if (with_index_day) for (gas in c("abg", "vbg")) {
+    maximum <- result[[paste0(gas, "_pco2")]]
+    value <- ifelse(!is.na(maximum) & runif(n) > .22, pmax(1, maximum - runif(n, 0, 4)), NA_real_)
+    result[[paste0(gas, "_pco2_index_day")]] <- value
+    result[[paste0(gas, "_index_day_available")]] <- ifelse(is.na(maximum), NA_integer_, as.integer(!is.na(value)))
+  }
   attr(result, "data_status") <- "ARTIFICIAL FIXTURE - NOT CLINICAL RESULTS"
   result
 }

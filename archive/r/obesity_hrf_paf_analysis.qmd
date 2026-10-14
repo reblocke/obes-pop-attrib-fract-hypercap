@@ -1,0 +1,755 @@
+---
+title: "Historical obesity/HRF analysis: repaired R reference"
+author:
+  - "Alyssa Schreck MD"
+  - "Brian Locke MD MSc"
+format:
+  html:
+    toc: true
+    number-sections: true
+  pdf:
+    pdf-engine: xelatex
+    mainfont: Arial
+    toc: true
+    number-sections: true
+execute:
+  echo: true
+  warning: false
+  message: false
+---
+
+```{r}
+#| label: historical-display
+#| echo: false
+# Keep inspectable code in HTML; prevent long source lines clipping in PDF.
+knitr::opts_chunk$set(echo = !knitr::is_latex_output())
+```
+
+```{=html}
+<!--
+Purpose
+- This is a maintainable refactor of the exploratory obesity/HRF analysis.
+- It preserves the same conceptual outputs as the 2026-05-07 PDF draft:
+  data checks, variable derivations, attrition, descriptive tables, BMI-category plots,
+  primary/sensitivity logistic models, hypercapnia subgroup model, and first-pass PAF/PIF.
+- It intentionally centralizes constants and helper functions before use.
+- It avoids treating missing gas data as "No HRF".
+-->
+```
+
+# Analysis plan
+
+**ARCHIVED HISTORICAL TRACK.** This repaired replay retains its original outcomes, adjustment and BMI scenarios. It does not supply results for the primary one-unit-shift analysis. Unchanged sources are preserved with hashes under `archive/2026-10-13-bmi-to-40/`.
+
+Primary question: among encounters with recorded BMI and classifiable hypercapnic respiratory failure (HRF) status, estimate the association between BMI and HRF and estimate model-standardized impact fractions under BMI counterfactuals.
+
+Primary outcome: stringent hypercapnic respiratory failure, defined by ventilatory support plus either ABG or VBG evidence of hypercapnic acidosis.
+
+Sensitivity outcome: strict lab + ICD hypercapnic respiratory failure.
+
+Primary PIF/PAF approach: fit an adjusted logistic regression model, then standardize predicted risk under observed BMI and under named counterfactual BMI distributions.
+
+# Setup
+
+```{r setup}
+set.seed(20260507)
+
+library(dplyr)
+library(forcats)
+library(ggplot2)
+library(gtsummary)
+library(haven)
+library(here)
+library(modelsummary)
+library(purrr)
+library(stringr)
+library(tibble)
+library(tidyr)
+source(file.path(Sys.getenv("HISTORICAL_REPO_ROOT", unset = here::here()), "R", "historical_hrf_helpers.R"))
+```
+
+```{r constants}
+# Clinical cutoffs. Keep these in one location so any future edits are deliberate.
+CO2_ABG_CUTOFF <- 45
+CO2_VBG_CUTOFF <- 50
+PH_CUTOFF <- 7.35
+OBESITY_CUTOFF <- 30
+NORMAL_BMI_COUNTERFACTUAL <- 25
+
+ICD_HRF_VARS <- c("has_j9612", "has_j9622", "has_j9692", "has_j9602")
+
+PRIMARY_MODEL_FORMULA <- hrf_v1 ~ curr_bmi_num + age_at_encounter + sex + ethnicity
+STRICT_MODEL_FORMULA <- hrf_v2_strict ~ curr_bmi_num + age_at_encounter + sex + ethnicity
+HYPERCAPNIA_SUBGROUP_FORMULA <- hrf_vs_comp ~ curr_bmi_num + age_at_encounter + sex + ethnicity
+
+BMI_CATEGORY_LEVELS <- c(
+  "Underweight",
+  "Normal weight",
+  "Overweight",
+  "Obesity I",
+  "Obesity II",
+  "Obesity III"
+)
+
+COEF_MAP_COMMON <- c(
+  "curr_bmi_num" = "BMI (per 1 kg/m^2)",
+  "age_at_encounter" = "Age (per year)",
+  "sexMale" = "Male",
+  "ethnicityHispanic or Latino" = "Hispanic/Latino",
+  "ethnicityUnknown" = "Ethnicity: Unknown"
+)
+
+# Historical replay requires an explicit input; no primary-analysis fallback.
+DATA_PATH_CANDIDATES <- Sys.getenv("HISTORICAL_DATA_PATH")
+if (!nzchar(DATA_PATH_CANDIDATES)) stop("Use make legacy-r INPUT=...; the historical report is archived.")
+
+```
+
+# Helper functions
+
+```{r helpers-validation}
+require_columns <- function(data, columns, data_name = "data") {
+  missing_columns <- setdiff(columns, names(data))
+  if (length(missing_columns) > 0) {
+    stop(
+      sprintf(
+        "%s is missing required columns: %s",
+        data_name,
+        paste(missing_columns, collapse = ", ")
+      ),
+      call. = FALSE
+    )
+  }
+  invisible(data)
+}
+
+first_existing_path <- function(paths) {
+  existing <- paths[file.exists(paths)]
+  if (length(existing) == 0) {
+    stop(
+      "Could not find the analysis dataset. Tried:\n  ",
+      paste(paths, collapse = "\n  "),
+      call. = FALSE
+    )
+  }
+  existing[[1]]
+}
+
+as_binary_from_labelled <- function(x, positive_label, negative_label) {
+  x_label <- as.character(haven::as_factor(x))
+  dplyr::case_when(
+    x_label == positive_label ~ 1,
+    x_label == negative_label ~ 0,
+    TRUE ~ NA_real_
+  )
+}
+
+parse_numeric_bmi <- function(x) {
+  x_chr <- stringr::str_trim(as.character(haven::zap_labels(x)))
+  x_chr <- dplyr::na_if(x_chr, "n/a")
+  valid_numeric <- stringr::str_detect(x_chr, "^\\d+(\\.\\d+)?$")
+  dplyr::if_else(valid_numeric, as.numeric(x_chr), NA_real_)
+}
+
+make_bmi_category <- function(bmi) {
+  dplyr::case_when(
+    is.na(bmi) ~ NA_character_,
+    bmi < 18.5 ~ "Underweight",
+    bmi < 25 ~ "Normal weight",
+    bmi < 30 ~ "Overweight",
+    bmi < 35 ~ "Obesity I",
+    bmi < 40 ~ "Obesity II",
+    bmi >= 40 ~ "Obesity III"
+  ) |>
+    factor(levels = BMI_CATEGORY_LEVELS)
+}
+```
+
+```{r helpers-derivation}
+standardize_raw_data <- function(raw_data) {
+  required <- c(
+    "curr_bmi",
+    "niv_proc",
+    "imv_proc",
+    "highest_paco2",
+    "abg_ph",
+    "vbg_co2",
+    "vbg_ph",
+    "age_at_encounter",
+    "sex",
+    "ethnicity",
+    ICD_HRF_VARS
+  )
+  require_columns(raw_data, required, "raw_data")
+
+  raw_data |>
+    mutate(
+      niv_proc = as_binary_from_labelled(
+        niv_proc,
+        positive_label = "Received NIV (not including nightly CPAP)",
+        negative_label = "No NIV"
+      ),
+      imv_proc = as_binary_from_labelled(
+        imv_proc,
+        positive_label = "Received IMV",
+        negative_label = "No IMV"
+      ),
+      curr_bmi_num = parse_numeric_bmi(curr_bmi),
+      highest_paco2 = as.numeric(highest_paco2),
+      abg_ph = as.numeric(abg_ph),
+      vbg_co2 = as.numeric(vbg_co2),
+      vbg_ph = as.numeric(vbg_ph),
+      sex = haven::as_factor(sex) |> forcats::fct_na_value_to_level(level = "Unknown or Other"),
+      ethnicity = haven::as_factor(ethnicity) |> forcats::fct_na_value_to_level(level = "Unknown")
+    )
+}
+
+derive_analysis_variables <- function(data) {
+  data |>
+    mutate(
+      # Availability flags. These are used by attrition, outcome classification, and missingness checks.
+      has_bmi = !is.na(curr_bmi_num),
+      has_abg_pair = !is.na(highest_paco2) & !is.na(abg_ph),
+      has_vbg_pair = !is.na(vbg_co2) & !is.na(vbg_ph),
+      has_any_gas_pair = has_abg_pair | has_vbg_pair,
+      received_ventilation = niv_proc == 1 | imv_proc == 1,
+
+      bmi_category = make_bmi_category(curr_bmi_num),
+      obesity_bmi30 = curr_bmi_num >= OBESITY_CUTOFF,
+
+      abg_hypercapnia = has_abg_pair & highest_paco2 >= CO2_ABG_CUTOFF,
+      vbg_hypercapnia = has_vbg_pair & vbg_co2 >= CO2_VBG_CUTOFF,
+      physiologic_hypercapnia = if_else(has_any_gas_pair, abg_hypercapnia | vbg_hypercapnia, NA),
+
+      abg_hypercapnic_acidosis = abg_hypercapnia & abg_ph <= PH_CUTOFF,
+      vbg_hypercapnic_acidosis = vbg_hypercapnia & vbg_ph <= PH_CUTOFF,
+      lab_hypercapnic_acidosis = if_else(has_any_gas_pair, abg_hypercapnic_acidosis | vbg_hypercapnic_acidosis, NA),
+
+      hrf_v1_numeric = historical_hrf_status(received_ventilation, lab_hypercapnic_acidosis, has_any_gas_pair),
+      hrf_v1 = factor(hrf_v1_numeric, levels = c(0, 1), labels = c("No", "Yes")),
+
+      compensated_hypercapnia = case_when(
+        abg_hypercapnia & abg_ph > PH_CUTOFF ~ 1,
+        vbg_hypercapnia & vbg_ph > PH_CUTOFF ~ 1,
+        has_any_gas_pair ~ 0,
+        TRUE ~ NA_real_
+      ),
+
+      # Mutually exclusive clinical status. This avoids leaving compensated hypercapnia hidden inside "No HRF".
+      respiratory_status = case_when(
+        hrf_v1_numeric == 1 ~ "HRF",
+        is.na(hrf_v1_numeric) & lab_hypercapnic_acidosis %in% TRUE ~ NA_character_,
+        compensated_hypercapnia == 1 ~ "Compensated hypercapnia",
+        has_any_gas_pair & !physiologic_hypercapnia ~ "No hypercapnia",
+        has_any_gas_pair ~ "Other classifiable gas pattern",
+        TRUE ~ NA_character_
+      ) |>
+        factor(levels = c("No hypercapnia", "Compensated hypercapnia", "HRF", "Other classifiable gas pattern")),
+
+      hrf_labs_v2 = as.integer(lab_hypercapnic_acidosis),
+      hrf_icd_v2 = historical_icd_union(pick(all_of(ICD_HRF_VARS))),
+      hrf_v2 = as.integer(hrf_labs_v2 == 1 | hrf_icd_v2 == 1),
+      hrf_v2_strict = as.integer(hrf_labs_v2 == 1 & hrf_icd_v2 == 1),
+
+      # Broad definition for descriptive question: hypercapnia by ABG/VBG CO2 or ICD flag.
+      hypercapnia_any = as.integer(physiologic_hypercapnia | hrf_icd_v2 == 1)
+    )
+}
+```
+
+```{r helpers-tables-models}
+make_missingness_table <- function(data, variables) {
+  require_columns(data, variables, "data")
+
+  tibble(variable = variables) |>
+    mutate(
+      n_missing = map_int(variable, ~ sum(is.na(data[[.x]]))),
+      n_present = map_int(variable, ~ sum(!is.na(data[[.x]]))),
+      n_total = n_missing + n_present,
+      pct_missing = round(100 * n_missing / n_total, 1)
+    )
+}
+
+make_attrition_table <- function(data, primary_cohort, strict_cohort, hypercapnia_cohort) {
+  historical_attrition_counts(
+    nrow(data), sum(data$has_bmi, na.rm = TRUE),
+    sum(data$has_bmi & data$has_any_gas_pair, na.rm = TRUE),
+    nrow(primary_cohort), nrow(strict_cohort), nrow(hypercapnia_cohort)
+  )
+}
+
+make_bmi_outcome_summary <- function(data, outcome, event_value = "Yes") {
+  data |>
+    filter(!is.na(bmi_category), !is.na(.data[[outcome]])) |>
+    group_by(bmi_category) |>
+    summarise(
+      n_total = n(),
+      n_event = sum(.data[[outcome]] == event_value, na.rm = TRUE),
+      n_non_event = n_total - n_event,
+      pct_event = round(100 * n_event / n_total, 1),
+      .groups = "drop"
+    ) |>
+    arrange(bmi_category)
+}
+
+fit_logistic_model <- function(formula, data) {
+  stats::glm(formula, data = data, family = stats::binomial())
+}
+
+estimate_pif <- function(model, label, bmi_counterfactual) {
+  # Use the model frame to ensure predictions use exactly the complete-case analytic rows used by glm().
+  model_data <- stats::model.frame(model)
+
+  observed_risk <- mean(stats::predict(model, newdata = model_data, type = "response"), na.rm = TRUE)
+
+  counterfactual_data <- model_data
+  counterfactual_data$curr_bmi_num <- bmi_counterfactual(counterfactual_data$curr_bmi_num)
+  counterfactual_risk <- mean(stats::predict(model, newdata = counterfactual_data, type = "response"), na.rm = TRUE)
+
+  tibble(
+    counterfactual = label,
+    n_model_rows = nrow(model_data),
+    risk_observed = observed_risk,
+    risk_counterfactual = counterfactual_risk,
+    pif = (observed_risk - counterfactual_risk) / observed_risk
+  )
+}
+
+make_standardized_bmi_curve <- function(model, bmi_values) {
+  model_data <- stats::model.frame(model)
+
+  map_dfr(bmi_values, function(bmi_value) {
+    prediction_data <- model_data
+    prediction_data$curr_bmi_num <- bmi_value
+
+    tibble(
+      curr_bmi_num = bmi_value,
+      predicted_risk = mean(stats::predict(model, newdata = prediction_data, type = "response"), na.rm = TRUE)
+    )
+  })
+}
+```
+
+```{r helpers-plots}
+theme_paper <- function(base_size = 10) {
+  ggplot2::theme_minimal(base_size = base_size) +
+    ggplot2::theme(
+      panel.grid.minor = ggplot2::element_blank(),
+      plot.title = ggplot2::element_text(face = "bold"),
+      plot.title.position = "plot",
+      legend.position = "none"
+    )
+}
+
+plot_bmi_category_summary <- function(summary_data, title, y_label) {
+  ggplot(summary_data, aes(x = bmi_category, y = pct_event)) +
+    geom_col(width = 0.75, fill = "grey65") +
+    geom_text(aes(label = paste0(pct_event, "%")), vjust = -0.35, size = 3) +
+    scale_y_continuous(expand = expansion(mult = c(0, 0.12))) +
+    labs(
+      title = stringr::str_wrap(title, width = 55),
+      x = "BMI category",
+      y = y_label
+    ) +
+    theme_paper() +
+    theme(axis.text.x = element_text(angle = 30, hjust = 1))
+}
+
+plot_standardized_bmi_curve <- function(curve_data) {
+  ggplot(curve_data, aes(x = curr_bmi_num, y = predicted_risk)) +
+    geom_line(linewidth = 0.9) +
+    geom_vline(xintercept = c(25, 30, 40), linetype = "dashed", linewidth = 0.4) +
+    labs(
+      title = "Adjusted predicted probability of HRF across BMI",
+      x = "BMI (kg/m^2)",
+      y = "Model-standardized predicted risk"
+    ) +
+    theme_paper()
+}
+
+plot_pif_results <- function(pif_results) {
+  pif_results |>
+    mutate(counterfactual = forcats::fct_reorder(counterfactual, pif)) |>
+    ggplot(aes(x = pif, y = counterfactual)) +
+    geom_point(size = 2) +
+    geom_vline(xintercept = 0, linetype = "dashed", linewidth = 0.4) +
+    labs(
+      title = "Model-standardized impact fraction estimates",
+      x = "Impact fraction",
+      y = NULL
+    ) +
+    theme_paper() +
+    theme(legend.position = "none")
+}
+```
+
+# Data ingest and derivation
+
+```{r load-and-derive-data}
+data_path <- first_existing_path(DATA_PATH_CANDIDATES)
+raw_data <- readRDS(data_path)
+
+analysis_data <- raw_data |>
+  standardize_raw_data() |>
+  derive_analysis_variables()
+```
+
+```{r historical-run-status}
+#| results: asis
+if (identical(attr(raw_data, "data_status"), "ARTIFICIAL HISTORICAL FIXTURE")) cat("**ARTIFICIAL HISTORICAL FIXTURE — no clinical results.**\n\n") else cat("**ARCHIVED HISTORICAL TRACK — input and scientific qualification remain separate.**\n\n")
+```
+
+```{r top-level-qc}
+nrow(analysis_data)
+
+tibble(
+  ventilation_status = c("NIV", "IMV", "Any NIV/IMV", "Neither NIV nor IMV"),
+  n = c(
+    sum(analysis_data$niv_proc == 1, na.rm = TRUE),
+    sum(analysis_data$imv_proc == 1, na.rm = TRUE),
+    sum(analysis_data$received_ventilation, na.rm = TRUE),
+    sum(analysis_data$niv_proc == 0 & analysis_data$imv_proc == 0, na.rm = TRUE)
+  )
+)
+```
+
+```{r missingness-summary}
+make_missingness_table(
+  analysis_data,
+  variables = c("curr_bmi", "curr_bmi_num", "vbg_co2", "vbg_ph", "highest_paco2", "abg_ph")
+)
+```
+
+```{r gas-pair-availability}
+tibble(
+  gas_pair = c("ABG PaCO2 + pH pair", "VBG CO2 + pH pair", "Any ABG/VBG pair"),
+  n_present = c(
+    sum(analysis_data$has_abg_pair, na.rm = TRUE),
+    sum(analysis_data$has_vbg_pair, na.rm = TRUE),
+    sum(analysis_data$has_any_gas_pair, na.rm = TRUE)
+  ),
+  n_absent = nrow(analysis_data) - n_present,
+  pct_present = round(100 * n_present / nrow(analysis_data), 1)
+)
+```
+
+```{r plausibility-checks}
+analysis_data |>
+  summarise(
+    bmi_min = min(curr_bmi_num, na.rm = TRUE),
+    bmi_max = max(curr_bmi_num, na.rm = TRUE),
+    paco2_min = min(highest_paco2, na.rm = TRUE),
+    paco2_max = max(highest_paco2, na.rm = TRUE),
+    abg_ph_min = min(abg_ph, na.rm = TRUE),
+    abg_ph_max = max(abg_ph, na.rm = TRUE),
+    vbg_co2_min = min(vbg_co2, na.rm = TRUE),
+    vbg_co2_max = max(vbg_co2, na.rm = TRUE),
+    vbg_ph_min = min(vbg_ph, na.rm = TRUE),
+    vbg_ph_max = max(vbg_ph, na.rm = TRUE)
+  )
+```
+
+# Cohorts and attrition
+
+```{r define-cohorts}
+primary_cohort <- analysis_data |>
+  filter(has_bmi, !is.na(hrf_v1))
+
+strict_cohort <- analysis_data |>
+  filter(
+    has_bmi,
+    has_any_gas_pair,
+    hrf_v2_strict == 1 | (hrf_labs_v2 == 0 & hrf_icd_v2 == 0)
+  )
+
+hypercapnia_cohort <- analysis_data |>
+  filter(
+    has_bmi,
+    has_any_gas_pair,
+    physiologic_hypercapnia
+  ) |>
+  mutate(
+    hrf_vs_comp = case_when(
+      hrf_v1 == "Yes" ~ 1,
+      compensated_hypercapnia == 1 ~ 0,
+      TRUE ~ NA_real_
+    )
+  ) |>
+  filter(!is.na(hrf_vs_comp))
+```
+
+```{r attrition-table}
+attrition_table <- make_attrition_table(
+  data = analysis_data,
+  primary_cohort = primary_cohort,
+  strict_cohort = strict_cohort,
+  hypercapnia_cohort = hypercapnia_cohort
+)
+
+attrition_table
+```
+
+```{r respiratory-status-counts}
+analysis_data |>
+  mutate(
+    respiratory_status = forcats::fct_na_value_to_level(
+      respiratory_status,
+      level = "Unclassifiable/missing gas"
+    )
+  ) |>
+  count(respiratory_status, name = "n") |>
+  mutate(pct = round(100 * n / sum(n), 1))
+```
+
+```{r hrf-v1-counts}
+analysis_data |>
+  mutate(
+    hrf_v1_status = forcats::fct_na_value_to_level(
+      hrf_v1,
+      level = "Unclassifiable/missing gas"
+    )
+  ) |>
+  count(hrf_v1_status, name = "n") |>
+  mutate(pct = round(100 * n / sum(n), 1))
+```
+
+# Descriptive statistics
+
+```{r hrf-and-obesity-statistic}
+# Statistic requested for the broad hypercapnia definition:
+# Among patients with BMI recorded and any hypercapnia by ABG CO2, VBG CO2, or ICD,
+# what proportion have obesity (BMI >= 30)?
+hypercapnia_obesity_summary <- analysis_data |>
+  filter(has_bmi, hypercapnia_any == 1) |>
+  summarise(
+    n_hypercapnia_with_bmi = n(),
+    n_obesity_bmi30 = sum(obesity_bmi30, na.rm = TRUE),
+    proportion_obesity_bmi30 = n_obesity_bmi30 / n_hypercapnia_with_bmi
+  )
+
+hypercapnia_obesity_summary
+```
+
+```{r hrf-by-bmi-category-summary}
+bmi_hrf_summary <- make_bmi_outcome_summary(primary_cohort, outcome = "hrf_v1", event_value = "Yes")
+bmi_hrf_summary
+
+chisq.test(table(primary_cohort$bmi_category, primary_cohort$hrf_v1))$p.value
+```
+
+```{r}
+#| label: plot-bmi-category-primary
+#| fig-cap: "Hypercapnic respiratory failure by BMI category in the primary analytic cohort."
+#| fig-alt: "Bar chart showing the percent with hypercapnic respiratory failure for each BMI category in the primary analytic cohort."
+plot_bmi_category_summary(
+  bmi_hrf_summary,
+  title = "Proportion of Hypercapnic Respiratory Failure by BMI Category",
+  y_label = "Percent with HRF"
+)
+```
+
+```{r baseline-table}
+baseline_table <- primary_cohort |>
+  select(
+    hrf_v1,
+    respiratory_status,
+    bmi_category,
+    curr_bmi_num,
+    age_at_encounter,
+    sex,
+    ethnicity,
+    highest_paco2,
+    abg_ph,
+    vbg_co2,
+    vbg_ph,
+    niv_proc,
+    imv_proc
+  ) |>
+  gtsummary::tbl_summary(
+    by = hrf_v1,
+    missing = "ifany",
+    statistic = list(
+      gtsummary::all_continuous() ~ "{mean} ({sd})",
+      gtsummary::all_categorical() ~ "{n} ({p}%)"
+    ),
+    label = list(
+      respiratory_status ~ "Respiratory status",
+      bmi_category ~ "BMI category",
+      curr_bmi_num ~ "BMI (kg/m^2)",
+      age_at_encounter ~ "Age at encounter",
+      niv_proc ~ "Received NIV",
+      imv_proc ~ "Received IMV"
+    )
+  ) |>
+  gtsummary::add_overall()
+
+baseline_table
+```
+
+# Primary and sensitivity models
+
+```{r fit-primary-models}
+model_primary_unadjusted <- fit_logistic_model(hrf_v1 ~ curr_bmi_num, primary_cohort)
+model_primary_adjusted <- fit_logistic_model(PRIMARY_MODEL_FORMULA, primary_cohort)
+
+model_strict_unadjusted <- fit_logistic_model(hrf_v2_strict ~ curr_bmi_num, strict_cohort)
+model_strict_adjusted <- fit_logistic_model(STRICT_MODEL_FORMULA, strict_cohort)
+
+model_hypercapnia_subgroup <- fit_logistic_model(HYPERCAPNIA_SUBGROUP_FORMULA, hypercapnia_cohort)
+```
+
+```{r primary-model-tables}
+# Short display names prevent the four-model comparison from overflowing PDF.
+modelsummary(
+  list(
+    "v1 unadjusted" = model_primary_unadjusted,
+    "v1 adjusted" = model_primary_adjusted,
+    "v2 unadjusted" = model_strict_unadjusted,
+    "v2 adjusted" = model_strict_adjusted
+  ),
+  exponentiate = TRUE,
+  statistic = "conf.int",
+  ci_method = "wald",
+  coef_map = COEF_MAP_COMMON,
+  gof_omit = "RMSE|F|Adj|R2"
+)
+```
+
+```{r hypercapnia-subgroup-model}
+modelsummary(
+  list("HRF vs compensated hypercapnia" = model_hypercapnia_subgroup),
+  exponentiate = TRUE,
+  statistic = "conf.int",
+  ci_method = "wald",
+  coef_map = COEF_MAP_COMMON,
+  gof_omit = "RMSE|F|Adj|R2"
+)
+```
+
+```{r strict-bmi-category-summary}
+bmi_hrf_strict_summary <- strict_cohort |>
+  mutate(hrf_v2_strict_factor = factor(hrf_v2_strict, levels = c(0, 1), labels = c("No", "Yes"))) |>
+  make_bmi_outcome_summary(outcome = "hrf_v2_strict_factor", event_value = "Yes")
+
+bmi_hrf_strict_summary
+chisq.test(table(strict_cohort$bmi_category, strict_cohort$hrf_v2_strict))$p.value
+```
+
+```{r}
+#| label: plot-bmi-category-strict
+#| fig-cap: "Strict hypercapnic respiratory failure by BMI category in the sensitivity cohort."
+#| fig-alt: "Bar chart showing the percent with strict hypercapnic respiratory failure for each BMI category in the sensitivity cohort."
+plot_bmi_category_summary(
+  bmi_hrf_strict_summary,
+  title = "Proportion of Strict Hypercapnic Respiratory Failure by BMI Category",
+  y_label = "Percent with strict HRF"
+)
+```
+
+# Population attributable fraction / impact fraction
+
+This section uses model standardization. The current exploratory PDF used the counterfactual "set everyone to BMI 25". That is retained as a proof-of-concept row, but the more interpretable obesity estimands cap BMI above a threshold while leaving lower BMI values unchanged.
+
+```{r pif-estimates}
+pif_primary <- bind_rows(
+  estimate_pif(
+    model_primary_adjusted,
+    label = "Proof of concept: set everyone to BMI 25",
+    bmi_counterfactual = function(bmi) rep(NORMAL_BMI_COUNTERFACTUAL, length(bmi))
+  ),
+  estimate_pif(
+    model_primary_adjusted,
+    label = "Excess BMI: BMI >25 set to 25",
+    bmi_counterfactual = function(bmi) pmin(bmi, 25)
+  ),
+  estimate_pif(
+    model_primary_adjusted,
+    label = "Obesity: BMI >30 set to 30",
+    bmi_counterfactual = function(bmi) pmin(bmi, 30)
+  ),
+  estimate_pif(
+    model_primary_adjusted,
+    label = "Severe obesity: BMI >40 set to 40",
+    bmi_counterfactual = function(bmi) pmin(bmi, 40)
+  )
+) |>
+  mutate(target_population = "Primary analytic cohort", .before = counterfactual)
+
+pif_primary
+```
+
+```{r severe-obesity-subgroup-pif}
+severe_obesity_cohort <- primary_cohort |>
+  filter(curr_bmi_num >= 40)
+
+model_severe_obesity <- fit_logistic_model(PRIMARY_MODEL_FORMULA, severe_obesity_cohort)
+
+pif_severe_obesity_subgroup <- estimate_pif(
+  model_severe_obesity,
+  label = "BMI >=40 subgroup: BMI >40 set to 40",
+  bmi_counterfactual = function(bmi) pmin(bmi, 40)
+) |>
+  mutate(target_population = "BMI >=40 subgroup", .before = counterfactual)
+
+# Under a linear PIF-vs-excess-BMI approximation, this gives the average PIF contribution per BMI point above 40.
+mean_bmi_excess_above_40 <- mean(stats::model.frame(model_severe_obesity)$curr_bmi_num - 40, na.rm = TRUE)
+
+pif_severe_obesity_subgroup |>
+  mutate(
+    mean_bmi_excess_above_40 = mean_bmi_excess_above_40,
+    approximate_pif_per_bmi_point_above_40 = pif / mean_bmi_excess_above_40
+  )
+```
+
+```{r pif-results-table}
+pif_results <- bind_rows(pif_primary, pif_severe_obesity_subgroup)
+
+pif_results |>
+  mutate(
+    across(c(risk_observed, risk_counterfactual, pif), ~ round(.x, 4))
+  ) |>
+  knitr::kable(
+    col.names = c(
+      "Target population",
+      "Counterfactual",
+      "Model rows",
+      "Observed risk",
+      "Counterfactual risk",
+      "Impact fraction"
+    ),
+    caption = "Model-standardized impact fractions under named BMI counterfactuals."
+  )
+```
+
+```{r}
+#| label: plot-pif
+#| fig-cap: "Model-standardized impact fraction estimates under BMI counterfactuals."
+#| fig-alt: "Dot plot showing impact fraction estimates for several BMI counterfactual definitions."
+plot_pif_results(pif_primary)
+```
+
+# Adjusted BMI-risk curve
+
+```{r bmi-risk-curve-data}
+bmi_grid <- seq(
+  from = floor(quantile(primary_cohort$curr_bmi_num, probs = 0.05, na.rm = TRUE)),
+  to = ceiling(quantile(primary_cohort$curr_bmi_num, probs = 0.95, na.rm = TRUE)),
+  by = 1
+)
+
+bmi_risk_curve <- make_standardized_bmi_curve(model_primary_adjusted, bmi_grid)
+bmi_risk_curve
+```
+
+```{r}
+#| label: plot-bmi-risk-curve
+#| fig-cap: "Adjusted predicted HRF risk across BMI using standardization over the primary model covariate distribution."
+#| fig-alt: "Line plot of standardized predicted HRF risk by BMI with reference lines at BMI 25, 30, and 40."
+plot_standardized_bmi_curve(bmi_risk_curve)
+```
+
+# Appendix
+
+```{r session-info}
+cat(strwrap(capture.output(sessionInfo()), width = 75), sep = "\n")
+```
