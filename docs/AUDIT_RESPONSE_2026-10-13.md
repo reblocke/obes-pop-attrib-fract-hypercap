@@ -1,5 +1,7 @@
 # Response to the October 13 obesity–hypercapnia audit
 
+**Historical disposition below; current authority updated 2026-10-14.** The approved common-index BMI ≥30 study now addresses gas-observation selection explicitly with separately labeled observed benchmarks, MAR projections and exploratory MNAR assumptions. It preserves the exact one-unit shift above 30, inherited adjustment and conditional delta-method inference. The prior fifteen-cell frame-specific study remains runnable with frozen sources; its distinct estimands are not relabeled as the new common-index results. Version-3 input qualification still requires actual expanded-population coverage and field evidence. See [current implementation plan](BMI_HYPERCAPNIA_TRIANGULATION_PLAN.md) and [decisions](DECISIONS.md). The table records the earlier audit response and is retained unchanged.
+
 Audit reviewed main `1e78e3c2ece8771a189b910b415959d3f3734647`. The supplied memo and independent algebra script/receipt are historical references; the auditor did not run R/Quarto, open clinical inputs or inspect saved images. Their algebra check supports the standardization calculation, not source readiness. The current user-approved plan and decisions supersede the audit's proposed strict cutoffs and BMI-to-40 scenario.
 
 | Finding | Disposition / implementation | Verification or remaining evidence |

@@ -1,3 +1,5 @@
+**Current use, 2026-10-14:** common first BMI ≥30 indexing and separate arterial/combined projections. The dated October 13 assessment below is preserved; the October 14 qualification ledger at the end governs the expanded use. No clinical input acceptance has been established.
+
 # Bounded source assessment for the primary BMI-shift analysis
 
 Assessment date: 2026-10-13. Intended use: the patient-level, fifteen-cell one-unit BMI shift above 30, with nine encounter-wide primary and six index-calendar-day sensitivity positions. **Clinical input acceptance is not established on this machine. Existing accepted source products are not declared unsuitable.**
@@ -56,3 +58,34 @@ Reviewed 2026-10-13. A live, read-only check of upstream `main` still returned `
 | Calendar-day summaries | Date precision exists; the separate start-day maxima/availability are not yet authenticated in the local input. Qualified primary cells may proceed with explicitly pending sensitivity cells. |
 
 No private clinical comparison or clinical estimation was performed during this repair. The earlier readiness receipt retains its original code identity and unrun private checks; the focused follow-up receipt records the new source-code identity without rewriting that history. Remaining causal interpretation, selection/missingness and linear-model assumptions are scientific limitations even after source qualification, not automatically remediable data defects.
+
+## Common-index use — 2026-10-14 update
+
+The intended use is now first BMI ≥30 indexing before gas availability, with separate arterial/combined MAR/MNAR projections to a common covariate-complete reference. BMI ≥40 sensitivity restricts those indexes and reuses primary models. The prior frame-specific assessment is retained as dated evidence; it does not qualify this expanded use.
+
+The local host still has no accepted product volume mounted and only the pending example manifest is present. Current upstream main remains `787fba64319c0285244e2e17a9e303c739f31a14`. No private source reconciliation or clinical model has run. The new determination remains **not_evaluated**, not a declaration that accepted products are unsuitable.
+
+| Qualification item | Recommendation / needed evidence |
+| --- | --- |
+| Exact input and variant | Prefer accepted FULL_DATA/pre-screen evidence; authenticate the actual RDS producer, conversion and original-key mapping. |
+| Expanded population | Reconcile BMI ≥30 candidates, especially untested patients and uncertain earlier BMI/chronology, against existing captured source. Compatibility membership alone is insufficient. |
+| Keys, dates/settings | Use original keys/crosswalk and reviewed start dates/ED-inpatient coding; preserve conflicts and unresolved first indexes. |
+| BMI/adjustment | Retain approved legacy derived values; verify units, timing, dictionaries and coverage. Do not invent a different baseline BMI. |
+| Testing/missingness | Distinguish usable evidence, confirmed testing with unusable results, no captured evidence and unknown capture where supported. Testing no longer selects the primary population, but result-derived names still cannot establish performed testing. |
+| Gas mapping | Exact raw specimen selectors, normal/boundary/positive/unusable records, units/valid maxima and encounter attribution; temperature-adjusted concepts distinct. |
+| ICD negative/unknown | Review captured absence of the five-code composite versus incomplete evidence; required for matched coding comparisons. |
+| Calendar-day/frequency | Existing dated records can support start-day summaries. Retain pending sensitivities if unbound; no timestamp/pH pairing requirement. Source-record counts must not be called independent measurements without evidence. |
+| Support/interpretation | Report observation patterns and BMI/covariate coverage, unseen levels and shifted-range extrapolation. Demographics-only MAR and MNAR ranges remain assumptions after technical source acceptance. |
+| Reviewer evidence | Actual source-custodian binding/mapping review and study-lead interpretation approval; do not fill accepted gates from schema/hash success alone. |
+
+The smallest next clinical action is the expanded study-specific binding on the host with the existing accepted products and private receipts. No replacement export, upstream message or source-definition substitution is presumed necessary. Version-3 manifests explicitly bind the new use; old versions remain for their original runnable workflows. Software/artificial completion is separate from this source determination.
+
+## Source-policy release — 2026-10-15
+
+The owner confirmed ordinary unadjusted PCO₂, authenticated specimen assignment, strict arterial 5–200 and venous 10–250 mm Hg validity intervals, and captured-absence ICD negatives without another-diagnosis requirement. New clinical manifests require `unadjusted_pco2_v1` and matching hashed field evidence. Validity intervals and inclusive outcome thresholds are distinct. Existing bundles retain their recorded source policy.
+
+One concrete mapping concern is demonstrated in the pinned upstream legacy producer: `paco2` pools 2019-8, unspecified-blood 11557-6 and adjusted arterial 32771-8; `highest_paco2` maximizes across that family. Those names alone cannot supply the new ordinary specimen-specific maximum. The adapter uses accepted original-key/legacy BMI/covariate products plus raw exact-code transport to create fresh maxima. Historical producer behavior and its compatibility acceptance are preserved.
+
+The adapter reconciles potential captured-source candidates before gas/BMI/completeness filtering and stops if legacy coverage is incomplete. It preserves unresolved date/type information, verifies source/reader identities and rejects incompatible mappings or interrupted queries. Source-record audits describe preparation scope before index selection; they are not independent specimens or patient prevalence.
+
+The Mini connection again failed hostname resolution. The owner will resume on the home network. No accepted private products/receipts were opened, no study-source acceptance was issued and no clinical model was fitted. Clinical readiness remains **not_evaluated**. The [home-network handoff](CLINICAL_RUN_HANDOFF.md) gives commands and required evidence. Code is released first; actual clinical review is recorded separately.

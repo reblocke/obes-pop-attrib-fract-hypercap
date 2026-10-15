@@ -1,5 +1,5 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "input_sha256": "PENDING_SHA256_OF_EXACT_INPUT",
   "source_identity": "PENDING_PRODUCER_COMMIT_VARIANT_AND_SNAPSHOT",
   "reviewed_by": "PENDING_DATA_STEWARD",
@@ -90,5 +90,8 @@
     "binary_codes": {},
     "semantics": "max_valid_specimen_PCO2_on_encounter_start_calendar_date",
     "note": "When qualified, map abg_pco2_index_day/vbg_pco2_index_day and abg_index_day_available/vbg_index_day_available; add index_day evidence file/hash. Do not map pending fields."
-  }
+  },
+  "study_design": "common_index_bmi_ge30_v1",
+  "population_policy": "first_2022_adult_ED_inpatient_BMI_ge30_before_gas_and_completeness",
+  "source_policy_id": "unadjusted_pco2_v1"
 }

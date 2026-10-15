@@ -1,0 +1,17 @@
+{
+  "source_policy_id": "unadjusted_pco2_v1",
+  "arterial_codes": ["2019-8"],
+  "venous_codes": ["2021-4"],
+  "unspecified_codes": ["11557-6"],
+  "temperature_adjusted_codes": ["32771-8", "40619-9", "34705-4"],
+  "unit_factors_to_mmhg": {"mmhg": 1, "mm hg": 1, "mm[hg]": 1, "kpa": 7.50062},
+  "arterial_validity": {"lower_exclusive": 5, "upper_exclusive": 200},
+  "venous_validity": {"lower_exclusive": 10, "upper_exclusive": 250},
+  "unspecified_specimen": "requires_authenticated_specimen_mapping",
+  "missing_units": "unusable_unless_identity_bound_source_metadata_supplies_units",
+  "encounter_attribution": "original_patient_and_encounter_keys",
+  "index_day": "collection_date_equals_encounter_start_calendar_date",
+  "icd_codes": ["J96.02", "J96.12", "J96.22", "J96.92", "E66.2"],
+  "icd_negative": "no_target_code_in_complete_available_captured_encounter_extract",
+  "unusable_gases": "unknown_outcome_not_negative"
+}

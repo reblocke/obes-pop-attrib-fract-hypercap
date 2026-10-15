@@ -1,3 +1,7 @@
+# Current primary authority — 2026-10-14
+
+The common first-BMI ≥30 index study is primary. It has separate arterial/combined observed/MAR/MNAR projections, a fixed-index BMI ≥40 reference sensitivity using the primary models, and separate matched ICD/gas pairs. The current [decisions](DECISIONS.md) and [plan](BMI_HYPERCAPNIA_TRIANGULATION_PLAN.md) govern it. The frame-specific grid below is preserved supporting work at `archive/2026-10-14-frame-specific/`; its original indexing and one-unit policy are not changed or relabeled. The remaining text is a dated comparison of older tracks.
+
 # Current primary analysis and historical comparison
 
 As confirmed on 2026-10-13, the primary report is [patient-level triangulation](../reports/bmi_hypercapnia_triangulation.qmd): observed BMI >30 reduced by one kg/m² with no floor, nine encounter-wide primary plus six index-calendar-day gas sensitivity cells. Its paired PIFs describe distinct model-evaluable populations with fixed original indexes and adjustment. Artificial verification does not provide clinical estimates.

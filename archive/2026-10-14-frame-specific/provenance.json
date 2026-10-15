@@ -1,0 +1,23 @@
+{
+  "source_commit": "d8909df72d04185f12ac45995069addfd772343e",
+  "archived_on": "2026-10-14",
+  "purpose": "Unchanged version-2 frame-specific analysis before common-index promotion",
+  "files": {
+    "R/bmi_hypercapnia_triangulation.R": "8d6ee8bb95f8ac5f395dab3a4eb8452024ad967c7a1a03d632ae42045d75432f",
+    "R/triangulation_reporting.R": "e5db544e1ffa6aeb9095de872b99bb9cf5318d6e3ca49a65655e27f126cc9c4b",
+    "reports/bmi_hypercapnia_triangulation.qmd": "2bbe147b6cf7449fb5419d331317f7fc8e8968582e26ba00972f50a6b935e9e1",
+    "scripts/render_triangulation.R": "1e6eebcc55d02456c7ae7993bc801b2748df2e93c4764390bbc14fdfd1698fe1",
+    "scripts/preflight_triangulation.R": "91ba735ed96cd143a5817a7ad662faccdaf285db77d29d81b72a46f73fa5da94",
+    "tests/fixtures/triangulation_fixture.R": "6001747a9e2d4e66d0746e3d0fd26fd796141150ec550b7698806f2d03aa4dc6",
+    "tests/triangulation_checks.R": "53777a333dc7922b3e9602a7d026e0b5d220ba879fab5a2bd2a3f8261d234601",
+    "tests/run_triangulation_tests.R": "0df22a0d843a9cd21268c49a0ebdfc3452b1aebf88e84f476175501b28ccac38",
+    "tests/testthat/test-triangulation.R": "4ff252ccbf241a0bfeeacffb84a7955a845746d1d54968377fd15daa024e5f37",
+    "docs/BMI_HYPERCAPNIA_TRIANGULATION_PLAN.md": "bd6fbe9eefae8585ebf1c80376c43fdcff9b9efd77c37e907745091cd7ca1393",
+    "docs/DECISIONS.md": "83cb264d40c664bc207f09a247936a8a370f7fc7b745e326657675d4d66ebdee",
+    "docs/TRIANGULATION_SOURCE_ASSESSMENT.md": "ea62a90239a5ebd67fef77b6c961203fc7d475f2a59a8099a200de3f675f4bf1",
+    "config/triangulation_input.example.json": "448b0a0a27d5138c88859e9470c2c359c8ea1b66fca0ca2d776cc90fb0002880",
+    "README.md": "7b52ee4389642cc6b1061c8458460f6e79a40b8efb2b6b1e6c8ab8bdb95329b9",
+    "Makefile": "f80ecba4d80586e6647005f74db8bc1ade01e2b19b224350c1d4733e43882442",
+    "AGENTS.md": "a33d46ea76824cda028137331ac0bf5b15b5bae25dcfb7aba7e2c36fee7ec66d"
+  }
+}

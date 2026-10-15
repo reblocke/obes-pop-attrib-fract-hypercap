@@ -1,12 +1,13 @@
 ---
-title: "BMI and hypercapnia: evidence triangulation"
-subtitle: "One-unit BMI reduction among patients with observed BMI >30"
+title: "BMI and hypercapnia: common-index evidence comparisons"
+subtitle: "One-unit reduction above BMI 30; fixed cohort and explicit missing-outcome assumptions"
 format:
   html:
     toc: true
     embed-resources: true
   pdf:
     pdf-engine: xelatex
+    latex-auto-install: false
     mainfont: Arial
     fontsize: 10pt
     papersize: a4
@@ -19,273 +20,238 @@ execute:
 ---
 
 ```{r}
-#| label: setup-triangulation
+#| label: setup-common-index
 #| include: false
 root <- Sys.getenv("TRI_REPO_ROOT")
 run_dir <- Sys.getenv("TRI_RUN_DIR")
 output <- Sys.getenv("TRI_OUTPUT_DIR")
-if (!nzchar(root) || !dir.exists(run_dir) || !dir.exists(output)) stop("Use a dedicated Make target with an explicit saved RUN.")
-source(file.path(root, "R", "bmi_hypercapnia_triangulation.R"))
-source(file.path(root, "R", "triangulation_reporting.R"))
-require_tri_packages(c("ggplot2", "jsonlite", "digest", "knitr"))
-bundle <- read_tri_bundle(run_dir)
-if (bundle$manifest$schema_version != 2L) stop("Version-1 results use the frozen historical report.")
-analysis <- bundle$analysis
-results <- analysis$results
+if (!nzchar(root) || !dir.exists(run_dir) || !dir.exists(output)) stop("Use saved-run rendering through the launcher.")
+for (file in c("bmi_hypercapnia_triangulation.R", "triangulation_reporting.R", "common_index_hypercapnia.R", "common_index_reporting.R")) source(file.path(root, "R", file))
+require_tri_packages(c("jsonlite", "digest", "knitr"))
+bundle <- read_common_bundle(run_dir)
+a <- bundle$analysis
+r <- a$results
 artificial <- bundle$manifest$mode == "fixture"
-figures <- tri_figure_candidates(results, artificial)
 knitr::opts_chunk$set(dev = if (knitr::is_latex_output()) "cairo_pdf" else "png")
-frame_label <- function(x) unname(c(severe_obesity = "BMI ≥40", abg_drawn = "ABG obtained", any_gas_drawn = "Either gas obtained")[x])
-outcome_label <- function(x) unname(c(icd = "ICD", abg = "ABG", any_gas = "Either gas")[x])
-window_label <- function(x) ifelse(x == "encounter", "Encounter", "Index day")
+outcome <- function(x) unname(c(abg = "ABG", any_gas = "Combined", icd = "ICD")[x])
+method <- function(x) unname(c(observed = "Observed", mar = "MAR", mnar = "MNAR", matched = "Matched")[x])
+window <- function(x) ifelse(x == "encounter", "Encounter", "Index day")
+target <- function(x) unname(c(bmi_ge30 = "BMI ≥30", bmi_ge40 = "BMI ≥40", matched_abg = "Matched ABG", matched_any_gas = "Matched combined")[x])
 table_out <- function(x, caption) knitr::kable(x, caption = caption, booktabs = TRUE, row.names = FALSE)
-identity_columns <- function(r) data.frame(Frame = frame_label(r$frame), Outcome = outcome_label(r$outcome), Window = window_label(r$ascertainment_window))
+contrast_table <- function(rows, identities) cbind(identities, data.frame(
+  `Change /1,000 (95% CI)` = common_interval_label(rows, "absolute", FALSE),
+  `PIF % (95% CI)` = common_interval_label(rows, "relative", FALSE), check.names = FALSE))
+page <- function() if (knitr::is_latex_output()) cat("\n\\newpage\n")
 ```
 
 ```{r}
-#| label: status-banner
+#| label: status
 #| results: asis
-cat(if (artificial) "**ARTIFICIAL DATA — every numerical result is simulated for workflow and layout verification.**\n\n" else "**DRAFT CLINICAL RESULTS — source declarations and identity checks passed; scientific and release review remain separate.**\n\n")
-if (any(results$source_status == "pending")) cat("**Calendar-day sensitivity source evidence is pending. Its six positions have no estimates or measured model counts.**\n\n")
-```
-
-# Question and approved specification
-
-How does modeled documented hypercapnia frequency change under a **one-unit BMI reduction for patients with observed BMI >30 kg/m²**? For every model-evaluable patient, use $BMI^*=BMI-1$ when $BMI>30$ and $BMI^*=BMI$ otherwise. There is no floor at 30: 30.2 becomes 29.2, 40 becomes 39, and 30 remains unchanged. Eligibility for the shift uses observed BMI.
-
-The primary quantity is the model-standardized potential impact fraction (PIF), $1-\bar p_{\mathrm{shifted}}/\bar p_{\mathrm{observed}}$. Both probabilities average predictions over the same cell-specific complete cases. Original frame membership, selected encounter and adjustment values stay fixed. We also report the absolute probability difference and the percentage eligible for the shift.
-
-This is a common BMI-shift scenario applied to deliberately different estimands. It is not a constant fraction attributable to each BMI unit. Its value depends on the BMI distribution, proportion shifted and modeled outcome probability. The supporting BMI odds ratio describes a different quantity.
-
-The population is adults aged ≥18 with emergency or inpatient encounters starting in **2022**, within the authenticated captured source. Each patient contributes their first qualifying encounter independently within each frame, selected before checking outcome or covariate completeness:
-
-| Frame | Membership |
-|:--|:--|
-| Severe obesity | Observed BMI ≥40 kg/m² |
-| ABG obtained | Confirmed arterial testing, without a BMI threshold |
-| Either gas obtained | Confirmed arterial or venous testing, without a BMI threshold |
-
-A patient may have different index encounters across frames. The legacy derived BMI is retained. Adjustment uses linear BMI and age, sex, combined race/ethnicity and region (the source field `location`).
-
-{{< pagebreak >}}
-
-# Outcomes, windows and evidence
-
-| Outcome | Definition | Ascertainment |
-|:--|:--|:--|
-| ICD | J96.02, J96.12, J96.22, J96.92 or E66.2 | Encounter; primary |
-| ABG | Arterial PaCO~2~ ≥45 mm Hg | Encounter; primary |
-| Either gas | Arterial PaCO~2~ ≥45 or venous PCO~2~ ≥50 mm Hg | Encounter; primary |
-| ABG | The same arterial threshold | Index calendar day; sensitivity |
-| Either gas | The same combined thresholds | Index calendar day; sensitivity |
-
-Applying these five specifications within each frame yields **nine primary and six sensitivity cells**. ICD is not duplicated for the gas timing sensitivity. No pH or ventilatory-support criterion is required. E66.2 is retained and acknowledged as an obesity-containing diagnosis.
-
-Index calendar day means the collection date equals the encounter-start date under the authenticated source date convention. It does not mean elapsed 24 hours. Frame membership and index selection remain fixed. A later-only gas cannot establish a calendar-day positive or negative result.
-
-Any valid positive gas establishes combined positivity. At least one valid gas with every available result below its threshold establishes an **available-gas negative**. With no valid result, the outcome is unknown. An unmeasured specimen is not a negative measurement. Testing evidence and result availability are separate. Discordant calendar-day summaries remain unknown and cannot change a primary index.
-
-Source-pending sensitivity cells differ from patient-level unknown outcomes. Qualified primary analyses may proceed while timing evidence is pending; failed models retain their positions and explicit reasons.
-
-# Cohort and index audit
-
-```{r}
-#| label: scope-counts
-s <- analysis$scope
-table_out(data.frame(Step = c("Input rows", "Duplicate primary-field rows collapsed", "Distinct primary encounter versions", "Keys with conflicting primary versions", "In study scope", "Outside scope", "Uncertain scope"), N = tri_count(unlist(s, use.names = FALSE))), "Source-scope accounting. Calendar-day disagreement does not create a primary-field conflict.")
-```
-
-```{r}
-#| label: frame-counts
-f <- analysis$frame_counts
-table_out(data.frame(Frame = frame_label(f$frame), Confirmed = tri_count(f$n_frame_patients), Resolved = tri_count(f$n_index_resolved), Unresolved = tri_count(f$n_index_unresolved), `Uncertain membership only` = tri_count(f$n_membership_uncertain), check.names = FALSE), "Patients within each frame. Overlapping frames must not be summed.")
-```
-
-Conflicting primary versions, earliest-date ties and potentially earlier qualifying encounters remain unresolved. No later encounter is substituted for a more complete outcome or covariate profile. Confirmed patients remain in the frame audit even when their index is unresolved.
-
-{{< pagebreak >}}
-
-# Cell-specific denominator accounting
-
-```{r}
-#| label: denominator-accounting
-coverage <- cbind(identity_columns(results), Indexed = tri_count(results$n_index_resolved), Known = tri_count(results$n_outcome_known), Unknown = tri_count(results$n_outcome_missing), Model = tri_count(results$n_model), Events = tri_count(results$n_events))
-table_out(coverage, "Indexed = known + unknown; known = model cases + missing covariates, when the source module is qualified. Dashes indicate unassessed counts.")
-```
-
-```{r}
-#| label: exclusion-and-support
-support <- cbind(identity_columns(results), `Missing covariates` = tri_count(results$n_missing_adjustment), `Shifted, n` = tri_count(results$n_bmi_shifted), `Shifted, %` = ifelse(is.na(results$pct_bmi_shifted), "—", sprintf("%.1f", results$pct_bmi_shifted)), `Outside BMI range, n` = tri_count(results$n_counterfactual_outside_support), `Day conflicts, n` = tri_count(results$n_index_day_conflicts))
-table_out(support, "Eligibility and marginal BMI support. Shifted percentages use model N; calendar-day conflicts are unavailable evidence, not negative outcomes.")
-```
-
-Complete cases require the selected outcome, BMI, age, sex, race/ethnicity and region. A confirmed draw without a usable result stays in its frame but can leave the outcome unknown. Each fraction describes its model-evaluable population; it does not automatically generalize to everyone eligible for the nominal frame.
-
-Patients with BMI ≤30 stay in both prediction averages. In the severe-obesity frame all model cases shift, including BMI 40 to 39. Some shifted values can fall below that cell's observed fitted BMI range. This marginal check does not establish covariate-specific support when zero.
-
-{{< pagebreak >}}
-
-::: {.content-visible when-format="html"}
-# Preferred exhibit: compare magnitude and precision
-:::
-
-```{r}
-#| label: fig-bmi-triangulation
-#| fig-width: 7.4803
-#| fig-height: 10.6299
-#| out-width: 96%
-#| fig-pos: H
-#| fig-cap: "A: frame-grouped forest/table. Identical saved estimates across all alternatives; shifted percentages describe the model sample. Detailed missingness and support remain in the denominator tables."
-#| fig-alt: "Fifteen positions in three sampling-frame blocks show encounter and index-calendar-day PIF intervals on one scale, with PIF, CI, model N and percentage shifted. Pending and nonestimable positions have no numerical marks."
-grid::grid.newpage()
-grid::grid.draw(figures$A)
-```
-
-{{< pagebreak >}}
-
-::: {.content-visible when-format="html"}
-# Alternative B: compare populations within each outcome
-:::
-
-```{r}
-#| label: fig-triangulation-triptych
-#| fig-width: 7.4803
-#| fig-height: 10.6299
-#| out-width: 96%
-#| fig-pos: H
-#| fig-cap: "B: outcome-first panels compare the three frames within each outcome, with paired gas windows. Every interval uses the same scale and saved ledger as A."
-#| fig-alt: "Three outcome columns show each sampling frame, with one ICD encounter estimate and two gas-window estimates per frame. Quantities and denominators match candidate A."
-grid::grid.newpage()
-grid::grid.draw(figures$B)
-```
-
-{{< pagebreak >}}
-
-::: {.content-visible when-format="html"}
-# Alternative C: expose the triangulation design
-:::
-
-```{r}
-#| label: fig-triangulation-matrix
-#| fig-width: 7.4803
-#| fig-height: 10.6299
-#| out-width: 96%
-#| fig-pos: H
-#| fig-cap: "C: sampling-frame rows and outcome columns; the gas cells contain paired ascertainment windows. Three ICD and twelve gas estimates use identical PIF scales."
-#| fig-alt: "A frame-by-outcome matrix contains fifteen total estimate positions, with direct numerical labels, model N and shifted percentages; unavailable evidence is explicitly pending."
-grid::grid.newpage()
-grid::grid.draw(figures$C)
-```
-
-{{< pagebreak >}}
-
-# Standardized probabilities, fractions and supporting associations
-
-```{r}
-#| label: standardized-probabilities
-probabilities <- cbind(identity_columns(results), `Observed, %` = tri_percent(results$p_observed), `Shifted, %` = tri_percent(results$p_counterfactual), `Difference, pp` = tri_percent(results$absolute_difference, 3))
-table_out(probabilities, "Paired mean predicted probabilities; pp = percentage points. Both predictions use the same patients.")
-```
-
-```{r}
-#| label: impact-estimates
-display <- prepare_tri_display(results)$data
-table_out(cbind(identity_columns(results), `PIF (95% CI)` = display$estimate_label, N = tri_count(results$n_model)), "Model-standardized one-unit-shift PIFs. Tiny nonzero estimates retain visible precision; genuine zero remains zero.")
-```
-
-```{r}
-#| label: supporting-associations
-or_label <- ifelse(results$status == "estimated", sprintf("%.3f (%.3f–%.3f)", results$odds_ratio, results$conf_low, results$conf_high), ifelse(results$source_status == "pending", "Source pending", "Not estimable"))
-table_out(cbind(identity_columns(results), `BMI OR (95% CI)` = or_label), "Supporting adjusted odds ratio per 1 kg/m² higher BMI; no OR-to-PIF conversion is used.")
-```
-
-{{< pagebreak >}}
-
-# Estimation checks and timing transitions
-
-Each model uses the unchanged formula:
-
-```r
-outcome ~ bmi + age_at_encounter +
-  factor(sex) + factor(race_ethnicity) + factor(location)
-```
-
-The workflow checks outcome/BMI variation, rank, complete/quasi-complete separation, convergence, warnings and finite quantities. Nonestimable cells retain a reason. No alternative estimator or adjustment term is substituted.
-
-PIF intervals use the full coefficient covariance for the delta method on the log ratio of mean predicted probabilities. They are pointwise, model-based 95% intervals conditional on the empirical covariates. Negative fractions remain visible. When no model case has BMI >30, the scenario is unchanged and its fraction and interval are exactly zero.
-
-```{r}
-#| label: estimation-status
-#| results: asis
-failed <- results[results$impact_status != "estimated", ]
-if (nrow(failed)) print(table_out(cbind(identity_columns(failed), Reason = failed$impact_reason), "Pending and nonestimable cells.")) else cat("All fifteen artificial or clinical cells passed the implemented computational checks. This does not establish scientific acceptance.\n")
-```
-
-```{r}
-#| label: timing-transitions
-t <- analysis$timing_audit
-if (any(results$source_status == "pending")) {
-  table_out(data.frame(Frame = frame_label(t$frame), Outcome = outcome_label(t$outcome), Status = "Source pending"), "Timing comparisons remain unassessed.")
+cat(if (artificial) "**ARTIFICIAL DATA — all results are simulated for software and layout verification.**\n\n" else "**DRAFT CLINICAL RESULTS — reviewed source declarations passed; scientific and release review remain separate.**\n\n")
+if (any(r$source_status == "pending")) cat("**Calendar-day source evidence is pending. Those positions contain no estimates or assessed training/reference counts.**\n\n")
+source_policy <- bundle$input_receipt$source_policy_id
+if (identical(source_policy, "unadjusted_pco2_v1")) {
+  cat("Source policy: **unadjusted PCO₂**, authenticated specimen, 5 < arterial PCO₂ <200 and 10 < venous PCO₂ <250 mm Hg. Temperature-adjusted measurements are excluded from these outcomes. ICD absence denotes no target code in a complete available captured encounter extract.\n\n")
 } else {
-  groups <- split(seq_len(nrow(t)), paste(t$frame, t$outcome, sep = "/"))
-  summary <- do.call(rbind, lapply(groups, function(rows) {
-    z <- t[rows, ]
-    data.frame(Frame = frame_label(z$frame[1]), Outcome = outcome_label(z$outcome[1]),
-      `Positive to negative` = sum(z$n[z$primary_state == "positive" & z$index_day_state == "available_negative"]),
-      `Known to unknown` = sum(z$n[z$primary_state != "unknown" & z$index_day_state == "unknown"]),
-      `Unknown both` = sum(z$n[z$primary_state == "unknown" & z$index_day_state == "unknown"]), check.names = FALSE)
-  }))
-  table_out(summary, "Selected encounter-to-calendar-day transitions. The complete nine-state cross-tables are in timing_audit.csv.")
+  cat("Source policy: ", if (artificial) "artificial typed gases; no clinical source acceptance" else "not recorded in this historical bundle; no new source-policy label is assigned", ".\n\n", sep = "")
 }
 ```
 
-Calendar-day analyses can change both classification and the model-evaluable sample. The transition counts and denominator tables distinguish those changes. No additional same-sample models or formal between-cell comparisons are fitted.
+## Study question and interpretation
 
-{{< pagebreak >}}
+Among adults with a first qualifying BMI ≥30 emergency/inpatient encounter in 2022, how do modeled criterion probabilities change under a one-unit BMI reduction above 30? Arterial and combined arterial/venous criteria are analyzed separately. Common-target projections allow a comparison of evidence definitions while displaying assumptions about unobserved outcomes.
 
-# BMI distributions and descriptive model checks
+These are model-standardized probability contrasts. They are not incidence reductions, effects of within-person weight loss, or established physiologic prevalence. Equal PIFs do not establish equivalent populations or ascertainment. Absolute and relative changes are both shown.
+
+## Methods
+
+Select the first BMI ≥30 encounter before outcome or covariate completeness. Uncertain earlier membership, conflicting indexes and date ties remain unresolved; a later measured admission is never substituted. The common reference comprises resolved indexes with complete inherited adjustment variables. Patients outside that reference remain visible in cohort accounting.
+
+Use unchanged legacy derived BMI and linear logistic models with BMI, age, sex, race/ethnicity and geographic region. Shift observed BMI >30 by exactly 1 kg/m²; BMI =30 stays unchanged, with no floor. The BMI ≥40 sensitivity restricts those same indexes and reuses the primary fitted models.
+
+ABG requires PaCO~2~ ≥45 mm Hg; combined gas requires PaCO~2~ ≥45 or PvCO~2~ ≥50 among available usable results. A combined negative does not establish that an unmeasured specimen is negative. Encounter maxima are primary; index-calendar-day maxima are sensitivities. Calendar-day does not mean elapsed 24 hours or a standardized testing schedule. Missing/unusable results remain unknown.
+
+Observed benchmarks average over outcome-observed cases. Conditional missing-at-random (MAR) projections average the outcome model over the common reference. Demographics alone may not account for informative ordering, specimen choice or frequency; MAR is an assumption benchmark, not a validated correction.
+
+For unobserved outcomes, the exploratory pattern-mixture model is:
+
+$$
+\operatorname{logit}q_0(B,L)=\widehat\eta(B,L)+\log(r)+\log(g)(B-40)/5.
+$$
+
+Cross missing-versus-observed odds ratios at BMI 40 of 0.25, 0.5, 1, 2 and 4 with relative odds-gradient multipliers per five BMI units of 0.5, 1 and 2. Evaluate this rule at shifted BMI as well; observation membership remains fixed. The r=g=1 anchor reproduces MAR. These parameters are not identified by observed outcomes and their ranges are not clinically validated bounds.
+
+PIF is 1 − mean shifted probability / mean observed probability. Absolute differences are also reported per 1,000 indexed patients. Pointwise 95% delta-method intervals use the full coefficient covariance, holding empirical references, observation status and sensitivity parameters fixed. Their precision does not quantify uncertainty about missingness assumptions.
+
+The ICD comparator includes J96.02/J96.12/J96.22/J96.92/E66.2. Each ICD/gas pair uses identical rows with known coding capture and the required gas evidence. The arterial pair requires ABG; the combined pair accepts either specimen. The two pairs may have different populations. E66.2 includes obesity-containing ascertainment.
+
+## Population accounting
 
 ```{r}
-#| label: bmi-summary
-b <- analysis$bmi_summary
-table_out(cbind(identity_columns(results), Min = round(b$minimum, 1), Q1 = round(b$q25, 1), Median = round(b$median, 1), Q3 = round(b$q75, 1), Max = round(b$maximum, 1), `BMI 39–<41, n` = tri_count(b$n_near40), `BMI ≥50, n` = tri_count(b$n_at_least50)), "BMI among the exact model cases. The near-40 and upper-tail counts describe support; they are not exclusion rules.")
+#| label: population-accounting
+counts <- a$population
+labels <- c(n_frame_patients = "Confirmed BMI ≥30 patients", n_index_resolved = "Resolved first indexes",
+  n_index_unresolved = "Unresolved first indexes", n_membership_uncertain = "Patients with only uncertain membership",
+  n_earliest_ties = "Earliest-date ties", n_earlier_uncertainty = "Potentially earlier qualifying encounter",
+  n_conflicting_indexes = "Conflicting earliest evidence", n_missing_adjustment = "Resolved indexes missing adjustment",
+  n_reference = "Common covariate-complete reference", n_reference_ge40 = "Fixed-index BMI ≥40 subset",
+  n_known_icd = "Reference with known ICD capture", n_matched_abg = "Matched arterial/ICD reference",
+  n_matched_any_gas = "Matched either-gas/ICD reference")
+table_out(data.frame(Measure = unname(labels), N = tri_count(unlist(counts[names(labels)]))), "Cohort and reference populations; uncertain membership is separate from confirmed patients.")
+```
+
+## Primary encounter-wide contrasts
+
+```{r}
+#| label: primary-probabilities
+primary <- r[r$target_id == "bmi_ge30" & r$window == "encounter" & r$method %in% c("observed", "mar"), ]
+table_out(data.frame(Outcome = outcome(primary$outcome), Method = method(primary$method),
+  `Model N` = tri_count(primary$n_training), `Reference N` = tri_count(primary$n_reference),
+  `Unobserved N` = tri_count(primary$n_reference_unobserved),
+  `Observed BMI p (%)` = tri_percent(primary$p_observed), `Shifted BMI p (%)` = tri_percent(primary$p_counterfactual), check.names = FALSE),
+  "Probability scenarios and distinct model/reference denominators. Observed denotes the BMI scenario, not measured prevalence.")
+table_out(contrast_table(primary, data.frame(Outcome = outcome(primary$outcome), Method = method(primary$method))), "Absolute and relative model-standardized contrasts.")
 ```
 
 ```{r}
-#| label: fig-bmi-model-check
-#| fig-width: 7.4803
-#| fig-height: 6.5
+#| label: page-primary-figure
+#| results: asis
+page()
+```
+
+## Candidate A — preferred paired forest/table
+
+```{r}
+#| label: fig-common-A
+#| fig-cap: "Absolute and relative contrasts on the fixed BMI ≥30 index cohort. Open points are observed-evidence benchmarks; filled points are assumption-dependent MAR projections. Intervals are conditional model-based 95% confidence intervals."
+#| fig-alt: "Four rows compare arterial and combined gas outcomes, each with an observed benchmark and MAR projection. Absolute change per 1,000 and PIF appear on separate axes alongside their intervals and model/reference counts."
 #| out-width: 100%
 #| fig-pos: H
-#| fig-cap: "Descriptive BMI checks using fixed 5-kg/m² bins: observed outcome frequency and mean fitted probability among the same model cases. These unadjusted bin summaries inspect model shape and calibration; they are not causal exposure curves. Empty panels contain no fitted cases. Counts and events are retained in bmi_diagnostics.csv."
-#| fig-alt: "Fifteen small panels compare observed bin frequencies with mean fitted probabilities across BMI, grouped by sampling frame and outcome/window. A vertical line marks BMI 40."
-d <- analysis$bmi_diagnostics
-if (nrow(d)) {
-  d$panel <- factor(analysis$registry$display_order[match(d$cell_id, analysis$registry$cell_id)] %% 5,
-    levels = c(1, 2, 3, 4, 0), labels = c("ICD\nEncounter", "ABG\nEncounter", "ABG\nIndex day", "Either gas\nEncounter", "Either gas\nIndex day"))
-  d$frame <- factor(frame_label(analysis$registry$frame[match(d$cell_id, analysis$registry$cell_id)]), levels = frame_label(names(triangulation_frames)))
-  long <- rbind(transform(d, series = "Observed frequency", probability = observed_fraction), transform(d, series = "Mean model prediction", probability = mean_fitted))
-  p <- ggplot2::ggplot(long, ggplot2::aes(x = bin_low + 2.5, y = probability, shape = series, linetype = series)) +
-    ggplot2::geom_vline(xintercept = 40, colour = "grey60", linewidth = .35) +
-    ggplot2::geom_line(colour = "#184F64", linewidth = .4) + ggplot2::geom_point(colour = "#184F64", size = 1.6) +
-    ggplot2::facet_grid(frame ~ panel, drop = FALSE) +
-    ggplot2::scale_shape_manual(values = c("Observed frequency" = 1, "Mean model prediction" = 16)) +
-    ggplot2::scale_linetype_manual(values = c("Observed frequency" = "dashed", "Mean model prediction" = "solid")) +
-    ggplot2::scale_x_continuous(breaks = c(30, 40, 50, 60)) +
-    ggplot2::scale_y_continuous(limits = c(0, 1), breaks = c(0, .5, 1)) +
-    ggplot2::labs(x = "BMI (kg/m²); fixed bin midpoints", y = "Outcome frequency / probability", shape = NULL, linetype = NULL) +
-    ggplot2::theme_minimal(base_family = "Arial", base_size = 10) +
-    ggplot2::theme(legend.position = "bottom", strip.text = ggplot2::element_text(size = 9), axis.text = ggplot2::element_text(size = 9), panel.grid.minor = ggplot2::element_blank())
-  print(p)
+knitr::include_graphics(file.path(output, "figures", paste0("candidate-A.", if (knitr::is_latex_output()) "pdf" else "png")))
+```
+
+```{r}
+#| label: page-supporting
+#| results: asis
+page()
+```
+
+## Fixed-index severe-obesity and timing sensitivities
+
+```{r}
+#| label: supporting-contrasts
+support <- r[r$method == "mar" & !(r$target_id == "bmi_ge30" & r$window == "encounter"), ]
+table_out(contrast_table(support, data.frame(Target = target(support$target_id), Outcome = outcome(support$outcome), Window = window(support$window))),
+  "MAR projections using unchanged primary models; BMI ≥40 is a reference restriction, not a new index or refit.")
+table_out(data.frame(Target = target(support$target_id), Outcome = outcome(support$outcome), Window = window(support$window),
+  `Model N` = tri_count(support$n_training), `Reference N` = tri_count(support$n_reference),
+  `Shifted (%)` = common_number(support$pct_shifted), `Outside BMI support N` = tri_count(support$n_shifted_bmi_outside_support), check.names = FALSE),
+  "Support diagnostics. Marginal-range counts do not establish conditional positivity; source-pending counts are unassessed.")
+```
+
+## Matched ICD comparisons
+
+```{r}
+#| label: matched-comparisons
+matched <- r[r$method == "matched", ]
+identities <- data.frame(Pair = ifelse(matched$target_id == "matched_abg", "Arterial/ICD", "Either gas/ICD"), Criterion = outcome(matched$outcome))
+table_out(cbind(identities, data.frame(N = tri_count(matched$n_reference), `Observed p (%)` = tri_percent(matched$p_observed),
+  `Shifted p (%)` = tri_percent(matched$p_counterfactual), check.names = FALSE)), "Within each pair, models use the same encounters; no missing ICD projection is fitted.")
+table_out(contrast_table(matched, identities), "Matched-definition contrasts; pairs are overlapping and are not independent replications.")
+```
+
+```{r}
+#| label: page-diagnostics
+#| results: asis
+page()
+```
+
+## Observation and model diagnostics
+
+The saved observation-by-BMI table reports both evidence availability and positivity. Observation patterns distinguish specimen availability from testing flags. “No captured testing evidence” is not proof that testing did not occur. Dates and maxima do not standardize measurement frequency or treatment before measurement.
+
+```{r}
+#| label: observation-summary
+patterns <- aggregate(n ~ window + evidence_pattern, a$observation, sum, na.action = na.pass)
+table_out(data.frame(Window = window(patterns$window), Pattern = patterns$evidence_pattern, N = tri_count(patterns$n)), "Usable gas patterns in the common reference; unavailable source evidence remains pending.")
+table_out(data.frame(Model = a$models$model_id, N = tri_count(a$models$n_training), Events = tri_count(a$models$n_training_events),
+  `BMI OR` = common_number(a$models$odds_ratio), Status = a$models$status, check.names = FALSE), "Fitted-model diagnostics; the BMI odds ratio is not converted into PIF.")
+```
+
+Detailed BMI-bin availability/positivity, age and categorical covariate coverage, model-shape diagnostics and timing-transition counts are retained as aggregate CSVs. Unseen reference categories are nonestimable without silently reducing the target. Shifted BMI outside marginal training support is flagged. Selection, missingness, model shape and causal assumptions remain relevant after technical source qualification.
+
+```{r}
+#| label: failures
+failed <- unique(r[r$status != "estimated", c("target_id", "outcome", "window", "reason")])
+if (nrow(failed)) table_out(data.frame(Analysis = paste(target(failed$target_id), outcome(failed$outcome), window(failed$window), sep = " / "),
+  Reason = failed$reason), "Pending or nonestimable analyses; no substitute model or numerical mark is used.")
+```
+
+```{r}
+#| label: page-B
+#| results: asis
+page()
+```
+
+## Candidate B — outcome-first panels
+
+```{r}
+#| label: fig-common-B
+#| fig-cap: "The same four benchmarks and confidence limits as candidate A, grouped by evidence criterion. Differences between observed and MAR references are explicit."
+#| fig-alt: "Two outcome panels show observed-evidence and MAR contrasts on absolute and PIF scales, with training and reference counts."
+#| out-width: 100%
+#| fig-pos: H
+knitr::include_graphics(file.path(output, "figures", paste0("candidate-B.", if (knitr::is_latex_output()) "pdf" else "png")))
+```
+
+```{r}
+#| label: page-C
+#| results: asis
+page()
+```
+
+## Candidate C — sensitivity to unobserved outcomes
+
+```{r}
+#| label: fig-common-C
+#| fig-cap: "Prespecified missing-outcome scenarios for the same BMI ≥30 reference. Outlined cells reproduce MAR. Sensitivity ranges are not confidence intervals or validated clinical bounds."
+#| fig-alt: "Four grayscale maps cross five missing-outcome odds assumptions with three BMI-gradient assumptions, separately showing absolute differences and PIF for arterial and combined criteria."
+#| out-width: 100%
+#| fig-pos: H
+knitr::include_graphics(file.path(output, "figures", paste0("candidate-C.", if (knitr::is_latex_output()) "pdf" else "png")))
+```
+
+```{r}
+#| label: page-reproducibility
+#| results: asis
+page()
+```
+
+## Reproducibility and source qualification
+
+This report reads a saved, hash-verified version-3 aggregate bundle. Rendering neither opens clinical inputs nor fits models. Clinical qualification requires the intended BMI ≥30 population, original-key and chronology reconciliation, reviewed legacy BMI/adjustment values, gas mappings and coding-capture evidence. Engineering acceptance and artificial success cannot establish those checks.
+
+```{r}
+#| label: source-policy-aggregate-audit
+#| results: asis
+source_audit <- bundle$input_receipt$source_audit
+audit_rows <- lapply(names(source_audit), function(domain) {
+  values <- source_audit[[domain]]
+  if (!length(values)) return(NULL)
+  data.frame(Domain = domain, Measure = gsub("_", " ", names(values)), N = unlist(values), row.names = NULL)
+})
+if (length(audit_rows) && any(vapply(audit_rows, Negate(is.null), logical(1)))) {
+  print(table_out(do.call(rbind, audit_rows), "Source preparation audit before index selection. Record counts are not necessarily independent specimens; measures overlap. Encounter counts use original composite keys."))
 }
 ```
 
-# Interpretation and reproducibility
+The prior frame-specific, BMI-to-40, historical R and Stata tracks retain their own definitions and runnable commands. They are not relabeled as this common-index analysis.
 
-Compare the explicitly different frame/outcome/window estimands using their magnitudes, intervals and denominators. Patients overlap and indexes can differ. No pooling, significance vote count, joint specification-curve test or independent-replication claim is made.
+```{r}
+#| label: reproducibility
+#| results: asis
+cat("Run ID: `", bundle$manifest$run_id, "`\n\nDesign: `", common_design_id,
+  "`\n\nBundle SHA-256: `", bundle$bundle_manifest_sha256, "`\n\n", sep = "")
+```
 
-The shared one-unit shift does not equalize populations or remove testing selection, reverse causation, residual confounding or missingness assumptions. Each estimate depends on its fitted BMI distribution. The demographic adjustment set and linear functional form do not establish exchangeability. Gas outcomes describe physiologic measurements; ICD ascertainment includes E66.2. Incidence reduction and causal prevention are not established.
-
-Estimation runs once. Version-2 bundles persist the scenario, fifteen-cell registry, full-precision results, aggregate diagnostics and input/source hashes. All report and figure revisions read the saved aggregates without reopening clinical data or refitting. Version-1 BMI-to-40 bundles are rendered only by their frozen historical sources and retain their original labels.
-
-Only aggregate results are exported; indexes and identifiers remain in memory. Local artifacts are ignored by Git. Current upstream acceptance is reused within its documented scope; each input still needs an authenticated study mapping. The saved source assessment records which checks passed and which could not run. Archived R and Stata analyses retain their historical specifications and are available through explicit historical commands.
+Methodological references: [potential impact fractions](https://pubmed.ncbi.nlm.nih.gov/19692711/), [generalizability and transportability](https://www.annualreviews.org/content/journals/10.1146/annurev-statistics-042522-103837), and [binary-outcome sensitivity analyses](https://discovery.ucl.ac.uk/id/eprint/10106387/).
