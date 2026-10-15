@@ -2,6 +2,8 @@
 
 Updated 2026-10-15. The user selected execution on the Mini and will resume on the home network. The saved Mini hostname did not resolve from the current Mac. No private product was opened and no clinical model ran during this release. The original local `full_db.rds` remains a historical comparator.
 
+Workflow release: [PR #5](https://github.com/reblocke/obes-pop-attrib-fract-hypercap/pull/5). Use its merged revision when synchronizing the Mini; exact local publication receipts remain in ignored evidence storage.
+
 ## 1. Open the clean merged checkout
 
 From the Mini's existing repository, inspect `git status --short`. Preserve unrelated work; do not reset it. With a clean checkout:
