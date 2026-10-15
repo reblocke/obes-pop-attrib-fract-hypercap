@@ -4,6 +4,7 @@ args <- commandArgs(trailingOnly = TRUE)
 if (!length(args) %in% c(1L, 2L)) stop("Usage: Rscript scripts/preflight_triangulation.R INPUT [MANIFEST]")
 source("R/bmi_hypercapnia_triangulation.R")
 source("R/triangulation_reporting.R")
+source("R/common_index_hypercapnia.R")
 require_tri_packages(c("jsonlite", "digest"))
 input <- normalizePath(args[1], mustWork = TRUE)
 ext <- tolower(tools::file_ext(input))
@@ -63,7 +64,7 @@ receipt <- list(status = "schema_audited_not_authenticated", input_sha256 = tri_
                 audit_source_sha256 = tri_sha256("scripts/preflight_triangulation.R"))
 qualification_error <- NULL
 if (length(args) == 2L) {
-  loaded <- tryCatch(load_triangulation_input(input, args[2]), error = function(e) e)
+  loaded <- tryCatch(load_common_input(input, args[2]), error = function(e) e)
   if (inherits(loaded, "error")) {
     qualification_error <- conditionMessage(loaded)
     receipt$status <- "source_qualification_failed"
@@ -77,6 +78,6 @@ if (length(args) == 2L) {
   }
 }
 jsonlite::write_json(receipt, file.path(output, "preflight_receipt.json"), auto_unbox = TRUE, pretty = TRUE)
-writeLines(c("# Input preflight", "", paste("Status:", receipt$status), "", "Schema and aggregates do not establish producer lineage or population completeness. With a manifest, this CLI additionally verifies reviewed mappings and referenced evidence-file hashes; it does not perform an independent raw-source comparison.", "", "No clinical models were fitted. Normal gas records do not alone prove complete frame coverage.", "", paste("Rows:", nrow(data), "; columns:", ncol(data)), paste("Required names absent:", paste(receipt$required_names_absent, collapse = ", ")), "", "See docs/TRIANGULATION_SOURCE_ASSESSMENT.md and docs/TRIANGULATION_INPUT_HANDOFF.md for the bounded source assessment."), file.path(output, "preflight_review.md"))
+writeLines(c("# Input preflight", "", paste("Status:", receipt$status), "", "Schema and aggregates do not establish producer lineage or population completeness. With a manifest, this CLI additionally verifies reviewed mappings and referenced evidence-file hashes; it does not perform an independent raw-source comparison.", "", "No clinical models were fitted. Normal gas records do not alone prove complete common-target coverage.", "", paste("Rows:", nrow(data), "; columns:", ncol(data)), paste("Required names absent:", paste(receipt$required_names_absent, collapse = ", ")), "", "See docs/TRIANGULATION_SOURCE_ASSESSMENT.md and docs/TRIANGULATION_INPUT_HANDOFF.md for the bounded source assessment."), file.path(output, "preflight_review.md"))
 cat("Preflight saved:", output, "\nStatus:", receipt$status, "\nModels fitted: 0\n")
 if (!is.null(qualification_error)) stop("Qualification failed; receipt retained: ", qualification_error)

@@ -13,3 +13,9 @@ The primary analysis is [the patient-level one-unit BMI shift report](../reports
 Version-1 BMI-to-40 runs remain immutable. `make render RUN=<version-1 run>` validates them and uses their frozen original report/figures, preserving nine cells and BMI-to-40 labels. Version-2 runs use the fifteen-cell, BMI >30 one-unit-shift definition. This compatibility path performs no clinical data load or model refit.
 
 Only source originals are tracked here. Raw data, generated reports, clinical artifacts, input paths and local receipts are ignored. Archive hash tests are a preservation check, not acceptance of a historical clinical result.
+
+## Frame-specific version 2, preserved 2026-10-14
+
+`2026-10-14-frame-specific/` contains sixteen unchanged sources/documents from `d8909df`, with hashes in provenance.json. It retains the BMI >30 minus-one contrast in three independently indexed frames and fifteen cells. It is supporting work, not the new common-index study.
+
+Use `make frame-triangulation-test`, `make frame-triangulation-fixture` or explicit `make frame-triangulation INPUT=... MANIFEST=...` (version 2). The wrapper verifies hashes and executes a copy inside ignored `artifacts/triangulation/frame-workspaces/`; it does not modify the archive. Default saved-run render dispatches version-1/2 bundles to these frozen sources. Existing historical R/Stata commands remain unchanged.

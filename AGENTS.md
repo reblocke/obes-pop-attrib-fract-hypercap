@@ -6,7 +6,7 @@
 - The input dataset is expected to be generated upstream by `https://github.com/reblocke/trinetx-preprocessing` and made available locally as `data/raw/full_db.rds`.
 - The separate preserved Stata track accepts an already prepared `full_db.dta` through `STATA_DATA_PATH` (default `data/raw/full_db.dta`). Do not convert inputs or reconstruct upstream fields during import/launcher work.
 - The primary deliverable is a Quarto report/manuscript analysis estimating model-standardized population attributable fractions / potential impact fractions (PAF/PIF) for BMI counterfactuals.
-- R/Quarto patient-level triangulation is the primary analysis, approved 2026-10-13: BMI >30 reduced by exactly 1 kg/m², without a floor. Older R and Stata reports are distinct runnable historical archives. Do not change that scientific decision or harmonize historical definitions silently.
+- R/Quarto common-index BMI ≥30 analysis is primary, approved 2026-10-14: BMI >30 reduced by exactly 1 kg/m², without a floor. Older R and Stata reports are distinct runnable historical archives. Do not change that scientific decision or harmonize historical definitions silently.
 - Do not invent results. If the data are unavailable, make code changes and state that render/validation could not be completed.
 
 ## Repository map
@@ -61,9 +61,14 @@ If a `Makefile` is present, prefer:
 - `make render-html RUN=...`
 - `make render-pdf RUN=...`
 - `make triangulation-test` and `make triangulation-fixture` use artificial data only.
+- `make common-index-test` runs the new artificial checks; `make triangulation-test` also retains the prior shared checks.
+- `make frame-triangulation-test` and `make frame-triangulation-fixture` use verified frozen version-2 sources.
+- `make frame-triangulation INPUT=... MANIFEST=...` explicitly runs the supporting frame analysis with its version-2 manifest.
 - `make historical-test` verifies original defects and repaired archived R behavior.
 - `make legacy-r INPUT=...` explicitly renders the repaired historical R track.
-- Clinical estimation requires explicit `make triangulation-render INPUT=... MANIFEST=...` with authenticated version-2 evidence.
+- Clinical estimation requires explicit `make triangulation-render INPUT=... MANIFEST=...` with authenticated version-3 evidence.
+- `make triangulation-prepare PREP_PYTHON=... SOURCE_CONFIG=... OUTPUT=...` uses pinned upstream readers and fresh private output. Its manifest remains pending until source review; it does not fit models or rebuild upstream products.
+- `make preparation-test` uses artificial data. The orchestration check requires existing pandas/R; no installation is automatic.
 - `make render-archival`
 - `make test`
 - `make stata-check` checks Stata 18+ and installed dependencies; no clinical input is opened.
@@ -89,16 +94,21 @@ precision repair, and archived failure. Missing evidence must not become a succe
 - For random operations, set an explicit seed near the beginning, for example `set.seed(1234)`.
 - Do not add heavy workflow frameworks (`targets`, `drake`, databases, containers) unless requested or clearly justified.
 
-## Primary patient-level specification
+## Primary common-index specification
 
-- Scope: adults ≥18, 2022 ED/inpatient, first qualifying encounter per patient separately within BMI ≥40, ABG obtained and either-gas-obtained frames. Indexes precede completeness checks.
-- Outcomes: five-code J96.02/J96.12/J96.22/J96.92/E66.2 composite; PaCO₂ ≥45; PaCO₂ ≥45 or PvCO₂ ≥50. No pH or support requirement.
-- Nine encounter primary plus six index-calendar-day gas sensitivity cells use one registry. Calendar-day conflicts do not alter primary indexes. Pending source evidence has missing counts/estimates, distinct from patient unknowns and model failures.
-- Use legacy derived BMI; linear BMI/age and sex/race-ethnicity/region adjustment. Shift observed BMI >30 by exactly −1; hold original membership/index/covariates and model cases fixed. No floor at 30.
-- Report paired probabilities, absolute difference, PIF with full-covariance delta-method limits, N and shifted percentage. Retain negative limits and exact no-change zeros.
-- Version-2 bundles are aggregate-only and immutable. Figure/report rerenders use an explicit saved RUN without reading clinical inputs or refitting. Version-1 BMI-to-40 reports use frozen source hashes and their original labels.
-- Reuse current upstream acceptance evidence; stale local failed-build documentation is superseded. Actual study input mapping/coverage still needs qualification. No new export is presumed necessary. See docs/TRIANGULATION_SOURCE_ASSESSMENT.md.
-- Apply the figure QC skill for primary scientific exports and record actual native-size/grayscale inspection.
+- Adults ≥18, 2022 ED/inpatient; first legacy BMI ≥30 encounter before gas availability/completeness. Preserve unresolved earlier membership and indexes; no later substitute.
+- Common reference: resolved indexes with complete legacy BMI/age/sex/race-ethnicity/region. Model N and reference N differ. No new covariates or covariate imputation.
+- Separate ABG ≥45 and ABG ≥45 or VBG ≥50 evidence outcomes; no pH/support requirement. Unknown gases remain unknown. Combined available negatives do not prove unmeasured-specimen negativity.
+- Confirmed 2026-10-15: new clinical inputs bind `unadjusted_pco2_v1`; ordinary specimen-authenticated gases, strict arterial 5–200 and venous 10–250 mm Hg validity intervals, explicit units. Unspecified-blood codes need specimen evidence; adjusted values remain outside primary outcomes and are audited.
+- BMI >30 decreases by exactly one, without floor; BMI =30 unchanged. Observation status, indexes and covariates fixed. BMI ≥40 sensitivity restricts original reference and reuses primary models, with no refit.
+- Observed benchmarks and common-reference MAR/MNAR projections are distinct. MNAR varies missing-outcome odds at BMI 40 and relative gradient per five BMI units; evaluate the offset at shifted BMI too. Ranges are assumptions, not estimates.
+- ICD/ABG and ICD/either-gas comparisons each use identical rows within their own pair, with known coding capture. The latter accepts either specimen; never require both. Retain all five codes including E66.2; no missing-ICD projection.
+- With complete available captured diagnosis extraction, no target code is documented-ICD negative without requiring another diagnosis. Incomplete/unavailable capture stays unknown.
+- Encounter primary and fixed-index calendar-day sensitivities use one registry. Pending timing has unassessed counts and empty estimates, distinct from patient unknowns or model failures.
+- Report probabilities, difference per 1,000, PIF/CI, model/reference counts and support. Full-coefficient delta intervals condition on empirical reference and fixed sensitivity assumptions. Retain negatives and small nonzero estimates; no causal/incidence claims.
+- Version-3 manifests/bundles bind common study/target/method/parameters. Default rerenders consume explicit saved aggregates without clinical inputs or refitting. Version-1/2 saved runs use verified frozen sources and original labels. Preserve runnable frame/R/Stata archives.
+- Reuse accepted upstream source products first; qualify expanded BMI ≥30 coverage and exact local input/mappings. No new export is presumed necessary. Apply figure QC with recorded native-size/grayscale inspection.
+- Clinical execution is on the Mini from a clean merged checkout. Record commit/tree, source/input/policy/evidence hashes and actual review states. Preparation, estimation completion, numerical review and scientific review remain distinct; preserve historical bundle labels.
 
 ## Historical R scientific definitions and shared guardrails
 

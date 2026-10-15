@@ -53,6 +53,8 @@ stata-test:
 
 triangulation-test:
 	Rscript --vanilla tests/run_triangulation_tests.R
+	Rscript --vanilla tests/run_common_index_tests.R
+	"$(PREP_PYTHON)" -m unittest discover -s tests -p 'test_preparation*.py'
 
 triangulation-fixture:
 	Rscript --vanilla scripts/render_triangulation.R fixture
@@ -68,3 +70,28 @@ triangulation-preflight:
 triangulation-review:
 	@test -n "$(RUN)" || (echo 'Set an explicit saved RUN directory.'; exit 1)
 	Rscript --vanilla scripts/render_triangulation.R review "$(RUN)"
+
+# Frozen version-2 estimation/test entrypoints. Default rendering dispatches old bundles.
+.PHONY: common-index-test frame-triangulation frame-triangulation-fixture frame-triangulation-test
+common-index-test:
+	Rscript --vanilla tests/run_common_index_tests.R
+
+frame-triangulation:
+	@test -n "$(INPUT)" -a -n "$(MANIFEST)" || (echo 'Set explicit historical INPUT and version-2 MANIFEST.'; exit 1)
+	python3 scripts/run_frame_triangulation.py clinical "$(INPUT)" "$(MANIFEST)"
+
+frame-triangulation-fixture:
+	python3 scripts/run_frame_triangulation.py fixture
+
+frame-triangulation-test:
+	python3 scripts/run_frame_triangulation.py test
+
+# Use the existing Python environment containing the pinned upstream readers.
+PREP_PYTHON ?= python3
+.PHONY: triangulation-prepare preparation-test
+triangulation-prepare:
+	@test -n "$(SOURCE_CONFIG)" -a -n "$(OUTPUT)" || (echo 'Set explicit reviewed SOURCE_CONFIG and fresh private OUTPUT.'; exit 1)
+	"$(PREP_PYTHON)" scripts/prepare_common_index_input.py --config "$(SOURCE_CONFIG)" --output "$(OUTPUT)"
+
+preparation-test:
+	"$(PREP_PYTHON)" -m unittest discover -s tests -p 'test_preparation*.py'

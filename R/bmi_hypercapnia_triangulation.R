@@ -408,14 +408,18 @@ run_triangulation <- function(data) {
   ))
 }
 
-load_triangulation_input <- function(input_path, manifest_path) {
+load_triangulation_input <- function(input_path, manifest_path, schema_version = 2L, study_design = NULL) {
   require_tri_packages(c("jsonlite", "digest", "haven"))
   if (!nzchar(input_path) || !nzchar(manifest_path)) stop("Clinical mode requires explicit input and reviewed manifest paths.")
   if (!file.exists(input_path) || !file.exists(manifest_path)) stop("Input or manifest does not exist.")
   manifest_hash <- digest::digest(file = manifest_path, algo = "sha256")
   manifest <- jsonlite::read_json(manifest_path, simplifyVector = TRUE)
   required <- c("schema_version", "input_sha256", "source_identity", "reviewed_by", "reviewed_on", "evidence_reference", "columns", "binary_codes", "encounter_type_codes", "category_values", "semantics", "source_qualification", "source_evidence_files", "index_day")
-  if (length(setdiff(required, names(manifest))) || !identical(manifest$schema_version, 2L)) stop("Invalid manifest schema; new estimation requires version 2.")
+  if (length(setdiff(required, names(manifest))) || !identical(manifest$schema_version, schema_version)) stop("Invalid manifest schema; estimation requires version ", schema_version, ".")
+  if (schema_version == 3L && (!identical(manifest$study_design, study_design) ||
+      !identical(manifest$population_policy, "first_2022_adult_ED_inpatient_BMI_ge30_before_gas_and_completeness"))) {
+    stop("Manifest does not qualify the common-index BMI >=30 study population.")
+  }
   for (name in c("source_identity", "reviewed_by", "reviewed_on", "evidence_reference")) {
     if (!is.character(manifest[[name]]) || length(manifest[[name]]) != 1 || !nzchar(trimws(manifest[[name]])) || grepl("pending", manifest[[name]], ignore.case = TRUE)) stop("Manifest review metadata incomplete: ", name)
   }

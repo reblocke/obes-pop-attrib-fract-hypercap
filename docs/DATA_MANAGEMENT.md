@@ -1,3 +1,7 @@
+# Current common-index input authority — 2026-10-14
+
+Primary estimation requires an explicit authenticated input and version-3 manifest for the first BMI ≥30 index study. The covariate-complete reference is fixed across gas projections; observation status and original indexes remain fixed under the BMI shift. Unknown gases are not recoded negative. Saved version-3 outputs are aggregate-only and rerender without clinical data or refitting. Version-1/2 frame/BMI-to-40 workflows and historical R/Stata remain distinct. See [input handoff](TRIANGULATION_INPUT_HANDOFF.md) and [source assessment](TRIANGULATION_SOURCE_ASSESSMENT.md). The following historical notes are retained for their original scopes.
+
 # Primary input and historical data contracts
 
 The primary patient-level analysis uses an explicit authenticated input plus the version-2 study manifest. Its required fields, optional calendar-day module and source-acceptance boundary are specified in [the saved plan](BMI_HYPERCAPNIA_TRIANGULATION_PLAN.md), [current decisions](DECISIONS.md), [source assessment](TRIANGULATION_SOURCE_ASSESSMENT.md) and `config/triangulation_input.example.json`.
