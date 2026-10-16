@@ -4,6 +4,19 @@ Authority: implementation ticket dated 2026-10-16, based on 8735505, reconciled
 against the pending original-list/BMI corrections. The original plan is preserved
 in `archive/2026-10-16-curve-refactor/PLAN.source.md` as superseded history.
 
+## Execution checkpoint — 2026-10-16
+
+PR #7 (`f18d383`) releases the tested curve/audit workflow. The owner explicitly
+authorized source acceptance and clinical execution. Fresh source preflight and
+one clinical analysis completed from a clean matching Mini worktree, preserving
+existing source products and unrelated pending work. All 21 registered positions
+are retained: 20 successful fits and one constant ICD capture-availability
+position. The immutable aggregate bundle passes 48 additional numerical checks.
+Both clinical HTML/PDF reports and all 153 figure exports pass recorded QC;
+investigator numerical/scientific review remains pending. Private receipts and
+exact run identities are indexed by WORKLOG.md. No new scientific definition
+was adopted and no replacement export was requested.
+
 ## Confirmed decisions
 
 - Retain original FULL_DATA selected ED/inpatient encounter candidates; do not
@@ -111,9 +124,7 @@ exact commands are in WORKLOG.md and ignored run/QC evidence.
 | WP5 reports/exhibits | R/reporting.R, two Quarto reports, F0–F5, F1 A/B/C, captions, gallery and QC receipts |
 | WP6 verification | 65-check standalone/testthat interface, independent artificial source tests, private Mini preflight and source receipts |
 
-Clinical data were opened only for qualification/cohort preflight; zero clinical
-models ran. Automated source/companion qualification passes within the approved
-original-list population. Investigator scientific review is not asserted. The
-next operational gate is code review/merge and a clean matching Mini checkout,
-then one clinical analysis, numerical review and repeated clinical export QC.
-No new scientific rule or replacement export is required by the observed checks.
+The preceding artificial/preflight evidence records the pre-release checkpoint.
+It is superseded for execution status by the current checkpoint above; its
+receipts and artifacts are preserved. Investigator scientific review is not
+asserted. No new scientific rule or replacement export was required.

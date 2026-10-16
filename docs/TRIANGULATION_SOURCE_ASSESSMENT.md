@@ -1,3 +1,29 @@
+## Current source acceptance and execution — 2026-10-16
+
+The owner explicitly accepted the checked original-selected-encounter source,
+pre-index companion and mappings and authorized release and clinical estimation.
+Twelve post-run input/evidence hashes match; existing independent field and
+30-check original-population evidence is retained. This accepts the
+documented-evidence source for the agreed use, not MAR/MNAR assumptions or
+causal claims.
+
+PR #7 merged as `f18d383`; its tree exactly matches the candidate tested on the
+Mini (65 artificial acceptance checks, 24 adapter tests, both complete HTML/PDF
+reports and recorded figure/page QC). A separate clean external-drive worktree
+preserves the pre-existing Mini edits and upstream checkout. Fresh clinical
+preflight and one estimation completed from the merged revision. All 21 model
+positions remain visible: 20 fits succeed; ICD capture availability is constant
+and its raw proportions remain available. No source, covariate or estimator rule
+was changed for execution.
+
+The private `clinical-release-20261016/` packet binds source acceptance, reviewed
+manifest, merged commit/tree, clinical bundle and 48 aggregate numerical checks.
+Both clinical HTML/PDF reports and all 153 figure exports pass recorded QC.
+Investigator numerical/scientific review remains pending. No clinical artifacts
+or effect estimates are included here.
+The dated pre-run assessments below remain historical evidence, not the current
+execution status.
+
 **Final refactor verification — 2026-10-16:** the fresh pre-index companion,
 independent selected-field comparison and model-free preflight pass in the
 isolated Mini snapshot. All 13 qualification-function identities and all

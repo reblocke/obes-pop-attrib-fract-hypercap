@@ -754,3 +754,74 @@ were absent from the noninteractive SSH PATH. No installation is needed so far.
 Next checkpoint: commit the reviewed candidate, run fresh artificial end-to-end
 and adapter checks on the Mini, then push/PR/merge and synchronize the exact
 merged revision before clinical preflight or estimation.
+
+## 2026-10-16 22:20 UTC — Clinical estimation completed from merged release
+
+PR #7 merged as `f18d383b2b6858f6e39307bda4fd84e0c5631850`; its tree
+`4b12e22c978266aab2ad2e398d0fe6977e398cf1` exactly matches tested candidate
+`ee00e20`. The clean external-drive Mini worktree matched origin/main for the
+clinical launch. The original consumer checkout's tracked diff and untracked
+inventory remain unchanged; upstream work and accepted products were not edited.
+No package or system-library installation occurred during this release.
+
+Fresh Mini `make fixture` completed scientific/audit HTML and PDF. All 65
+artificial acceptance checks and all 24 source-adapter tests passed without skips.
+The 230 artificial figure pixels match the previously inspected local exports;
+eight scientific/cohort tables agree at tolerance 1e-10. The Mini's artificial
+audit has 1,239 pages; different local TeX/Quarto pagination is documented. The
+first environment smoke failed because R rejects spaces in TMPDIR; a private
+space-free symlink to external-drive scratch resolved it without changing code.
+
+The owner explicitly accepted the checked original-list source and pre-index
+companion and authorized clinical execution. A fresh private reviewed manifest
+preserves the earlier automated manifest and all source products. Twelve
+input/evidence hashes also match after execution. Source acceptance is separate
+from assumptions about observation, causal interpretation or future investigator
+review of the results.
+
+Actual commands were `make preflight INPUT=... MANIFEST=...`, followed by one
+`make analyze INPUT=... MANIFEST=...`, and `make render RUN=...`. Exact protected
+paths, runtime activation, commands, natural completion markers and logs are in
+ignored `artifacts/triangulation/clinical-release-20261016/`. Preflight run:
+`curve-preflight-20261016T155811-16922`. Clinical run:
+`curve-analyze-20261016T160703-17017`. Estimation took 528.71 seconds. All 21
+registered positions are retained: 20 fits succeeded, while ICD capture
+availability is constant and is explicitly not fitted. No replacement estimator
+or scientific-rule change was used.
+
+The clinical bundle passes 48 additional aggregate numerical checks, including
+model/event/denominator accounting, coefficient/covariance coverage, paired
+probabilities/PIF, signed contribution and full-covariance reconciliation,
+fixed-index timing and MAR/MNAR anchors. Both HTML/PDF formats reproduce all
+coefficient, category and variable-profile rows and complete covariance cells.
+Rendering records zero clinical input reads and zero model refits; the saved
+bundle and estimator sources remain unchanged.
+
+Clinical review `reviews/20261016T160718-17170/` contains both HTML/PDF reports,
+40 aggregate tables, 153 scientific/audit figure exports, the three F1
+alternatives, SVG/PDF masters, 300-dpi PNG/JPG and gallery/captions. Figure QC
+inspected all 153 grayscale exports in native-review-width sheets and F1/F2/main
+flow individually. Every PDF master passed native text bounds/size checks. All
+nine scientific and 1,224 audit pages received layout-overview inspection;
+all-page native text bounds and replacement-character checks pass. Representative
+complete source/profile/coefficient/covariance tables were inspected at native
+raster size. This does not assert manual reading of every table cell. Static
+HTML inventory finds 1,446 audit tables and 152 embedded audit images; no image
+resource is missing. Clinical browser interaction was not repeated.
+
+F1-A remains preferred. Nonblocking presentation follow-ups are the large/slow
+complete audit, long captions continuing on the next PDF page, and connecting
+arcs crossing some detailed-flow label boxes; the main flow and complete edge
+table remain clear. Actual receipts distinguish source accepted, estimation
+complete, automated numerical reconciliation passed, export QC complete, and
+investigator numerical/scientific interpretation pending. Frozen run-manifest
+review flags describe their initial execution-time state; the separate review
+receipt records subsequent checks without modifying the bundle.
+
+Updated README, implementation plan, decision log, source assessment and clinical
+handoff to remove the active pre-run status. Clinical effect estimates and exact
+aggregates remain private and ignored by Git. Next: investigator/coauthor review
+of interpretation, sparse upper-BMI support, apparent fit and gas-observation
+MAR/MNAR assumptions (including sign-changing sensitivity scenarios) before
+abstract claims. No new source export or operational decision is required by the
+observed checks. No abstract was submitted or clinical result published.

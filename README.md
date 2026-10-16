@@ -111,9 +111,16 @@ candidate covariates. The older selected-index input and its passing source chec
 alone cannot supply the full new audit. Qualification failures retain a partial
 audit and block inference; unknown totals are not zeros.
 
-Existing original-list source checks and the new identity-bound companion
-preflight passed in an isolated Mini snapshot on 2026-10-16. Clinical estimation
-from a clean merged revision and investigator scientific review remain pending. Read the
+The original-list source and pre-index companion are accepted for this use.
+On 2026-10-16, the owner authorized acceptance and clinical execution; fresh
+preflight and one clinical estimation completed on the clean merged Mini checkout
+at `f18d383` (PR #7). All 21 registered positions are retained: 20 fits succeeded,
+and constant ICD capture availability is explicitly not fitted. Aggregate
+numerical reconciliation passes. Both clinical HTML/PDF reports and all 153
+figure exports pass recorded QC.
+Investigator numerical/scientific review remains pending. Exact run paths,
+hashes and protected receipts are recorded in ignored release storage and
+WORKLOG. Read the
 [current plan](docs/BMI_HYPERCAPNIA_TRIANGULATION_PLAN.md),
 [source assessment](docs/TRIANGULATION_SOURCE_ASSESSMENT.md),
 [clinical handoff](docs/CLINICAL_RUN_HANDOFF.md) and
