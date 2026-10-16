@@ -18,7 +18,7 @@ import os
 import subprocess
 import sys
 from collections import Counter
-from datetime import date
+from datetime import date, timedelta
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -202,6 +202,133 @@ def validate_key_coverage(candidate_keys, feature_keys):
         raise PreparationError(f"Expanded-population candidates lack legacy mappings: {len(missing)} encounter keys")
 
 
+def base_source_columns(mapping, encoding):
+    if encoding not in ("typed_v1", "accepted_stata_full_data_v1"):
+        raise PreparationError("Unreviewed legacy base-field encoding")
+    columns=list(mapping.values())
+    if encoding == "accepted_stata_full_data_v1":
+        if mapping["race_ethnicity"] != "race_ethnicity":
+            raise PreparationError("Legacy combined race/ethnicity must name its derived field")
+        columns=[value for name,value in mapping.items() if name!="race_ethnicity"]+["race","ethnicity"]
+    if len(set(columns)) != len(columns):
+        raise PreparationError("Legacy base inputs must use distinct source fields")
+    return columns
+
+
+def decode_base_fields(raw, mapping, encoding):
+    """Decode the explicit accepted FULL_DATA layout, never guess from values.
+
+    The accepted dictionary marks encounter_date as Stata %td (days from
+    1960-01-01). The ordered race/ethnicity rule is inherited from Stata
+    10_preprocessing.do and upstream encounters/legacy/measurement.py.
+    """
+    import pandas as pd
+    base_source_columns(mapping,encoding)
+    out=raw.rename(columns={value:name for name,value in mapping.items()}).copy()
+    if encoding == "typed_v1":
+        return out[list(BASE_COLUMNS)]
+
+    def codes(values, allowed, missing=True):
+        result=[]
+        for value in values:
+            if pd.isna(value):
+                if not missing:
+                    raise PreparationError("Missing legacy race/ethnicity needs explicit review; no default category substituted")
+                result.append(None);continue
+            numeric=number(value)
+            if numeric is None or numeric not in allowed:
+                raise PreparationError("Legacy coded field is outside its reviewed dictionary")
+            result.append(str(int(numeric)))
+        return result
+
+    days=[]
+    for value in out.encounter_date:
+        if pd.isna(value):days.append(None);continue
+        numeric=number(value)
+        if numeric is None or numeric!=int(numeric):
+            raise PreparationError("Legacy Stata day must be an integer or missing")
+        try:days.append(date(1960,1,1)+timedelta(days=int(numeric)))
+        except (OverflowError,ValueError):raise PreparationError("Legacy Stata date is outside calendar bounds") from None
+    out["encounter_date"]=days
+    out["encounter_type"]=codes(out.encounter_type,{1,2,3})
+    out["sex"]=codes(out.sex,{0,1,2})
+    out["location"]=codes(out.location,{0,1,2,3})
+    race=codes(raw["race"],{0,1,2,3,4,5},missing=False)
+    ethnicity=codes(raw["ethnicity"],{0,1,2},missing=False)
+    combined=[]
+    for r,e in zip(race,ethnicity):
+        value="6" if r=="2" else "0"
+        if e=="1":value="2"
+        if r in ("1","3","4","5"):value=r
+        combined.append(value)
+    out["race_ethnicity"]=combined
+    return out[list(BASE_COLUMNS)]
+
+
+def build_bounded_candidate_fields(connection, build, features, raw_types, scope_types):
+    """Project all raw rows in disjoint patient partitions under the RAM cap.
+
+    Each original key and every conflicting raw row stay together. This changes
+    query execution, not scope, consensus, eligibility or index selection.
+    """
+    connection.execute('SET threads=1')
+    connection.execute('SET preserve_insertion_order=false')
+    connection.execute("SET max_temp_directory_size='64GiB'")
+    import pandas as pd
+    totals={}
+    frames=[]
+    for part in range(16):
+        # The interpolated value is an internal bounded integer, never a source key.
+        connection.execute('CREATE OR REPLACE TEMP VIEW bmi30_raw_partition AS SELECT * FROM '
+            'source_encounter WHERE hash(patient_id)%16='+str(part))
+        try:
+            audit=build(connection,output_relation='bmi30_candidates',
+                source_encounter_relation='bmi30_raw_partition')
+            for name,value in vars(audit).items():totals[name]=totals.get(name,0)+value
+            unmapped=connection.execute('SELECT count(DISTINCT encounter_type) FROM bmi30_candidates '
+                'WHERE (encounter_start_date IS NULL OR year(encounter_start_date)=2022) '
+                'AND (year_of_birth IS NULL OR 2022-year_of_birth>=18) '
+                'AND encounter_type IS NOT NULL AND NOT list_contains(?,encounter_type)',[raw_types]).fetchone()[0]
+            if unmapped:
+                raise PreparationError('Captured candidate encounters have unmapped source setting codes')
+            # Consensus precedes this unchanged study-scope filter. Uncovered
+            # keys fail in SQL, before any potentially huge Python allocation.
+            frame=scoped_candidate_frame(connection,features,scope_types)
+            if len(frame):frames.append(frame)
+        except PreparationError as exc:
+            raise PreparationError(f'{exc}; source partition {part+1}/16 (not a full-population total)') from None
+        finally:
+            connection.execute('DROP VIEW IF EXISTS bmi30_raw_partition')
+            connection.execute('DROP TABLE IF EXISTS bmi30_scoped_candidates')
+            connection.execute('DROP TABLE IF EXISTS bmi30_candidates')
+        print('Completed source candidate partition',part+1,'of 16',flush=True)
+    source_rows=connection.execute('SELECT count(*) FROM source_encounter').fetchone()[0]
+    # Every covered candidate key is unique within an upstream projection and
+    # cannot occur in another patient-hash partition. Do not materialize the
+    # much larger out-of-study historical population merely to count its keys.
+    if totals['source_encounter_rows']!=source_rows or sum(len(x) for x in frames)>len(features):
+        raise PreparationError('Partitioned candidate projection did not reconcile')
+    candidates=pd.concat(frames,ignore_index=True) if frames else pd.DataFrame(
+        columns=['patient_id','encounter_id','encounter_start_date','encounter_type'])
+    return type(audit)(**totals),candidates
+
+
+def scoped_candidate_frame(connection, features, scope_types):
+    """Fail on uncovered keys in SQL before materializing candidates in Python."""
+    connection.register('bmi30_legacy_keys',features[['patient_id','encounter_id']])
+    connection.execute('CREATE TEMP TABLE bmi30_scoped_candidates AS SELECT patient_id,encounter_id,'
+        'encounter_start_date,encounter_type FROM bmi30_candidates '
+        'WHERE (encounter_start_date IS NULL OR year(encounter_start_date)=2022) '
+        'AND (encounter_type IS NULL OR encounter_type=ANY(?)) '
+        'AND (year_of_birth IS NULL OR 2022-year_of_birth>=18)',[scope_types])
+    missing=connection.execute('SELECT count(*) FROM bmi30_scoped_candidates c '
+        'ANTI JOIN bmi30_legacy_keys l USING(patient_id,encounter_id)').fetchone()[0]
+    if missing:
+        raise PreparationError(f'Expanded-population candidates lack legacy mappings: {missing} encounter keys')
+    return connection.execute('SELECT patient_id,encounter_id,encounter_start_date,encounter_type '
+        'FROM bmi30_scoped_candidates').fetchdf()
+
+
 def pinned_readers(config):
     pin = json.loads((ROOT / "config/common_index_preparation.example.json").read_text())
     if config["upstream_revision"] != pin["upstream_revision"] or config["upstream_reader_sha256"] != pin["upstream_reader_sha256"]:
@@ -221,6 +348,8 @@ def prepare(config, output):
         raise PreparationError("Unreviewed preparation policy or configuration version")
     if set(config["columns"]) != set(BASE_COLUMNS) or len(set(config["columns"].values())) != len(BASE_COLUMNS):
         raise PreparationError("Preparation requires distinct mappings for all nine base fields")
+    encoding=config.get("base_field_encoding","typed_v1")
+    source_columns=base_source_columns(config["columns"],encoding)
     if not config["specimen_codes"] or any(v not in ("abg", "vbg", "other", "unspecified") for v in config["specimen_codes"].values()):
         raise PreparationError("Explicit reviewed specimen vocabulary is required")
     if type(config["diagnosis_capture_complete"]) is not bool:
@@ -250,8 +379,8 @@ def prepare(config, output):
     features = readers["encounters.reader"].read_encounters(
         Path(bundle["path"]), variant=bundle["variant"], receipt_path=Path(bundle["receipt_path"]),
         expected_receipt_sha256=bundle["expected_receipt_sha256"],
-        validation_report_path=Path(bundle["validation_report_path"]), columns=list(config["columns"].values()))
-    features.columns = list(config["columns"])
+        validation_report_path=Path(bundle["validation_report_path"]), columns=source_columns)
+    features=decode_base_fields(features,config["columns"],encoding)
     require_original_keys(features)
     source = config["canonical_source"]
     # This generic source API is metadata/schema validation. Study acceptance is
@@ -261,25 +390,13 @@ def prepare(config, output):
         spill_root=Path(source["spill_root"]), memory_limit_mib=2816) as opened:
         connection = opened.connection
         build = readers["combined_preprocessing.cohort_source_calendar_population"].build_calendar_candidate_fields
-        candidate_audit = build(connection, output_relation="bmi30_candidates")
-        if candidate_audit.invalid_encounter_key_rows:
-            raise PreparationError("Captured encounters contain invalid original keys; source scope needs review")
         raw_types = list(config["encounter_type_codes"])
         if not raw_types or any(v not in ("EMER", "IMP", "OTHER", "NA") for v in config["encounter_type_codes"].values()):
             raise PreparationError("Invalid reviewed encounter-type vocabulary")
-        acute_types = [k for k,v in config["encounter_type_codes"].items() if v in ("EMER", "IMP")]
-        unmapped_types = connection.execute(
-            "SELECT count(DISTINCT encounter_type) FROM bmi30_candidates "
-            "WHERE (encounter_start_date IS NULL OR year(encounter_start_date)=2022) "
-            "AND (year_of_birth IS NULL OR 2022-year_of_birth>=18) "
-            "AND encounter_type IS NOT NULL AND NOT list_contains(?,encounter_type)", [raw_types]).fetchone()[0]
-        if unmapped_types:
-            raise PreparationError("Captured candidate encounters have unmapped source setting codes")
-        candidates = connection.execute(
-            "SELECT patient_id,encounter_id,encounter_start_date,encounter_type FROM bmi30_candidates "
-            "WHERE (encounter_start_date IS NULL OR year(encounter_start_date)=2022) "
-            "AND (encounter_type IS NULL OR encounter_type=ANY(?)) "
-            "AND (year_of_birth IS NULL OR 2022-year_of_birth>=18)", [acute_types]).fetchdf()
+        scope_types = [k for k,v in config["encounter_type_codes"].items() if v in ("EMER", "IMP", "NA")]
+        candidate_audit,candidates = build_bounded_candidate_fields(connection,build,features,raw_types,scope_types)
+        if candidate_audit.invalid_encounter_key_rows:
+            raise PreparationError("Captured encounters contain invalid original keys; source scope needs review")
         candidate_keys = set(zip(candidates.patient_id, candidates.encounter_id))
         validate_key_coverage(candidate_keys, set(zip(features.patient_id, features.encounter_id)))
         legacy_confirmed = set()
@@ -309,12 +426,14 @@ def prepare(config, output):
             unknown_dates += day is None
             raw_type = selected.at[i,"encounter_type_source"]
             source_type = config["encounter_type_codes"].get(raw_type)
+            if source_type == "NA":source_type=None
             legacy_type = selected.at[i,"encounter_type"]
             if not pd.isna(legacy_type):
                 legacy_type = str(legacy_type).strip().upper()
                 if legacy_type not in config["encounter_type_codes"]:
                     raise PreparationError("Legacy encounter setting code lacks a reviewed mapping")
-                if source_type is not None and config["encounter_type_codes"][legacy_type] != source_type:
+                legacy_mapped=config["encounter_type_codes"][legacy_type]
+                if source_type is not None and legacy_mapped!="NA" and legacy_mapped != source_type:
                     raise PreparationError("Legacy and captured encounter settings disagree")
             selected.at[i,"encounter_type"] = source_type
         connection.register("bmi30_study_keys", candidates[["patient_id", "encounter_id"]])
@@ -357,6 +476,7 @@ def prepare(config, output):
     subprocess.run([config.get("rscript","Rscript"),"--vanilla",str(ROOT/"scripts/write_common_index_input.R"),
                     str(csv_path),str(output/"study-input.rds")],check=True)
     fields={"source_policy":policy,"gas_audit":gas_audit,"icd_audit":icd_audit,
+        "base_field_encoding":encoding,"base_source_columns":source_columns,
         "specimen_codes":config["specimen_codes"],"metadata_pressure_unit":config.get("source_metadata_pressure_unit"),
         "diagnosis_code_systems":config["diagnosis_code_systems"],"diagnosis_capture_complete":config["diagnosis_capture_complete"],
         "testing_evidence_definition":"numeric captured PCO2 result, including adjusted or unusable numeric results, establishes specimen-specific testing; absent selected-code evidence is not proof of no gas draw; nonnumeric/ambiguous evidence remains unknown",
@@ -368,12 +488,14 @@ def prepare(config, output):
     population={"source_policy_id":policy["source_policy_id"],
         "canonical_database_sha256":source["database"]["sha256"],"canonical_sidecar_sha256":source["sidecar"]["sha256"],
         "accepted_bundle_receipt_sha256":bundle["expected_receipt_sha256"],"source_audit":vars(candidate_audit),
+        "candidate_projection":"all_raw_rows_consensus_then_study_scope_patient_hash_16_v1",
         "source_scope":"captured encounters: 2022 or unresolved date; acute-care or unresolved type; adult birth-year proxy or unresolved age; no gas/BMI/completeness prefilter",
         "candidate_encounter_keys":len(candidate_keys),"missing_legacy_mapping_keys":0,"input_rows":len(selected),
         "legacy_confirmed_scope_keys":len(legacy_confirmed),"legacy_scope_keys_missing_or_contradictory":0,
         "automated_verification":True,"human_review":"pending","clinical_results_qualified":False}
     (output/"population-evidence.json").write_text(json.dumps(population,indent=2)+"\n")
     receipt={"status":"prepared_not_qualified","source_policy_id":policy["source_policy_id"],
+        "base_field_encoding":encoding,
         "input_sha256":sha256(output/"study-input.rds"),"candidate_encounter_keys":len(candidate_keys),
         "input_rows":len(selected),"unresolved_source_date_rows":unknown_dates,
         "coverage":"all scoped captured-source candidate keys have legacy mappings",

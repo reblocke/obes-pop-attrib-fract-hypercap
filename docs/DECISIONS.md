@@ -39,6 +39,14 @@ Existing accepted upstream evidence is reused first; source absence is not infer
 
 Scientific limits remain after source qualification: demographics-only MAR, informative ordering/specimen/frequency, model form, covariate missingness, shifted BMI support and causal confounding. The MNAR range is exploratory, not a clinical plausibility certificate.
 
+## 2026-10-15 operational source bindings
+
+The accepted FULL_DATA dictionary uses Stata calendar days, coded settings/demographics and separate `race`/`ethnicity`; the preparation configuration explicitly selects `accepted_stata_full_data_v1`. Decode the dictionary and reproduce the inherited ordered combined-category rule, leaving BMI/age unchanged. Missing raw race/ethnicity requires review rather than a new default assignment. The independent retained-reference category comparison passed. Previously typed preparation configurations retain `typed_v1`; saved results are unchanged.
+
+Raw-source projection streams disjoint patient-hash partitions because direct projection/accumulation exceeded the execution caps. All raw rows for every original key remain together before consensus; only then is the agreed study scope applied and covered keys retained. Contradictory, missing and explicitly unknown settings remain uncertain. This is a resource fix, with reconciliation and fail-closed coverage, not a different sampling frame. External research scratch is required on this Mini; source products are never rebuilt or overwritten. No estimand, counterfactual, threshold or missing-outcome assumption changes here.
+
+The completed bounded Mini check demonstrated missing legacy mappings for potential adult 2022 EMER/IMP keys (adult birth-year proxy, exact age/BMI not adjudicated). The approved study is not silently restricted to historical compatibility membership. Clinical estimation stops pending the separately named mapping described in [the source-gap handoff](COMMON_INDEX_SOURCE_GAP_HANDOFF.md); other primary gas/ICD qualification remains required.
+
 ## Dated superseded history and runnable archives
 
 - **2026-10-13:** observed BMI >30 minus one became primary within three independently indexed frames (BMI ≥40, ABG obtained, either gas obtained), with nine encounter and six calendar-day cells. Its unchanged source, report, plan, decisions and tests are preserved at `archive/2026-10-14-frame-specific/` from commit `d8909df`. Default saved-run review recognizes those version-2 bundles. Dedicated frame commands retain estimation/testing in ignored workspaces.
