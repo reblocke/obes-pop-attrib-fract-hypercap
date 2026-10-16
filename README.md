@@ -1,141 +1,133 @@
-# BMI and hypercapnia: common-index evidence comparisons
+# BMI and documented hypercapnia probability
 
-This R/Quarto workflow estimates **model-standardized probability differences and potential impact fractions** under a one-unit BMI reduction among patients with observed BMI >30. BMI =30 stays unchanged; there is no floor. It is intended for clinical collaborators running or reviewing the analysis.
+An R/Quarto analysis of how documented index-encounter hypercapnia varies across
+BMI in a selected TriNetX-derived acute-care cohort. The main displays combine
+flexible probability curves, usable-evidence availability and BMI frequencies.
+Named BMI-scenario potential impact fractions (PIFs) are secondary summaries.
 
-The primary population is adults with a first qualifying **BMI ≥30** ED/inpatient encounter in 2022, selected before gas availability. Separate arterial and combined-gas models supply observed-evidence benchmarks and assumption-dependent projections to one common covariate-complete reference. A BMI ≥40 sensitivity restricts those same index encounters and reuses the primary models. The previous independently indexed frame analysis is preserved as supporting work.
+Two reports share one immutable aggregate bundle:
 
-**Status (2026-10-15):** the Mini audit authenticated existing accepted-product receipts and legacy field decoding, but demonstrated a broader-candidate mapping gap. Approved legacy BMI/covariates are unavailable for some captured adult 2022 acute-care keys, so their BMI eligibility cannot yet be assessed. Clinical estimation remains unrun; gas/ICD qualification and missing Mini R dependencies also remain open. The adapter now handles the actual FULL_DATA encoding and bounded, fail-closed coverage checks. See the [source-gap handoff](docs/COMMON_INDEX_SOURCE_GAP_HANDOFF.md), [source assessment](docs/TRIANGULATION_SOURCE_ASSESSMENT.md) and [worklog](WORKLOG.md). Artificial results do not establish clinical findings.
+- **Scientific report:** relationship curves, concise cohort flow, sampling support,
+  exact original-BMI-band scenario contributions and focused sensitivities.
+- **Complete audit:** source/eligibility/index accounting, every variable at each
+  applicable stage, every planned model's coefficients/covariance, diagnostics,
+  failures and numerical reconciliation.
 
-## Prerequisites
-
-Run commands from the repository root with Make, R ≥4.3 and Quarto. Installations are not automatic. Required installed R packages: `lpSolve`, `jsonlite`, `digest`, `haven`, `ggplot2`, `knitr`, `rmarkdown`. The previous shared checks support testthat or base R; the new artificial runner uses base R. Python 3 supports frozen-frame and Stata launchers.
-
-PDF reports require XeLaTeX and Arial. Automatic LaTeX package installation is disabled in the new QMD. HTML-only execution skips LaTeX report compilation but still exports R-generated PDF figure masters/gallery. There is no committed renv lockfile; versions are recorded per run. Environment bootstrapping remains separately approved.
-
-Clinical preparation additionally requires the existing Python environment containing pandas, PyArrow, DuckDB and the pinned upstream reader modules. The [preparation template](config/common_index_preparation.example.json) binds four reader-file hashes at upstream `787fba64319c0285244e2e17a9e303c739f31a14`. A stale installed reader is rejected. Standard-library preparation checks run without those packages; the orchestration check additionally uses pandas and R. No dependency installation is attempted.
+The 2026-10-16 refactor breaks compatibility with earlier analysis bundles. Prior
+inputs, outputs and Git history are preserved; old bundles are rejected explicitly.
+This repository does not distribute restricted source data or clinical results.
+Artificial examples do not establish source or scientific qualification.
 
 ## Start with artificial data
 
-```bash
-make triangulation-test
-make triangulation-fixture
-# HTML report only, with all figure formats:
-Rscript --vanilla scripts/render_triangulation.R fixture html
-```
-
-These commands never open clinical input. Estimation runs once and produces a fresh ignored directory under `artifacts/triangulation/`. The launcher prints that directory and its completion status. Open `rendered/bmi_hypercapnia_triangulation.html` and `figure-gallery.html` inside it; the full fixture also creates a report PDF. Every artificial report/exhibit is labeled.
-
-| Saved output | Purpose |
-| --- | --- |
-| `aggregate_bundle.rds`, `aggregate_results.csv`, `specification_registry.csv`, `bundle_manifest.json` | Full-precision version-3 design, outcomes, references, methods, scenario parameters and identities |
-| `population_counts.csv`, `scope_counts.csv`, `model_diagnostics.csv` | Selection/completeness, model versus reference denominators and model failures |
-| `observation_patterns.csv`, `observation_by_bmi.csv`, `covariate_coverage.csv` | Usable specimen patterns, availability/positivity by BMI and inherited covariates |
-| `model_shape_by_bmi.csv`, `timing_audit.csv` | Descriptive model-shape and fixed-index timing diagnostics |
-| `analysis_status.json`, `analysis_receipt.json`, `input_receipt.json`, `session_info.txt` | Completion, one-estimation receipt, source declarations and environment |
-| `rendered/`, `figures/`, `figure-gallery.html`, `figure-gallery.pdf` | Reports, editable-source-linked SVG/PDF/PNG/JPG candidates and galleries |
-| `render_status.json`, `quarto-render.log` | Completion/failure, expected outputs, no-refit/no-clinical-read and source-stability records |
-
-Success means zero exit status, `analysis_completed`, then `render_completed` with expected outputs and unchanged sources. Source-pending/nonestimable positions remain visible; they are not zero estimates. Matching hashes and artificial success do not establish clinical acceptance. Fresh failure receipts are retained.
-
-## Methods and interpretation
-
-The unchanged inherited model uses linear BMI and age plus sex, race/ethnicity and geographic region. Index selection precedes completeness. Missing covariates stay in cohort accounting; the common projection reference has complete inherited adjustment values. No imputation or added clinical predictors is used.
-
-| Criterion | Usable evidence | Primary window |
-| --- | --- | --- |
-| Arterial | PaCO₂ ≥45 mm Hg | Selected encounter maximum |
-| Combined | PaCO₂ ≥45 or PvCO₂ ≥50 mm Hg | Available arterial or venous maxima |
-
-No usable gas remains unknown. An available combined negative does not prove that an unmeasured specimen is normal. Fixed-index calendar-day sensitivities use the same thresholds and collection date equal to encounter-start date, not elapsed 24 hours or a standardized measurement schedule.
-
-New clinical runs require [unadjusted_pco2_v1](config/common_index_source_policy.json): ordinary values, authenticated specimen, strict 5–200 mm Hg arterial and 10–250 mm Hg venous validity intervals, and explicit reviewed units. Unspecified-blood codes require specimen evidence. Temperature-adjusted measurements remain outside primary outcomes and appear in source-preparation availability audits. Outcome thresholds ≥45/≥50 remain inclusive. Historical bundles retain their recorded policy.
-
-Observed benchmarks average over measured cases. MAR projects each gas outcome model to the same full reference under conditional MAR. MNAR scenarios vary missing/observed odds at BMI 40 (0.25/0.5/1/2/4) and the relative odds gradient per five BMI units (0.5/1/2). These are exploratory assumptions, not estimates or clinically validated bounds. Observation status remains fixed when BMI changes; the r=g=1 scenario reproduces MAR.
-
-Report paired probabilities, absolute difference per 1,000 and PIF `1 - p_shifted/p_observed`, with pointwise full-covariance delta intervals conditional on the empirical reference and fixed assumptions. Model N and reference N differ. Retain negative contrasts, small nonzero values and support diagnostics. These do not establish physiologic prevalence, incidence reduction, within-person weight-loss effects or causal prevention.
-
-Matched ICD comparisons use the five-code composite J96.02/J96.12/J96.22/J96.92/E66.2. Each ICD/arterial pair requires ABG; each ICD/combined pair accepts either gas. Both models within a pair use identical rows with known coding capture; the pairs may differ. No missing-ICD projection is performed.
-
-ICD negative denotes no target code in a complete, available captured encounter diagnosis extract; another diagnosis is not required. Unavailable/incomplete capture stays unknown. This is a documented-code outcome.
-
-The registry contains 140 display/analysis positions but only eight unique outcome-model positions. Severe-subset and MNAR projections reuse models; cells and overlapping patients are not independent replications. No pooling or joint specification-curve inference is performed.
-
-## Qualified clinical input
-
-Clinical inputs are restricted and not distributed here. On the Mini, prepare fresh typed input using existing accepted products and a private reviewed configuration; preserve the original RDS:
+Run from the repository root. Use existing **R >=4.3**, Quarto and a working
+XeLaTeX/TinyTeX installation for PDF. R dependencies are `ggplot2`, `jsonlite`,
+`digest`, `lpSolve`, `knitr`, `rmarkdown`; `haven` is also required by the clinical
+input loader. Base R `splines`, `stats`, `graphics` and `grid` supply modeling and
+vector drawing. Nothing is installed automatically.
 
 ```bash
-make triangulation-prepare \
-  PREP_PYTHON="/existing/upstream-environment/bin/python" \
-  SOURCE_CONFIG="config/common_index_preparation.local.json" \
-  OUTPUT="artifacts/triangulation/source-qualification-YYYYMMDD-unique"
+make fixture
 ```
 
-Fill the private configuration from [the preparation template](config/common_index_preparation.example.json) using actual trusted identities/mappings. Choose a fresh output path. The command verifies readers/source identities and population coverage, then writes owner-only typed input, aggregate source evidence, a receipt and a **pending** manifest. Preparation does not accept the source or fit models. Follow [the handoff](docs/CLINICAL_RUN_HANDOFF.md) to review all seven gates and finalize a separately named manifest.
-
-The example explicitly decodes accepted FULL_DATA Stata dates/codes and derives the inherited combined race/ethnicity field; it does not assume that derived field already exists. Already typed sources use `typed_v1`. Candidate projection retains all raw rows in 16 disjoint patient-key partitions, applies the agreed study scope after consensus, and checks coverage in SQL before materializing covered candidates. Unrelated histories are not accumulated. The existing RAM cap and 64-GiB scratch limit remain; use external research scratch. Reviewed unknown setting codes remain uncertain. Uncovered keys stop preparation with explicitly partial partition counts; they are never discarded to obtain a result.
-
-Authorized users then provide the authenticated RDS/DTA and reviewed **version-3** manifest:
+The command prints a fresh `artifacts/triangulation/curve-fixture-...` run and a
+review directory. A successful fixture produces both HTML/PDF reports, complete
+CSV/RDS aggregates, F0–F5 exports, the three F1 alternatives and `figures/gallery.html`.
+A failed render preserves estimation: rerender the printed run rather than refit.
 
 ```bash
-make triangulation-preflight INPUT="/explicit/input.rds"
-make triangulation-preflight INPUT="/explicit/input.rds" MANIFEST="/reviewed/v3.json"
-make triangulation-render INPUT="/accepted/input.rds" MANIFEST="/reviewed/v3.json"
+make render RUN="artifacts/triangulation/<exact-version-4-run>"
+make render-html RUN="artifacts/triangulation/<exact-version-4-run>"
+make render-pdf RUN="artifacts/triangulation/<exact-version-4-run>"
 ```
 
-The [template](config/triangulation_input.example.json) is deliberately pending. It binds the common BMI ≥30 study, exact source/input identity, original keys, mappings, approved gas/ICD policy and reviewed lineage/population/field evidence. A version-2 manifest cannot automatically qualify this expanded study. Preflight validates schema, mappings and evidence hashes; it does not independently reconcile raw source records. Clinical estimation requires a clean merged checkout and records its commit/tree and source hashes. No fallback dataset or unreviewed conversion is used.
+Renders consume saved aggregates only and create fresh review directories.
+Figure edits do not repeat estimation. Estimator/source/configuration changes
+require a new run; hashes prevent silent reuse. HTML/PDF renders run sequentially.
 
-Reuse [accepted upstream products](https://github.com/reblocke/trinetx-preprocessing/blob/787fba64319c0285244e2e17a9e303c739f31a14/docs/CURRENT_STATE.md) and existing receipts first. Reconcile all intended BMI ≥30 encounters, including patients without gases; historical compatibility membership is not a completeness proof. Distinguish testing from result-derived flags, verify raw specimen codes/units/maxima, retain legacy BMI/covariate derivations and authenticate ICD negative-versus-unknown rules. Normal gas records alone do not establish source coverage.
-
-Optional calendar-day evidence can remain pending, with unassessed estimates/counts. Date precision suffices; pH pairing, medication activity and elapsed timestamps are not prerequisites. Request additional source work only for a demonstrated gap. See [input handoff](docs/TRIANGULATION_INPUT_HANDOFF.md) and [data management](docs/DATA_MANAGEMENT.md).
-
-## Render a saved run
+After actual figure/page inspection, run the acceptance checks against that review:
 
 ```bash
-make render RUN="artifacts/triangulation/<saved-run>"
-make render-html RUN="artifacts/triangulation/<saved-run>"
-make render-pdf RUN="artifacts/triangulation/<saved-run>"
+make test BMI_TEST_REVIEW="artifacts/triangulation/<run>/reviews/<review>"
 ```
 
-Reports and figures read validated aggregates without reopening clinical inputs or refitting. Each review creates a fresh directory inside its saved run. Version-1/2 runs dispatch to hash-verified frozen sources and keep original definitions. Bundles contain no patient identifiers, selected indexes, fitted model objects/data or individual predictions.
+The 65-check runner preserves a result ledger under ignored artifacts. Checks
+requiring rendered reports or visual inspection fail explicitly when their actual
+receipts are absent. Source-adapter tests use Python; one optional SQL case needs
+the existing upstream Python environment. `PREP_PYTHON` selects it. No patient data
+are used by tests. See [acceptance requirements](docs/CURVE_AUDIT_ACCEPTANCE.csv).
 
-## Exhibit alternatives
+## Scientific definitions
 
-A is the preferred paired absolute/PIF forest/table. B shows the same four observed/MAR benchmarks in outcome-first panels. C shows prespecified missing-outcome assumptions with the MAR anchor outlined; its range is not a confidence interval. BMI ≥40, timing, matched ICD and detailed diagnostics remain supporting results.
+Candidates are restricted to authenticated **original selected encounter keys**;
+raw-history visits cannot add candidates. Select the first 2022 adult EMER/IMP
+encounter with valid BMI >=30 before gas availability and adjustment completeness.
+Completed missing BMI is distinct from unresolved earlier evidence. BMI uses the
+approved encounter/prior reported and observed height/weight hierarchy, without
+statistical imputation; age retains the birth-year proxy.
 
-All figures use one saved ledger, signed scales and explicit unavailable positions. Exports are 190 mm wide, SVG/PDF masters plus 300-dpi PNG/JPG, with readable data/caption labels and full-size HTML/PDF galleries. Native-size, grayscale and numerical QC is recorded with actual coverage; it does not establish clinical validity. See [figure brief](docs/TRIANGULATION_FIGURE_BRIEF.md).
+Q contains resolved indexes; C is Q complete for inherited BMI, age, sex,
+race/ethnicity and region. Models use a natural BMI spline with knots at C's
+5th/35th/65th/95th percentiles, linear age and inherited categorical references.
+Gas curves standardize to C. ICD curves use C_icd with established diagnosis
+capture, including positive and negative patients. Denominators are printed.
 
-## Project and historical workflows
+Arterial hypercapnia is valid ordinary PCO2 >=45 mm Hg; combined evidence accepts
+arterial >=45 or venous >=50. Missing/unusable gases remain unknown. The combined
+negative concerns available specimens only. The ICD composite includes
+J96.02/J96.12/J96.22/J96.92/E66.2; complete captured absence is negative, unknown
+capture remains unknown. Start-calendar-day sensitivities retain the same indexes.
 
-| Entry | Role |
-| --- | --- |
-| [Primary QMD](reports/bmi_hypercapnia_triangulation.qmd) | Report from saved common-index aggregates |
-| [Common estimation](R/common_index_hypercapnia.R) and [reporting](R/common_index_reporting.R) | Models/projections, strict persistence and figures |
-| [Plan](docs/BMI_HYPERCAPNIA_TRIANGULATION_PLAN.md) and [decisions](docs/DECISIONS.md) | Current scientific authority and dated history |
-| [Source assessment](docs/TRIANGULATION_SOURCE_ASSESSMENT.md) | Existing-source qualification ledger |
-| [Archive index](archive/README.md) and [comparison](docs/ANALYSIS_COMPARISON.md) | Distinct preserved specifications and provenance |
+The default secondary scenario reduces **observed BMI >30 by exactly one**, with
+no floor or reselection. PIF = 1 - shifted/observed-BMI modeled probability; it is
+population-dependent. Signed original-band contributions use paired patient
+predictions and reconcile exactly. Curves multiplied by marginal BMI densities
+are not used to obtain adjusted PIF. The separate MAR/MNAR projections require
+assumptions beyond source acceptance. These are documented index-encounter
+probabilities, not incidence or demonstrated effects of weight loss.
 
-The unchanged version-2 frame-specific sources are preserved at `archive/2026-10-14-frame-specific/`. These supporting commands verify hashes and execute a copy in ignored storage:
+## Restricted-data execution
+
+Upstream products come from [trinetx-preprocessing](https://github.com/reblocke/trinetx-preprocessing).
+Reuse accepted products, pinned readers and existing captured evidence. Preserve
+`data/raw/full_db.rds` as a historical comparator. Do not substitute it for a
+qualified current study input.
 
 ```bash
-make frame-triangulation-test
-make frame-triangulation-fixture
-make frame-triangulation INPUT="/accepted/input.rds" MANIFEST="/reviewed/v2.json"
+make prepare PREP_PYTHON="/existing/environment/bin/python" \
+  SOURCE_CONFIG="/private/reviewed-source-config.json" OUTPUT="/private/fresh-output"
+make qualify PREP_PYTHON="/existing/environment/bin/python" \
+  SOURCE_CONFIG="/private/reviewed-source-config.json" \
+  PREPARED="/private/fresh-output" OUTPUT="/private/fresh-qualification"
+make preflight INPUT="/private/study-input.rds" MANIFEST="/private/reviewed-manifest.json"
+make cohort-audit INPUT="/private/study-input.rds" MANIFEST="/private/reviewed-manifest.json"
+make analyze INPUT="/private/study-input.rds" MANIFEST="/private/reviewed-manifest.json"
 ```
 
-Version-1 BMI-to-40 sources, original older R reports, repaired historical R replay and immutable/runnable Stata tracks retain their definitions. No historical result is relabeled as the new study.
+The paths are placeholders, not discovered clinical inputs. Clinical estimation
+requires the clean merged Mini checkout. Preselected inputs now require a new
+hash-bound **pre-index cohort-audit companion**, which is generated from mapped
+candidate covariates. The older selected-index input and its passing source checks
+alone cannot supply the full new audit. Qualification failures retain a partial
+audit and block inference; unknown totals are not zeros.
 
-```bash
-make historical-test
-make stata-test
-make legacy-r INPUT="/explicit/historical.rds"
-make legacy-r-html INPUT="/explicit/historical.rds"
-make legacy-r-pdf INPUT="/explicit/historical.rds"
-make render-archival
-STATA_EXE="/path/to/licensed/Stata" make stata-check
-STATA_EXE="/path/to/licensed/Stata" STATA_DATA_PATH="/approved/full_db.dta" make stata
-```
+Existing original-list source checks and the new identity-bound companion
+preflight passed in an isolated Mini snapshot on 2026-10-16. Clinical estimation
+from a clean merged revision and investigator scientific review remain pending. Read the
+[current plan](docs/BMI_HYPERCAPNIA_TRIANGULATION_PLAN.md),
+[source assessment](docs/TRIANGULATION_SOURCE_ASSESSMENT.md),
+[clinical handoff](docs/CLINICAL_RUN_HANDOFF.md) and
+[decision log](docs/DECISIONS.md) before restricted execution.
 
-Historical R additionally uses dplyr/forcats/gtsummary/here/modelsummary/purrr/stringr/tibble/tidyr. Stata requires version ≥18, table1_mc/mkspline2/cleanplots; reference smoke additionally uses xblc. No packages are installed automatically. See [Stata import](docs/STATA_IMPORT.md).
+## Code and outputs
 
-Generated/restricted materials remain ignored. Source acceptance, assumption credibility, scientific review and submission are separate milestones. Software licence, citation metadata and an external access procedure have not been declared; access and release permissions must not be inferred from repository access.
+- `R/analysis.R` loads the current source, cohort, model, prediction and reporting modules.
+- `config/bmi_hypercapnia_analysis.json` and `config/variable_dictionary.csv` define analysis defaults and variables.
+- `reports/bmi_hypercapnia.qmd` and `reports/bmi_hypercapnia_audit.qmd` render saved aggregates.
+- `scripts/run_bmi_hypercapnia.R` estimates/audits; `scripts/render_bmi_hypercapnia.R` renders.
+- `artifacts/triangulation/` is ignored private storage for bundles, receipts and figures.
+- `WORKLOG.md` records actual commands, results and outstanding work.
+
+Exact aggregate audits may expose rare categories and remain protected. Public
+sharing or abstract submission requires separate review. Historical source files
+are retained for provenance; the Makefile has one current scientific workflow.

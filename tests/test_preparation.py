@@ -136,4 +136,39 @@ class PreparationChecks(unittest.TestCase):
             subprocess.run(['Rscript','--vanilla','-e',code,str(dest)],check=True,capture_output=True)
 
 
+    def test_full_source_hash_receipt_reuse_requires_exact_identity_and_digest(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root=Path(temp);database=root/'ARTIFICIAL.db';database.write_bytes(b'ARTIFICIAL source')
+            receipt=root/'full-hash.json'
+            value=dict(sha256=prep.sha256(database),file_identity=list(prep.file_identity(database)),identity_stable=True)
+            receipt.write_text(json.dumps(value))
+            source=dict(database=dict(path=str(database),sha256=value['sha256']),
+                full_hash_receipt=dict(path=str(receipt),sha256=prep.sha256(receipt)))
+            self.assertEqual(prep.verify_canonical_database(source),database)
+            source['database']['sha256']='0'*64
+            with self.assertRaises(prep.PreparationError):prep.verify_canonical_database(source)
+            source['database']['sha256']=value['sha256'];database.write_bytes(b'CHANGED SOURCE')
+            with self.assertRaises(prep.PreparationError):prep.verify_canonical_database(source)
+
+
+    def test_mapped_csv_preserves_stored_float32_values(self):
+        try:
+            import duckdb
+        except ImportError:
+            self.skipTest("requires existing upstream DuckDB environment")
+        import struct
+        expected = struct.unpack("f", struct.pack("f", 38.8))[0]
+        with tempfile.TemporaryDirectory() as temp:
+            output = Path(temp)/"numeric.csv"
+            with duckdb.connect() as connection:
+                connection.execute("CREATE TABLE original AS SELECT CAST(38.8 AS REAL) bmi, CAST(50 AS REAL) age_at_encounter")
+                query = "SELECT "+",".join(prep.mapping_csv_fields(["bmi","age_at_encounter"]))+" FROM original"
+                connection.execute("COPY ("+query+") TO '"+str(output)+"' (FORMAT CSV, HEADER)")
+            with output.open() as file:
+                row = next(csv.DictReader(file))
+            self.assertEqual(float(row["bmi"]), expected)
+            self.assertNotEqual(float(row["bmi"]), 38.8)
+            self.assertEqual(float(row["age_at_encounter"]), 50)
+
+
 if __name__=='__main__':unittest.main()

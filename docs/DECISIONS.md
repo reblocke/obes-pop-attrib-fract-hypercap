@@ -1,6 +1,38 @@
+## Automated source/audit update — 2026-10-16
+
+The new pre-index audit companion and fresh manifest pass automated reconciliation
+and preflight on the Mini using the existing accepted products. An independent
+field comparison agrees with the accepted selected input. Float32 values are
+promoted before CSV serialization to preserve their exact accepted values; this
+is a transport correction, not a new BMI definition. All qualification function
+hashes match current code. No clinical models or human scientific approval are
+claimed. Release/clean-checkout and clinical model review remain subsequent gates.
+
+# Current authority — curve/audit refactor, confirmed 2026-10-16
+
+The curve-first scientific report and complete construction/model audit supersede
+the linear-coefficient/PIF-first grid and historical bundle replay. Dated entries
+below retain history; this section and the current implementation plan govern.
+
+| Decision | Confirmed policy |
+| --- | --- |
+| Population | Authenticated original selected encounters; outside-list broader mapping gap is historical |
+| BMI/index/source | Preserve available encounter/prior/calculated BMI, birth-year age proxy, first BMI>=30 before gas/completeness and unadjusted source rules |
+| Primary estimand | Flexible documented hypercapnia-probability relationship across BMI, with observation and frequency displays |
+| Models | Fixed natural BMI spline at C quantiles .05/.35/.65/.95, type 7; inherited adjustment; no model selection |
+| Gas reference | C, with explicit transport/MAR interpretation for untested patients |
+| ICD reference | C_icd, patients with established capture including code-positive and code-negative patients; unknown capture not projected |
+| Secondary scenario | Observed BMI>30 minus exactly one without floor; named caps disabled by default |
+| Audit | One cohort ledger; every variable/stage and all coefficients/covariance/diagnostics/failures visible |
+| Compatibility | Breaking version-4 bundle; old results rejected without migration/relabeling |
+| New source requirement | Hash-bound pre-index audit companion from existing mapped candidates; do not infer earlier-stage profiles from selected indexes |
+| Review states | Software, source qualification, execution, numerical review and scientific review remain separate |
+
+**Current population correction — 2026-10-16:** candidate membership is restricted to the authenticated original FULL_DATA selected encounter list. See [the confirmed correction](#original-encounter-list-correction--confirmed-2026-10-16); earlier broader-source readiness is superseded for this use. The BMI rule and common-index model specification remain unchanged.
+
 # Analysis decisions
 
-## Primary authority — confirmed 2026-10-14
+## Historical primary authority — 2026-10-14, superseded by curve/audit refactor
 
 The [implementation plan](BMI_HYPERCAPNIA_TRIANGULATION_PLAN.md) and `reports/bmi_hypercapnia_triangulation.qmd` define the primary **common-index BMI ≥30 study**. This replaces the frame-specific grid as primary; that grid remains runnable supporting work.
 
@@ -29,15 +61,30 @@ An available-gas negative does not establish negativity of an unmeasured specime
 - Retain strict validity intervals 5 < arterial PCO₂ <200 and 10 < venous PCO₂ <250 mm Hg, with explicit reviewed conversion. These differ from inclusive outcome thresholds ≥45/≥50. Missing/incompatible units and unusable results remain unknown.
 - No target code in a complete available captured encounter diagnosis extract is documented-ICD negative; another diagnosis is not required. Incomplete/unavailable capture remains unknown. Retain all five codes.
 - Bind `unadjusted_pco2_v1` in new version-3 clinical manifests and hashed JSON field evidence. Existing bundles retain their recorded definitions and are never relabeled under this policy.
-- Review/commit/push/merge code before qualification, then execute on the Mini from the clean merged revision. The owner will resume on the home network. Private reconciliation and clinical execution remain unrun here; calendar-day evidence may remain pending.
+- The released baseline followed the code-first release sequence. The subsequent broader-mapping checks are pre-release source validation on explicitly recorded implementation branches. Review/commit/push/merge and synchronize final code before clinical estimation; repeat affected qualification after a material source/definition change. Calendar-day evidence may remain pending when unavailable.
 
 ## Data and interpretation judgments still requiring evidence
 
-The [source assessment](TRIANGULATION_SOURCE_ASSESSMENT.md) identifies exact input/variant/conversion, original keys and chronology, expanded BMI ≥30 coverage, legacy derivation/dictionary coverage, actual specimen/unit/window mappings, testing evidence, ICD capture and calendar-day mapping. Scientific source rules above are settled; their application still needs actual evidence. Use the [home-network handoff](CLINICAL_RUN_HANDOFF.md).
+The [source assessment](TRIANGULATION_SOURCE_ASSESSMENT.md#expanded-source-qualification--2026-10-16) now records passing actual source checks for the separately prepared input, including original keys/chronology, expanded coverage, BMI/adjustment, gas/testing, ICD capture and calendar day. This is automated technical source qualification under the current rules. Human scientific review, code release and clinical estimation remain separate. Use the [home-network handoff](CLINICAL_RUN_HANDOFF.md).
 
 Existing accepted upstream evidence is reused first; source absence is not inferred from an unavailable product on this host. No replacement export or timestamp acquisition is presumed necessary. Version-3 review must bind the expanded study; an old schema/hash pass alone is insufficient. Remaining source judgments are made from actual records/receipts, not invented here.
 
 Scientific limits remain after source qualification: demographics-only MAR, informative ordering/specimen/frequency, model form, covariate missingness, shifted BMI support and causal confounding. The MNAR range is exploratory, not a clinical plausibility certificate.
+
+## BMI availability and missingness — clarified 2026-10-15
+
+The owner defines the source population by **valid BMI from the encounter or earlier**. Retain the adult, 2022 ED/inpatient and BMI ≥30 restrictions, the first qualifying encounter before gas availability, and the one-unit shift for observed BMI >30. This clarification does not make all acute-care patients the analysis denominator.
+
+- Prefer valid recorded encounter BMI, then valid prior BMI, then BMI calculated from available observed height and weight. Preserve the inherited preference for current versus prior component measurements and record their dates. Encounter evidence may occur during the selected encounter; prior evidence must precede it. Do not use a subsequent encounter or substitute an encounter-start-only BMI window. Audit measurement age and ambiguous timing.
+- No statistical BMI imputation, prediction from other characteristics, interpolation or assignment from obesity codes. Calculating weight/height² from usable observed measurements is permitted; preserve units, rounding and component provenance. A masked/censored value is not an exact measurement and cannot supply an invented exact BMI.
+- After a completed source search/mapping, no usable recorded or calculable BMI is **missing BMI**, an ordinary data limitation. Count and report these encounters/patients; they do not qualify for the valid-BMI cohort and are not classified as BMI <30. A genuinely BMI-missing earlier encounter does not prevent a later encounter from being the first with valid BMI ≥30. No usable BMI anywhere leaves the patient outside this cohort, without imputation.
+- An unprocessed key, incomplete evidence query, unresolved linkage or ambiguous timing is different from confirmed absence of usable BMI. Complete the mapping before assigning a missing-BMI reason; preserve uncertainty that could change the first valid-BMI index. Missing BMI values alone are not a reason to reject the entire source or request a replacement export.
+
+The original Stata preprocessing explicitly comments that BMI is truncated at 50 by TriNetX and recodes current/prior recorded BMI ≥50.1 to missing. The accepted Python legacy cleaner reproduces that rule and the recorded-current → recorded-prior → calculated hierarchy. The final calculated BMI does not receive the 50.1 upper cutoff. This code comparison demonstrates inherited behavior, not a newly discovered Stata/Python discrepancy; see [the source assessment](TRIANGULATION_SOURCE_ASSESSMENT.md#bmi-source-clarification--2026-10-15).
+
+The owner's proposed upper limit of about **120 kg/m²** is conditional: if existing source evidence establishes genuine noncensored high BMI rather than masking, retain such values through the proposed plausibility ceiling in the new mapping and document the departure from legacy filtering. Do not merely change 50.1 to 120, reinterpret a top-code as an exact value, or describe 120 as a proven physiologic maximum. The precise masking encoding in this snapshot has not been established by the code comment or generic de-identification documentation. Historical accepted products remain unchanged.
+
+**Implementation status:** the new mapping/index path uses `available_encounter_or_prior_bmi_v1` and explicit `bmi_evidence_state`; completed-missing BMI permits a later first valid-BMI index, while unresolved source evidence remains uncertain. Untagged historical inputs and saved bundles retain their original definitions. Bounded preparation uses the same R selector before gas extraction and binds the original aggregate census to resolved-index input. Actual source checks and preflight pass under this policy; see [the implementation plan](BMI_HYPERCAPNIA_TRIANGULATION_PLAN.md#valid-bmi-mapping-revision--2026-10-15).
 
 ## 2026-10-15 operational source bindings
 
@@ -45,7 +92,76 @@ The accepted FULL_DATA dictionary uses Stata calendar days, coded settings/demog
 
 Raw-source projection streams disjoint patient-hash partitions because direct projection/accumulation exceeded the execution caps. All raw rows for every original key remain together before consensus; only then is the agreed study scope applied and covered keys retained. Contradictory, missing and explicitly unknown settings remain uncertain. This is a resource fix, with reconciliation and fail-closed coverage, not a different sampling frame. External research scratch is required on this Mini; source products are never rebuilt or overwritten. No estimand, counterfactual, threshold or missing-outcome assumption changes here.
 
-The completed bounded Mini check demonstrated missing legacy mappings for potential adult 2022 EMER/IMP keys (adult birth-year proxy, exact age/BMI not adjudicated). The approved study is not silently restricted to historical compatibility membership. Clinical estimation stops pending the separately named mapping described in [the source-gap handoff](COMMON_INDEX_SOURCE_GAP_HANDOFF.md); other primary gas/ICD qualification remains required.
+The initial bounded Mini check demonstrated missing legacy mappings for potential adult 2022 EMER/IMP keys. That finding motivated the separately named mapping described in [the source handoff](COMMON_INDEX_SOURCE_GAP_HANDOFF.md); it did not justify restricting the study to historical compatibility membership. The current implementation is recorded below.
+
+## Original encounter-list correction — confirmed 2026-10-16
+
+This decision supersedes the broader-source candidate population and the proposed
+choice about earlier `UNKNOWN` history records. Candidate membership is the
+**authenticated original FULL_DATA selected encounter list**, restricted to its
+recorded ED/inpatient settings. Raw source `LAB`, `UNKNOWN`, other-history and
+return-visit keys cannot add candidates or block an index outside that list.
+The original list already represents the original reason-for-suspicion selection;
+it is not a census of all encounters. Preserve that selected-population limitation.
+
+Verify the original `first_encounter` flags using the frozen patient/date/hash
+ordering. They identify the first row across original branches/settings; do not
+apply them as a prefilter before the agreed BMI ≥30/acute-care eligibility.
+Select one first qualifying adult 2022 BMI ≥30 encounter **within the original
+list**, before gases or adjustment completeness. The new index orders captured
+encounter starts; the historical flag orders original qualifying dates. Audit
+that distinction explicitly rather than relabeling one date as the other. Same-day eligible ties and
+unresolved relevant evidence within that list remain explicit; no arbitrary
+key ordering or later replacement is introduced into the new study.
+
+Use `FULL_DATA` membership, not AFTER_EXCLUSION imputed values. Retain
+`available_encounter_or_prior_bmi_v1`: current, then prior recorded BMI, then
+calculation from observed height/weight; no statistical imputation. Broader
+history remains available solely to retrieve permitted prior evidence. Preserve
+the exact one-unit shift for observed BMI >30, inclusive gas thresholds,
+adjustment, models and observation-status rules.
+
+New mapping/preparation/qualification binds `original_selected_encounters_v1`,
+the original acceptance receipt and actual product/input hashes. Earlier broader
+products, counts, readiness assessments and preflight receipts are retained as
+superseded evidence for their original scope; they do not qualify this corrected
+population. Old saved results retain their recorded specifications.
+
+Execution is limited to mapping, preparation, source qualification and preflight;
+no clinical models, publication or submission are authorized by this correction.
+The Mini's separate GLP-1 qualification process is not modified. Shared upstream
+code and captured databases remain read-only; this study uses its own private
+outputs, a writer lease and guarded file synchronization.
+
+**Current verification:** the original-list mapping is complete; all original first flags reproduce and exact acute-key coverage passes. Fresh dependent qualification passes all 30 independent source comparisons with zero disagreements. Technical completion, human scientific review and clinical
+results remain distinct. See the source assessment and worklog for final receipts.
+
+## Broader mapping implementation — 2026-10-16 (superseded population)
+
+The separate upstream product uses original keys and captured records before gas/BMI/completeness selection. BMI provenance and `valid`/`missing`/`unresolved` states are explicit. Coverage, prepared-field equality, index/BMI, gas/testing, ICD/calendar-day checks and preflight pass. Products and clinical evidence remain private and historical products are unchanged.
+
+Preserve the complete inherited numeric chain: normalized float16/CSV decimals, float32 source storage, Stata rounding, float32 intermediate and final BMI. The historical overlap audit exposed a defect in the draft mapper's intermediate storage order; it was reproduced and repaired before qualification or model fitting. When selected components agree, no unexplained BMI precision discrepancy remains. Per-candidate prior evidence and encounter-start-year age intentionally differ from the historical qualifying-event anchor.
+
+The source contains no recorded BMI above 50.1. The conditional ceiling near 120 is therefore not activated. This does not prove that the observed value 50 is or is not top-coded; no exact masked value is inferred. Calculated BMI retains its approved arithmetic and does not receive the recorded-BMI cap.
+
+Earlier unknown encounter setting and same-calendar-day index ties cause material attrition. Retain the existing conservative unresolved-index rule while the owner considers whether a **first documented ED/inpatient** target is preferable. No unknown setting is silently recoded nonacute and no arbitrary tied encounter is selected. Missing BMI after complete mapping remains an ordinary nonqualifying encounter, not unresolved evidence. Scientific source review, code release and clinical estimation remain separate.
+
+## Remaining source-related choices — 2026-10-16
+
+These are scientific choices exposed by actual source audits, not missing export
+or mapping requirements. Exact counts and timing distributions remain private.
+
+| Item | Current rule and proposal |
+| --- | --- |
+| Earlier unknown setting outside the original list | Resolved by the original-list correction above: outside-list history cannot block indexing. This was an artifact of the superseded candidate universe, not a missing-type-field defect in the original cohort. Within-list source conflicts remain separately audited. |
+| Same-day earliest encounters | Keep unresolved without authentic ordering evidence. Do not pick by key, gas availability, ED-before-inpatient assumption or a later encounter. |
+| Age of prior BMI/weight | Current approved availability rule has no recency cap. Actual prior measurements can be old. Retain that primary definition; propose a prespecified one-year recency sensitivity before clinical fitting. Define its BMI/component requirements and training/reference changes explicitly, retaining original indexes rather than substituting later encounters. No recency restriction is implemented here. |
+| Measurements during the encounter | Current-encounter BMI/components may be recorded after admission, as allowed. Retain their dates and describe the encounter-wide evidence window; do not label them guaranteed pre-outcome baseline measurements. A start-day-only BMI definition would be a new scientific choice. |
+
+The automated source review and identity-bound preflight pass for the current
+rules. Human source/scientific approval is not invented; the private review
+records its absence. Code publication, clinical estimation, numerical review and
+coauthor interpretation remain subsequent steps.
 
 ## Dated superseded history and runnable archives
 
@@ -55,3 +171,26 @@ The completed bounded Mini check demonstrated missing legacy mappings for potent
 - Stata retains its immutable source and runnable repaired copy, obesity-source/BMI ≥40 cohort, legacy derived BMI, five-code/ABG definitions, demographic/region adjustment, spline/linear models and BMI-to-40 PIF. The authorized four-call precision repair remains its only analysis-body substitution beyond documented import changes. No new Stata edits are authorized by this update.
 
 No archived estimate is relabeled as the common-index study. See [archive index](../archive/README.md) and [historical comparison](ANALYSIS_COMPARISON.md).
+
+## Corrected-population source acceptance — 2026-10-16
+
+The original-list mapping and fresh preparation completed naturally. All thirty
+independent source comparisons have zero disagreements. Historical first flags,
+exact original-key coverage, captured setting support, raw start-date consensus,
+new first-index census, BMI arithmetic/states and typed fields reconcile. All
+nineteen CSV/RDS fields agree exactly; gas/testing, ICD and calendar-day evidence
+also reconcile. No unexplained historical/new index difference remains.
+
+The source-freeze receipt is **ready_with_limitations** for the corrected
+original-selected-cohort use. The identity-bound preflight passes with zero
+models fitted. These are automated technical source checks; human scientific
+approval and clinical results remain unrun. Broader receipts remain superseded
+for this target and retain their historical labels.
+
+No new source-export or membership decision is required to proceed under the
+agreed rules. Within-list BMI/date uncertainty and same-day ties stay unresolved;
+patients with only uncertain membership remain separate from confirmed patients.
+The uncapped prior-measurement policy is retained. Any alternative tie resolution,
+requirement for the historical global first flag, recency cap or different date
+anchor would require an explicit new decision and dependent qualification.
+Review/release and synchronize clean merged code before clinical estimation.

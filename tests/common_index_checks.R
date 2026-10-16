@@ -1,4 +1,7 @@
 # Artificial-only checks shared by testthat and the standalone base-R runner.
+# Failure scenario added before the available-BMI selection change: an earlier
+# completed search with missing BMI must not be confused with unresolved source
+# evidence. Existing fixtures have no evidence-state field and keep old behavior.
 common_expect_error <- function(expression, pattern = NULL) {
   error <- tryCatch({ force(expression); NULL }, error = function(e) e)
   if (is.null(error) || (!is.null(pattern) && !grepl(pattern, conditionMessage(error)))) stop("Expected failure did not occur: ", pattern)
@@ -136,7 +139,7 @@ common_checks <- list(
     base<-a$results[a$results$target_id=="bmi_ge30" & a$results$window=="encounter" & a$results$method%in%c("observed","mar"), ]
     stopifnot(identical(candidates$primary,base),nrow(candidates$sensitivity)==30,all(candidates$sensitivity$r%in%common_risk_odds))
   },
-  "New manifests bind the design, expanded population and evidence hashes" = function() {
+  "New manifests bind the design, original population and evidence hashes" = function() {
     dir<-tempfile("common-loader-");dir.create(dir);on.exit(unlink(dir,recursive=TRUE),add=TRUE)
     input<-file.path(dir,"ARTIFICIAL.rds");d<-make_triangulation_fixture(8,with_index_day=FALSE);saveRDS(d,input)
     m<-jsonlite::read_json(file.path(tri_repo_root(), "config/triangulation_input.example.json"),simplifyVector=TRUE)
@@ -153,6 +156,34 @@ common_checks <- list(
     write_m(m);loaded<-load_common_input(input,manifest);stopifnot(nrow(loaded$data)==nrow(d))
     upper<-m;upper$source_evidence_files$fields$sha256<-toupper(upper$source_evidence_files$fields$sha256)
     write_m(upper);stopifnot(nrow(load_common_input(input,manifest)$data)==nrow(d))
+    # The fields and prepared-selection evidence have different digests. Both
+    # must be checked against their own entry, rather than the last one read.
+    mapped <- m
+    mapped$bmi_policy_id <- "available_encounter_or_prior_bmi_v1"
+    mapped$population_scope_id <- "original_selected_encounters_v1"
+    mapped$bmi_evidence_column <- "bmi_evidence_state"
+    mapped$index_preselected <- TRUE
+    d$bmi_evidence_state <- ifelse(is.na(d$bmi), "missing", "valid")
+    saveRDS(d,input);mapped$input_sha256 <- tri_sha256(input)
+    jsonlite::write_json(list(source_policy=common_source_policy(), population_scope_id=mapped$population_scope_id,
+      original_encounter_list=list(variant="FULL_DATA"), bmi_policy=jsonlite::read_json(
+      file.path(tri_repo_root(), "config/common_index_bmi_policy.json"), simplifyVector=FALSE)),
+      evidence,auto_unbox=TRUE,digits=NA)
+    fields_entry <- list(path=basename(evidence),sha256=tri_sha256(evidence))
+    mapped$source_evidence_files <- list(lineage=fields_entry,population=fields_entry,fields=fields_entry)
+    selection <- file.path(dir,"ARTIFICIAL-selection.json")
+    jsonlite::write_json(list(bmi_policy_id=mapped$bmi_policy_id, population_scope_id=mapped$population_scope_id,
+      counts=list(n_index_resolved=nrow(d)),clinical_models_fitted=0L),selection,auto_unbox=TRUE)
+    mapped$source_evidence_files$selection <- list(path=basename(selection),sha256=tri_sha256(selection))
+    write_m(mapped);stopifnot(nrow(load_common_input(input,manifest)$data)==nrow(d))
+    broader <- mapped; broader$population_scope_id <- NULL
+    write_m(broader);common_expect_error(load_common_input(input,manifest), "original encounter membership")
+    # Restore the original fixture and evidence for the remaining failures.
+    d$bmi_evidence_state <- NULL;saveRDS(d,input);m$input_sha256<-tri_sha256(input)
+    jsonlite::write_json(list(source_policy=common_source_policy(),note="ARTIFICIAL; no source acceptance"),
+      evidence,auto_unbox=TRUE,digits=NA)
+    entry<-list(path=basename(evidence),sha256=tri_sha256(evidence))
+    m$source_evidence_files<-list(lineage=entry,population=entry,fields=entry)
     old<-m;old$schema_version<-2L;write_m(old);common_expect_error(load_common_input(input,manifest),"version 3")
     bad<-m;bad$population_policy<-"first gas encounter";write_m(bad);common_expect_error(load_common_input(input,manifest),"population")
     bad<-m;bad$source_policy_id<-"temperature_adjusted";write_m(bad);common_expect_error(load_common_input(input,manifest),"source policy")
@@ -169,3 +200,81 @@ common_checks <- list(
     }
   }
 )
+
+common_checks[["Known BMI absence permits a later first valid BMI; unresolved evidence does not"]] <- function() {
+  d <- make_triangulation_fixture(2, with_index_day = FALSE)
+  d$bmi <- c(NA_real_, 35, 31, 36)
+  d$bmi_evidence_state <- c("missing", "valid", "valid", "valid")
+  a <- run_common_index(d)
+  stopifnot(a$population$n_index_resolved == 2L,
+    identical(attr(a, "bmi_policy_id"), "available_encounter_or_prior_bmi_v1"))
+  d$bmi_evidence_state[1] <- "unresolved"
+  b <- run_common_index(d)
+  stopifnot(b$population$n_index_resolved == 1L, b$population$n_earlier_uncertainty == 1L)
+  d$bmi_evidence_state <- NULL
+  legacy <- run_common_index(d)
+  stopifnot(legacy$population$n_index_resolved == 1L, is.null(attr(legacy, "bmi_policy_id")))
+}
+
+common_checks[["BMI evidence states cannot contradict values or silently relabel bundles"]] <- function() {
+  d <- make_triangulation_fixture(2, with_index_day = FALSE)
+  d$bmi_evidence_state <- rep("missing", nrow(d))
+  common_expect_error(validate_triangulation_input(d), "BMI evidence")
+  d$bmi_evidence_state <- rep("valid", nrow(d))
+  a <- run_common_index(d)
+  directory <- tempfile("available-bmi-bundle-"); dir.create(directory)
+  on.exit(unlink(directory, recursive = TRUE), add = TRUE)
+  write_common_bundle(a, directory, list(mode = "fixture"), list(), "fixture", "available-bmi-test")
+  bundle <- read_common_bundle(directory)
+  stopifnot(identical(bundle$manifest$specification$bmi_policy_id, "available_encounter_or_prior_bmi_v1"),
+    is.null(common_specification()$bmi_policy_id))
+}
+
+common_checks[["Batched source preparation retains whole patients, indexes and source census"]] <- function() {
+  d <- make_triangulation_fixture(240, with_index_day = FALSE)
+  d$bmi_evidence_state <- ifelse(is.na(d$bmi), "missing", "valid")
+  d$bmi[1:2] <- c(NA_real_, 35); d$bmi_evidence_state[1:2] <- c("missing", "valid")
+  root <- tempfile("batch-index-"); dir.create(root)
+  on.exit(unlink(root, recursive = TRUE), add = TRUE)
+  parts <- file.path(root, "parts"); dir.create(parts)
+  # Partition on patients, never individual encounters.
+  stripe <- match(d$patient_id, unique(d$patient_id)) %% 2
+  fields <- c("patient_id", "encounter_id", "encounter_date", triangulation_adjustment,
+    "encounter_type", "bmi_evidence_state")
+  for (i in 0:1) utils::write.csv(d[stripe == i, fields], file.path(parts, paste0(i, ".csv")), row.names = FALSE, na = "")
+  out <- file.path(root, "indexes.csv"); receipt <- file.path(root, "selection.json")
+  status <- system2(file.path(R.home("bin"), "Rscript"), c("--vanilla", "scripts/select_common_index_mapping.R",
+    shQuote(parts), shQuote(out), shQuote(receipt)), stdout = FALSE, stderr = FALSE)
+  stopifnot(status == 0L)
+  selected <- utils::read.csv(out, colClasses = "character")
+  full <- derive_triangulation_variables(validate_triangulation_input(d))
+  full$common_obesity <- full$bmi >= 30
+  full$common_obesity[full$bmi_evidence_state == "missing"] <- FALSE
+  expected <- select_frame_indexes(full, "common_obesity")
+  audit <- jsonlite::read_json(receipt, simplifyVector = TRUE)
+  stopifnot(setequal(selected$encounter_id, expected$indexes$encounter_id),
+    audit$counts$n_index_resolved == nrow(expected$indexes), audit$scope$input_encounters == nrow(d),
+    audit$counts$n_frame_patients == expected$counts$n_frame_patients)
+  # Selecting before the evidence join must preserve the fitted analyses and
+  # full-source accounting, not just the selected keys.
+  prepared <- d[match(selected$encounter_id, d$encounter_id), , drop = FALSE]
+  attr(prepared, "source_selection") <- audit
+  unbatched <- run_common_index(d)
+  batched <- run_common_index(prepared)
+  stopifnot(any(unbatched$models$status == "estimated"),
+    isTRUE(all.equal(unbatched$results, batched$results, tolerance = 1e-12, check.attributes = FALSE)),
+    isTRUE(all.equal(unbatched$population, batched$population, check.attributes = FALSE)),
+    isTRUE(all.equal(unbatched$scope, batched$scope, check.attributes = FALSE)))
+}
+
+common_checks[["Original population identity persists without relabeling old specifications"]] <- function() {
+  data <- make_triangulation_fixture()
+  old <- run_common_index(data)
+  attr(data, "population_scope_id") <- "original_selected_encounters_v1"
+  current <- run_common_index(data)
+  stopifnot(identical(old$results, current$results),
+    identical(attr(current, "population_scope_id"), "original_selected_encounters_v1"),
+    is.null(common_specification()$population_scope_id),
+    identical(common_specification(NULL, "original_selected_encounters_v1")$population_scope_id, "original_selected_encounters_v1"))
+  common_expect_error(common_specification(NULL, "broader_history"), "Unknown original population")
+}

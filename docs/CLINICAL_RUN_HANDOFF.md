@@ -1,10 +1,40 @@
+**Current workflow amendment — 2026-10-16 curve/audit refactor:** the original
+selected encounter scope is retained. Prior passing original-list source checks
+remain evidence for that scope; the earlier outside-list mapping gap is historical.
+The new analysis additionally requires a hash-bound pre-index cohort-audit companion
+from the existing mapped candidate covariates. The earlier selected-index input
+alone cannot establish those stage distributions. New companion reconciliation and identity-bound preflight now pass on the Mini,
+using the unchanged accepted input and a fresh private manifest. The independent
+field comparison and current qualification-function hashes agree. Clinical model
+execution remains unrun; human/scientific review is not asserted. Current commands are
+`make prepare`, `make qualify`, `make preflight`, `make cohort-audit`, `make analyze`
+and `make render RUN=...`; dated commands below describe superseded workflows.
+The active plan and README define the current interface. Preserve existing inputs,
+accepted products and human-review status.
+
+**2026-10-16 correction:** use authenticated original FULL_DATA selected encounter membership, bound as `original_selected_encounters_v1`. Broader-history candidate qualification is superseded. Retain available current/prior/calculated BMI and the first BMI-eligible index within the original list; verify historical first flags separately. Fresh original-list mapping, preparation and all 30 independent source checks pass; identity-bound preflight passes with zero models fitted. See [the governing decision](DECISIONS.md#original-encounter-list-correction--confirmed-2026-10-16). No clinical models have run.
+
 # Home-network handoff: qualify and run on the Mini
 
-Updated 2026-10-15. Home-network access resumed using the Mini's saved `reblocke` account (`ssh -4 reblocke@Brians-Mac-mini.local`). The merged release was copied through a Git bundle because the Mini lacks working GitHub credentials. Private accepted-product checks have started; no clinical model has run. The original local `full_db.rds` remains a historical comparator. See the dated continuation in [the source assessment](TRIANGULATION_SOURCE_ASSESSMENT.md).
+Updated 2026-10-16. The Mini is reachable. The separate upstream branch
+`codex/broader-bmi-mapping` supplies the unchanged reviewed available-BMI mapper
+at `72c91a2`; shared upstream code and canonical source remain read-only. The
+consumer `codex/available-bmi-mapping` now restricts candidates to authenticated
+original FULL_DATA selected ED/inpatient keys. Historical first flags reproduce,
+exact membership and captured setting support pass, and fresh dependent
+qualification and preflight pass. No clinical model has run.
 
-**Current stop:** the bounded source check demonstrated candidate keys without approved legacy-field mappings. Follow [the source-gap handoff](COMMON_INDEX_SOURCE_GAP_HANDOFF.md) before attempting clinical preparation/estimation. No clinical manifest was accepted. This is not a request for a replacement raw export or a change in the agreed population.
+**Current boundary:** broader-source qualification is superseded. Outside-list
+UNKNOWN/LAB/history/return keys cannot enter or block the new indexes. Retain
+within-list unresolved chronology/BMI and same-day ties; no later replacement.
+Release and synchronize reviewed clean code before clinical estimation. The
+original RDS and accepted source products remain unchanged. Keep the approved
+uncapped measurement-recency rule and disclose its limitations.
 
-Workflow release: [PR #5](https://github.com/reblocke/obes-pop-attrib-fract-hypercap/pull/5). Use its merged revision when synchronizing the Mini; exact local publication receipts remain in ignored evidence storage.
+The released baseline is PR #6 (`8735505`); the new mapping/consumer branches are
+not a merged clinical release. Synchronize the eventual reviewed revisions and
+record actual commit/tree/source hashes before fitting models. Git bundles can
+be used while the Mini lacks GitHub credentials; do not copy credentials.
 
 ## 1. Open the clean merged checkout
 
@@ -14,41 +44,59 @@ From the Mini's existing repository, inspect `git status --short`. Preserve unre
 git switch main
 git pull --ff-only
 git rev-parse HEAD
-make triangulation-test
 ```
 
 Use the merged release linked from this repository's PR history. Clinical execution requires a clean checkout and records its actual commit/tree plus analysis-source hashes. Private configuration and results belong in ignored or existing owner-only storage. No packages are installed automatically.
 
-Check the actual R executable and libraries first. On this continuation, the Homebrew default lacked primary dependencies. The separately installed framework R supplied `jsonlite`, `digest` and `lpSolve`, but still lacked `haven`, `ggplot2`, `knitr` and `rmarkdown`. Dependency installation was requested separately; do not treat that request as approval. Select an installed compatible runtime or obtain authorization for an isolated library before estimation/rendering.
+The owner authorized isolated dependency installation on 2026-10-15. The Mini's framework R 4.6.1 now loads `haven` 2.5.5, `ggplot2` 4.0.3, `knitr` 1.52 and `rmarkdown` 2.32 from `artifacts/triangulation/runtime/r-4.6-aarch64/library/`, alongside its existing `jsonlite`, `digest` and `lpSolve`. Compatible macOS binaries were used. Before/after file hashes confirm that the system libraries were unchanged; all 24 shared and 14 common-index artificial check groups passed.
 
-## 2. Bind existing products, without rebuilding them
-
-Copy `config/common_index_preparation.example.json` to ignored `config/common_index_preparation.local.json`. Fill the paths and trusted identities from the existing private release records. Expected digests must come from the trusted record, not be obtained from a neighboring file and declared accepted. Keep the reviewed upstream revision and four reader hashes unchanged. Use the existing Python environment exposing those readers, DuckDB, pandas and PyArrow; Rscript must expose the documented R dependencies.
-
-Use absolute source, receipt and spill paths in the preparation configuration. The output and Make command paths may be relative to the repository root. This keeps evidence references valid in the generated manifest's new directory.
-
-Review every nonblank specimen label. Map generic blood labels to `unspecified`, established arterial/venous labels to `abg`/`vbg`, and established other specimens to `other`. Unreviewed labels stop preparation; an unspecified-blood code plus a generic blood label cannot establish an arterial specimen.
-
-Required bindings are the accepted FULL_DATA bundle/receipt/validation report, canonical source database/sidecar/catalog, private spill location, source evidence references, original-key and nine legacy-field mappings, exhaustive source/legacy encounter-setting vocabulary, specimen vocabulary, diagnosis code systems and captured-extract completeness. The example uses explicit `accepted_stata_full_data_v1` decoding: dictionary-defined Stata days since 1960, coded settings/demographics and the inherited ordered race/ethnicity rule from separate `race`/`ethnicity`. Its `race_ethnicity` mapping names the derived output, not an existing FULL_DATA column. BMI and age are copied unchanged. Unexpected codes and missing raw race/ethnicity stop for review; no default category is imputed. Previously typed inputs retain `typed_v1` (also the compatibility default when that key is absent). The encoding is bound in configuration/field evidence and the preparation receipt. Review these mappings against the accepted dictionary; do not choose an encoding from value magnitudes.
-
-A global pressure-unit default is allowed only when authenticated source metadata establishes it; otherwise leave it null. Select calendar-day `qualified` only when that source evidence is available; `pending` remains supported.
-
-Use the existing source products in place. Canonical database hashing is potentially long; the recorded earlier full-database pass took about 15 minutes. The command uses one upstream source session, bounded upstream memory and the supplied private spill location. Verify free scratch capacity on that volume first: internal-disk spill exhausted its configured capacity during qualification. It does not copy the canonical database or rerun preprocessing. Preserve failed attempts; an execution resource failure is not a failed population-coverage test.
-
-The bounded projection streams 16 disjoint patient-hash partitions, retaining every raw encounter row for each key before consensus and study selection. It retains only the agreed study scope after consensus and checks mapped-key coverage in SQL before Python materialization, rather than accumulating all historical candidate fields. It reconciles raw row totals and the bound on covered keys, keeping the 2,816-MiB RAM cap and at most 64 GiB of scratch. It prints completed projection partitions; that is substage progress, not overall preparation completion. A partition failure count is not a full-population total. Select private output storage with enough space for the new typed input too; the Mini's internal disk was nearly full.
-
-The observed raw vocabulary includes `UNKNOWN`. Its explicit `NA` mapping retains uncertain eligibility and becomes a true missing setting in the typed input. Review every other source setting code; do not treat a named unknown as a confirmed nonacute encounter.
+On this configured Mini, activate the ignored local environment from the repository root before running the commands below:
 
 ```bash
-make triangulation-prepare \
-  PREP_PYTHON="/existing/upstream-environment/bin/python" \
-  SOURCE_CONFIG="config/common_index_preparation.local.json" \
-  OUTPUT="artifacts/triangulation/source-qualification-YYYYMMDD-unique"
+. artifacts/triangulation/runtime/activate.sh
+Rscript --vanilla -e 'cat(R.version.string, "\n"); print(.libPaths())'
+make fixture
+make test BMI_TEST_REVIEW="artifacts/triangulation/<fresh-fixture>/reviews/<completed-review>" \
+  PREP_PYTHON="/existing/upstream/environment/bin/python"
 ```
 
-Replace the Python path and choose a fresh output directory. The owner-only output contains restricted `study-input.csv`/`study-input.rds`, `field-evidence.json`, `population-evidence.json`, `preparation_receipt.json` and **`triangulation_input.pending.json`**. A failure retains a separate receipt; it is not a qualified input. The original RDS and accepted upstream products are preserved.
+The activation file selects the framework runtime and project library for this shell, including Quarto's R selection. It is a local setup artifact, not a file supplied by a fresh clone. Installation, package inventory, session information, unchanged-library evidence and the two R test logs are retained in the ignored runtime setup directory. No renv project or lockfile was created. This verifies R dependencies and artificial checks, not a full Mini report render or clinical source acceptance.
 
-The preparation uses raw exact-code transport, not syndrome-positive catalog filters. It includes potential adult 2022 acute-care candidates and unresolved dates/types before BMI, gas or model-completeness filtering. Every candidate must have a legacy mapping; otherwise it stops with an aggregate missing-key count. It preserves incomplete values and exact repeated base rows for downstream accounting. It rejects incompatible original keys, chronology/settings contradictions, unmapped settings, incomplete evidence queries, duplicate source records and unreviewed diagnosis systems. Do not resolve a failure by discarding candidates or relabeling numeric keys.
+## 2. Map the authenticated original selected encounters
+
+Use `config/common_index_mapping.example.json` for the primary route. It binds the
+five reviewed upstream modules and `available_encounter_or_prior_bmi_v1`. The
+historical `common_index_preparation.example.json` remains for its original
+FULL_DATA route; it does not bind the corrected available-BMI/original-list policy. Follow the
+[map/prepare/qualify commands](../README.md#restricted-data-execution).
+
+On the Mini the completed mapping, source hash, trusted historical receipts,
+source inventories and typed preparation live in the existing owner-only external
+qualification packet. Exact paths/digests remain private. No replacement export,
+source-schema change or upstream rebuild is needed. Use a fresh output directory
+for every preparation or qualification attempt and retain failures.
+
+Preparation streams whole-patient partitions through the same R first-index
+selector before gas extraction. Every candidate has a mapped row; genuine absent
+BMI is `missing`, while unresolved timing/capture/value conflicts remain
+`unresolved`. The typed input contains only resolved indexes, with the original
+cohort/exclusion/index counts bound in `selection-evidence.json`. Reload BMI from
+the upstream product after selection to preserve exact float32 values.
+
+The source mapping preserves explicit units, inherited numeric precision and
+adjustment coding. Its prior measurement date is relative to each candidate;
+age uses encounter-start year minus captured birth year. These are intentional
+anchor differences from the historical qualifying-event product, not unexplained
+Stata/Python disagreement. The source inventory contains no recorded BMI above
+50.1, so the conditional high-BMI ceiling was not activated. No statistical BMI
+imputation is used.
+
+The gas/ICD preparation uses raw exact-code transport at those fixed keys. Review
+specimen vocabulary and units, ordinary versus adjusted gases, invalid/censored
+values, captured diagnosis completeness and fixed start-calendar-day maxima.
+Unknown or incompatible evidence must not become normal measurements. A completed
+canonical hash receipt is reusable only with its expected digest and unchanged
+source identity. External scratch is required on this Mini.
 
 ## 3. Review one source-qualification ledger
 
@@ -59,7 +107,7 @@ The field evidence must bind `unadjusted_pco2_v1` exactly: ordinary specimen-aut
 After the seven primary checks pass, make a separately named reviewed manifest from the pending copy. Preserve the pending original, fill actual review identity/date and evidence reference, set only verified gates to accepted, and retain hashes of the finalized evidence files. If evidence files change during review, update their hashes. Calendar-day evidence can stay pending. Source-level unsupported requirements remain explicit; request upstream work only for a demonstrated gap.
 
 ```bash
-make triangulation-preflight \
+make preflight \
   INPUT="artifacts/triangulation/source-qualification-YYYYMMDD-unique/study-input.rds" \
   MANIFEST="artifacts/triangulation/source-qualification-YYYYMMDD-unique/triangulation_input.reviewed.json"
 ```
@@ -69,7 +117,7 @@ Passing preflight verifies reviewed declarations, exact input/policy and evidenc
 ## 4. Estimate once and review aggregates
 
 ```bash
-make triangulation-render \
+make analyze \
   INPUT="artifacts/triangulation/source-qualification-YYYYMMDD-unique/study-input.rds" \
   MANIFEST="artifacts/triangulation/source-qualification-YYYYMMDD-unique/triangulation_input.reviewed.json"
 ```

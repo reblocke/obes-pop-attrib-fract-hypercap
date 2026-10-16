@@ -14,6 +14,9 @@ full_db.rds
 /reports/*.pdf
 /reports/*.log
 /reports/*.tex
+/reports/*.aux
+/reports/*.out
+/reports/*.toc
 /reports/*.knit.md
 /reports/*_files/
 reports/.RData
@@ -28,6 +31,7 @@ __pycache__/
 /artifacts/triangulation/
 /config/triangulation_input.local.json
 /config/common_index_preparation.local.json
+/config/common_index_mapping.local.json
 
 # Archived-source replays and historical generated reports
 /artifacts/historical-r/

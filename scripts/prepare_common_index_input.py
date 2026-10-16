@@ -20,6 +20,7 @@ import sys
 from collections import Counter
 from datetime import date, timedelta
 from pathlib import Path
+from types import SimpleNamespace
 
 ROOT = Path(__file__).resolve().parents[1]
 POLICY_PATH = ROOT / "config/common_index_source_policy.json"
@@ -59,6 +60,26 @@ def verify_file(entry):
     if path.is_symlink() or not path.is_file() or sha256(path) != entry["sha256"].lower():
         raise PreparationError("Trusted input/evidence identity mismatch")
     return path
+
+
+def verify_canonical_database(source):
+    """Reuse this qualification's completed full hash only at unchanged identity.
+
+    The expected receipt digest is caller-trusted and retained in configuration.
+    Immutable-source and before/after identity checks still apply during reads.
+    Without an explicit receipt, compute and compare the full database hash.
+    """
+    entry = source.get("full_hash_receipt")
+    if entry is None:
+        return verify_file(source["database"])
+    receipt = json.loads(verify_file(entry).read_text())
+    database = Path(source["database"]["path"])
+    if (not database.is_absolute() or database.is_symlink() or not database.is_file() or
+        receipt.get("sha256") != source["database"]["sha256"].lower() or
+        receipt.get("file_identity") != list(file_identity(database)) or
+        receipt.get("identity_stable") is not True):
+        raise PreparationError("Completed canonical hash receipt does not match this source identity/digest")
+    return database
 
 
 def parsed_date(value):
@@ -330,11 +351,12 @@ def scoped_candidate_frame(connection, features, scope_types):
 
 
 def pinned_readers(config):
-    pin = json.loads((ROOT / "config/common_index_preparation.example.json").read_text())
+    mapped = config.get("schema_version") == 2
+    pin = json.loads((ROOT / "config" / ("common_index_mapping.example.json" if mapped else "common_index_preparation.example.json")).read_text())
     if config["upstream_revision"] != pin["upstream_revision"] or config["upstream_reader_sha256"] != pin["upstream_reader_sha256"]:
         raise PreparationError("Upstream reader pin differs from the reviewed adapter")
     readers = {}
-    for suffix in UPSTREAM_MODULES:
+    for suffix in UPSTREAM_MODULES + (("encounters.calendar_covariates",) if mapped else ()):
         module = importlib.import_module("trinetx_preprocessing." + suffix)
         if sha256(module.__file__) != config["upstream_reader_sha256"][suffix]:
             raise PreparationError("Installed upstream reader does not match the reviewed pin")
@@ -342,9 +364,82 @@ def pinned_readers(config):
     return readers
 
 
+def load_legacy_features(config, readers, source_columns, encoding):
+    bundle = config["encounter_bundle"]
+    paths = [bundle["path"], bundle["receipt_path"], bundle["validation_report_path"], config["canonical_source"]["spill_root"]]
+    if any(not Path(path).is_absolute() for path in paths):
+        raise PreparationError("Source, receipt and spill locations must be explicit absolute paths")
+    if bundle["variant"] != "FULL_DATA":
+        raise PreparationError("Expanded common-index preparation requires the reviewed FULL_DATA variant")
+    raw = readers["encounters.reader"].read_encounters(
+        Path(bundle["path"]), variant=bundle["variant"], receipt_path=Path(bundle["receipt_path"]),
+        expected_receipt_sha256=bundle["expected_receipt_sha256"],
+        validation_report_path=Path(bundle["validation_report_path"]), columns=source_columns)
+    return decode_base_fields(raw, config["columns"], encoding)
+
+
+def mapping_csv_fields(fields):
+    """Promote stored floats before CSV serialization, preserving their exact value."""
+    return ["CAST("+name+" AS DOUBLE) AS "+name if name in ("bmi", "age_at_encounter") else name for name in fields]
+
+
+def load_mapped_indexes(config, mapper, output, readers):
+    """Verify upstream product, then select before gases in whole-patient batches."""
+    import duckdb
+    import pandas as pd
+    path = verify_file(config["covariate_mapping"]["manifest"])
+    manifest = json.loads(path.read_text())
+    from original_encounter_population import read_original_list, require_original_population
+    require_original_population(config, manifest)
+    original, _ = read_original_list(config, readers)
+    verify_file(manifest["original_encounter_list"])
+    if manifest.get("product") != "calendar_encounter_covariates_v1" or manifest.get("policy") != mapper.POLICY:
+        raise PreparationError("Unreviewed upstream covariate product/policy")
+    if set(manifest["files"]) != {"covariates.parquet"}:
+        raise PreparationError("Unexpected covariate mapping files")
+    product = verify_file({"path":str(path.parent/"covariates.parquet"),"sha256":manifest["files"]["covariates.parquet"]})
+    parts = output/"index-partitions"; parts.mkdir(mode=0o700)
+    cache = output/"index-cache"
+    fields = list(BASE_COLUMNS) + ["bmi_evidence_state"]
+    quote = lambda value: "'"+str(value).replace("'","''")+"'"
+    with duckdb.connect() as c:
+        c.execute("SET memory_limit='2816MiB'"); c.execute("SET threads=1")
+        c.execute('SET temp_directory='+quote(output/'selection-spill'))
+        c.register('authenticated_original_keys', original.loc[original.encounter_type.isin([2,3]), ['patient_id','encounter_id']])
+        outside = c.execute('SELECT count(*) FROM read_parquet(?) m ANTI JOIN authenticated_original_keys o USING(patient_id,encounter_id)', [str(product)]).fetchone()[0]
+        missing = c.execute('SELECT count(*) FROM authenticated_original_keys o ANTI JOIN read_parquet(?) m USING(patient_id,encounter_id)', [str(product)]).fetchone()[0]
+        if outside or missing:
+            raise PreparationError('Mapped keys differ from authenticated original acute encounter list')
+        c.execute("COPY (SELECT "+','.join(fields)+",hash(patient_id)%64 AS part FROM read_parquet("+quote(product)+")) TO "+quote(cache)+" (FORMAT PARQUET,PARTITION_BY(part),COMPRESSION ZSTD)")
+        for part in range(64):
+            files=list((cache/f'part={part}').glob('*.parquet'))
+            if not files: continue
+            csv_fields = mapping_csv_fields(fields)
+            c.execute("COPY (SELECT "+','.join(csv_fields)+" FROM read_parquet(["+','.join(quote(f) for f in files)+"])) TO "+quote(parts/f'{part:02}.csv')+" (FORMAT CSV, HEADER)")
+    subprocess.run([config.get("rscript","Rscript"),"--vanilla",str(ROOT/"scripts/select_common_index_mapping.R"),
+                    str(parts),str(output/"selected-indexes.csv"),str(output/"selection-evidence.json")],check=True)
+    selection=json.loads((output/"selection-evidence.json").read_text())
+    selection["population_scope_id"]=manifest["population_scope_id"]
+    (output/"selection-evidence.json").write_text(json.dumps(selection,indent=2)+"\n")
+    if selection["scope"]["input_encounters"] != manifest["rows"] or selection["bmi_policy_id"] != mapper.POLICY_ID:
+        raise PreparationError("Bounded selection does not reconcile to upstream mapping")
+    selected_keys=pd.read_csv(output/"selected-indexes.csv",usecols=["patient_id","encounter_id"],
+                              dtype="string",keep_default_na=False)
+    with duckdb.connect() as c:
+        c.execute("SET memory_limit='2816MiB'"); c.execute("SET threads=1")
+        c.register('selected_original_keys',selected_keys)
+        features=c.execute('SELECT '+','.join('p.'+n for n in fields)+' FROM read_parquet(?) p '
+            'JOIN selected_original_keys k USING(patient_id,encounter_id)',[str(product)]).fetchdf()
+    # Promote stored Stata float32 exactly; avoid a shortened CSV representation.
+    features["bmi"]=features["bmi"].astype('float64')
+    if len(features)!=selection["counts"]["n_index_resolved"] or features.patient_id.duplicated().any():
+        raise PreparationError("Prepared common indexes do not reconcile")
+    return features, manifest, selection
+
+
 def prepare(config, output):
     policy = json.loads(POLICY_PATH.read_text())
-    if config["source_policy_id"] != policy["source_policy_id"] or config["schema_version"] != 1:
+    if config["source_policy_id"] != policy["source_policy_id"] or config["schema_version"] not in (1, 2):
         raise PreparationError("Unreviewed preparation policy or configuration version")
     if set(config["columns"]) != set(BASE_COLUMNS) or len(set(config["columns"].values())) != len(BASE_COLUMNS):
         raise PreparationError("Preparation requires distinct mappings for all nine base fields")
@@ -366,35 +461,53 @@ def prepare(config, output):
         raise PreparationError("Reviewed lineage, population and field evidence references are required")
     for entry in config["source_evidence_files"].values():
         verify_file(entry)
-    database = verify_file(config["canonical_source"]["database"])
+    database = (verify_canonical_database(config["canonical_source"]) if config["schema_version"] == 2
+                else verify_file(config["canonical_source"]["database"]))
     verify_file(config["canonical_source"]["sidecar"])
     before = (file_identity(database), file_identity(config["canonical_source"]["sidecar"]["path"]))
     readers = pinned_readers(config)
     import pandas as pd
-    bundle = config["encounter_bundle"]
-    if any(not Path(path).is_absolute() for path in [bundle["path"],bundle["receipt_path"],bundle["validation_report_path"],config["canonical_source"]["spill_root"]]):
-        raise PreparationError("Source, receipt and spill locations must be explicit absolute paths")
-    if bundle["variant"] != "FULL_DATA":
-        raise PreparationError("Expanded common-index preparation requires the reviewed FULL_DATA variant")
-    features = readers["encounters.reader"].read_encounters(
-        Path(bundle["path"]), variant=bundle["variant"], receipt_path=Path(bundle["receipt_path"]),
-        expected_receipt_sha256=bundle["expected_receipt_sha256"],
-        validation_report_path=Path(bundle["validation_report_path"]), columns=source_columns)
-    features=decode_base_fields(features,config["columns"],encoding)
+    mapped = config["schema_version"] == 2
+    bundle = config.get("encounter_bundle", {})
+    mapping_manifest = None
+    if mapped:
+        mapping_path = verify_file(config["covariate_mapping"]["manifest"])
+        mapping_manifest = json.loads(mapping_path.read_text())
+        identity = mapping_manifest["source_identity"]
+        if (identity["canonical_sidecar_sha256"] != config["canonical_source"]["sidecar"]["sha256"] or
+            identity["catalog_sha256"] != config["canonical_source"]["catalog_sha256"] or
+            identity["database_file_identity"] != list(file_identity(database))):
+            raise PreparationError("Covariate mapping belongs to another canonical input")
+        features, mapping_manifest, prepared_selection = load_mapped_indexes(config, readers["encounters.calendar_covariates"], output, readers)
+        if not set(BASE_COLUMNS + ("bmi_evidence_state",)) <= set(features):
+            raise PreparationError("Mapped covariate product lacks required fields")
+        source_columns = list(BASE_COLUMNS) + ["bmi_evidence_state"]
+        if encoding != "typed_v1":
+            raise PreparationError("New mapped covariates require explicit typed encoding")
+    else:
+        features = load_legacy_features(config, readers, source_columns, encoding)
     require_original_keys(features)
     source = config["canonical_source"]
+    if not Path(source["spill_root"]).is_absolute():
+        raise PreparationError("Spill location must be absolute")
     # This generic source API is metadata/schema validation. Study acceptance is
     # separately bound by the caller's reviewed lineage/population evidence.
     with readers["combined_preprocessing.cohort_source"].open_cohort_source(
         database, expected_catalog_sha256=source["catalog_sha256"],
         spill_root=Path(source["spill_root"]), memory_limit_mib=2816) as opened:
         connection = opened.connection
-        build = readers["combined_preprocessing.cohort_source_calendar_population"].build_calendar_candidate_fields
-        raw_types = list(config["encounter_type_codes"])
-        if not raw_types or any(v not in ("EMER", "IMP", "OTHER", "NA") for v in config["encounter_type_codes"].values()):
+        if mapped:
+            candidates = features[["patient_id", "encounter_id", "encounter_date", "encounter_type"]].rename(columns={"encounter_date":"encounter_start_date"}).copy()
+            candidate_audit = SimpleNamespace(**mapping_manifest["source_candidate_audit"])
+            if len(candidates) != prepared_selection["counts"]["n_index_resolved"] or candidates.duplicated(["patient_id", "encounter_id"]).any():
+                raise PreparationError("Mapped candidate key accounting failed")
+        else:
+            build = readers["combined_preprocessing.cohort_source_calendar_population"].build_calendar_candidate_fields
+            raw_types = list(config["encounter_type_codes"])
+            scope_types = [k for k,v in config["encounter_type_codes"].items() if v in ("EMER", "IMP", "NA")]
+            candidate_audit,candidates = build_bounded_candidate_fields(connection,build,features,raw_types,scope_types)
+        if not config["encounter_type_codes"] or any(v not in ("EMER", "IMP", "OTHER", "NA") for v in config["encounter_type_codes"].values()):
             raise PreparationError("Invalid reviewed encounter-type vocabulary")
-        scope_types = [k for k,v in config["encounter_type_codes"].items() if v in ("EMER", "IMP", "NA")]
-        candidate_audit,candidates = build_bounded_candidate_fields(connection,build,features,raw_types,scope_types)
         if candidate_audit.invalid_encounter_key_rows:
             raise PreparationError("Captured encounters contain invalid original keys; source scope needs review")
         candidate_keys = set(zip(candidates.patient_id, candidates.encounter_id))
@@ -416,6 +529,9 @@ def prepare(config, output):
             raise PreparationError("No candidate encounters in the authenticated study scope")
         starts = dict(zip(zip(candidates.patient_id,candidates.encounter_id), [parsed_date(x) for x in candidates.encounter_start_date]))
         unknown_dates = 0
+        # Explicit Date objects are written below; avoid implicit datetime64
+        # coercion when the typed upstream mapping came through pandas/Arrow.
+        selected["encounter_date"] = selected["encounter_date"].astype(object)
         for i in selected.index:
             key = (selected.at[i,"patient_id"],selected.at[i,"encounter_id"])
             legacy_date = parsed_date(selected.at[i,"encounter_date"])
@@ -438,6 +554,9 @@ def prepare(config, output):
             selected.at[i,"encounter_type"] = source_type
         connection.register("bmi30_study_keys", candidates[["patient_id", "encounter_id"]])
         target_codes = [code.replace(".","") for code in policy["icd_codes"]]
+        expected_icd_records = connection.execute(
+            "SELECT count(*) FROM source_diagnosis d JOIN bmi30_study_keys k USING(patient_id,encounter_id) "
+            "WHERE replace(upper(trim(d.code)),'.','')=ANY(?)", [target_codes]).fetchone()[0] if mapped else None
         source_systems = {row[0] for row in connection.execute(
             "SELECT DISTINCT d.code_system FROM source_diagnosis d JOIN bmi30_study_keys k "
             "USING(patient_id,encounter_id) WHERE replace(upper(trim(d.code)),'.','')=ANY(?)", [target_codes]).fetchall()}
@@ -445,23 +564,29 @@ def prepare(config, output):
             raise PreparationError("Target-like diagnosis records have unreviewed code systems")
         transport = readers["combined_preprocessing.cohort_source_calendar_transport"].iter_calendar_source_records
         codes = sum((policy[name] for name in ("arterial_codes","venous_codes","unspecified_codes","temperature_adjusted_codes")), [])
+        print("Extracting exact-code gas evidence at fixed indexes", flush=True)
         gas, gas_audit = summarize_gases(transport(connection,encounter_relation="bmi30_study_keys",domain="lab",
             code_selectors=[("LOINC",c) for c in codes]), policy, config["specimen_codes"], start_dates=starts,
             metadata_units=config.get("source_metadata_pressure_unit"))
+        print("Gas evidence complete; extracting diagnosis evidence", flush=True)
         selectors = [(system, code) for system in config["diagnosis_code_systems"]
                      for target in policy["icd_codes"] for code in (target,target.replace(".",""))]
         if not selectors:
             raise PreparationError("Reviewed diagnosis code systems are required")
         icd, icd_audit = summarize_icd(transport(connection,encounter_relation="bmi30_study_keys",domain="diagnosis",
             code_selectors=selectors), policy, config["diagnosis_capture_complete"])
+        print("Diagnosis evidence complete; validating typed output", flush=True)
+        if mapped and icd_audit.get("target_records", 0) != expected_icd_records:
+            raise PreparationError("Transported ICD target records disagree with independent captured-source count")
         if set(gas) != candidate_keys or set(icd) != candidate_keys:
             raise PreparationError("Evidence streams do not reconcile to candidate keys")
-        columns = OUTPUT_COLUMNS + (DAY_COLUMNS if config["index_day_status"] == "qualified" else ())
+        row_columns = BASE_COLUMNS + (("bmi_evidence_state",) if mapped else ())
+        columns = OUTPUT_COLUMNS + (("bmi_evidence_state",) if mapped else ()) + (DAY_COLUMNS if config["index_day_status"] == "qualified" else ())
         csv_path = output / "study-input.csv"
         with csv_path.open("x",newline="") as file:
             writer = csv.DictWriter(file, fieldnames=columns); writer.writeheader()
-            for values in selected[list(BASE_COLUMNS)].itertuples(index=False,name=None):
-                row = dict(zip(BASE_COLUMNS,values)); key=(row["patient_id"],row["encounter_id"])
+            for values in selected[list(row_columns)].itertuples(index=False,name=None):
+                row = dict(zip(row_columns,values)); key=(row["patient_id"],row["encounter_id"])
                 row.update({k:v for k,v in gas[key].items() if k in columns});row["icd_hypercapnia"]=icd[key]
                 # pandas NaN/NA/NaT must remain true missing values, not categories.
                 row={k:(None if pd.isna(v) else v) for k,v in row.items()}
@@ -470,9 +595,14 @@ def prepare(config, output):
         raise PreparationError("Canonical source identity changed during preparation")
     for entry in config["source_evidence_files"].values():
         verify_file(entry)
-    readers["encounters.reader"].verify_accepted_bundle(Path(bundle["path"]),variant=bundle["variant"],
-        receipt_path=Path(bundle["receipt_path"]),expected_receipt_sha256=bundle["expected_receipt_sha256"],
-        validation_report_path=Path(bundle["validation_report_path"]))
+    if mapped:
+        verify_file(config["covariate_mapping"]["manifest"])
+        for filename, digest in mapping_manifest["files"].items():
+            verify_file({"path": str(mapping_path.parent / filename), "sha256": digest})
+    else:
+        readers["encounters.reader"].verify_accepted_bundle(Path(bundle["path"]),variant=bundle["variant"],
+            receipt_path=Path(bundle["receipt_path"]),expected_receipt_sha256=bundle["expected_receipt_sha256"],
+            validation_report_path=Path(bundle["validation_report_path"]))
     subprocess.run([config.get("rscript","Rscript"),"--vanilla",str(ROOT/"scripts/write_common_index_input.R"),
                     str(csv_path),str(output/"study-input.rds")],check=True)
     fields={"source_policy":policy,"gas_audit":gas_audit,"icd_audit":icd_audit,
@@ -484,23 +614,42 @@ def prepare(config, output):
         "base_missingness":{name:int(selected[name].isna().sum()) for name in BASE_COLUMNS if name not in ("patient_id","encounter_id")},
         "index_day_status":config["index_day_status"],"automated_verification":True,
         "human_review":"pending","clinical_results_qualified":False}
+    if mapped:
+        fields.update(independent_icd_record_count=expected_icd_records, bmi_policy=mapping_manifest["policy"],
+            bmi_audit=mapping_manifest["bmi_audit"], bmi_methods=mapping_manifest["bmi_methods"],
+            bmi_mapping_manifest_sha256=config["covariate_mapping"]["manifest"]["sha256"],
+            population_scope_id=mapping_manifest["population_scope_id"],
+            original_encounter_list=mapping_manifest["original_encounter_list"])
     (output/"field-evidence.json").write_text(json.dumps(fields,indent=2)+"\n")
     population={"source_policy_id":policy["source_policy_id"],
         "canonical_database_sha256":source["database"]["sha256"],"canonical_sidecar_sha256":source["sidecar"]["sha256"],
-        "accepted_bundle_receipt_sha256":bundle["expected_receipt_sha256"],"source_audit":vars(candidate_audit),
+        "accepted_bundle_receipt_sha256":bundle.get("expected_receipt_sha256"),"source_audit":vars(candidate_audit),
         "candidate_projection":"all_raw_rows_consensus_then_study_scope_patient_hash_16_v1",
         "source_scope":"captured encounters: 2022 or unresolved date; acute-care or unresolved type; adult birth-year proxy or unresolved age; no gas/BMI/completeness prefilter",
         "candidate_encounter_keys":len(candidate_keys),"missing_legacy_mapping_keys":0,"input_rows":len(selected),
         "legacy_confirmed_scope_keys":len(legacy_confirmed),"legacy_scope_keys_missing_or_contradictory":0,
         "automated_verification":True,"human_review":"pending","clinical_results_qualified":False}
+    if mapped:
+        population.pop("missing_legacy_mapping_keys", None)
+        population["missing_covariate_mapping_keys"] = 0
+        population["mapped_confirmed_scope_keys"] = population.pop("legacy_confirmed_scope_keys")
+        population.update(bmi_policy_id=mapping_manifest["policy"]["id"],
+            source_candidate_encounter_keys=mapping_manifest["rows"],
+            selected_common_index_rows=len(selected),
+            candidate_projection="original_selected_encounters_patient_hash_16_v1",
+            source_scope="authenticated original selected ED/inpatient keys only; broader history supplies prior evidence only",
+            population_scope_id=mapping_manifest["population_scope_id"],
+            original_encounter_list=mapping_manifest["original_encounter_list"],
+            bmi_mapping_manifest_sha256=config["covariate_mapping"]["manifest"]["sha256"])
     (output/"population-evidence.json").write_text(json.dumps(population,indent=2)+"\n")
     receipt={"status":"prepared_not_qualified","source_policy_id":policy["source_policy_id"],
         "base_field_encoding":encoding,
-        "input_sha256":sha256(output/"study-input.rds"),"candidate_encounter_keys":len(candidate_keys),
+        "input_sha256":sha256(output/"study-input.rds"),"input_csv_sha256":sha256(output/"study-input.csv"),"candidate_encounter_keys":len(candidate_keys),
         "input_rows":len(selected),"unresolved_source_date_rows":unknown_dates,
-        "coverage":"all scoped captured-source candidate keys have legacy mappings",
+        "coverage":("all scoped candidate keys have source-mapped covariates; missing BMI retained" if mapped else "all scoped captured-source candidate keys have legacy mappings"),
         "source_config_sha256":config["_config_sha256"],"upstream_reader_sha256":config["upstream_reader_sha256"],
         "source_policy_sha256":sha256(POLICY_PATH),"preparation_source_sha256":sha256(__file__),
+        "population_helper_sha256":sha256(ROOT/"scripts/original_encounter_population.py"),
         "writer_source_sha256":sha256(ROOT/"scripts/write_common_index_input.R"),
         "field_evidence_sha256":sha256(output/"field-evidence.json"),
         "population_evidence_sha256":sha256(output/"population-evidence.json"),
@@ -521,6 +670,11 @@ def prepare(config, output):
         manifest["index_day"]["columns"]={name:name for name in DAY_COLUMNS}
         manifest["index_day"]["binary_codes"]={name:{"0":"0","1":"1"} for name in DAY_COLUMNS if name.endswith("available")}
         manifest["source_evidence_files"]["index_day"]=manifest["source_evidence_files"]["fields"]
+    if mapped:
+        manifest.update(population_scope_id=mapping_manifest["population_scope_id"], bmi_policy_id=mapping_manifest["policy"]["id"], bmi_evidence_column="bmi_evidence_state")
+        manifest["source_evidence_files"]["selection"]={"path":"selection-evidence.json","sha256":sha256(output/"selection-evidence.json")}
+        manifest["index_preselected"]=True
+        manifest["source_evidence_files"]["cohort_audit"]={"path":"cohort-audit-companion.rds","sha256":sha256(output/"cohort-audit-companion.rds")}
     (output/"triangulation_input.pending.json").write_text(json.dumps(manifest,indent=2)+"\n")
     return receipt
 

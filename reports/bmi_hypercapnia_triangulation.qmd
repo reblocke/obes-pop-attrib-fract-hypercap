@@ -65,9 +65,11 @@ These are model-standardized probability contrasts. They are not incidence reduc
 
 ## Methods
 
-Select the first BMI ≥30 encounter before outcome or covariate completeness. Uncertain earlier membership, conflicting indexes and date ties remain unresolved; a later measured admission is never substituted. The common reference comprises resolved indexes with complete inherited adjustment variables. Patients outside that reference remain visible in cohort accounting.
+`r if (identical(bundle$manifest$specification$population_scope_id, "original_selected_encounters_v1")) "Candidate encounters are restricted to authenticated original FULL_DATA study keys and recorded ED/inpatient membership. Broader history supplies prior BMI/components only; it does not add candidate visits or block indexes. The original first-encounter flag is verified separately, not used before BMI eligibility." else "This saved bundle retains its recorded candidate population; no original-list scope is assigned retrospectively."`
 
-Use unchanged legacy derived BMI and linear logistic models with BMI, age, sex, race/ethnicity and geographic region. Shift observed BMI >30 by exactly 1 kg/m²; BMI =30 stays unchanged, with no floor. The BMI ≥40 sensitivity restricts those same indexes and reuses the primary fitted models.
+Select the first BMI ≥30 encounter before outcome or adjustment-variable completeness. Conflicting indexes and date ties remain unresolved. `r if (is.null(bundle$manifest$specification$bmi_policy_id)) "Earlier missing BMI retains the unresolved-membership policy recorded in this historical bundle." else "BMI comes from the encounter or earlier: valid recorded encounter BMI, then valid prior BMI, then calculation from observed height and weight. No statistical BMI imputation is used. Completed searches without usable BMI do not qualify that encounter; unresolved source evidence remains distinct and can prevent index resolution."` The common reference comprises resolved indexes with complete inherited adjustment variables. Patients outside that reference remain visible in cohort accounting.
+
+`r if (is.null(bundle$manifest$specification$bmi_policy_id)) "Use unchanged legacy derived BMI" else "Use inherited BMI calculation and numeric precision, with measurement availability evaluated relative to each candidate encounter"` and linear logistic models with BMI, age, sex, race/ethnicity and geographic region. Shift observed BMI >30 by exactly 1 kg/m²; BMI =30 stays unchanged, with no floor. The BMI ≥40 sensitivity restricts those same indexes and reuses the primary fitted models.
 
 ABG requires PaCO~2~ ≥45 mm Hg; combined gas requires PaCO~2~ ≥45 or PvCO~2~ ≥50 among available usable results. A combined negative does not establish that an unmeasured specimen is negative. Encounter maxima are primary; index-calendar-day maxima are sensitivities. Calendar-day does not mean elapsed 24 hours or a standardized testing schedule. Missing/unusable results remain unknown.
 
@@ -241,7 +243,10 @@ audit_rows <- lapply(names(source_audit), function(domain) {
   data.frame(Domain = domain, Measure = gsub("_", " ", names(values)), N = unlist(values), row.names = NULL)
 })
 if (length(audit_rows) && any(vapply(audit_rows, Negate(is.null), logical(1)))) {
-  print(table_out(do.call(rbind, audit_rows), "Source preparation audit before index selection. Record counts are not necessarily independent specimens; measures overlap. Encounter counts use original composite keys."))
+  caption <- if (is.null(bundle$manifest$specification$bmi_policy_id))
+    "Source preparation audit before index selection. Record counts are not necessarily independent specimens; measures overlap. Encounter counts use original composite keys." else
+    "Source audit: BMI states cover all mapped candidate encounters before index selection; gas/ICD records cover the fixed resolved indexes. Measures overlap and source records are not necessarily independent specimens. Encounter counts use original composite keys."
+  print(table_out(do.call(rbind, audit_rows), caption))
 }
 ```
 
