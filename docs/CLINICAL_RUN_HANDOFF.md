@@ -1,3 +1,25 @@
+## Completed release and estimation — 2026-10-16
+
+PR #7 merged as `f18d383`, with the exact tested candidate tree. The owner
+accepted the checked source/companion and authorized clinical execution.
+A separate clean Mini worktree passed fresh clinical preflight and completed one
+analysis; its version-4 bundle passes 48 additional aggregate numerical checks.
+Twenty fits succeeded; the ICD capture-availability position is constant and
+retains its explicit status/raw proportions. Both HTML/PDF reports and all 153
+figure exports pass recorded QC. Investigator numerical/scientific interpretation
+remains pending.
+
+The private release packet records exact input/manifest, source/evidence hashes,
+commit/tree, runtime activation and saved-run paths. For presentation changes,
+use `make render RUN="<exact saved clinical run>"`; do not repeat estimation.
+The clean external worktree reuses the existing isolated R library; its runtime
+activation path and SSH PATH are in the private execution scripts. Existing Mini
+working changes, accepted products and upstream work remain untouched.
+
+The sections below preserve the earlier operational handoff. Statements that
+clinical execution is unrun or that release is pending describe that earlier
+checkpoint and are superseded by this closeout.
+
 **Current workflow amendment — 2026-10-16 curve/audit refactor:** the original
 selected encounter scope is retained. Prior passing original-list source checks
 remain evidence for that scope; the earlier outside-list mapping gap is historical.
