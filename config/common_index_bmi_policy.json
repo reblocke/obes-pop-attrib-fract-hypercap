@@ -1,0 +1,16 @@
+{
+  "id": "available_encounter_or_prior_bmi_v1",
+  "hierarchy": "valid current; valid prior; observed height/weight calculation",
+  "current": "earliest valid date at exact encounter; no later than known end",
+  "prior": "latest valid date strictly before each candidate start",
+  "ties": "different values on selected calendar day remain unresolved",
+  "recorded_bmi": "10 < BMI < 50.1; inherited TriNetX masking exclusion",
+  "height_inches": "raw 54 <= inches < 84, legacy cleaning, integer rounding",
+  "weight_pounds": "raw 10 <= pounds < 450, legacy cleaning, integer rounding",
+  "calculated": "round((pounds*0.453592)/(inches*0.0254)^2,0.1); no 50.1 cap",
+  "imputation": "none",
+  "numeric_transport": "legacy float16/CSV decimals; float32 source and intermediate storage; Stata floor(x/unit+0.5)*unit; float32 BMI",
+  "age": "encounter_start_year minus captured birth_year",
+  "missing": "complete available search without usable BMI",
+  "unresolved": "unavailable capture, unknown start or relevant date/value conflict"
+}

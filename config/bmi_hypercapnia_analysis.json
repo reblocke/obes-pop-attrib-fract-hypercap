@@ -1,0 +1,71 @@
+{
+  "analysis_id": "bmi_hypercapnia_curve_audit_v1",
+  "bundle_schema": 4,
+  "population_scope_id": "original_selected_encounters_v1",
+  "bmi_policy_id": "available_encounter_or_prior_bmi_v1",
+  "source_policy_id": "unadjusted_pco2_v1",
+  "quantile_type": 7,
+  "knot_probabilities": [
+    0.05,
+    0.35,
+    0.65,
+    0.95
+  ],
+  "factor_references": {
+    "sex": "0",
+    "race_ethnicity": "0",
+    "location": "0"
+  },
+  "grid_step": 0.25,
+  "bmi_bin_width": 5,
+  "chunk_size": 10000,
+  "sparse_n": 30,
+  "sparse_events": 5,
+  "ecdf_grid_size": 101,
+  "kde_min_n": 50,
+  "kde_min_distinct": 10,
+  "fixed_bmi_contrast": [
+    40,
+    45
+  ],
+  "mnar_enabled": true,
+  "mnar_r": [
+    0.25,
+    0.5,
+    1,
+    2,
+    4
+  ],
+  "mnar_gradient_multiplier": [
+    0.5,
+    1,
+    2
+  ],
+  "policies": [
+    {
+      "policy_id": "bmi_gt30_minus1_v1",
+      "enabled": true,
+      "threshold": 30,
+      "transformation": "minus_one",
+      "target": "observed_and_common_reference",
+      "label": "One-unit BMI reduction for observed BMI >30; no floor"
+    },
+    {
+      "policy_id": "cap30_v1",
+      "enabled": false,
+      "threshold": 30,
+      "transformation": "cap",
+      "target": "C",
+      "label": "BMI >30 set to 30"
+    },
+    {
+      "policy_id": "cap40_v1",
+      "enabled": false,
+      "threshold": 40,
+      "transformation": "cap",
+      "target": "C",
+      "label": "BMI >40 set to 40"
+    }
+  ],
+  "maxit": 25
+}

@@ -51,7 +51,14 @@ validate_triangulation_input <- function(data) {
   day_present <- triangulation_index_day_columns %in% names(data)
   if (any(day_present) && !all(day_present)) stop("Incomplete index-calendar-day columns.")
   day <- if (all(day_present)) data[c("patient_id", "encounter_id", triangulation_index_day_columns)] else NULL
+  bmi_state <- data$bmi_evidence_state
   data <- as.data.frame(data[triangulation_columns])
+  if (!is.null(bmi_state)) {
+    if (!is.character(bmi_state) || anyNA(bmi_state) ||
+        any(!bmi_state %in% c("valid", "missing", "unresolved")) ||
+        any((bmi_state == "valid") != !is.na(data$bmi))) stop("BMI evidence state contradicts its value or policy.")
+    data$bmi_evidence_state <- bmi_state
+  }
   for (name in c("patient_id", "encounter_id")) {
     if (!is.character(data[[name]]) || anyNA(data[[name]]) || any(!nzchar(trimws(data[[name]])))) {
       stop(name, " must contain verified, nonmissing character keys; no row-number fallback.")
@@ -458,6 +465,12 @@ load_triangulation_input <- function(input_path, manifest_path, schema_version =
   if (!setequal(names(mapping), triangulation_columns) || anyDuplicated(mapping) || !all(mapping %in% names(raw))) stop("Incomplete, duplicate, or unavailable source column mapping.")
   data <- as.data.frame(raw[unname(mapping[triangulation_columns])])
   names(data) <- triangulation_columns
+  if (!is.null(manifest$bmi_policy_id)) {
+    if (!identical(manifest$bmi_policy_id, "available_encounter_or_prior_bmi_v1") ||
+        !is.character(manifest$bmi_evidence_column) || length(manifest$bmi_evidence_column) != 1L ||
+        !manifest$bmi_evidence_column %in% names(raw)) stop("Unreviewed available-BMI evidence mapping.")
+    data$bmi_evidence_state <- as.character(raw[[manifest$bmi_evidence_column]])
+  }
   if (day_status == "qualified") {
     day_mapping <- unlist(manifest$index_day$columns, use.names = TRUE)
     if (!setequal(names(day_mapping), triangulation_index_day_columns) || anyDuplicated(day_mapping) ||

@@ -1,0 +1,4 @@
+/* Complete audit tables wrap without hiding columns or shrinking text. */
+table.bmi-audit-table { width: 100%; table-layout: fixed; font-size: .92rem; margin: 1rem 0 1.6rem; }
+table.bmi-audit-table th, table.bmi-audit-table td { overflow-wrap: anywhere; padding: .35rem .45rem; vertical-align: top; }
+table.bmi-audit-table caption { caption-side: top; text-align: left; color: #333; font-weight: 600; }

@@ -1,79 +1,119 @@
-# BMI–hypercapnia common-index implementation plan
+# BMI–hypercapnia curve and audit implementation plan
 
-Approved revision: **2026-10-14**. The primary study now uses a common first BMI ≥30 index and separate arterial and combined-gas projections. This replaces the version-2 frame-specific grid as primary. The one-unit BMI >30 shift remains unchanged. No BMI-to-30/40 cap is adopted.
+Authority: implementation ticket dated 2026-10-16, based on 8735505, reconciled
+against the pending original-list/BMI corrections. The original plan is preserved
+in `archive/2026-10-16-curve-refactor/PLAN.source.md` as superseded history.
 
-## Scientific decisions
+## Confirmed decisions
 
-- Adults ≥18; 2022 ED/inpatient; original patient/encounter keys. First qualifying BMI ≥30 encounter selected before gas availability or covariate completeness. Uncertain earlier eligibility/chronology remains unresolved, with no later-admission substitution.
-- One common reference of resolved indexes with complete legacy BMI/age/sex/race-ethnicity/region values. Keep incomplete patients in cohort accounting. No covariate imputation or added predictors.
-- BMI >30 decreases by exactly 1 kg/m²; BMI =30 unchanged; no floor. Retain the original index and observation status in both prediction scenarios.
-- Primary encounter outcomes: PaCO₂ ≥45, and PaCO₂ ≥45 or PvCO₂ ≥50 among available usable gases. A combined negative is an available-evidence negative, not proof that an unmeasured specimen is normal. No usable result remains unknown.
-- Index-calendar-day sensitivities retain those same indexes and require collection date equal to encounter-start date. Date-only precision suffices; no elapsed-24-hour, pH, support or paired-sample requirement is introduced.
-- The BMI ≥40 sensitivity restricts common-index reference rows. Reuse the BMI ≥30 fitted models; do not reindex or refit.
-- Fit linear logistic models using the unchanged Stata adjustment set. Failed, separated or unsupported models retain explicit empty positions. No substitute estimator or nonlinear selection.
+- Retain original FULL_DATA selected ED/inpatient encounter candidates; do not
+  reopen the outside-list mapping gap. Revalidate coverage within that universe.
+- Preserve approved encounter/prior/calculated BMI, birth-year age proxy, first
+  BMI>=30 index before gas/completeness, gas policies and inherited adjustment.
+- Gas curves standardize to C; ICD curves/scenarios use C_icd with established
+  capture, including positives/negatives. Do not project unknown diagnosis capture.
+- Primary relationship: logistic natural BMI spline; C type-7 quantiles
+  .05/.35/.65/.95, two interior/boundary knots, three basis columns; linear age.
+- Default secondary policy: BMI>30 minus one, no floor/reselection. Caps disabled.
+  C40 reuses the broader fit. Fixed 45-versus-40 contrast is not PIF.
+- Keep independent primary/timing/observation/linear/matched fit registries and
+  secondary fixed-observation MAR/MNAR projections. No automatic model selection.
+- Breaking analysis schema version 4; preserve the accepted source contract,
+  private artifacts and history. Old bundles reject rather than migrate.
 
-## Estimation and comparison
+## Work packages
 
-Each gas/window model is fitted once among observed, covariate-complete patients. Observed benchmarks average over the corresponding observed reference subset. MAR projections average over the same full reference for both criteria. Model N, reference N, unknown-outcome N, shifted percentage and BMI support are distinct quantities.
+1. **Authority/interfaces:** replace default routing, current instructions and
+   registry; independent source/analysis/render commands and explicit configuration.
+2. **Ledger/atlas first:** instrument pre-index candidate selection, preserve
+   grain/uncertainty/overlap, complete variables, exclusions, missingness and
+   distributions; support model-free and partial-source audit reports.
+3. **Models:** register 21 planned fits when timing qualifies; complete coefficient,
+   covariance/reference, sample, failure, residual, influence and support outputs.
+4. **Predictions:** fixed-BMI common-reference curves, pointwise full-covariance
+   uncertainty, supported 45-vs-40 contrasts, exact paired original-band burden
+   decomposition and cross-band covariance; separate sensitivities.
+5. **Reports/figures:** complete scientific/audit HTML/PDF, F0–F5, three F1 layouts,
+   editable/vector/raster exports and actual QC at 190 mm and grayscale.
+6. **Verification/handoff:** all 65 acceptance requirements mapped in
+   `CURVE_AUDIT_ACCEPTANCE.csv`; independently verify predictions, gradients,
+   reconciliation, full tables, adverse states, privacy and no-refit rendering.
 
-For unobserved outcomes use the exploratory pattern mixture:
+## Source assessment amendment
 
-`logit(q0(B,L)) = eta(B,L) + log(r) + log(g)*(B-40)/5`.
+The existing selected-index input cannot reconstruct pre-index distributions.
+Prepare a fresh hash-bound companion from the existing mapped candidate product;
+no upstream rebuild or new clinical export is presumed. It binds selected key and
+covariate identity and contains aggregate stage audit only. Candidate profiles are
+exact; partition quantiles are not averaged. Pre-index gases/diagnoses not extracted
+are capability gaps, not patient-level negative/missing outcomes.
 
-Cross r = 0.25, 0.5, 1, 2, 4 with g = 0.5, 1, 2. r is the missing/observed odds ratio at BMI 40; g modifies the relative odds gradient per five BMI units. Evaluate the offset at shifted BMI too. Hold empirical observation status fixed. The r=g=1 MNAR anchor is identical to MAR and is not independent evidence.
+The earlier original-list mapping passed 30 independent checks and preflight.
+That evidence remains useful but does not authenticate the new companion. On the
+Mini, coordinate active jobs before remote writes; use fresh private locations and
+reconcile the new companion against accepted products/input. Uncovered candidates
+within the approved population block inference. No human review is invented.
 
-Use these scenarios separately for arterial and combined criteria, both windows and both reference targets. Parameters are assumptions, not identified estimates or validated clinical bounds. MAR conditional on demographics is a strong benchmark; common standardization cannot correct unmeasured selection, testing frequency or specimen-dependent ascertainment.
+## Interfaces and completion
 
-Report paired probabilities, absolute difference per 1,000 and PIF `1 - p_shifted/p_observed`. Full-coefficient delta-method intervals are pointwise and conditional on empirical reference, observation membership and sensitivity parameters. Retain negative values and small nonzero estimates. Do not label the contrasts incidence reduction, causal prevention or the effect of individual weight loss.
+`make fixture`, `make test BMI_TEST_REVIEW=...`, `make preflight/cohort-audit/analyze
+INPUT=... MANIFEST=... CONFIG=...`, and `make render/render-html/render-pdf RUN=...`.
+The model-free audit, once-per-model estimation and aggregate-only render are
+separate. Saved bundle/source hashes prevent estimator changes from silently
+reusing results. Figure revisions may render without refitting.
 
-Matched coding comparisons are separate: ICD/ABG requires usable ABG and known ICD; ICD/combined accepts either usable gas and known ICD. Each pair fits both outcomes on identical complete rows. The pairs need not share the same N. Retain J96.02/J96.12/J96.22/J96.92/E66.2; do not project missing ICD under MAR or require both gas specimens.
+Software completion requires artificial end-to-end/adverse checks plus actual
+full-report/native-size/grayscale inspection. Source qualification, clinical run,
+numerical review and investigator scientific review are separately recorded.
+Clinical analysis requires a clean reviewed merged Mini checkout; this ticket
+itself does not authorize external publication, submission or upstream writes.
 
-## Implementation and interfaces
+## Execution evidence — 2026-10-16
 
-- `R/common_index_hypercapnia.R` implements selection, eight unique models, paired standardization and audits, using existing validated source/selection helpers. The ordered registry has 140 positions: 136 gas benchmark/projection/scenario positions plus four matched-comparison positions. Many positions reuse a fitted model; they are not independent estimates.
-- Version-3 input manifests bind `study_design=common_index_bmi_ge30_v1` and the exact population policy, in addition to the existing seven reviewed source gates and evidence hashes. Version-2 manifests cannot qualify the expanded study automatically.
-- Version-3 aggregate-only bundles bind design/scenario/registry, exact source and input identities, model/reference counts, sensitivity parameters, probabilities/intervals and audits. No identifiers, indexes, model objects/data or individual predictions are persisted.
-- Fit once per analysis run. Default `make render`, `render-html`, `render-pdf` require explicit saved RUN and never load clinical inputs or refit.
-- Preserve unchanged version-2 sources at `archive/2026-10-14-frame-specific/` with commit/hash provenance. Dedicated frame commands run a verified frozen copy in ignored storage. Saved version-1/2 review dispatches to frozen readers/reports; old results retain their original labels.
+The refactor is implemented in the current working tree. The current source
+qualification functions match the isolated Mini snapshot. The accepted mapped
+candidate product, new aggregate companion, original selected input fields and
+complete ledger reconcile; fresh identity-bound preflight passes. Existing source
+and input products are unchanged. Private receipts are under ignored
+`artifacts/triangulation/curve-refactor-source-review/`; no clinical models ran.
 
-## Existing-source qualification
+All 65 artificial acceptance requirements pass against the completed two-report
+package. All 24 source-adapter tests pass without skips on the Mini. The local
+Python run skips 12 optional dependency-backed cases, which the Mini run covers.
+The optional testthat interface uses the same checks as the standalone runner;
+no package was installed. All 13 qualification-function identities and the
+estimation-file hashes agree with the isolated Mini snapshot.
 
-Reuse accepted source products and receipts first; FULL_DATA/pre-screen evidence is preferred. Bind the actual input variant/conversion and original-key linkage. Verify complete intended BMI ≥30 encounter coverage, legacy derivations/dictionaries, source chronology, testing/missingness distinctions, exact arterial/venous mappings, units/valid maxima and ICD capture. Accepted historical compatibility membership alone is not a full-population proof.
+Final artificial run: `artifacts/triangulation/curve-fixture-20261016T144730-79118/`.
+Final review: `reviews/20261016T151707-glyph-81498/` within that run. Both HTML/PDF
+reports, complete coefficients/covariances, reconciliation tables, F0–F5 and the
+three F1 alternatives are present. F1-A remains preferred. The focused final
+scientific-label repair reused the unchanged audit and figures with checked
+hashes; it did not refit models or reopen clinical input.
 
-Current engineering acceptance supersedes the stale failed-build handoff. The local RDS remains unqualified; private accepted products/receipts have not been bound here. Additional source work is requested only for a demonstrated unsupported requirement. Calendar-day evidence may remain pending, with no estimates or assessed model/reference counts for its positions.
+Actual QC covers all 230 scientific figures in grayscale/native-size views,
+every report page in layout overview, all-page text geometry, and representative
+complete audit tables at native raster size. The audit has 1,094 pages and the
+scientific report nine. Complete row and covariance coverage is independently
+checked, rather than claiming manual reading of every cell. The large audit has
+a slow cold HTML load, and some long captions continue on the next PDF page;
+these are recorded presentation limitations, not missing content. Receipts and
+exact commands are in WORKLOG.md and ignored run/QC evidence.
 
-See [source assessment](TRIANGULATION_SOURCE_ASSESSMENT.md) and [input handoff](TRIANGULATION_INPUT_HANDOFF.md). Source qualification does not establish MAR, measurement-protocol equivalence or causal interpretation.
+### Implemented work-package map
 
-## Figures and verification
+| Package | Modules / deliverables |
+|---|---|
+| WP1 authority/interfaces | Makefile, README, AGENTS, config, scripts/run_bmi_hypercapnia.R, scripts/render_bmi_hypercapnia.R |
+| WP2 ledger/atlas | R/input_contract.R, R/cohort_audit.R, variable dictionary, cohort/retained-excluded/missingness/distribution exports |
+| WP3 model audit | R/bmi_models.R, 21-position registry, complete coefficients/covariance/correlation/sample diagnostics |
+| WP4 curves and burden | R/standardization.R, fixed-BMI curves/contrasts, paired scenarios and signed contribution covariance |
+| WP5 reports/exhibits | R/reporting.R, two Quarto reports, F0–F5, F1 A/B/C, captions, gallery and QC receipts |
+| WP6 verification | 65-check standalone/testthat interface, independent artificial source tests, private Mini preflight and source receipts |
 
-A is the preferred paired absolute/PIF forest/table; B compares evidence criteria in outcome-first panels. A/B show identical four encounter-wide BMI ≥30 observed/MAR benchmarks. C shows the prespecified assumption grids with MAR outlined, signed values and common shading within each statistic. Supporting tables contain BMI ≥40, timing, ICD and detailed missingness/support results. All derive from one ledger; C is an assumption display, not a confidence-interval plot.
-
-Apply figure-and-medical-illustration-qc: 190-mm width, ≥9-point data/caption text, grayscale-safe marks, zero and every finite interval endpoint, native-size inspection, SVG/PDF masters and 300-dpi PNG/JPG. Preserve all alternatives and export/QC receipts.
-
-Verify fixed indexes, BMI boundaries, reference/model denominators, no severe-subset refitting, specimen rules, within-pair matching, independent GLM/prediction parity, finite-difference gradients, MAR/MNAR identity, no-observation/no-change/negative/failure states, pending timing, unseen categories, input/bundle hashes, aggregate-only rendering and preserved version-1/2/historical sources. Inspect every changed report page and export. Generated materials remain ignored.
-
-Completion means a tested workflow, reviewed artificial package and accurate qualification ledger. Clinical numerical population requires source acceptance and reconciled model diagnostics. Scientific/coauthor review and submission remain separate.
-
-## Implementation status — 2026-10-14
-
-Implemented locally: common-index selection, paired observed/MAR/MNAR standardization, fixed-model BMI ≥40 sensitivity, separately matched ICD comparisons, version-3 evidence/bundle contracts, aggregate-only rendering and runnable frozen version-1/2 workflows. The 24 shared artificial checks and 14 common-index check groups pass, as do historical R and nine Stata source/launcher checks. No packages were installed.
-
-The artificial package `fixture-20261014T191709-47425` has a completed eight-page HTML/PDF review at `reviews/review-20261014T194108-48834/`. Candidate A is preferred after numerical read-back, native-size and grayscale review; all three alternatives are retained. A separate pending-calendar-day fixture verifies empty sensitivity positions without changing primary estimates. Exact receipts, source hashes and QC findings remain in ignored artifacts; see WORKLOG.md.
-
-Clinical qualification remains **not evaluated**. The existing local input is unchanged, but no accepted-product/private-receipt binding qualifies its expanded BMI ≥30 coverage here. No clinical model was fitted. The next action is the field-specific existing-source reconciliation, not an assumed replacement export. This implementation is local and uncommitted.
-
-## Qualification and release revision — 2026-10-15
-
-The user approved code-first release followed by source qualification/clinical execution on the Mini. Bind new clinical inputs to `unadjusted_pco2_v1`: ordinary specimen-authenticated gases; strict 5–200 arterial and 10–250 venous mm Hg validity intervals; explicit units; captured-absence ICD negatives with complete available extraction and no other-diagnosis requirement. The BMI shift, indexes, models and MAR/MNAR specification are unchanged. See [confirmed decisions](DECISIONS.md).
-
-Implement the study preparation command using pinned accepted readers and raw exact-code transport, with a fresh typed input, population/field evidence, aggregate preparation receipt and deliberately pending manifest. Keep the original input immutable. Require original-key and expanded-population reconciliation; fail on unmapped coverage or interrupted queries. Add the required policy identity to new version-3 clinical manifests and preserve saved bundle compatibility. Clinical estimation requires clean merged code and records commit/tree/source hashes; successful rendering does not confer scientific acceptance.
-
-The Mini is inaccessible from the current network; the owner will resume at home. Private source qualification and clinical execution remain pending. Complete engineering release and handoff now; use [CLINICAL_RUN_HANDOFF.md](CLINICAL_RUN_HANDOFF.md) for the seven acceptance gates, exact run sequence, saved-run rerender and clinical closeout. The dated October 14 local/uncommitted status above is retained as history. Current release/verification status is recorded in WORKLOG.md.
-
-## Home-network continuation — 2026-10-15
-
-PR #5 released the common-index workflow before clinical qualification. The Mini is now reachable and has a clean copy of that release; accepted receipts and original-key FULL_DATA reading were authenticated. The actual dictionary requires explicit Stata-date/coded-field decoding and the inherited race/ethnicity derivation. The adapter supports that encoding and the prior typed format; BMI and age remain unchanged. A private retained-reference comparison verifies the combined categories. No clinical estimates are populated from those checks.
-
-Direct raw consensus/accumulation exhausted bounded execution resources. Stream all raw rows in disjoint patient-hash partitions, retaining conflicts/unknowns; apply the same study scope only after consensus and check coverage in SQL before Python materialization. Do not accumulate unrelated historical candidates. The bounded SQL path has artificial parity against the upstream projection, with external scratch and the existing RAM cap.
-
-A completed bounded check demonstrates missing approved legacy mappings for potential adult 2022 EMER/IMP keys (adult birth-year proxy). It does not determine exact age/BMI eligibility or the full gap size. Clinical execution stops at this primary gate; see [the specific mapping handoff](COMMON_INDEX_SOURCE_GAP_HANDOFF.md). Reuse existing captured records for a separately named expanded mapping, preserve historical accepted products and do not silently narrow the study. Current full-source hashing and remaining gas/ICD/window checks stay unaccepted. Missing R dependencies need authorized setup. After that evidence is supplied, follow the unchanged preflight/one-run/aggregate-review sequence in the clinical handoff. No clinical results or scientific approval are claimed.
+Clinical data were opened only for qualification/cohort preflight; zero clinical
+models ran. Automated source/companion qualification passes within the approved
+original-list population. Investigator scientific review is not asserted. The
+next operational gate is code review/merge and a clean matching Mini checkout,
+then one clinical analysis, numerical review and repeated clinical export QC.
+No new scientific rule or replacement export is required by the observed checks.

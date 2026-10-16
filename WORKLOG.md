@@ -464,3 +464,293 @@ Publication checkpoint: source commit `2198a44` was pushed and [PR #5](https://g
 - Mini framework R lacks `haven`, `ggplot2`, `knitr` and `rmarkdown`. Package installation was requested, not performed. No clinical input/acceptance manifest or clinical results bundle was issued, no clinical model ran and no clinical figure/report was rendered. Current full-database hashing and gas/specimen/unit/ICD/window qualification remain unrun after the primary mapping stop. The fresh readiness receipt validates as **blocked**, separately retaining pending scientific review.
 
 Next: review/publish these source fixes and synchronize the clean Mini checkout. Obtain a separately named approved legacy-field mapping from existing captured records, restore an authorized complete R runtime, then finish all primary source gates before one clinical estimation run. Keep scientific/coauthor review and submission separate. Exact PR/merge/synchronization identities will be retained in the ignored publication receipt.
+
+## 2026-10-15 19:20 MDT — Authorized isolated Mini R dependency setup
+
+- The owner authorized installation in an isolated project library. Used the Mini's existing framework R 4.6.1 and compatible CRAN macOS arm64 binaries to install `haven` 2.5.5, `ggplot2` 4.0.3, `knitr` 1.52, `rmarkdown` 2.32 and required dependencies under ignored `artifacts/triangulation/runtime/r-4.6-aarch64/library/`. No renv bootstrap, compiler installation or system-library update was performed.
+- Added an ignored Mini-only `artifacts/triangulation/runtime/activate.sh` that selects the framework runtime, isolated library and Quarto R executable for the invoking shell. Installation scripts/logs, binary-index snapshot, package inventory, session information and receipts are retained in the runtime setup directory. All seven required R packages load, with the four requested packages resolved from the isolated library.
+- Before/after file hashes match for the inspected framework, Homebrew and user R libraries. Installation exited zero. Against merged source `8735505`, `Rscript --vanilla tests/run_triangulation_tests.R` passed all 24 shared groups and `make common-index-test` passed all 14 common-index groups; both use artificial data only. The Mini's tracked checkout remains unchanged.
+- Updated README, clinical/source-gap handoffs, saved implementation plan and source assessment to mark R dependency setup resolved and document activation. Prior dated failure records remain as history. No clinical input was opened, no clinical model ran, and a full Mini report render was not attempted.
+
+Next: complete the separately named broader-candidate legacy-field mapping and remaining source qualification, then use the documented activation before preparation/preflight and the single clinical run. The installation does not satisfy any clinical source or scientific-review gate.
+
+## 2026-10-15 21:33 MDT — Clarify available-BMI cohort and legacy masking rationale
+
+- The owner clarified that BMI must come from the encounter or earlier, with observed height/weight calculation permitted and no statistical BMI imputation. Retained BMI ≥30 study eligibility and the above-30 one-unit shift. Genuine missing BMI after completed mapping is a counted limitation, not a reason to reject the whole source or request a replacement export.
+- Read the original Stata BMI block at `5ada7194d40f6006e5563c3592727861336ce2c8` and the accepted Python legacy cleaner at `787fba64319c0285244e2e17a9e303c739f31a14` on the Mini. Stata explicitly attributes its recorded-BMI ≥50.1 exclusion to TriNetX truncation; Python preserves the cutoff and current/prior/calculated hierarchy. Calculated BMI is not capped at 50.1. This was source inspection, not a new patient-level parity comparison. Also distinguished the earlier normalized-vitals BMI range from the raw evidence transport.
+- Read the canonical sidecar's metadata fields and source readers without querying clinical rows. TriNetX's indexed de-identification summary describes physical-characteristic tail truncation, but direct PDF retrieval returned 404 and the general description does not authenticate this snapshot's exact masking encoding. No raw-vital distribution audit was run. The proposed ~120 ceiling remains conditional on genuine noncensored measurements; no historical cutoff or source product was changed.
+- Inspected common-index selection: `NA` BMI currently becomes uncertain membership and can block a later observed BMI ≥30 index. Recorded the required distinction between completed mapping with true BMI absence and incomplete source evidence/chronology. The former is nonqualification for an available-BMI cohort; the latter can still prevent index resolution. No runtime behavior was silently changed.
+- Updated `docs/DECISIONS.md`, the saved implementation plan, source-gap and clinical handoffs, source assessment and README. The plan now specifies current/prior/calculated provenance and timing, missingness reasons, explicit new policy binding, preserved historical outputs, and focused mapping/index verification. Earlier isolated-R setup edits remain intact.
+- Verification: documentation diff and local-link/anchor checks; no estimation or analysis test rerun was necessary for this documentation-only clarification. No source/analysis code, clinical input or archived output was edited; no clinical model, commit, push, merge or source acceptance occurred.
+
+Next: implement the broader source mapping and known-missing-versus-unresolved index distinction under the clarified rule, retaining conditional high-BMI handling and the remaining gas/ICD qualification. Complete mapped keys with genuinely absent BMI may proceed as documented missingness.
+
+## 2026-10-15 — Broader source mapping execution checkpoint
+
+- Owner authorized upstream implementation on the Mini, downstream consumption and renewed source qualification. Preserved the unrelated dirty upstream checkout and created `codex/broader-bmi-mapping` from `787fba6` in a separate checkout. Local upstream commits `45eb5ee` and `c588020` add the original-key calendar covariate product, provenance/state fields and hash-bound reader. No historical product or raw input was modified. The downstream branch is `codex/available-bmi-mapping`.
+- The independent source-to-product oracle was written before implementation and retained a failing import run. Further fractional/boundary cases exposed missing inherited float16/CSV numeric transport; the corrected mapper preserves that transport, Stata float32 BMI storage and the earlier strict normalized-vital screens. The corrected source-to-product test and Ruff pass. All five existing upstream E2E workflows passed; their retained manifest was independently verified. This is engineering evidence, not clinical source acceptance.
+- Read-only private audits authenticated the accepted receipt/sidecar, reviewed actual vital/gas units and demographic vocabulary, inventoried captured domains and checked target diagnosis systems. A full canonical database hash completed in about 15 minutes with stable file identity. Private receipts retain exact queries, hashes, aggregate findings and failed diagnostic queries. No source-value reinterpretation or BMI imputation was introduced.
+- The initial diagnostic mapper completed source/candidate/vital staging, then was stopped before qualification to apply the numeric correction. Its partial covariates remain unqualified. Completed raw staging was sealed by source identity, file hashes, row counts, original-key uniqueness and patient partition checks. The corrected producer reuses only that verified staging in a fresh output directory. Private outputs and spill remain external to both repositories.
+- Added `scripts/map_common_index_covariates.py` and `make triangulation-map`; the schema-2 preparation route consumes the separate upstream product. Source size requires bounded whole-patient selection before gas extraction. `scripts/select_common_index_mapping.R` uses the same R selection helper and retains aggregate source scope/index counts; the estimation input contains resolved indexes plus bound census evidence. This is an execution change, not later-index substitution or gas-based selection.
+- New `bmi_evidence_state` values distinguish valid, completed-missing and unresolved evidence. New runs persist `available_encounter_or_prior_bmi_v1`; older version-3 bundles preserve their original policy. Tests verify later valid indexes after confirmed BMI absence, continued blocking by unresolved evidence, bundle identity and batched selection parity. The 24 shared and 17 common-index artificial groups pass locally. All 15 preparation cases pass in the Mini's existing Python/framework-R environment.
+- Qualification remains in progress. No clinical model, abstract result, figure update, source acceptance or human scientific approval is asserted at this checkpoint. The remaining work is corrected-product reconciliation, typed preparation, independent gas/ICD/timing checks and source preflight. Exact runtime commands and artifacts remain in the private qualification packet; final status will be appended after those checks.
+
+## 2026-10-16 07:02 UTC — Broader mapping and actual source qualification completed
+
+- Completed the separately named upstream mapping on the Mini at local commit `72c91a2` (`codex/broader-bmi-mapping`), preserving the unrelated dirty upstream checkout, accepted historical products and original RDS. A verified Git bundle of the three implementation commits is retained in ignored local evidence. The consumer branch is `codex/available-bmi-mapping` on both hosts; its new changes are not yet committed/published/merged.
+- The historical overlap audit exposed an intermediate float32-before-rounding defect in the new draft mapper, not a defect in the accepted Stata/Python producer. A failing fractional case and the corrected E2E are retained. Final mapping preserves float16/CSV transport, float32 source/intermediate storage, Stata rounding and final float32 BMI. Identical selected components reproduce historical BMI; demographic codes agree, and age/date differences are explained by the declared encounter-start versus historical qualifying-event anchor. Earlier mapping/preparation attempts remain explicitly diagnostic and unqualified.
+- Fresh preparation from the corrected product completed. Independent original-key/index/census, BMI-state/arithmetic/timing, prepared-field, ordinary gas/testing, ICD and calendar-day checks have zero disagreements. The native raw-source qualifier and its exact source snapshot are retained; the prepared-field extension was checked separately without repeating unchanged raw scans. All nineteen CSV/RDS fields agree exactly. No clinical model was fitted.
+- Issued a separately named automated-reviewed version-3 manifest after the actual source comparisons. The original pending manifest is unchanged. The source-freeze readiness determination is `ready_with_limitations` for the existing conservative definitions; automated and human review states remain distinct. The first receipt had empty optional-action strings rejected by the structure validator; a separate corrected receipt uses nulls and passes `--require-ready`. No source result changed during that metadata repair.
+- Mini `make triangulation-preflight INPUT=... MANIFEST=...` completed in `artifacts/triangulation/preflight-20261016T065817-5083/` with `reviewed_primary_input_identity_and_mapping_passed`, zero models and a qualified calendar-day module. Its generated directory was made owner-only. Exact restricted paths, hashes, counts, source inventories, timing distributions and acceptance evidence remain in the existing external private packet.
+- Actual source limitations remain visible: unknown earlier settings and same-day earliest encounters cause substantial unresolved-index attrition; some prior BMI/weight evidence is old, while current-encounter measurements can occur after admission. Recorded these choices and proposed a prespecified recency sensitivity without changing the approved primary rule. No recorded BMI above 50.1 was found; the conditional high-BMI ceiling was not activated. Missing BMI remains missing without statistical imputation.
+- Verification: 24 shared and 17 common-index artificial groups pass, including fitted-result/denominator parity after bounded preparation. All 15 preparation cases and 3 qualification cases pass in the Mini's existing environment; tests detect wrong indexes/values/testing/ICD, invalid prior dates and configuration rebinding. Historical R and all nine Stata source/launcher checks pass. The new upstream source-to-product E2E, Ruff and all five existing retained E2E workflows pass; the final E2E evidence was independently verified.
+- An older version-3 saved artificial bundle rerenders as HTML with zero analysis evaluations and no clinical input read. Its original BMI/missingness wording remains intact. Source archives retain their verified hashes. Updated README, project instructions, plan/decision/source handoffs, report provenance wording and private-config ignore rule; final link/privacy/diff/source-sync checks follow below.
+
+Next: resolve or explicitly retain the documented scientific choices, review/publish both implementation branches, synchronize clean merged code and rerun identity preflight before the first clinical fit. Source changes require a fresh dependent qualification; presentation changes consume saved aggregates. Clinical results, clinical exhibits, numerical/coauthor scientific review and abstract submission remain unrun. No clinical source artifact is committed or released.
+
+Final verification: 57 local documentation links/anchors resolve; all 26 changed public files match between the local and Mini consumer checkouts. Generated evidence and the new local mapping configuration are ignored. No historical R/Stata source path changed, and the original RDS digest matches the earlier final-verification snapshot. The upstream documentation closeout is `45d3fc0`; its producer code remains the qualified `72c91a2` bytes. Both Git bundles are retained, with the final bundle independently verified. No push/PR/merge or clinical estimation occurred in this implementation phase.
+
+## 2026-10-16 — original selected encounter-list correction (in progress)
+
+Owner confirmed that original selected encounter membership governs the study;
+the broader raw-source universe and resulting outside-list UNKNOWN attrition are
+superseded. Reserved a private Mini writer lease and starting source hashes.
+Observed a separate GLP-1 qualification process using its own private directory;
+kept that process and shared upstream code/source read-only. Guarded synchronization
+rejects unexpected target-file edits; use one worker and separate fresh outputs.
+
+Added `scripts/original_encounter_population.py`, original-membership regression
+checks, mapping/preparation guards and independent qualification checks. The new
+mapping authenticates FULL_DATA, verifies original first flags, stages all raw
+records only at original acute keys, and preserves the agreed current/prior/
+calculated BMI policy. Original flags are not a prefilter before BMI eligibility.
+New manifests bind `original_selected_encounters_v1`; superseded broader mappings
+cannot acquire that label. Old saved bundles retain their specifications.
+
+Four artificial original-membership checks passed after the red import check;
+additional independent wrong-key and population-persistence checks are added.
+The first private original-list mapping is running; completion, qualification,
+preflight and remaining issues will be recorded below. No clinical model started.
+
+Original-list mapping completed with native exit zero. Original first flags
+reproduce under frozen ordering, every original acute key has captured setting
+support, and the completed vital cache covers every original candidate patient.
+All shared-key BMI/covariate/date/state comparisons against the earlier mapping
+have zero differences; cohort membership alone is narrowed. Within-list raw date
+and setting conflicts remain in the private audit. Fixed-index selection is
+complete; gas extraction is running and independent qualification is queued
+strictly after successful preparation.
+
+Verification now passes: 24 shared and 18 common-index groups (also on Mini),
+15 preparation cases, 5 original-membership cases, 3 qualification cases,
+historical R and 9 Stata source/launcher cases. The initial common-manifest
+fixture failed because it lacked the newly required original population binding;
+updated the artificial fixture and added a rejection for its removal. Old saved
+bundles still render with their recorded labels; a new artificial scoped bundle
+renders with original-cohort Methods/captions. Quarto initially lacked access to
+its existing cache under the sandbox; the authorized rerender succeeded. All
+three changed artificial captions/exports were inspected with figure QC, with
+no clipping or symbol/readability issue observed. This is not clinical evidence.
+
+Preparation completed naturally with exit zero. All nineteen CSV/RDS fields
+agree exactly, including original string keys, dates and float precision. The
+independent qualifier passed its first twenty-one membership/index/field/BMI/
+original-flag/raw-start checks without discrepancies, then advanced to raw gas,
+testing, ICD and calendar-day checks. Source-setting uncertainty causes no
+index blocks in this corrected universe. Historical/new first-index differences
+are fully accounted for by ambulatory membership, BMI below threshold, completed
+BMI absence or qualifying-date versus start-date ordering; no unexplained case.
+The exact counts and reconciliation are private. No clinical model was fitted.
+
+Corrected original-scope qualification completed with native exit zero: all thirty
+independent source checks have zero disagreements. Issued a fresh automated source
+review and version-3 reviewed manifest after checking exact input/config/mapping/
+preparation/selection/code hashes and the typed roundtrip. The readiness receipt
+validates as `ready_with_limitations` for the approved selected-cohort source use;
+human source/scientific approval is explicitly not invented. Mini identity-bound
+preflight `artifacts/triangulation/preflight-20261016T173924-11359/` reports
+`reviewed_primary_input_identity_and_mapping_passed`, zero models. The original
+pending manifest, older broader products and their receipts remain unchanged.
+
+Plan, decisions, source assessment, README, project instructions and handoffs now
+identify original selected membership as authoritative. No new source-export or
+membership choice is required under current rules. Within-list chronology/BMI
+uncertainty and earliest-date ties remain explicit; a recency cap, old-first-flag
+prefilter or alternate tie/date rule would be a new scientific decision. Final
+cross-host synchronization, source/ignore checks and writer-lease closeout follow.
+No clinical estimates, commit, push or merge were performed in this phase.
+
+Final closeout: all 98 local documentation link targets resolve; Python sources
+compile and `git diff --check` passes. The corrected source review and preflight
+bind the same exact input, and the recorded executable source hashes still match.
+The shared upstream worktree is clean at its unchanged documentation-closeout
+revision. All public changes are synchronized between this checkout and the Mini
+under per-file guards with no unexpected target edits. Generated reviews and
+configuration are ignored; clinical products remain external/private. The study's
+writer lease is closed only after all native jobs report success. Clinical models,
+human scientific review and code release remain unrun/uncommitted as applicable.
+
+## 2026-10-16 12:10 MDT — BMI availability cross-analysis audit
+
+Investigated whether the selected patient count incorrectly implied low BMI
+availability. Performed read-only, aggregate-only Mini comparisons of original
+acute keys, the new mapping, accepted FULL_DATA/AFTER_EXCLUSION products and
+retained historical Stata comparators. Inspected bicarbonate, hypercapnia
+case-definition and equity source filters; did not execute those studies' models.
+Reconciled available BMI, BMI≥30 eligibility, distinct patients, first-index
+uncertainty, prior/calculated contributions and historical BMI/date differences.
+The historical comparator matches accepted AFTER_EXCLUSION keys and BMI exactly;
+this does not authenticate every field or the publication/current Air snapshot.
+
+The ignored review and aggregate receipts are under
+`artifacts/triangulation/bmi-coverage-review-20261016/`. Arithmetic, same-key
+comparisons and source-identity checks pass. An initial audit query used an
+unsupported DuckDB prepared CREATE VIEW and was corrected to quote the fixed
+paths. An equity audit initially mislabeled the temporary first-only descriptive
+subset; the retained version-2 receipt respects preserve/restore and supersedes
+those labels. Detailed receipts remain private. No source data, scientific rules,
+analysis code, clinical estimates or other-repository files changed. Ambiguous
+reported BMI with usable height/weight remains an explicit potential policy
+choice; no alternative fallback or index rerun was adopted.
+
+## 2026-10-16 — Curve-first scientific report and complete audit refactor
+
+Implemented the ticket anchored to 8735505, preserving the pending original-list
+source corrections. Confirmed original selected encounter scope and known-capture
+ICD reference. Replaced default historical/PIF-grid dispatch with separate source
+preparation/preflight, cohort audit, analysis and aggregate-only rendering.
+
+New modules cover input validation/selection, membership ledger and variable
+atlas, 21 planned spline/linear/observation/matched fits with complete audits,
+paired curves/scenarios and full contribution covariance, and version-4 bundles.
+Scientific/audit Quarto reports, F0–F5 and three F1 alternatives are generated.
+Superseded authority snapshots and the original ticket are retained with hashes.
+
+Commands so far: repeated artificial numerical/adverse acceptance runs; Python
+preparation/original-population/source-qualification tests locally and in an
+isolated Mini snapshot; `make fixture`; saved-run `make render`. Initial numerical
+checks pass; render/visual acceptance remains explicitly pending until actual
+inspection. The source adapter suite passes on the Mini including the added
+Float32-to-CSV preservation case. Optional testthat is absent locally; the same
+checks run through the standalone runner without installation.
+
+Safe repair loops retained failed/superseded views: PDF absolute image paths,
+long panel labels, long unbroken identifiers and TeX captions were repaired.
+Pending timing memberships are unassessed instead of zero. Identical atlas plots
+share an indexed representative; complete stage tables remain. Covariances print
+as complete matrices. Presentation changes rerender the saved final artificial
+bundle without refitting. Every standalone fixture figure is marked artificial.
+
+Mini work used fresh external private code/scratch, after checking active jobs;
+the existing working checkout and accepted products were not edited. Existing
+original-list source checks, independent selected-field comparisons, the new
+cohort companion, its ledger and fresh preflight pass with zero clinical models.
+All 12 current qualification-function hashes match the tested Mini functions.
+Private receipts: `artifacts/triangulation/curve-refactor-source-review/`.
+
+No commit, push, merge, upstream write, package installation or submission was
+performed. Next: finish actual HTML/PDF/native-size/grayscale inspection, rerun
+all 65 acceptance checks against that completed review, and record final receipts.
+Clinical fitting still requires the reviewed clean merged Mini checkout.
+
+### 2026-10-16 15:22 MDT — Final curve/audit verification and handoff
+
+Software implementation and artificial verification complete. Final source/cohort
+helper move binds source acceptance, companion selection and reconciliation to the
+estimation hashes. An unchanged tree renders; plot-only revisions remain compatible;
+cohort-source and aggregate tampering fail. Eight scientific/cohort aggregate tables
+remain exactly equal across the module move. The final Mini comparison includes
+13 qualification-function identities and all estimation-file hashes, superseding
+the intermediate 12-function note above.
+
+Commands completed:
+
+- `make fixture` saved `artifacts/triangulation/curve-fixture-20261016T144730-79118`.
+- `make render RUN="artifacts/triangulation/curve-fixture-20261016T144730-79118"`
+  completed both complete HTML/PDF reports. Presentation-only repairs reused the
+  same saved run, never clinical input or model fitting.
+- `Rscript --vanilla artifacts/triangulation/curve-refactor-baseline/final-scientific-glyph-render.R`
+  repaired one scientific PDF subscript label in a fresh review, reusing the
+  unchanged audit/figures with output/source hashes checked.
+- `make test BMI_TEST_REVIEW="artifacts/triangulation/curve-fixture-20261016T144730-79118/reviews/20261016T151707-glyph-81498"`
+  passed all 65 R acceptance checks. The expected absent-manifest negative test
+  emits a missing-file warning. Local Python checks pass with 12 optional cases
+  skipped; the Mini runs all 16 preparation, five original-population and three
+  source-qualification cases without skips (24 pass).
+- Figure skill `figure_manifest_lint.py`, `table_manifest_lint.py` and
+  `inspect_image_files.py` return zero against the curated final manifests.
+  Poppler page raster/bounds checks and actual browser/visual inspection complete.
+- `git diff --check`, R parse checks, Python compile checks, current authority
+  file-link checks and all six archive hash checks pass. Historical Stata/raw
+  tracked paths have no diff. Generated/private evidence remains ignored.
+
+Final review is
+`artifacts/triangulation/curve-fixture-20261016T144730-79118/reviews/20261016T151707-glyph-81498/`.
+It includes scientific and exhaustive audit HTML/PDF, `figures/gallery.html`,
+F0–F5, F1-A/B/C, SVG/PDF masters, 300-dpi PNG reviews, primary JPG alternatives,
+complete captions, manifests and `visual-review-receipt.json`. Aggregate ledger,
+complete coefficient/covariance/correlation and reconciliation CSV/RDS tables are
+at the run root. The scientific PDF has nine pages; the complete audit has 1,094.
+
+Actual review: all 230 scientific PNGs at approximately 190 mm/100 dpi in grayscale;
+79 revised plots rechecked in 20 sheets; final PNGs identical to inspected outputs.
+Every report page received layout overview and automated text geometry checks
+(zero bounds/collision flags), with representative audit tables inspected at native
+raster size. This does not claim manual reading of every cell. Full row and
+covariance coverage is tested. All 1,372 audit HTML tables and 229 images are
+present, with no broken images/overflowing cells. Scientific HTML has all three
+images and no overflow. F1-A is preferred for aligned cross-outcome comparison;
+B/C remain available. Some long captions continue on the next PDF page and the
+full audit has a slow cold browser load; these are nonblocking presentation limits.
+
+Repair history is retained: long labels, image paths, table widths/continuation
+headers, booktabs intercept parsing, LaTeX header leakage, excessive decimal
+columns, and one unavailable subscript glyph. Curated manifests and actual
+inspection supersede broad prototype heuristics that mislabeled duplicate
+PNG/PDF assets and numbered figure variants. Failed/superseded reviews are not
+deleted. Final receipts distinguish successful software verification from clinical
+qualification or investigator review.
+
+Mini source work used an isolated external private snapshot after active-job
+checks. Clinical data were opened for source/companion and model-free preflight
+only. Automated original-list source/field/ledger qualification passes. Zero
+clinical models fitted; no human approval, MAR validity or causal interpretation
+is asserted. Private source receipts remain under
+`artifacts/triangulation/curve-refactor-source-review/`.
+
+Changes remain uncommitted. No push/merge, other-repository modification, package
+installation, clinical submission or publication occurred. Next: review/merge the
+implementation, synchronize a clean matching Mini checkout, then execute one
+clinical run, reconcile its numerical outputs and repeat figure/report QC before
+investigator scientific review. No observed discrepancy requires a new scientific
+choice or replacement source export.
+
+## 2026-10-16 — Authorized release and clinical execution
+
+The investigator authorized review/repair, release, clean Mini synchronization,
+source acceptance and clinical estimation in the current conversation. Source
+acceptance is based on the existing identity-bound original-list/companion
+checks; clinical-results scientific review remains subsequent. Existing work was
+preserved in ignored `artifacts/triangulation/clinical-release-20261016/` before
+any release edits.
+
+Read-only review covered current cohort/source binding, model registration and
+failure handling, prediction/decomposition, aggregate persistence, launchers,
+preparation/qualification changes and the pending file inventory. No substantive
+scientific defect was identified. Obsolete handoff Make target names were corrected.
+Added aggregate-only phase/model messages to make the long run observable; all
+eight coefficient/covariance/curve/contribution/cohort tables remain exactly
+unchanged on the full artificial fixture after that addition. No covariate,
+index, outcome, estimator or scenario rule changed. No CI workflow is configured;
+local and Mini receipts will supply the release's actual check evidence.
+
+Mini inspection found no active competing R/source-analysis job. Its original
+consumer checkout remains dirty and will be preserved; its upstream checkout has
+separate work and remains read-only. The internal disk is nearly full, so the
+candidate smoke and clinical run use a separate clean external-drive checkout
+and external temporary storage. Existing Quarto and XeLaTeX are installed but
+were absent from the noninteractive SSH PATH. No installation is needed so far.
+
+Next checkpoint: commit the reviewed candidate, run fresh artificial end-to-end
+and adapter checks on the Mini, then push/PR/merge and synchronize the exact
+merged revision before clinical preflight or estimation.

@@ -10,7 +10,7 @@ if (!length(args) %in% c(required_args, required_args + 1L)) stop("Explicit mode
 output_format <- if (length(args) > required_args) args[length(args)] else "all"
 if (!output_format %in% c("all", "html", "pdf")) stop("FORMAT must be all, html or pdf.")
 if (!requireNamespace("digest", quietly = TRUE)) stop("Missing digest; no installation attempted.")
-source_files <- c("R/common_index_hypercapnia.R", "R/common_index_reporting.R", "R/bmi_hypercapnia_triangulation.R", "R/triangulation_reporting.R", "reports/bmi_hypercapnia_triangulation.qmd", "scripts/render_triangulation.R", "tests/fixtures/triangulation_fixture.R", "config/common_index_source_policy.json")
+source_files <- c("R/common_index_hypercapnia.R", "R/common_index_reporting.R", "R/bmi_hypercapnia_triangulation.R", "R/triangulation_reporting.R", "reports/bmi_hypercapnia_triangulation.qmd", "scripts/render_triangulation.R", "tests/fixtures/triangulation_fixture.R", "config/common_index_source_policy.json", "config/common_index_bmi_policy.json")
 source_paths <- setNames(file.path(root, source_files), source_files)
 source_hashes <- as.list(vapply(source_paths, function(path) digest::digest(file = path, algo = "sha256"), character(1)))
 source(file.path(root, "R", "bmi_hypercapnia_triangulation.R"))

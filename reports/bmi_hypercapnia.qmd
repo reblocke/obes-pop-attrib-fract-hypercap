@@ -1,0 +1,109 @@
+---
+title: "BMI and documented hypercapnia probability"
+subtitle: "Relationship, evidence availability and secondary scenario burden"
+format:
+  html:
+    toc: true
+    embed-resources: true
+    css: bmi_report.css
+  pdf:
+    pdf-engine: xelatex
+    latex-auto-install: false
+    fontsize: 10pt
+    mainfont: Arial
+    papersize: a4
+    geometry: margin=10mm
+    header-includes:
+      - \usepackage{longtable,booktabs,array}
+execute:
+  echo: false
+  warning: true
+  message: false
+  cache: false
+---
+
+```{r}
+#| label: setup
+#| include: false
+root<-Sys.getenv("BMI_REPO_ROOT");run<-Sys.getenv("BMI_RUN_DIR");review<-Sys.getenv("BMI_REVIEW_DIR")
+if(!nzchar(root)||!dir.exists(run)||!dir.exists(review))stop("Use explicit saved-run rendering")
+source(file.path(root,"R","analysis.R"))
+Sys.setenv(BMI_REPORT_ID="scientific")
+load_common_input<-load_triangulation_input<-bmi_load_input<-fit_bmi_model<-fit_registered_models<-bmi_run_analysis<-function(...)stop("Render tripwire: clinical input/model fitting forbidden")
+bundle<-bmi_read_bundle(run);a<-bundle$analysis
+knitr::opts_chunk$set(dev=if(knitr::is_latex_output())"cairo_pdf"else"png",fig.width=7,fig.height=8)
+figure<-function(id){path<-file.path(review,"figures",paste0(id,".png"));if(file.exists(path)){if(startsWith(path,paste0(root,"/")))path<-paste0("../",substring(path,nchar(root)+2));cat("\n![",id,"](",path,"){width=100% fig-alt=\"",id,"; see the following full caption for population and uncertainty.\"}\n\n",sep="");if(exists("captions")){idx<-match(id,captions$figure_id);if(!is.na(idx)){tabs<-strsplit(captions$source_tables[idx],";",fixed=TRUE)[[1]];cat("Aggregate tables: ",paste(paste0("[",tabs,"](../../",tabs,".csv)"),collapse=", "),".\n\n",sep="")}}}}
+captions<-utils::read.csv(file.path(review,"figures","captions.csv"),stringsAsFactors=FALSE)
+caption<-function(id)cat(captions$caption[match(id,captions$figure_id)],"\n\n")
+```
+
+```{r}
+#| label: run-status
+#| results: asis
+cat(if(bundle$manifest$mode=="fixture")"**ARTIFICIAL DATA ONLY — software and layout verification; no clinical estimates.**\n\n"else"**Protected research draft. Source, execution, numerical review and scientific review are separate states.**\n\n")
+bmi_report_table(data.frame(source=bundle$manifest$source_status,analysis_completed=bundle$manifest$analysis_completed,numerically_reviewed=bundle$manifest$numerically_reviewed,scientifically_reviewed=bundle$manifest$scientifically_reviewed),"Actual run status")
+```
+
+## Question and population
+
+Within the original selected TriNetX-derived encounter population, how does documented index-encounter hypercapnia probability vary across BMI? How does availability of usable physiological evidence vary, and which original BMI ranges contribute to modeled occurrence and a specified secondary BMI contrast?
+
+The original selected population is a selected acute-care cohort, not all acute-care patients or a national population. Select the first qualifying adult 2022 emergency/inpatient encounter with BMI ≥30 before gas availability and adjustment completeness. Earlier unresolved eligibility and earliest-date ties remain unresolved. Age uses the approved birth-year proxy. BMI comes from encounter/prior reported values or observed height and weight under the approved hierarchy; there is no statistical BMI imputation.
+
+## Cohort construction
+
+```{r}
+#| label: observational-flow
+#| results: asis
+figure("F0-main");caption("F0-main")
+bmi_report_table(a$population_registry[a$population_registry$population_id %in% c("Q","C","C_icd","C40","M_abg","M_any_gas"),],"Named patient populations",keys="population_id")
+```
+
+## Relationship and observation
+
+Models use a natural cubic BMI spline with four fixed knots at common-reference BMI percentiles 5, 35, 65 and 95, plus linear age, sex, race/ethnicity and geographic region. Knots and factor references are fixed before outcome-specific fitting. Arterial hypercapnia uses valid unadjusted PCO2 ≥45 mm Hg. The combined definition accepts arterial ≥45 or venous ≥50; a negative means available usable specimens are below threshold. Missing or unusable gases remain unknown.
+
+Gas curves average each fitted outcome-observed model over the common covariate-complete reference, C. ICD curves use known-capture patients, C_icd; the composite includes J96.02, J96.12, J96.22, J96.92 and E66.2. Unknown diagnosis capture is not coded negative. The ICD curve therefore describes recorded diagnoses, including obesity-containing ascertainment.
+
+Observation curves describe usable evidence, not necessarily the decision to order testing. Probability bands are pointwise 95% full-covariance delta intervals conditional on the empirical reference. Extending gas relationships to untested patients requires an observation-exchangeability assumption. Bands do not incorporate source selection, missingness assumptions or model misspecification.
+
+```{r}
+#| label: primary-relationship
+#| results: asis
+figure("F1-A");caption("F1-A")
+bmi_report_table(a$fixed_bmi_contrasts[a$fixed_bmi_contrasts$model_id %in% paste(c("abg","any_gas","icd"),"encounter/spline",sep="/"),],"Supported fixed-BMI 45 versus 40 contrasts; probability difference and prevalence ratio",keys="model_id")
+```
+
+## Secondary scenario and original-BMI contributions
+
+The default scenario reduces observed BMI >30 by exactly one unit, without a floor; BMI =30 remains unchanged. It retains each patient's original index, covariates, observation status and reference membership. The model-standardized potential impact fraction is 1 − shifted probability / observed-BMI probability. It depends on the reference BMI/covariate distribution and is not a constant effect per BMI unit.
+
+Band contributions come from paired patient predictions in original BMI bands. They sum exactly to the overall probability difference; their full covariance reproduces total uncertainty. A fixed-BMI curve multiplied by marginal BMI density is not used to calculate adjusted PIF.
+
+```{r}
+#| label: scenario-decomposition
+#| results: asis
+figure("F2");caption("F2")
+r<-a$policy_totals
+if(nrow(r)){
+ ids<-paste(c("abg","any_gas","icd"),"encounter/spline",sep="/")
+ primary<-r$model_id %in% ids & ((r$method=="mar" & r$reference_id=="C") | (r$method=="observed" & r$reference_id=="C_icd"))
+ columns<-c("model_id","n_reference","n_model","pct_shifted","p_observed","p_shifted","difference_per1000","difference_low_per1000","difference_high_per1000","PIF","PIF_low","PIF_high")
+ bmi_report_table(r[primary,columns],"Primary-reference secondary scenario; complete sensitivities are in the audit",keys="model_id")
+}
+```
+
+## Supporting analyses and limitations
+
+Calendar-day sensitivities retain the original index and require collection date equal to encounter-start date. Matched ICD/ABG and ICD/combined comparisons use identical patients within each pair. The BMI ≥40 reference reuses the broader model. Linear-BMI comparisons use identical training samples; they do not select the primary form.
+
+The separate fixed-observation-stratum MNAR projection varies missing-outcome odds at BMI 40 and the gradient per five BMI units. Its offset is evaluated at shifted BMI too. The MAR anchor is a numerical identity, not independent confirmation. Sensitivity ranges are assumptions rather than estimated bounds. Covariates are not imputed and no observation weighting is applied.
+
+This analysis concerns documented index-encounter occurrence. It does not estimate incidence, cases prevented or effects of within-person weight loss. Full stage profiles, every model coefficient/covariance, diagnostics, failures, sensitivity quantities and source limitations appear in the accompanying audit report and protected aggregate exports.
+
+```{r}
+#| label: model-status
+#| results: asis
+bmi_report_table(a$model_registry[c("model_id","n_model","n_events","status","failure_reason")],"Every planned fit and its actual status",keys="model_id")
+bmi_report_table(a$linear_spline_comparison,"Same-sample functional-form comparisons",keys="outcome_id")
+```

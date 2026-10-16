@@ -1,0 +1,137 @@
+---
+title: "BMI–hypercapnia: complete construction and model audit"
+format:
+  html:
+    toc: true
+    toc-depth: 2
+    embed-resources: true
+    css: bmi_report.css
+  pdf:
+    pdf-engine: xelatex
+    latex-auto-install: false
+    fontsize: 9pt
+    mainfont: Arial
+    papersize: a4
+    geometry: margin=10mm
+    header-includes:
+      - \usepackage{longtable,booktabs,array}
+execute:
+  echo: false
+  warning: true
+  message: false
+  cache: false
+---
+
+```{r}
+#| label: audit-setup
+#| include: false
+root<-Sys.getenv("BMI_REPO_ROOT");run<-Sys.getenv("BMI_RUN_DIR");review<-Sys.getenv("BMI_REVIEW_DIR")
+if(!nzchar(root)||!dir.exists(run)||!dir.exists(review))stop("Use saved-run rendering")
+source(file.path(root,"R","analysis.R"))
+Sys.setenv(BMI_REPORT_ID="audit")
+load_common_input<-load_triangulation_input<-bmi_load_input<-fit_bmi_model<-fit_registered_models<-bmi_run_analysis<-function(...)stop("Render tripwire: clinical input/model fitting forbidden")
+bundle<-bmi_read_bundle(run);a<-bundle$analysis
+knitr::opts_chunk$set(dev=if(knitr::is_latex_output())"cairo_pdf"else"png",fig.width=7,fig.height=8)
+captions<-utils::read.csv(file.path(review,"figures","captions.csv"),stringsAsFactors=FALSE)
+page<-function()if(knitr::is_latex_output())cat("\n\\newpage\n")
+figure<-function(id){p<-file.path(review,"figures",paste0(id,".png"));if(file.exists(p)){if(startsWith(p,paste0(root,"/")))p<-paste0("../",substring(p,nchar(root)+2));cat("\n![",id,"](",p,"){width=100% fig-alt=\"",id,"; full definitions are in the captions and linked aggregate tables.\"}\n\n",sep="");if(exists("captions")){idx<-match(id,captions$figure_id);if(!is.na(idx)){tabs<-strsplit(captions$source_tables[idx],";",fixed=TRUE)[[1]];cat("Aggregate tables: ",paste(paste0("[",tabs,"](../../",tabs,".csv)"),collapse=", "),".\n\n",sep="");cat(captions$caption[idx],"\n\n")}}}}
+```
+
+```{r}
+#| label: audit-status
+#| results: asis
+cat(if(bundle$manifest$mode=="fixture")"**ARTIFICIAL DATA ONLY. No source qualification or clinical result follows from this report.**\n\n"else"**Protected internal research audit. Exact aggregates and rare categories are not automatically safe for public sharing.**\n\n")
+bmi_report_table(a$source_audit,"Source status and interpretation limits",keys="requirement")
+cat("Run: ",bundle$manifest$run_id,". Numerical review: ",bundle$manifest$numerically_reviewed,". Scientific review: ",bundle$manifest$scientifically_reviewed,".\n\n",sep="")
+```
+
+## Coverage and provenance
+
+Every required population, variable and model is indexed below. Missing, pending, failed, empty and not-applicable states are explicit. No patient identifiers, exact dates, individual predictions or model frames are exported. CSV/RDS tables retain full numerical precision. Distribution/prediction coordinates are exported in full; their complete plotted ranges are displayed here rather than printing every coordinate as a separate table row.
+
+```{r}
+#| label: coverage-index
+#| results: asis
+if(nrow(a$model_registry))for(id in a$model_registry$model_id)cat("- [",id,"](#model-",substr(digest::digest(id,algo="sha256"),1,12),")\n",sep="")
+bmi_report_table(a$coverage_index,"Coverage index",keys="kind")
+bmi_report_table(a$variable_dictionary,"Complete variable dictionary",keys="variable_id")
+```
+
+## Detailed observational cohort construction
+
+Source records, encounter versions and patients have distinct counting units. First-failure exclusions are exclusive at their declared grain; all-reason counts overlap. Gas and ICD samples are parallel overlapping analytic branches.
+
+```{r}
+#| label: detailed-flow
+#| results: asis
+ids<-tools::file_path_sans_ext(basename(list.files(file.path(review,"figures"),pattern="^F0-detail-.*\\.png$",full.names=TRUE)))
+for(id in ids){figure(id);page()}
+for(t in c("cohort_nodes","cohort_edges","exclusion_reasons","exclusion_overlaps","population_registry","timing_audit","observation_patterns","evidence_by_bmi","numerical_reconciliation")) {
+ cat("\n### ",gsub("_"," ",t),"\n\n",sep="");bmi_report_table(a[[t]],t,keys=intersect(c("population_id","outcome_id"),names(a[[t]])))
+}
+```
+
+## Complete stage and variable profiles
+
+Identifiers receive cardinality and linkage summaries. Date values are protected. Continuous variables receive exact type-7 quantiles, missingness, full-range distributions and ECDFs. Selected Gaussian KDEs share the source-variable bandwidth and scale by observed population mass. Constant/sparse variables are displayed without a fabricated KDE. Category percentages identify all-patient and nonmissing denominators; named unknown categories retain their approved meaning.
+
+```{r}
+#| label: full-stage-atlas-tables
+#| results: asis
+for(t in c("variable_summary","category_counts","missingness_patterns","comissingness")) {
+ cat("\n### ",gsub("_"," ",t),"\n\n",sep="");bmi_grouped_report(a[[t]],t,groups=if("variable_id" %in% names(a[[t]]))"variable_id"else"population_id")
+}
+```
+
+```{r}
+#| label: full-stage-atlas-figures
+#| results: asis
+bmi_report_table(utils::read.csv(file.path(review,"figures","atlas-index.csv")),"Atlas index: every plotted stage maps to an identical-profile representative",keys="variable_id")
+for(p in list.files(file.path(review,"figures"),pattern="^F3-.*\\.png$",full.names=TRUE)) {figure(tools::file_path_sans_ext(basename(p)));page()}
+```
+
+## Every planned regression
+
+The basis is fixed at common-reference BMI percentiles 5, 35, 65 and 95; age remains linear. No automatic estimator substitution, category pooling or model selection occurs. Model-based intervals condition on the empirical reference. Apparent fit is assessed on training data. Influence flags do not remove patients.
+
+```{r}
+#| label: full-regression-audit
+#| results: asis
+bmi_report_table(a$bmi_basis,"Fixed spline basis",keys="basis_id")
+if(nrow(a$model_registry))for(id in a$model_registry$model_id) {
+ page();cat("\n### Model: ",id," {#model-",substr(digest::digest(id,algo="sha256"),1,12),"}\n\n",sep="")
+ for(t in c("model_registry","factor_references","coefficients","coefficient_covariance","model_fit_diagnostics","model_residual_bins","model_influence_summary","model_support")) {
+  z<-a[[t]];if("model_id" %in% names(z))z<-z[z$model_id==id,,drop=FALSE]
+  if(t=="model_residual_bins")z<-z[!grepl("^(hist_|ecdf_)",z$diagnostic),,drop=FALSE]
+  if(t=="coefficient_covariance"&&nrow(z)){
+    bmi_covariance_report(z,"Complete coefficient covariance","term1","term2","covariance")
+    bmi_covariance_report(z,"Complete coefficient correlation","term1","term2","correlation")
+  }else bmi_report_table(z,t,keys=intersect(c("term","metric","variable_id"),names(z))[1:min(1,length(intersect(c("term","metric","variable_id"),names(z))))])
+ }
+ fid<-paste0("F4-",match(id,a$model_registry$model_id));figure(fid)
+}
+bmi_report_table(a$linear_spline_comparison,"Same-sample linear-versus-spline comparisons",keys="outcome_id")
+```
+
+## Relationship, support and scenario reconciliation
+
+Curves are policy-independent. Gas curves standardize to C; ICD curves use C_icd with known diagnosis capture. Standardization over untested patients requires a transport/MAR interpretation beyond technical source acceptance. No cross-model difference test is inferred from independent interval overlap.
+
+```{r}
+#| label: audit-relationships
+#| results: asis
+for(id in c("F1-A","F1-B","F1-C","F2")){figure(id);page()}
+for(t in c("fixed_bmi_contrasts","prediction_support","policy_registry","policy_totals","policy_contributions","policy_contribution_covariance","implied_missing_probabilities")) {
+ cat("\n### ",gsub("_"," ",t),"\n\n",sep="")
+ if(t=="policy_contribution_covariance"&&nrow(a[[t]])){
+  z<-a[[t]];groups<-c("model_id","reference_id","policy_id","method","r","gradient_multiplier");key<-do.call(paste,c(z[groups],sep=" | "))
+  for(ix in split(seq_len(nrow(z)),factor(key,levels=unique(key)))){cat("\n**",key[ix[1]],"**\n\n",sep="");bmi_covariance_report(z[ix,],"Complete original-band contribution covariance","bin1","bin2","covariance")}
+ }else if(t %in% c("policy_contributions","implied_missing_probabilities"))bmi_grouped_report(a[[t]],t,groups=c("model_id","reference_id","policy_id","method","r","gradient_multiplier"))
+ else bmi_report_table(a[[t]],t,keys=intersect(c("model_id","reference_id"),names(a[[t]])))
+}
+for(p in list.files(file.path(review,"figures"),pattern="^F5-.*\\.png$",full.names=TRUE)){figure(tools::file_path_sans_ext(basename(p)));page()}
+```
+
+## Export and review record
+
+The immutable bundle contains all tables, configuration, source hashes and input receipt. Figures and reports are fresh views of that bundle. Rendering is guarded against clinical input reads and model refits. Consult the adjacent render receipt, figure manifest and actual visual-review receipt for checks performed; successful rendering does not establish source or scientific acceptance.

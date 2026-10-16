@@ -5,7 +5,10 @@ common_risk_odds <- c(.25, .5, 1, 2, 4)
 common_gradient_odds <- c(.5, 1, 2)
 common_formula <- .outcome ~ bmi + age_at_encounter + factor(sex) + factor(race_ethnicity) + factor(location)
 
-common_specification <- function() list(
+common_specification <- function(bmi_policy_id = NULL, population_scope_id = NULL) {
+  if (!is.null(population_scope_id) && !identical(population_scope_id, "original_selected_encounters_v1")) stop("Unknown original population policy.")
+  if (!is.null(bmi_policy_id) && !identical(bmi_policy_id, "available_encounter_or_prior_bmi_v1")) stop("Unknown BMI policy.")
+  result <- list(
   study_design = common_design_id, scenario_id = triangulation_scenario_id,
   counterfactual = triangulation_counterfactual,
   population_policy = "first_2022_adult_ED_inpatient_BMI_ge30_before_gas_and_completeness",
@@ -18,7 +21,14 @@ common_specification <- function() list(
   risk_odds = common_risk_odds, gradient_odds = common_gradient_odds,
   interval = "pointwise full-coefficient delta; empirical reference, observation status and sensitivity parameters fixed",
   icd = "J96.02|J96.12|J96.22|J96.92|E66.2; separate matched arterial and either-gas pairs"
-)
+  )
+  if (!is.null(bmi_policy_id)) result$bmi_policy_id <- bmi_policy_id
+  if (!is.null(population_scope_id)) {
+    result$population_scope_id <- population_scope_id
+    result$population_policy <- "first_eligible_2022_adult_ED_inpatient_BMI_ge30_within_original_selected_encounter_keys_before_gas"
+  }
+  result
+}
 
 common_registry <- function() {
   methods <- rbind(data.frame(method = c("observed", "mar"), r = 1, g = 1),
@@ -53,6 +63,26 @@ load_common_input <- function(input_path, manifest_path) {
   if (!grepl("^(/|[A-Za-z]:)", field_path)) field_path <- file.path(dirname(manifest_path), field_path)
   fields <- jsonlite::read_json(field_path, simplifyVector = FALSE)
   if (!isTRUE(all.equal(fields$source_policy, policy, check.attributes = FALSE))) stop("Field evidence does not bind the exact unadjusted gas/ICD policy.")
+  if (!is.null(loaded$manifest$bmi_policy_id)) {
+    bmi_policy <- jsonlite::read_json(file.path(tri_repo_root(), "config", "common_index_bmi_policy.json"), simplifyVector = FALSE)
+    if (!identical(loaded$manifest$bmi_policy_id, bmi_policy$id) ||
+        !isTRUE(all.equal(fields$bmi_policy, bmi_policy, check.attributes = FALSE))) stop("Field evidence does not bind the exact available-BMI policy.")
+    attr(loaded$data, "population_scope_id") <- loaded$manifest$population_scope_id
+    if (!identical(loaded$manifest$population_scope_id, "original_selected_encounters_v1") ||
+        !identical(fields$population_scope_id, loaded$manifest$population_scope_id) ||
+        !identical(fields$original_encounter_list$variant, "FULL_DATA")) stop("New available-BMI input requires authenticated original encounter membership; broader mappings are superseded.")
+  }
+  if (isTRUE(loaded$manifest$index_preselected)) {
+    selection_entry <- loaded$manifest$source_evidence_files$selection
+    if (is.null(selection_entry) || is.null(loaded$manifest$bmi_policy_id)) stop("Missing prepared index evidence.")
+    path <- selection_entry$path
+    if (!grepl("^(/|[A-Za-z]:)", path)) path <- file.path(dirname(manifest_path), path)
+    census <- jsonlite::read_json(path, simplifyVector = TRUE)
+    if (!identical(census$bmi_policy_id, loaded$manifest$bmi_policy_id) ||
+        !identical(census$population_scope_id, loaded$manifest$population_scope_id) ||
+        census$counts$n_index_resolved != nrow(loaded$data) || census$clinical_models_fitted != 0L) stop("Invalid prepared index census.")
+    attr(loaded$data, "source_selection") <- census
+  }
   for (gas in c("abg", "vbg")) {
     bounds <- policy[[if (gas == "abg") "arterial_validity" else "venous_validity"]]
     names <- c(paste0(gas, "_pco2"), paste0(gas, "_pco2_index_day"))
@@ -66,7 +96,8 @@ load_common_input <- function(input_path, manifest_path) {
     "temperature_adjusted_excluded", "unreviewed_code", "unusable_numeric", "unusable_units", "outside_validity_limits",
     "valid_unadjusted", "valid_value_unknown_collection_date", "temperature_adjusted_source_records",
     "encounters_with_temperature_adjusted_records", paste0(rep(c("abg", "vbg"), each = 3), "_", rep(c("below", "at", "above"), 2), "_threshold_records")),
-    icd_audit = c("target_records", "unavailable_domain", "unavailable_field"))
+    icd_audit = c("target_records", "unavailable_domain", "unavailable_field"),
+    bmi_audit = c("valid", "missing", "unresolved"))
   loaded$source_audit <- list()
   for (name in names(allowed_audits)) {
     values <- fields[[name]]
@@ -191,9 +222,23 @@ common_observation_audit <- function(reference, window, source_status) {
 }
 
 run_common_index <- function(input) {
+  prepared_selection <- attr(input, "source_selection")
   data <- derive_triangulation_variables(validate_triangulation_input(input))
   data$common_obesity <- data$bmi >= 30
+  bmi_policy_id <- NULL
+  if (!is.null(data$bmi_evidence_state)) {
+    bmi_policy_id <- "available_encounter_or_prior_bmi_v1"
+    data$common_obesity[data$bmi_evidence_state == "missing"] <- FALSE
+  }
   selected <- select_frame_indexes(data, "common_obesity")
+  if (!is.null(prepared_selection)) {
+    counts <- as.data.frame(prepared_selection$counts, stringsAsFactors = FALSE)
+    if (!identical(bmi_policy_id, prepared_selection$bmi_policy_id) ||
+        nrow(counts) != 1L || counts$n_index_resolved != nrow(selected$indexes) ||
+        nrow(selected$indexes) != nrow(data) || anyDuplicated(data$patient_id) ||
+        counts$n_frame_patients != counts$n_index_resolved + counts$n_index_unresolved) stop("Prepared index census disagrees with typed input.")
+    selected$counts <- counts
+  }
   indexes <- selected$indexes
   reference <- indexes[complete.cases(indexes[triangulation_adjustment]), , drop = FALSE]
   source_day <- attr(data, "index_day_source_status")
@@ -268,7 +313,7 @@ run_common_index <- function(input) {
   shape_empty <- tri_bmi_diagnostics(data.frame(), NULL, "empty")
   # Everything returned below is aggregate-only. Models, indexes and individual
   # predictions remain local to this function and are never persisted.
-  list(results = do.call(rbind, results), registry = registry, population = population,
+  analysis <- list(results = do.call(rbind, results), registry = registry, population = population,
     models = do.call(rbind, lapply(models, function(m) m$row)), observation = observation,
     observation_bmi = if (length(bins)) do.call(rbind, bins) else data.frame(window = character(), outcome = character(), bin_low = numeric(), n_target = integer(), n_observed = integer(), n_positive = integer(), observation_fraction = numeric(), positivity = numeric(), source_status = character()),
     covariate_coverage = if (length(coverage)) do.call(rbind, coverage) else data.frame(window = character(), outcome = character(), variable = character(), category = character(), n_target = integer(), n_observed = integer(), n_positive = integer(), source_status = character()),
@@ -277,4 +322,8 @@ run_common_index <- function(input) {
     scope = data.frame(input_encounters = nrow(input), exact_duplicates_removed = attr(data, "exact_duplicates_removed"),
       distinct_encounter_versions = nrow(data), n_conflicting_keys = attr(data, "n_conflicting_keys"),
       in_scope = sum(data$in_scope %in% TRUE), out_of_scope = sum(data$in_scope %in% FALSE), uncertain_scope = sum(is.na(data$in_scope))))
+  attr(analysis, "bmi_policy_id") <- bmi_policy_id
+  attr(analysis, "population_scope_id") <- attr(input, "population_scope_id")
+  if (!is.null(prepared_selection)) analysis$scope <- as.data.frame(prepared_selection$scope)
+  analysis
 }

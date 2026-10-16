@@ -140,7 +140,7 @@ write_common_bundle <- function(analysis, run_dir, input_receipt, source_hashes,
   jsonlite::write_json(input_receipt, file.path(run_dir, "input_receipt.json"), auto_unbox = TRUE, pretty = TRUE)
   writeLines(capture.output(sessionInfo()), file.path(run_dir, "session_info.txt"))
   files <- c("aggregate_bundle.rds", unname(common_tables), "input_receipt.json", "session_info.txt")
-  manifest <- list(schema_version = 3L, run_id = run_id, mode = mode, specification = common_specification(),
+  manifest <- list(schema_version = 3L, run_id = run_id, mode = mode, specification = common_specification(attr(analysis, "bmi_policy_id"), attr(analysis, "population_scope_id")),
     code_identity = input_receipt$code_identity,
     registry_sha256 = tri_registry_hash(analysis$registry), analysis_source_sha256 = source_hashes,
     files = as.list(setNames(vapply(file.path(run_dir, files), tri_sha256, character(1)), files)))
@@ -159,11 +159,13 @@ read_common_bundle <- function(run_dir) {
   if (!identical(tri_sha256(manifest_path), receipt$bundle_manifest_sha256)) stop("Bundle manifest hash mismatch.")
   manifest <- jsonlite::read_json(manifest_path, simplifyVector = TRUE)
   if (!identical(manifest$schema_version, 3L) || !manifest$mode %in% c("fixture", "clinical") ||
-      !isTRUE(all.equal(manifest$specification, common_specification(), check.attributes = FALSE))) stop("Common-index bundle specification mismatch.")
+      !isTRUE(all.equal(manifest$specification, common_specification(manifest$specification$bmi_policy_id, manifest$specification$population_scope_id), check.attributes = FALSE))) stop("Common-index bundle specification mismatch.")
   files <- unlist(manifest$files, use.names = TRUE)
   if (!setequal(names(files), c("aggregate_bundle.rds", unname(common_tables), "input_receipt.json", "session_info.txt"))) stop("Unexpected bundle files.")
   for (name in names(files)) if (!file.exists(file.path(run_dir, name)) || !identical(tri_sha256(file.path(run_dir, name)), unname(files[name]))) stop("Bundle file hash mismatch: ", name)
   analysis <- readRDS(file.path(run_dir, "aggregate_bundle.rds"))
+  if (!identical(attr(analysis, "bmi_policy_id"), manifest$specification$bmi_policy_id)) stop("Saved BMI policy identity mismatch.")
+  if (!identical(attr(analysis, "population_scope_id"), manifest$specification$population_scope_id)) stop("Saved original population identity mismatch.")
   validate_common_aggregates(analysis)
   if (!identical(manifest$registry_sha256, tri_registry_hash(analysis$registry))) stop("Registry hash mismatch.")
   list(analysis = analysis, manifest = manifest,
@@ -249,6 +251,10 @@ common_candidates <- function(analysis, artificial = TRUE, source_policy_id = NU
     tri_at(common_interval_grob(base, "relative", axes$relative, y, c(.13, .87)), .71, .5, .15, .74),
     tri_at(common_axis(axes$absolute), .29, .035, .15, .08), tri_at(common_axis(axes$relative), .71, .035, .15, .08)))
   caption <- common_caption
+  if (identical(attr(analysis, "population_scope_id"), "original_selected_encounters_v1")) caption <- sub(
+    "Adults, 2022 ED/inpatient; first BMI ≥30 index selected before gas availability. Same covariate-complete target.",
+    "Original selected cohort: adult 2022 ED/inpatient; first BMI ≥30 index before gases. Common complete-covariate target.",
+    caption, fixed = TRUE)
   if (identical(source_policy_id, "unadjusted_pco2_v1")) caption <- sub("arterial/venous blood gas", "arterial/venous unadjusted gas", caption, fixed = TRUE)
   A <- common_shell(grid::grobTree(children = do.call(grid::gList, children)), "A — Paired forest/table", artificial, caption)
   panels <- list()
