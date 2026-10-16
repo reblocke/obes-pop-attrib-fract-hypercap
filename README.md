@@ -4,7 +4,7 @@ This R/Quarto workflow estimates **model-standardized probability differences an
 
 The primary population is adults with a first qualifying **BMI ≥30** ED/inpatient encounter in 2022, selected before gas availability. Separate arterial and combined-gas models supply observed-evidence benchmarks and assumption-dependent projections to one common covariate-complete reference. A BMI ≥40 sensitivity restricts those same index encounters and reuses the primary models. The previous independently indexed frame analysis is preserved as supporting work.
 
-**Status (2026-10-15):** the common-index workflow includes a study-specific preparation command and the approved unadjusted-gas policy. Clinical qualification and execution remain pending on the Mini; the owner will resume on the home network. Existing upstream engineering acceptance is reused first. Artificial results do not establish clinical findings. See the [home-network handoff](docs/CLINICAL_RUN_HANDOFF.md), [source assessment](docs/TRIANGULATION_SOURCE_ASSESSMENT.md) and [worklog](WORKLOG.md).
+**Status (2026-10-15):** the Mini audit authenticated existing accepted-product receipts and legacy field decoding, but demonstrated a broader-candidate mapping gap. Approved legacy BMI/covariates are unavailable for some captured adult 2022 acute-care keys, so their BMI eligibility cannot yet be assessed. Clinical estimation remains unrun; gas/ICD qualification and missing Mini R dependencies also remain open. The adapter now handles the actual FULL_DATA encoding and bounded, fail-closed coverage checks. See the [source-gap handoff](docs/COMMON_INDEX_SOURCE_GAP_HANDOFF.md), [source assessment](docs/TRIANGULATION_SOURCE_ASSESSMENT.md) and [worklog](WORKLOG.md). Artificial results do not establish clinical findings.
 
 ## Prerequisites
 
@@ -72,6 +72,8 @@ make triangulation-prepare \
 ```
 
 Fill the private configuration from [the preparation template](config/common_index_preparation.example.json) using actual trusted identities/mappings. Choose a fresh output path. The command verifies readers/source identities and population coverage, then writes owner-only typed input, aggregate source evidence, a receipt and a **pending** manifest. Preparation does not accept the source or fit models. Follow [the handoff](docs/CLINICAL_RUN_HANDOFF.md) to review all seven gates and finalize a separately named manifest.
+
+The example explicitly decodes accepted FULL_DATA Stata dates/codes and derives the inherited combined race/ethnicity field; it does not assume that derived field already exists. Already typed sources use `typed_v1`. Candidate projection retains all raw rows in 16 disjoint patient-key partitions, applies the agreed study scope after consensus, and checks coverage in SQL before materializing covered candidates. Unrelated histories are not accumulated. The existing RAM cap and 64-GiB scratch limit remain; use external research scratch. Reviewed unknown setting codes remain uncertain. Uncovered keys stop preparation with explicitly partial partition counts; they are never discarded to obtain a result.
 
 Authorized users then provide the authenticated RDS/DTA and reviewed **version-3** manifest:
 

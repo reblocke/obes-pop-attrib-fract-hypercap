@@ -1,6 +1,7 @@
 {
   "schema_version": 1,
   "source_policy_id": "unadjusted_pco2_v1",
+  "base_field_encoding": "accepted_stata_full_data_v1",
   "source_identity": "PENDING_ACCEPTED_PRODUCER_VARIANT_AND_SNAPSHOT",
   "upstream_revision": "787fba64319c0285244e2e17a9e303c739f31a14",
   "upstream_reader_sha256": {
@@ -29,15 +30,15 @@
     "validation_report_path": "PENDING_ACCEPTED_VALIDATION_REPORT"
   },
   "columns": {
-    "patient_id": "PENDING_REVIEWED_PATIENT_ID_COLUMN",
-    "encounter_id": "PENDING_REVIEWED_ENCOUNTER_ID_COLUMN",
-    "encounter_date": "PENDING_REVIEWED_ENCOUNTER_DATE_COLUMN",
-    "age_at_encounter": "PENDING_REVIEWED_AGE_AT_ENCOUNTER_COLUMN",
-    "encounter_type": "PENDING_REVIEWED_ENCOUNTER_TYPE_COLUMN",
-    "bmi": "PENDING_REVIEWED_BMI_COLUMN",
-    "sex": "PENDING_REVIEWED_SEX_COLUMN",
-    "race_ethnicity": "PENDING_REVIEWED_RACE_ETHNICITY_COLUMN",
-    "location": "PENDING_REVIEWED_LOCATION_COLUMN"
+    "patient_id": "patient_id",
+    "encounter_id": "encounter_id",
+    "encounter_date": "encounter_date",
+    "age_at_encounter": "age_at_encounter",
+    "encounter_type": "encounter_type",
+    "bmi": "bmi",
+    "sex": "sex",
+    "race_ethnicity": "race_ethnicity",
+    "location": "location"
   },
   "specimen_codes": {
     "PENDING_AUTHENTICATED_ARTERIAL_VALUE": "abg",
@@ -46,6 +47,10 @@
     "PENDING_GENERIC_BLOOD_VALUE": "unspecified"
   },
   "encounter_type_codes": {
+    "1": "OTHER",
+    "2": "EMER",
+    "3": "IMP",
+    "UNKNOWN": "NA",
     "PENDING_RAW_ED_VALUE": "EMER",
     "PENDING_RAW_INPATIENT_VALUE": "IMP",
     "PENDING_OTHER_RAW_VALUES": "OTHER"

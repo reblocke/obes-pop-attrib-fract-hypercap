@@ -1,6 +1,8 @@
 # Home-network handoff: qualify and run on the Mini
 
-Updated 2026-10-15. The user selected execution on the Mini and will resume on the home network. The saved Mini hostname did not resolve from the current Mac. No private product was opened and no clinical model ran during this release. The original local `full_db.rds` remains a historical comparator.
+Updated 2026-10-15. Home-network access resumed using the Mini's saved `reblocke` account (`ssh -4 reblocke@Brians-Mac-mini.local`). The merged release was copied through a Git bundle because the Mini lacks working GitHub credentials. Private accepted-product checks have started; no clinical model has run. The original local `full_db.rds` remains a historical comparator. See the dated continuation in [the source assessment](TRIANGULATION_SOURCE_ASSESSMENT.md).
+
+**Current stop:** the bounded source check demonstrated candidate keys without approved legacy-field mappings. Follow [the source-gap handoff](COMMON_INDEX_SOURCE_GAP_HANDOFF.md) before attempting clinical preparation/estimation. No clinical manifest was accepted. This is not a request for a replacement raw export or a change in the agreed population.
 
 Workflow release: [PR #5](https://github.com/reblocke/obes-pop-attrib-fract-hypercap/pull/5). Use its merged revision when synchronizing the Mini; exact local publication receipts remain in ignored evidence storage.
 
@@ -17,6 +19,8 @@ make triangulation-test
 
 Use the merged release linked from this repository's PR history. Clinical execution requires a clean checkout and records its actual commit/tree plus analysis-source hashes. Private configuration and results belong in ignored or existing owner-only storage. No packages are installed automatically.
 
+Check the actual R executable and libraries first. On this continuation, the Homebrew default lacked primary dependencies. The separately installed framework R supplied `jsonlite`, `digest` and `lpSolve`, but still lacked `haven`, `ggplot2`, `knitr` and `rmarkdown`. Dependency installation was requested separately; do not treat that request as approval. Select an installed compatible runtime or obtain authorization for an isolated library before estimation/rendering.
+
 ## 2. Bind existing products, without rebuilding them
 
 Copy `config/common_index_preparation.example.json` to ignored `config/common_index_preparation.local.json`. Fill the paths and trusted identities from the existing private release records. Expected digests must come from the trusted record, not be obtained from a neighboring file and declared accepted. Keep the reviewed upstream revision and four reader hashes unchanged. Use the existing Python environment exposing those readers, DuckDB, pandas and PyArrow; Rscript must expose the documented R dependencies.
@@ -25,9 +29,15 @@ Use absolute source, receipt and spill paths in the preparation configuration. T
 
 Review every nonblank specimen label. Map generic blood labels to `unspecified`, established arterial/venous labels to `abg`/`vbg`, and established other specimens to `other`. Unreviewed labels stop preparation; an unspecified-blood code plus a generic blood label cannot establish an arterial specimen.
 
-Required bindings are the accepted FULL_DATA bundle/receipt/validation report, canonical source database/sidecar/catalog, private spill location, source evidence references, original-key and nine legacy-field mappings, exhaustive source/legacy encounter-setting vocabulary, specimen vocabulary, diagnosis code systems and captured-extract completeness. A global pressure-unit default is allowed only when authenticated source metadata establishes it; otherwise leave it null. Select calendar-day `qualified` only when that source evidence is available; `pending` remains supported.
+Required bindings are the accepted FULL_DATA bundle/receipt/validation report, canonical source database/sidecar/catalog, private spill location, source evidence references, original-key and nine legacy-field mappings, exhaustive source/legacy encounter-setting vocabulary, specimen vocabulary, diagnosis code systems and captured-extract completeness. The example uses explicit `accepted_stata_full_data_v1` decoding: dictionary-defined Stata days since 1960, coded settings/demographics and the inherited ordered race/ethnicity rule from separate `race`/`ethnicity`. Its `race_ethnicity` mapping names the derived output, not an existing FULL_DATA column. BMI and age are copied unchanged. Unexpected codes and missing raw race/ethnicity stop for review; no default category is imputed. Previously typed inputs retain `typed_v1` (also the compatibility default when that key is absent). The encoding is bound in configuration/field evidence and the preparation receipt. Review these mappings against the accepted dictionary; do not choose an encoding from value magnitudes.
 
-Use the existing source products in place. Canonical database hashing is potentially long; the recorded earlier full-database pass took about 15 minutes. The command uses one upstream source session, bounded upstream memory and the supplied private spill location. It does not copy the canonical database or rerun preprocessing.
+A global pressure-unit default is allowed only when authenticated source metadata establishes it; otherwise leave it null. Select calendar-day `qualified` only when that source evidence is available; `pending` remains supported.
+
+Use the existing source products in place. Canonical database hashing is potentially long; the recorded earlier full-database pass took about 15 minutes. The command uses one upstream source session, bounded upstream memory and the supplied private spill location. Verify free scratch capacity on that volume first: internal-disk spill exhausted its configured capacity during qualification. It does not copy the canonical database or rerun preprocessing. Preserve failed attempts; an execution resource failure is not a failed population-coverage test.
+
+The bounded projection streams 16 disjoint patient-hash partitions, retaining every raw encounter row for each key before consensus and study selection. It retains only the agreed study scope after consensus and checks mapped-key coverage in SQL before Python materialization, rather than accumulating all historical candidate fields. It reconciles raw row totals and the bound on covered keys, keeping the 2,816-MiB RAM cap and at most 64 GiB of scratch. It prints completed projection partitions; that is substage progress, not overall preparation completion. A partition failure count is not a full-population total. Select private output storage with enough space for the new typed input too; the Mini's internal disk was nearly full.
+
+The observed raw vocabulary includes `UNKNOWN`. Its explicit `NA` mapping retains uncertain eligibility and becomes a true missing setting in the typed input. Review every other source setting code; do not treat a named unknown as a confirmed nonacute encounter.
 
 ```bash
 make triangulation-prepare \
