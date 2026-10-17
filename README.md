@@ -119,6 +119,11 @@ Reuse accepted products, pinned readers and existing captured evidence. Preserve
 `data/raw/full_db.rds` as a historical comparator. Do not substitute it for a
 qualified current study input.
 
+The active mapper profile now binds merged upstream `751d794` and its exact
+module hashes. Use its separately qualified installed environment with
+`PREP_PYTHON`; see [pin adoption and historical reproduction](docs/CLINICAL_RUN_HANDOFF.md).
+Existing accepted products retain their original producer/runtime identities.
+
 ```bash
 make prepare PREP_PYTHON="/existing/environment/bin/python" \
   SOURCE_CONFIG="/private/reviewed-source-config.json" OUTPUT="/private/fresh-output"

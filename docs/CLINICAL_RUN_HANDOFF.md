@@ -1,3 +1,39 @@
+# Upstream mapper pin adoption — 2026-10-17
+
+The owner approved adopting the corrected mapper after upstream
+[PR28](https://github.com/reblocke/trinetx-preprocessing/pull/28) merged at
+`751d794e0a277f72ced2e2b5b48246858f4dcf9b`.
+`config/common_index_mapping.example.json` pairs that revision with mapper SHA-256
+`0e1036b94cce9f7e753c57f5c860997df41adc313ba440c7b13c4897bab5844e`.
+The other four shared-reader hashes are unchanged. This revision/hash object is
+the mapper dependency lock; this repository has no Python dependency lockfile.
+
+The actual merged noneditable wheel and active child profile passed the exact-pin
+gate and all 28 retained mapper E2E cases on the Mini and Air. Mixed old/new pins,
+unreviewed revisions and forged hashes were rejected. The 16 existing preparation
+checks passed with the Mini's qualified R library activated. An initial shell
+without that library failed to load `jsonlite`; its log was preserved. Commands,
+fixture/runtime identities, products and hash readbacks remain in the private
+engineering handoff. No private mapping, extraction or model run was performed.
+
+For future mapping, choose the new isolated installed runtime through
+`PREP_PYTHON` and a separately reviewed source configuration matching the active
+profile. Preserve existing configurations and use a fresh product destination.
+This engineering qualification does not reissue acceptance for any existing
+clinical product or authorize regenerating it.
+
+Historical accepted products remain bound to mapper `72c91a2`, their original
+configuration and qualified runtime. Reproduce that route with the preserved
+child source at `2fdc05abba5728e6aa557b7e0f10896bb0f298f4` or its recorded clinical
+release checkout; use the original runtime and receipts. Do not run the historical
+configuration through the new adapter or replace its runtime in place. The current
+gate intentionally rejects crossed revision/hash pairs. Saved report bundles
+retain their own versioned report-source authority.
+
+The scientific definitions, source products, original encounter scope, BMI policy,
+R analysis/rendering code and readiness states are unchanged. The dated release
+records below retain their original implementation and acceptance scopes.
+
 # Observed-population report revision — 2026-10-16
 
 The approved version-5 workflow retains the accepted original-list input,

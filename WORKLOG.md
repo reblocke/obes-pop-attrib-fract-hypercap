@@ -1,5 +1,38 @@
 # Worklog
 
+## 2026-10-17 — Adopt the reviewed merged upstream mapper pin
+
+Owner approval covers upstream PR28 merge, mapper pin adoption and GitHub
+reauthentication. The active mapping configuration now pairs merged upstream
+`751d794e0a277f72ced2e2b5b48246858f4dcf9b` with mapper SHA-256
+`0e1036b94cce9f7e753c57f5c860997df41adc313ba440c7b13c4897bab5844e`.
+Only those two configuration fields changed. The other four module hashes and
+all transformation, selection, R analysis and rendering code are unchanged.
+
+Before the change, the actual new installed wheel was rejected by the historical
+profile. After the change, the real child gate accepts the reviewed pair and
+rejects crossed revisions, forged hashes and an unreviewed revision. All 28
+existing retained mapper E2E cases passed on both hosts with noneditable wheels
+and no PYTHONPATH. The rebuilt wheel matches the upstream hosted artifact, and
+all 122 package modules match the actual merged source.
+
+Commands: `verify_calendar_covariates_e2e.py --require-installed`, its read-only
+`--verify` mode, the retained exact-pin qualification driver, and
+`python -m unittest discover -s tests -p 'test_preparation*.py'`.
+The first preparation check used an unactivated R library and failed on missing
+`jsonlite`. Activating the existing qualified Mini R library resolved that setup
+issue; all 16 checks passed. Both logs are preserved. No package was installed
+into a qualified clinical runtime.
+
+Historical source/configuration/runtime and accepted products remain unchanged.
+Public documentation now distinguishes the active profile from historical
+reproduction. The private engineering handoff retains commands, source/fixture/
+runtime identities and artifact hashes. No clinical job, source extraction,
+product regeneration or readiness promotion is part of this update.
+
+Publication and source synchronization are recorded in the delivery handoff;
+the existing child repository has no hosted checks configured.
+
 ## 2026-05-07 08:31 MDT - Refactor obesity/HRF PAF repository setup
 
 Task completed:

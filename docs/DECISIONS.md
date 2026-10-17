@@ -1,3 +1,17 @@
+## Corrected mapper dependency adoption — confirmed 2026-10-17
+
+The owner reviewed and approved the mapper pin update after upstream PR28.
+Advance the active mapping example's revision and exact mapper hash together to
+merged `751d794e0a277f72ced2e2b5b48246858f4dcf9b`. Keep the strict installed-module
+gate. The four shared-reader hashes, study controller, source policies and R
+analysis remain unchanged. The new installed pair passed retained engineering
+qualification on both machines; this supplies no new clinical acceptance.
+
+Preserve the earlier `72c91a2` producer and original child source/runtime for
+historical products. Old configurations are not migrated in place or silently
+accepted by the new adapter. Keep private inputs, products, manifests, receipts
+and readiness states unchanged. See [operational handoff](CLINICAL_RUN_HANDOFF.md).
+
 ## Observed-population reporting decision — confirmed 2026-10-16
 
 - Primary gas standardization now uses each outcome-observed model population,
