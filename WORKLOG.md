@@ -1183,3 +1183,21 @@ The interrupted Quarto job left an untracked `.rmarkdown` intermediate. Preserve
 it with its hash in the aborted ignored review directory and added the matching
 report-intermediate ignore rule to prevent accidental staging of generated
 aggregate report text. Existing source/data files were not removed.
+
+### Release gate completed
+
+The corrected saved-run render `20261017T171928-47516` completed both HTML/PDF
+reports with zero clinical input reads or refits. Complete table/coefficient/
+covariance coverage passes. Automated export checks pass for 43 scientific pages,
+3,337 audit pages, 1,612 figure sets and all 18 JPG candidates. The scoped visual
+receipt records every scientific page overview, five native scientific pages,
+nine native audit pages, the three primary alternatives, supporting/scenario
+figures and RFS flow/entry/evidence displays. It does not assert individual human
+inspection of every native audit page or atlas figure. F1-A remains preferred.
+
+All 74 receipt-bound acceptance checks pass in fresh
+`kernel-tests-20261017T173804-64668`; the deliberately absent-input negative test
+retains its expected warning. The actual source/render checks and restricted
+clinical review remain distinct from artificial numerical tests. PR #14 releases
+the implemented correction with clinical estimation pending until the merged
+revision is synchronized to the Mini. Generated artifacts remain ignored.
