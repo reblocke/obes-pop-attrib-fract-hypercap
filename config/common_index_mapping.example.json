@@ -3,13 +3,13 @@
   "source_policy_id": "unadjusted_pco2_v1",
   "base_field_encoding": "typed_v1",
   "source_identity": "PENDING_ACCEPTED_PRODUCER_VARIANT_AND_SNAPSHOT",
-  "upstream_revision": "72c91a21d4ff65aadca970cf60a168971a8c4a6e",
+  "upstream_revision": "751d794e0a277f72ced2e2b5b48246858f4dcf9b",
   "upstream_reader_sha256": {
     "encounters.reader": "f821b6792613e94e386b02bfb2c395a76ac4a974f7fcce852e492e1d7d06a4ae",
     "combined_preprocessing.cohort_source": "414eaef8624575f77a4ed471d46816634cf8ed668b20fbefadbd26f396e4fcbe",
     "combined_preprocessing.cohort_source_calendar_population": "899d6564e42dabb8350693a2879e757fb8982cb65b25fd4504ee1ad206f62b24",
     "combined_preprocessing.cohort_source_calendar_transport": "21a5a8d78c1620c31d2e5b61785458447390efc351e96dd92039f115866c1662",
-    "encounters.calendar_covariates": "1301f47fb89be5a95f2f2a217a17942ebedc59c1fc963db5a2f202d561227895"
+    "encounters.calendar_covariates": "0e1036b94cce9f7e753c57f5c860997df41adc313ba440c7b13c4897bab5844e"
   },
   "canonical_source": {
     "database": {
