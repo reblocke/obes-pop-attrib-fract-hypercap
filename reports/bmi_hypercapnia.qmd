@@ -3,6 +3,7 @@ title: "BMI and documented hypercapnia in acute care"
 subtitle: "Expanded scientific report for investigator review"
 format:
   html:
+    html-table-processing: none
     toc: true
     toc-depth: 2
     embed-resources: true

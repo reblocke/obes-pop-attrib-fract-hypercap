@@ -151,7 +151,7 @@ bmi_grouped_report <- function(d,caption,groups,record=TRUE) {
   if(!nrow(d))return(bmi_report_table(d,caption,record=record))
   groups<-intersect(groups,names(d));key<-do.call(paste,c(d[groups],sep=" | "))
   for(ix in split(seq_len(nrow(d)),factor(key,levels=unique(key)))) {
-    cat("\n**",paste(paste(groups,as.character(d[ix[1],groups]),sep="="),collapse="; "),"**\n\n",sep="")
+    cat("\n**",paste(paste(groups,as.character(d[ix[1],groups]),sep="="),collapse=";  \n"),"**\n\n",sep="")
     if(record)bmi_coverage(d[ix,,drop=FALSE],caption)
     x<-d[ix,setdiff(names(d),groups),drop=FALSE]
     absent<-names(x)[vapply(x,function(v)all(is.na(v)),logical(1))]

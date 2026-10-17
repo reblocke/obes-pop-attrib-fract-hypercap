@@ -2,6 +2,7 @@
 title: "BMI–hypercapnia: complete construction and model audit"
 format:
   html:
+    html-table-processing: none
     toc: true
     toc-depth: 3
     embed-resources: false
@@ -42,6 +43,7 @@ figure<-function(id) {
   if(knitr::is_latex_output())return(bmi_figure(id,review,captions))
   # Keep the complete audit portable with its adjacent vector-figure directory.
   markup<-capture.output(bmi_figure(id,review,captions))
+  markup<-gsub("<img ","<img loading=\"lazy\" ",markup,fixed=TRUE)
   cat(gsub(paste0(review,"/"),"",markup,fixed=TRUE),sep="\n")
 }
 ```

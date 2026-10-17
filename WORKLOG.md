@@ -1043,3 +1043,29 @@ status, and does not shift other outcomes into the wrong panel. Root flow boxes
 use explicit source-entry labels. All six relationship alternatives and both
 secondary figures were inspected in an aggregate-only key-figure preview before
 restarting the complete audit export; A remains preferred, with B more compressed.
+
+The complete artificial export produced 1,985 figure sets; the 57-page scientific
+PDF has no native text-geometry or replacement-glyph issues. Its Methods page was
+inspected, and all eight key PNGs exactly match the inspected preview hashes.
+The audit HTML converter reached a measured 6.8-GB physical footprint while
+Quarto reparsed raw HTML tables. The installed Quarto schema/filter confirms
+`html-table-processing: none` bypasses that pass. Stopped only that converter;
+the parent retained complete figures and continued the audit PDF. This failed
+HTML attempt remains recorded. The correction will use aggregate-only
+`render-reports`, including portable lazy-loaded audit SVGs; no refit is needed.
+The retained integration checks were updated for source-group figure paths.
+
+Full artificial export QC detected 19 figure issues and two clipped audit group
+headings. The affected ECDFs had a single stored coordinate and were blank under
+geom_line, with an automatically expanded probability axis and a clipped endpoint
+tick. The display now uses steps/points, a [0,1] probability scale and an explicit
+single-value axis; stored coordinates are unchanged. F2 uses fewer y ticks in
+short panels. Multi-field audit group headings break between fields. A targeted
+preview checks all previously failing figure IDs before the next full export.
+No clinical estimation has occurred and no failed visual receipt is promoted.
+
+Removed the obsolete optional historical coefficient-equality comparison from the
+aggregate review command: separate RFS populations and bases intentionally change
+models. The command reviews one saved run and records its own source hash. Prior
+index/clinical-field equality remains authenticated preparation evidence. This
+engineering cleanup changes no estimation equation or saved result.

@@ -233,9 +233,9 @@ bmi_export_population_figures <- function(bundle,output) {
       }
       label<-a$policy_totals;label<-label[label$model_id==z$model_id[1]&label$reference_id==z$reference_id[1]&label$method==z$method[1]&label$policy_id==z$policy_id[1],]
       top<-bmi_bind(list(data.frame(bmi=(z$bin_low+z$bin_high)/2,p=z$mean_observed,scenario="Observed BMI"),data.frame(bmi=(z$bin_low+z$bin_high)/2,p=z$mean_shifted,scenario="Shifted BMI")))
-      f2[[length(f2)+1L]]<-ggplot2::ggplot(top,ggplot2::aes(bmi,p,linetype=scenario,shape=scenario))+ggplot2::geom_line(linewidth=.5,na.rm=TRUE)+ggplot2::geom_point(size=1.7,na.rm=TRUE)+
+      f2[[length(f2)+1L]]<-ggplot2::ggplot(top,ggplot2::aes(bmi,p,linetype=scenario,shape=scenario))+ggplot2::geom_line(linewidth=.5,na.rm=TRUE)+ggplot2::geom_point(size=1.7,na.rm=TRUE)+ggplot2::scale_y_continuous(limits=c(0,1),breaks=c(0,.5,1))+
         ggplot2::labs(title=bmi_outcome_label(o),subtitle=paste0("Model/reference N ",label$n_model,"/",label$n_reference,"; shifted ",sprintf("%.1f%%",label$pct_shifted),"\np0=",bmi_number(label$p_observed,4),"; pg=",bmi_number(label$p_shifted,4)),x="Original BMI (kg/m2)",y="Mean probability",linetype=NULL,shape=NULL)+bmi_theme()
-      f2[[length(f2)+1L]]<-ggplot2::ggplot(z,ggplot2::aes((bin_low+bin_high)/2,contribution_per1000))+ggplot2::geom_hline(yintercept=0,colour="grey45")+ggplot2::geom_col(ggplot2::aes(width=.8*(bin_high-bin_low)),fill="grey35")+ggplot2::geom_errorbar(ggplot2::aes(ymin=conf_low_per1000,ymax=conf_high_per1000),width=1)+
+      f2[[length(f2)+1L]]<-ggplot2::ggplot(z,ggplot2::aes((bin_low+bin_high)/2,contribution_per1000))+ggplot2::geom_hline(yintercept=0,colour="grey45")+ggplot2::geom_col(ggplot2::aes(width=.8*(bin_high-bin_low)),fill="grey35")+ggplot2::geom_errorbar(ggplot2::aes(ymin=conf_low_per1000,ymax=conf_high_per1000),width=1)+ggplot2::scale_y_continuous(n.breaks=3)+
         ggplot2::labs(title=paste0("Total change ",bmi_number(label$difference_per1000,3)," /1,000"),subtitle=paste0("PIF ",paste0(bmi_number(100*label$PIF,3),"%")," (",bmi_number(100*label$PIF_low,3),", ",bmi_number(100*label$PIF_high,3),")"),x="Original BMI (kg/m2)",y="Contribution /1,000 reference")+bmi_theme()
     }
     add("F2",function()bmi_draw_grid(f2,2,config$policies[[1]]$label,"Paired predictions and signed original-BMI contributions"),195,
@@ -285,8 +285,14 @@ bmi_export_population_figures <- function(bundle,output) {
       curvechunks<-split(reps,ceiling(seq_along(reps)/4))
       for(j in seq_along(curvechunks)) {
         z<-kinddata[kinddata$population_id %in% curvechunks[[j]],,drop=FALSE];if(!nrow(z))next
-        chart<-ggplot2::ggplot(z,ggplot2::aes(x,y))+ggplot2::geom_line(linewidth=.5)+ggplot2::facet_wrap(~population_id,ncol=2,labeller=ggplot2::as_labeller(function(x)bmi_wrap(bmi_population_label(x),28)))+
+        chart<-ggplot2::ggplot(z,ggplot2::aes(x,y))
+        if(kind=="ecdf") {
+          chart<-chart+ggplot2::geom_step(linewidth=.5)+ggplot2::geom_point(size=.6)+ggplot2::scale_y_continuous(limits=c(0,1),breaks=c(0,.5,1))
+          if(length(unique(z$x))==1L)chart<-chart+ggplot2::scale_x_continuous(breaks=z$x[1],expand=ggplot2::expansion(add=1))
+        }else chart<-chart+ggplot2::geom_line(linewidth=.5)
+        chart<-chart+ggplot2::facet_wrap(~population_id,ncol=2,labeller=ggplot2::as_labeller(function(x)bmi_wrap(bmi_population_label(x),28)))+
           ggplot2::labs(title=paste(v,kind),subtitle=if(kind=="kde")"Gaussian; shared source bandwidth; weighted by observed population mass"else"Observed-value ECDF on persisted common grid",x=axis_label,y=kind)+bmi_theme()
+        if(kind=="ecdf")chart<-chart+ggplot2::theme(plot.margin=grid::unit(c(3,8,3,3),"mm"))
         add(paste0("F3-",gsub("[^a-zA-Z0-9]","-",v),"-",kind,"-",j),local({chart<-chart;function()print(chart)}),185,paste("F3.",v,kind,"across named stages; full coordinate export and normalization metadata in distribution_curves."),"descriptive atlas")
       }
     }
