@@ -1,3 +1,24 @@
+# Historical analysis index
+
+The active workflow is the [observed-population curve report](../reports/bmi_hypercapnia.qmd)
+and its [complete audit](../reports/bmi_hypercapnia_audit.qmd). Current commands
+accept only version-5 bundles. The command descriptions below record historical
+interfaces; they are not promises of compatibility with the current launcher.
+
+## Version-4 curve / MAR–MNAR reports, preserved 2026-10-16
+
+The unchanged source is retained at Git commit `1626a6db8ac5d347df7f5c0444b5bcac755ea457`
+(clinical analysis release `f18d383`). The private clinical run
+`curve-analyze-20261016T160703-17017` and its hashed bundle remain immutable.
+It includes the earlier full-C gas projections and MNAR scenarios. These are
+superseded scientific outputs; the current renderer rejects them rather than
+changing their labels. The new observed-population run will retain its own
+identity and compare unchanged models/cohorts and observed scenarios against
+that historical bundle. Earlier visual-QC limitations are documented in the
+current handoff; historical receipts are not overwritten.
+
+## Earlier archive index (historical command descriptions)
+
 # Runnable historical analyses and unchanged originals
 
 The primary analysis is [the patient-level one-unit BMI shift report](../reports/bmi_hypercapnia_triangulation.qmd). Historical tracks retain distinct populations/outcomes/counterfactuals and must not supply its estimates.

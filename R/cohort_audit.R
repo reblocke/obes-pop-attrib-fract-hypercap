@@ -29,9 +29,11 @@ bmi_bind <- function(x) {
 }
 bmi_config <- function(path = "config/bmi_hypercapnia_analysis.json") {
   x <- jsonlite::read_json(path, simplifyVector = FALSE)
-  if (!identical(x$analysis_id, "bmi_hypercapnia_curve_audit_v1") || x$bundle_schema != 4 ||
+  if (!identical(x$analysis_id, "bmi_hypercapnia_observed_curve_audit_v2") || x$bundle_schema != 5 ||
       x$population_scope_id != "original_selected_encounters_v1" || x$source_policy_id != "unadjusted_pco2_v1" ||
       x$bmi_policy_id != "available_encounter_or_prior_bmi_v1") stop("Unreviewed analysis/source/population policy")
+  if (!identical(x$standardization_policy,"outcome_observed_v1") || !identical(x$mnar_enabled,FALSE)) stop("Full-cohort MAR/MNAR projections are superseded")
+  if (any(vapply(x$policies,function(p)!identical(p$target,"model_observed"),logical(1)))) stop("Policies must retain the model-observed population")
   for (name in c("quantile_type", "grid_step", "bmi_bin_width", "chunk_size", "ecdf_grid_size", "kde_min_n", "kde_min_distinct", "sparse_n", "sparse_events")) {
     if (length(x[[name]]) != 1 || !is.numeric(x[[name]]) || !is.finite(x[[name]]) || x[[name]] <= 0) stop("Invalid config: ", name)
   }

@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 source("tests/bmi_curve_checks.R")
-stopifnot(length(checks)==65)
+stopifnot(length(checks)==73)
 results<-list()
 for(id in names(checks)) {
   err<-tryCatch({checks[[id]]();NULL},error=function(e)e)
@@ -10,4 +10,4 @@ for(id in names(checks)) {
 r<-bmi_bind(results);dir.create("artifacts/triangulation/curve-refactor-tests",recursive=TRUE,showWarnings=FALSE)
 utils::write.csv(r,"artifacts/triangulation/curve-refactor-tests/acceptance-results.csv",row.names=FALSE)
 if(any(!r$passed))stop(sum(!r$passed)," acceptance checks failed; results retained")
-message("All 65 acceptance checks passed; artificial data only")
+message("All 73 acceptance checks passed; artificial data only")

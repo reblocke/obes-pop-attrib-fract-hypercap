@@ -1,9 +1,18 @@
-# BMI and documented hypercapnia probability
+# BMI and documented hypercapnia
 
-An R/Quarto analysis of how documented index-encounter hypercapnia varies across
-BMI in a selected TriNetX-derived acute-care cohort. The main displays combine
-flexible probability curves, usable-evidence availability and BMI frequencies.
-Named BMI-scenario potential impact fractions (PIFs) are secondary summaries.
+**Current revision: observed-population curves and expanded scientific/audit reports.**
+Gas curves and one-unit BMI-shift scenarios describe patients with the corresponding
+usable outcome; ICD estimates use known diagnosis capture. Full-cohort MAR/MNAR
+projections are superseded and remain in the frozen historical run. IPW is deferred.
+Evidence availability and BMI frequencies still describe C. Timing, matched-definition
+and linear-form checks remain in the expanded Results.
+
+The scientific report now has paper-style Introduction, detailed Methods, expanded
+Results (including all primary coefficients and key diagnostics), and draft conclusion
+wording. The complete audit retains every variable/model/covariance/failure entry,
+with verified sharing of identical summaries. Both render from explicit version-5
+saved aggregates; old bundles cannot be relabeled. The refreshed clinical results
+remain pending until the new merged-code run and its review receipts are complete.
 
 Two reports share one immutable aggregate bundle:
 
@@ -36,14 +45,28 @@ CSV/RDS aggregates, F0–F5 exports, the three F1 alternatives and `figures/gall
 A failed render preserves estimation: rerender the printed run rather than refit.
 
 ```bash
-make render RUN="artifacts/triangulation/<exact-version-4-run>"
-make render-html RUN="artifacts/triangulation/<exact-version-4-run>"
-make render-pdf RUN="artifacts/triangulation/<exact-version-4-run>"
+make render RUN="artifacts/triangulation/<exact-version-5-run>"
+make render-html RUN="artifacts/triangulation/<exact-version-5-run>"
+make render-pdf RUN="artifacts/triangulation/<exact-version-5-run>"
 ```
 
 Renders consume saved aggregates only and create fresh review directories.
 Figure edits do not repeat estimation. Estimator/source/configuration changes
 require a new run; hashes prevent silent reuse. HTML/PDF renders run sequentially.
+
+Review the saved numerical identities and prepare export checks with:
+
+```bash
+Rscript scripts/review_bmi_run.R "artifacts/triangulation/<exact-version-5-run>"
+python3 scripts/check_report_exports.py "artifacts/triangulation/<run>/reviews/<review>"
+```
+
+The numerical command optionally accepts a second historical run for an
+authenticated comparison of unchanged models/cohorts and observed scenarios.
+The export command uses an existing Python with Pillow and Poppler's `pdftotext`
+and `pdftoppm`. It checks page bounds, symbols and formats, then prepares page
+overviews and figure sheets. It does not certify manual visual or scientific
+review; record those checks separately in the review directory.
 
 After actual figure/page inspection, run the acceptance checks against that review:
 
@@ -51,7 +74,7 @@ After actual figure/page inspection, run the acceptance checks against that revi
 make test BMI_TEST_REVIEW="artifacts/triangulation/<run>/reviews/<review>"
 ```
 
-The 65-check runner preserves a result ledger under ignored artifacts. Checks
+The 73-check runner preserves a result ledger under ignored artifacts. Checks
 requiring rendered reports or visual inspection fail explicitly when their actual
 receipts are absent. Source-adapter tests use Python; one optional SQL case needs
 the existing upstream Python environment. `PREP_PYTHON` selects it. No patient data
@@ -69,7 +92,7 @@ statistical imputation; age retains the birth-year proxy.
 Q contains resolved indexes; C is Q complete for inherited BMI, age, sex,
 race/ethnicity and region. Models use a natural BMI spline with knots at C's
 5th/35th/65th/95th percentiles, linear age and inherited categorical references.
-Gas curves standardize to C. ICD curves use C_icd with established diagnosis
+Gas curves standardize to their outcome-observed model populations. ICD curves use C_icd with established diagnosis
 capture, including positive and negative patients. Denominators are printed.
 
 Arterial hypercapnia is valid ordinary PCO2 >=45 mm Hg; combined evidence accepts
@@ -82,8 +105,7 @@ The default secondary scenario reduces **observed BMI >30 by exactly one**, with
 no floor or reselection. PIF = 1 - shifted/observed-BMI modeled probability; it is
 population-dependent. Signed original-band contributions use paired patient
 predictions and reconcile exactly. Curves multiplied by marginal BMI densities
-are not used to obtain adjusted PIF. The separate MAR/MNAR projections require
-assumptions beyond source acceptance. These are documented index-encounter
+are not used to obtain adjusted PIF. Full-cohort MAR/MNAR projections remain historical only; no IPW is applied. These are documented index-encounter
 probabilities, not incidence or demonstrated effects of weight loss.
 
 ## Restricted-data execution
@@ -105,7 +127,7 @@ make analyze INPUT="/private/study-input.rds" MANIFEST="/private/reviewed-manife
 ```
 
 The paths are placeholders, not discovered clinical inputs. Clinical estimation
-requires the clean merged Mini checkout. Preselected inputs now require a new
+requires the clean merged Mini checkout. Preselected inputs require a
 hash-bound **pre-index cohort-audit companion**, which is generated from mapped
 candidate covariates. The older selected-index input and its passing source checks
 alone cannot supply the full new audit. Qualification failures retain a partial
@@ -116,8 +138,9 @@ On 2026-10-16, the owner authorized acceptance and clinical execution; fresh
 preflight and one clinical estimation completed on the clean merged Mini checkout
 at `f18d383` (PR #7). All 21 registered positions are retained: 20 fits succeeded,
 and constant ICD capture availability is explicitly not fitted. Aggregate
-numerical reconciliation passes. Both clinical HTML/PDF reports and all 153
-figure exports pass recorded QC.
+numerical reconciliation passes. The version-4 clinical reports and 153 figure exports are historical. Their original
+QC receipt is preserved; crossed flow connectors and detached captions identified
+afterward are being repaired in the current revision.
 Investigator numerical/scientific review remains pending. Exact run paths,
 hashes and protected receipts are recorded in ignored release storage and
 WORKLOG. Read the

@@ -3,7 +3,7 @@ title: "BMI–hypercapnia: complete construction and model audit"
 format:
   html:
     toc: true
-    toc-depth: 2
+    toc-depth: 3
     embed-resources: true
     css: bmi_report.css
   pdf:
@@ -13,8 +13,10 @@ format:
     mainfont: Arial
     papersize: a4
     geometry: margin=10mm
+    toc: true
+    number-sections: true
     header-includes:
-      - \usepackage{longtable,booktabs,array}
+      - \usepackage{longtable,booktabs,array,graphicx}
 execute:
   echo: false
   warning: true
@@ -33,8 +35,8 @@ load_common_input<-load_triangulation_input<-bmi_load_input<-fit_bmi_model<-fit_
 bundle<-bmi_read_bundle(run);a<-bundle$analysis
 knitr::opts_chunk$set(dev=if(knitr::is_latex_output())"cairo_pdf"else"png",fig.width=7,fig.height=8)
 captions<-utils::read.csv(file.path(review,"figures","captions.csv"),stringsAsFactors=FALSE)
-page<-function()if(knitr::is_latex_output())cat("\n\\newpage\n")
-figure<-function(id){p<-file.path(review,"figures",paste0(id,".png"));if(file.exists(p)){if(startsWith(p,paste0(root,"/")))p<-paste0("../",substring(p,nchar(root)+2));cat("\n![",id,"](",p,"){width=100% fig-alt=\"",id,"; full definitions are in the captions and linked aggregate tables.\"}\n\n",sep="");if(exists("captions")){idx<-match(id,captions$figure_id);if(!is.na(idx)){tabs<-strsplit(captions$source_tables[idx],";",fixed=TRUE)[[1]];cat("Aggregate tables: ",paste(paste0("[",tabs,"](../../",tabs,".csv)"),collapse=", "),".\n\n",sep="");cat(captions$caption[idx],"\n\n")}}}}
+page<-bmi_page
+figure<-function(id)bmi_figure(id,review,captions)
 ```
 
 ```{r}
@@ -47,7 +49,7 @@ cat("Run: ",bundle$manifest$run_id,". Numerical review: ",bundle$manifest$numeri
 
 ## Coverage and provenance
 
-Every required population, variable and model is indexed below. Missing, pending, failed, empty and not-applicable states are explicit. No patient identifiers, exact dates, individual predictions or model frames are exported. CSV/RDS tables retain full numerical precision. Distribution/prediction coordinates are exported in full; their complete plotted ranges are displayed here rather than printing every coordinate as a separate table row.
+Every required population, variable and model is indexed below. Identical stage summaries are shared only after exact equality of all nonidentifier fields, with an explicit stage-to-display mapping; this does not assert identical patient membership. Missing, pending, failed, empty and not-applicable states are explicit. No patient identifiers, exact dates, individual predictions or model frames are exported. CSV/RDS tables retain full numerical precision. Distribution/prediction coordinates are exported in full; their complete plotted ranges are displayed here rather than printing every coordinate as a separate table row.
 
 ```{r}
 #| label: coverage-index
@@ -79,7 +81,7 @@ Identifiers receive cardinality and linkage summaries. Date values are protected
 #| label: full-stage-atlas-tables
 #| results: asis
 for(t in c("variable_summary","category_counts","missingness_patterns","comissingness")) {
- cat("\n### ",gsub("_"," ",t),"\n\n",sep="");bmi_grouped_report(a[[t]],t,groups=if("variable_id" %in% names(a[[t]]))"variable_id"else"population_id")
+ cat("\n### ",gsub("_"," ",t),"\n\n",sep="");if("variable_id" %in% names(a[[t]]))bmi_profile_report(a[[t]],t)else bmi_grouped_report(a[[t]],t,groups="population_id")
 }
 ```
 
@@ -115,18 +117,18 @@ bmi_report_table(a$linear_spline_comparison,"Same-sample linear-versus-spline co
 
 ## Relationship, support and scenario reconciliation
 
-Curves are policy-independent. Gas curves standardize to C; ICD curves use C_icd with known diagnosis capture. Standardization over untested patients requires a transport/MAR interpretation beyond technical source acceptance. No cross-model difference test is inferred from independent interval overlap.
+Curves are policy-independent. Gas curves and scenarios standardize to their outcome-observed training populations; ICD curves use C_icd with known diagnosis capture. Observation models describe evidence availability over C. No physiological outcomes are projected to untested patients. Full-cohort MAR/MNAR projections remain only in the frozen historical run. No cross-model difference test is inferred from independent interval overlap.
 
 ```{r}
 #| label: audit-relationships
 #| results: asis
-for(id in c("F1-A","F1-B","F1-C","F2")){figure(id);page()}
-for(t in c("fixed_bmi_contrasts","prediction_support","policy_registry","policy_totals","policy_contributions","policy_contribution_covariance","implied_missing_probabilities")) {
+for(id in c("F1-A","F1-B","F1-C","F1-detail","F2")){figure(id);page()}
+for(t in c("fixed_bmi_contrasts","prediction_support","policy_registry","policy_totals","policy_contributions","policy_contribution_covariance")) {
  cat("\n### ",gsub("_"," ",t),"\n\n",sep="")
  if(t=="policy_contribution_covariance"&&nrow(a[[t]])){
-  z<-a[[t]];groups<-c("model_id","reference_id","policy_id","method","r","gradient_multiplier");key<-do.call(paste,c(z[groups],sep=" | "))
+  z<-a[[t]];groups<-c("model_id","reference_id","policy_id","method");key<-do.call(paste,c(z[groups],sep=" | "))
   for(ix in split(seq_len(nrow(z)),factor(key,levels=unique(key)))){cat("\n**",key[ix[1]],"**\n\n",sep="");bmi_covariance_report(z[ix,],"Complete original-band contribution covariance","bin1","bin2","covariance")}
- }else if(t %in% c("policy_contributions","implied_missing_probabilities"))bmi_grouped_report(a[[t]],t,groups=c("model_id","reference_id","policy_id","method","r","gradient_multiplier"))
+ }else if(t %in% c("policy_contributions","implied_missing_probabilities"))bmi_grouped_report(a[[t]],t,groups=c("model_id","reference_id","policy_id","method"))
  else bmi_report_table(a[[t]],t,keys=intersect(c("model_id","reference_id"),names(a[[t]])))
 }
 for(p in list.files(file.path(review,"figures"),pattern="^F5-.*\\.png$",full.names=TRUE)){figure(tools::file_path_sans_ext(basename(p)));page()}

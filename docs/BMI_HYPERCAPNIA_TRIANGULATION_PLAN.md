@@ -1,3 +1,46 @@
+# Observed-population BMI curves and expanded scientific/audit reports
+
+## Current implementation authority — 2026-10-16
+
+The owner approved this revision and its complete clinical refresh, including
+review, commit, push, PR and merge before clinical execution on the Mini.
+
+1. **Estimands:** gas curves, fixed contrasts and paired one-unit scenarios use
+   each registered outcome-observed training population; ICD uses known capture.
+   Observation curves and BMI support describe C. Retain first-index/BMI/source/
+   spline/adjustment definitions and the 21-model registry. Timing, matched and
+   linear-form checks remain; no estimator selection. Full-cohort MAR/MNAR and
+   C40 outcome projections remain in the frozen historical run; no IPW.
+2. **Scientific report:** introduction, detailed Methods, expanded Results with
+   cohort/evidence, primary curves and contrasts, all primary coefficients and
+   key diagnostics, paired scenario contributions, observed-data sensitivities,
+   limitations and generated example conclusion wording. Aim for a readable
+   mini-paper; completeness takes precedence over a fixed page cap.
+3. **Complete audit:** logical ledger diagrams, all stage/variable profiles,
+   all models/coefficient/covariance/failure/diagnostic entries, full-range
+   coordinate plots and complete exports. Share identical summaries only after
+   exact equality, with explicit aliases (not inferred membership identity).
+4. **Figures/tables:** three F1 alternatives, separate outcome/availability
+   quantities, one shared frequency strip, full ranges plus a labeled 30–60
+   detail view. Fix crossed connectors, caption detachment, raw code labels and
+   arbitrary column fragmentation. Vector PDF, SVG/PNG/JPG and actual figure QC.
+5. **Identity:** schema 5, `bmi_hypercapnia_observed_curve_audit_v2`; unchanged
+   source contract. Old bundles reject; preserve frozen source/results/history.
+   Estimation once, then aggregate-only `make render RUN=...`.
+6. **Verification/release:** independent observed-reference predictions, unchanged
+   fitted models/samples, paired covariance and contribution identities, complete
+   table reconstruction, adverse cases, actual artificial HTML/PDF renders and
+   visual receipts. Review and merge, verify Mini checkout and source identities,
+   run once into a fresh directory, reconcile against the former fit and inspect
+   clinical exports. Keep source/execution/numerical/visual/scientific states separate.
+
+## Preserved historical implementation record (superseded targets)
+
+The following records the released version-4 workflow and its actual execution.
+Its full-C gas targets and MAR/MNAR methods are not current defaults. Original
+artifacts remain unchanged; the previous QC assessment is superseded by the
+current repair work for crossed connectors and detached captions.
+
 # BMI–hypercapnia curve and audit implementation plan
 
 Authority: implementation ticket dated 2026-10-16, based on 8735505, reconciled

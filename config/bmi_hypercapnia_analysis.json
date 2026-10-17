@@ -1,6 +1,6 @@
 {
-  "analysis_id": "bmi_hypercapnia_curve_audit_v1",
-  "bundle_schema": 4,
+  "analysis_id": "bmi_hypercapnia_observed_curve_audit_v2",
+  "bundle_schema": 5,
   "population_scope_id": "original_selected_encounters_v1",
   "bmi_policy_id": "available_encounter_or_prior_bmi_v1",
   "source_policy_id": "unadjusted_pco2_v1",
@@ -28,44 +28,17 @@
     40,
     45
   ],
-  "mnar_enabled": true,
-  "mnar_r": [
-    0.25,
-    0.5,
-    1,
-    2,
-    4
-  ],
-  "mnar_gradient_multiplier": [
-    0.5,
-    1,
-    2
-  ],
+  "mnar_enabled": false,
   "policies": [
     {
       "policy_id": "bmi_gt30_minus1_v1",
       "enabled": true,
       "threshold": 30,
       "transformation": "minus_one",
-      "target": "observed_and_common_reference",
+      "target": "model_observed",
       "label": "One-unit BMI reduction for observed BMI >30; no floor"
-    },
-    {
-      "policy_id": "cap30_v1",
-      "enabled": false,
-      "threshold": 30,
-      "transformation": "cap",
-      "target": "C",
-      "label": "BMI >30 set to 30"
-    },
-    {
-      "policy_id": "cap40_v1",
-      "enabled": false,
-      "threshold": 40,
-      "transformation": "cap",
-      "target": "C",
-      "label": "BMI >40 set to 40"
     }
   ],
-  "maxit": 25
+  "maxit": 25,
+  "standardization_policy": "outcome_observed_v1"
 }

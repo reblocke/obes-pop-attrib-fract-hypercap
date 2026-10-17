@@ -74,7 +74,7 @@ add("E10",function(){beta<-coef(m$fit);pred<-bmi_mean_prediction(m,ref,config);e
 })
 add("E11",function(){z<-standardize_policy_and_contributions(m,ref,"C",policy,config);near(sum(z$policy_contribution_covariance$covariance),z$policy_totals$variance_difference);stopifnot(any(z$policy_contribution_covariance$bin1!=z$policy_contribution_covariance$bin2 & abs(z$policy_contribution_covariance$covariance)>0))})
 add("E12",function(){d<-ref;d$bmi<-30.2;z<-standardize_policy_and_contributions(m,d,"outside",policy,config);stopifnot(z$prediction_support$n_transformed_outside==nrow(d),all(z$policy_contributions$bin_low==30),z$policy_totals$n_reference==nrow(d))})
-add("E13",function(){mar<-standardize_policy_and_contributions(m,ref,"C",policy,config,"mar");mnar<-standardize_policy_and_contributions(m,ref,"C",policy,config,"mnar",1,1);near(mar$policy_totals$PIF,mnar$policy_totals$PIF);near(mar$policy_totals$p_shifted,mnar$policy_totals$p_shifted)})
+add("E13",function(){stopifnot(all(a$policy_totals$method=="observed"),nrow(a$sensitivity_results)==0,nrow(a$implied_missing_probabilities)==0);expect_error(standardize_policy_and_contributions(m,ref,"C",policy,config,"mar"),"historical only")})
 add("E14",function(){before<-serialize(models,NULL);cfg<-config;cfg$policies[[1]]$threshold<-40;standardize_policy_and_contributions(m,ref,"C",cfg$policies[[1]],cfg);stopifnot(identical(before,serialize(models,NULL)),identical(ctx$members$Q$encounter_id,construct_cohort_and_memberships(raw)$members$Q$encounter_id))})
 # F. Full render assertions run against a real fresh fixture review; no success from source inspection alone.
 review<-Sys.getenv("BMI_TEST_REVIEW");review_ok<-nzchar(review)&&file.exists(file.path(review,"render-receipt.json"))
@@ -102,3 +102,28 @@ add("F11",function(){
  if(is.na(old_root))Sys.unsetenv("BMI_REPO_ROOT")else Sys.setenv(BMI_REPO_ROOT=old_root)
  cat("\n",file=file.path(path,"coefficients.csv"),append=TRUE);expect_error(bmi_read_bundle(path),"hash mismatch")
 })
+
+# G. Observed-reference refresh and auditable presentation.
+add("G01",function(){
+ for(id in names(models)) {
+  mm<-models[[id]];curves<-if(mm$row$family=="observation")a$observation_curves else a$probability_curves
+  z<-curves[curves$model_id==id,,drop=FALSE];expected<-if(mm$row$family=="observation")"C"else mm$row$training_population_id
+  stopifnot(all(z$reference_id==expected));if(is.null(mm$fit))next
+  d<-ctx$members[[expected]];d$bmi<-z$bmi[1];pred<-predict(mm$fit,if(mm$row$model_form=="spline")bmi_add_basis(d,basis)else d,type="response")
+  near(z$probability[1],mean(pred));near(z$n_reference[1],nrow(d))
+ }
+})
+add("G02",function(){stopifnot(nrow(ctx$members$M_any_gas)<nrow(ctx$members$C_any_gas_encounter));z<-a$policy_totals[a$policy_totals$model_id=="any_gas/encounter/spline",];near(z$n_reference,nrow(m$data));stopifnot(z$reference_id=="C_any_gas_encounter")})
+add("G03",function(){for(id in names(models)){mm<-models[[id]];if(is.null(mm$fit))next;c<-a$coefficients[a$coefficients$model_id==id & a$coefficients$status=="estimated",];near(c$estimate,coef(mm$fit));near(a$model_registry$n_model[a$model_registry$model_id==id],nrow(mm$data))}})
+add("G04",function(){bad<-a;bad$probability_curves$reference_id[1]<-"C";expect_error(validate_analysis_bundle(bad),"reference");path<-tempfile();dir.create(path);jsonlite::write_json(list(schema_version=4L,analysis_id="bmi_hypercapnia_curve_audit_v1"),file.path(path,"bundle_manifest.json"));expect_error(bmi_read_bundle(path),"Superseded");unlink(path,recursive=TRUE)})
+add("G05",function(){token<-paste0("model:abg/encounter;EMER|IMP,J96.02/",paste(rep("abcdef0123",7),collapse=""));stopifnot(identical(gsub("\\allowbreak{}","",bmi_break_table_tokens(token),fixed=TRUE),token));expect_error(bmi_figure("absent",tempdir(),data.frame()),"Required figure missing");stopifnot(grepl("Non-Hispanic White",bmi_category_labels("race_ethnicity","0",a$variable_dictionary)))})
+add("G06",function(){d<-a$category_counts;z<-bmi_unique_plot_profiles(d[d$variable_id=="sex",],setdiff(names(d),"population_id"));for(i in seq_len(nrow(z$index))){old<-d[d$variable_id=="sex"&d$population_id==z$index$population_id[i],];new<-z$data[z$data$population_id==z$index$representative_id[i],];old$population_id<-new$population_id;rownames(old)<-rownames(new)<-NULL;stopifnot(identical(old,new))}})
+add("G07",function(){if(!review_ok)stop("Actual render required");actual<-bmi_read_bundle(dirname(dirname(review)))$analysis
+ for(table in c("variable_summary","category_counts"))for(v in unique(actual[[table]]$variable_id)) {
+  stem<-file.path(review,"coverage",paste0(table,"-",gsub("[^A-Za-z0-9]","-",v)))
+  alias<-utils::read.csv(paste0(stem,"-aliases.csv"),stringsAsFactors=FALSE);shown<-utils::read.csv(paste0(stem,"-displayed.csv"),stringsAsFactors=FALSE,check.names=FALSE)
+  orig<-actual[[table]][actual[[table]]$variable_id==v,];stopifnot(setequal(alias$population_id,unique(orig$population_id)))
+  for(i in seq_len(nrow(alias))){x<-orig[orig$population_id==alias$population_id[i],];y<-shown[shown$population_id==alias$representative_id[i],];stopifnot(nrow(x)==nrow(y));for(col in setdiff(names(x),"population_id"))if(is.numeric(x[[col]]))near(x[[col]],y[[col]])else stopifnot(identical(as.character(x[[col]]),as.character(y[[col]])))}
+ }
+})
+add("G08",function(){if(!review_ok)stop("Actual render required");r<-jsonlite::read_json(file.path(review,"figures","figure-data-receipt.json"));stopifnot(isTRUE(r$same_saved_values));for(id in c("F1-A","F1-B","F1-C","F1-detail","F2"))for(ext in c("svg","pdf","png","jpg"))stopifnot(file.exists(file.path(review,"figures",paste0(id,".",ext))))})
