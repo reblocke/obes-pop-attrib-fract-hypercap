@@ -1,0 +1,19 @@
+requirement_id,requirement,evidence_path,status_rule
+RFS01,Three-valued membership and overlap,tests/run_rfs_tests.R,automated fixture assertion
+RFS02,Source-membership zero does not imply outcome absence,tests/run_rfs_tests.R,automated fixture assertion
+RFS03,Metadata and gas changes preserve index,tests/run_rfs_tests.R,automated fixture assertion
+RFS04,Exact-key metadata joins and unknown retention,tests/test_rfs_enrichment.py,existing preparation Python environment required
+RFS05,Separate main-group fitting and saved basis identities,tests/run_rfs_tests.R,configured registry and basis checks
+RFS06,Current-measurement sensitivity preserves selected BMI,tests/run_rfs_tests.R,authenticated selected-source chronology
+RFS07,Paired equations and full covariance decomposition,tests/bmi_curve_checks.R,independent artificial numerical checks
+RFS08,Explicit estimator failures and zero/no-change quantities,tests/bmi_curve_checks.R,independent adverse fixtures
+RFS09,Fixed-grid support and local sparsity,tests/run_rfs_tests.R,grid values and marginal coverage
+RFS10,No historical bundle relabeling or silent migration,tests/run_rfs_tests.R,schema rejection
+RFS11,Complete HTML and PDF table/model coverage,tests/check_rfs_render.R,actual render receipt required
+RFS12,Source outcome incorporation and threshold boundaries,rfs_outcomes.csv,qualified clinical aggregate audit required
+RFS13,Prior exact-key and clinical-field invariance,prior-input-reconciliation.csv,authenticated prior input and bundle required
+RFS14,Alternative-index count only,prior-input-reconciliation.csv,candidate mapping must cover membership
+RFS15,Clinical provenance and raw demographic cross-tab,bmi_provenance.csv,supported fields or explicit unavailable states
+RFS16,Figure native-size and grayscale inspection,visual-review-receipt.json,actual visual review required
+RFS17,Cross-project decomposition and diagram discrepancy,prior_run_reconciliation.csv,not assessed remains explicit until authenticated
+RFS18,Investigator scientific approval,scientific-review-receipt.json,owner scientific review required

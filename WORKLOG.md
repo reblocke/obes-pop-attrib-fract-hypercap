@@ -960,3 +960,52 @@ render/coverage assertions; model tests still use artificial data. The private
 `clinical-release-review-receipt.json` binds code, input, manifest, companion,
 bundle, numerical and visual evidence. The final documentation update changes no
 analysis/render source and requires no refit.
+
+## 2026-10-17 — RFS-stratified implementation checkpoint
+
+Baseline dd6b927, clean before starting codex/rfs-curve-audit. Implemented one
+fixed-index selection followed by historical source-membership partition; separate
+main-group spline bases and configured model registry; limited current-measurement
+and overlapping all-OBESITY supporting fits. Added schema-4 metadata enrichment
+from accepted products and schema-6 aggregate-only reports. Preserved original
+clinical fields/indexes, available-BMI policy and paired equations.
+
+Read-only Mini inspection found a clean preprocessing checkout and no competing
+analysis process. The accepted producer receipt names 252d4ae; that revision's
+cleaner sets family membership and its merger fills nonmembership with zero.
+The six expected flags and raw race/ethnicity exist in FULL_DATA; mapped BMI
+provenance is retained upstream. Historical exact extraction thresholds/windows
+are not inferred from current catalog defaults; that limitation remains explicit.
+A fresh isolated staging/lease directory is under the private Mini release root.
+
+First independent RFS computation checks passed (16 checks); retained kernel
+computation checks passed after adapting the new table contract and corrected
+label expectation. Five metadata join checks passed in the existing Mini Python
+environment. Local optional pandas/DuckDB-dependent checks were skipped explicitly.
+First default fixture exposed an artificial BMI-state inconsistency after changed
+RNG draw ordering; fixture repair synchronizes nonmissing BMI validity states.
+Full new render, export inspection, source enrichment, review/release and clinical
+execution are still pending at this checkpoint. No scientific approval asserted.
+
+### RFS source and integration follow-up
+
+Fresh metadata preparation passed exact original-key/index and clinical-field
+comparison against the prior schema-5 aggregate run/input hashes. The private
+schema-4 input and companion are in the isolated Mini preparation directory;
+source preflight completed without clinical fitting. Alternative-index counts
+are a supporting audit only; unavailable alternatives mean no resolved alternative,
+not necessarily absence of any potentially qualifying visit.
+
+The first private configuration referenced the superseded broader mapper and was
+rejected by the metadata key join. Corrected to the original-list mapper already
+bound to prior source evidence. Adapter metadata tests passed (5); preparation
+checks passed (16) after activating the existing R runtime; original-population
+and source-qualification tests passed (5 and 3). Initial missing-Rscript test
+errors were environment invocation failures, retained in the private logs.
+
+Artificial rendering exposed empty-group handling in the existing validator,
+empty atlas CSV handling, and namespace filtering of global partition edges.
+Repairs preserve source/index rules and calculations; failed runs remain intact.
+Kernel computation and RFS checks pass; full render/visual review remains underway.
+The RFS review map and new requirements are in docs/RFS_AUDIT_RESPONSE.md and
+RFS_AUDIT_ACCEPTANCE.csv. The previous 73-check receipt is not overwritten.

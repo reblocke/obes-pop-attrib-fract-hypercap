@@ -38,16 +38,27 @@ bmi_support <- function(model,ref,transformed=ref$bmi) {
     maximum_observed_gap=if(length(old))max(gaps(old))else NA_real_,maximum_transformed_gap=if(length(new))max(gaps(new))else NA_real_,n_unseen_categories=sum(unseen))
 }
 standardize_probability_curves <- function(model,reference,reference_id,config) {
-  grid<-if(nrow(reference))sort(unique(c(min(reference$bmi),seq(ceiling(min(reference$bmi)/config$grid_step)*config$grid_step,max(reference$bmi),by=config$grid_step),max(reference$bmi))))else numeric()
+  grid<-numeric()
+  if(nrow(reference)) {
+    bounds_reference<-range(reference$bmi)
+    first<-ceiling(bounds_reference[1]/config$grid_step)*config$grid_step
+    interior<-if(first<=bounds_reference[2])seq(first,bounds_reference[2],by=config$grid_step)else numeric()
+    grid<-sort(unique(c(bounds_reference,interior)))
+  }
   base<-data.frame(model_id=model$row$model_id,reference_id=reference_id,n_reference=if(model$row$status=="pending_source")NA_integer_ else nrow(reference),n_model=model$row$n_model,
     outcome_id=model$row$outcome_id,window=model$row$window,family=model$row$family)
-  if(is.null(model$fit)||!length(grid))return(cbind(base,bmi=NA_real_,probability=NA_real_,conf_low=NA_real_,conf_high=NA_real_,supported=NA,status=model$row$status,reason=model$row$failure_reason))
+  if(is.null(model$fit)||!length(grid))return(cbind(base,bmi=NA_real_,probability=NA_real_,conf_low=NA_real_,conf_high=NA_real_,within_training_bmi_range=NA,status=model$row$status,reason=model$row$failure_reason))
   bounds<-range(model$data$bmi);v<-stats::vcov(model$fit)
   bmi_bind(lapply(grid,function(b) {
     result<-tryCatch(bmi_mean_prediction(model,reference,config,bmi=b),error=function(e)e)
-    if(inherits(result,"error"))return(cbind(base,bmi=b,probability=NA_real_,conf_low=NA_real_,conf_high=NA_real_,supported=FALSE,status="prediction_unavailable",reason=conditionMessage(result)))
+    if(inherits(result,"error"))return(cbind(base,bmi=b,probability=NA_real_,conf_low=NA_real_,conf_high=NA_real_,within_training_bmi_range=FALSE,status="prediction_unavailable",reason=conditionMessage(result)))
     ci<-bmi_probability_interval(result$probability,result$gradient,v)
-    cbind(base,bmi=b,probability=result$probability,conf_low=ci[1],conf_high=ci[2],supported=b>=bounds[1]&&b<=bounds[2],status="estimated",reason="")
+    local <- model$data[abs(model$data$bmi-b) <= config$bmi_bin_width/2,,drop=FALSE]
+    n_events <- sum(local[[model$row$field]]==1)
+    n_nonevents <- nrow(local)-n_events
+    coverage <- vapply(c("sex","race_ethnicity","location"), function(name)
+      length(setdiff(unique(as.character(reference[[name]])), unique(as.character(local[[name]])))), integer(1))
+    cbind(base,bmi=b,probability=result$probability,conf_low=ci[1],conf_high=ci[2],within_training_bmi_range=b>=bounds[1]&&b<=bounds[2],local_n=nrow(local),local_events=n_events,local_nonevents=n_nonevents,locally_sparse=nrow(local)<config$sparse_n||n_events<config$sparse_events||n_nonevents<config$sparse_events,missing_local_factor_levels=sum(coverage),status="estimated",reason="")
   }))
 }
 bmi_policy_transform <- function(bmi,policy) {
@@ -113,7 +124,7 @@ bmi_fixed_contrast <- function(model,reference,id,config) {
   if(inherits(attempt,"error"))return(cbind(base,status="prediction_unavailable",reason=conditionMessage(attempt)))
   attempt
 }
-bmi_run_analysis <- function(raw,config,source_status="artificial",audit_only=FALSE,companion=NULL) {
+bmi_run_population_analysis <- function(raw,config,source_status="artificial",audit_only=FALSE,companion=NULL) {
   message("[analysis] Constructing cohort, stage profiles and evidence ledger")
   ctx<-construct_cohort_and_memberships(raw);dict<-bmi_dictionary(ctx$data,config)
   ledger<-bmi_ledger(ctx);profiles<-profile_stage_variables(ctx$members,dict,config);evidence<-derive_evidence_states(ctx,config)
@@ -128,7 +139,7 @@ bmi_run_analysis <- function(raw,config,source_status="artificial",audit_only=FA
   for(name in c("model_registry","model_sample_audit","coefficients","coefficient_covariance","factor_references","model_fit_diagnostics","model_residual_bins","model_influence_summary","model_support","bmi_basis","prediction_support","probability_curves","observation_curves","fixed_bmi_contrasts","policy_totals","policy_contributions","policy_contribution_covariance","sensitivity_results","implied_missing_probabilities","linear_spline_comparison"))tables[[name]]<-data.frame()
   if(!audit_only) {
     message("[analysis] Resolving the common spline basis and fitting registered models")
-    basis<-resolve_bmi_basis(ctx$members$C,config)
+    basis<-if(is.null(config$basis_override))resolve_bmi_basis(ctx$members$C,config)else config$basis_override
     tables$bmi_basis<-data.frame(basis_id=basis$basis_id,knot_probability=unlist(config$knot_probabilities),knot=basis$knots,kind=c("boundary","interior","interior","boundary"),quantile_type=basis$quantile_type,status=basis$status,reference_id="C",basis="splines::ns; intercept FALSE; 3 columns")
     models<-fit_registered_models(ctx,basis,config)
     tables$model_registry<-bmi_bind(lapply(models,`[[`,"row"));tables$model_sample_audit<-tables$model_registry
@@ -149,8 +160,8 @@ bmi_run_analysis <- function(raw,config,source_status="artificial",audit_only=FA
       refid<-if(spec$family=="observation")"C"else spec$training_population_id
       ref<-ctx$members[[refid]]
       curves[[id]]<-standardize_probability_curves(m,ref,refid,config)
-      if(!is.null(m$fit)&&nrow(ref)) {curve_support[[id]]<-bmi_support(m,ref);curve_support[[id]]$reference_id<-refid;curve_support[[id]]$policy_id<-"none; relationship";curve_support[[id]]$method<-"fixed_BMI_curve"}
-      if(spec$family %in% c("primary","timing","matched")) {
+      if(!is.null(m$fit)&&nrow(ref)) {curve_support[[id]]<-bmi_support(m,ref,curves[[id]]$bmi);curve_support[[id]]$reference_id<-refid;curve_support[[id]]$policy_id<-"none; relationship";curve_support[[id]]$method<-"fixed_BMI_curve"}
+      if(spec$family %in% c("primary","timing","matched","supporting")) {
         fixed[[id]]<-bmi_fixed_contrast(m,ref,refid,config)
         for(policy in config$policies)if(isTRUE(policy$enabled)) {
           if (!identical(policy$target,"model_observed")) stop("Unreviewed standardization target")
@@ -165,6 +176,7 @@ bmi_run_analysis <- function(raw,config,source_status="artificial",audit_only=FA
     tables$sensitivity_results<-tables$policy_totals[tables$policy_totals$method %in% "mnar",,drop=FALSE]
     comparison<-list()
     for(w in c("encounter","index_calendar_day"))for(o in if(w=="encounter")c("abg","any_gas","icd")else c("abg","any_gas")) {
+      if(!is.null(config$fit_role) && config$fit_role=="supporting") next
       s<-models[[paste(o,w,"spline",sep="/")]];l<-models[[paste(o,w,"linear",sep="/")]]
       row<-data.frame(outcome_id=o,window=w,status="unavailable",n_model=s$row$n_model,reason="one or both models unavailable")
       if(!is.null(s$fit)&&!is.null(l$fit)) {
@@ -201,5 +213,6 @@ bmi_run_analysis <- function(raw,config,source_status="artificial",audit_only=FA
   diagnostic<-dict$variable_id[dict$role=="diagnostic"]
   for(v in diagnostic){ix<-tables$coverage_index$kind=="variable" & tables$coverage_index$item_id==v;tables$coverage_index$table[ix]<-if(v %in% c("leverage","cooks","max_abs_dfbeta"))"model_influence_summary"else"model_residual_bins";tables$coverage_index$status[ix]<-if(nrow(tables$model_residual_bins))"model audit distributions/quantiles; failed models explicitly unavailable"else"unavailable; no successful fitted model"}
   tables$numerical_reconciliation<-bmi_validate_ledger(tables)
+  for(name in setdiff(bmi_table_names,names(tables)))tables[[name]]<-data.frame()
   tables
 }

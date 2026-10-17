@@ -49,6 +49,13 @@ if(mode=="preflight") {
   analysis<-bmi_run_analysis(raw,config,receipt$source_status,audit_only=TRUE,companion=companion)
 }else analysis<-bmi_run_analysis(raw,config,receipt$source_status,audit_only=mode=="cohort-audit",companion=companion)
 if(mode!="fixture") {
+  e<-attempt$rfs_evidence
+  analysis$rfs_semantics<-bmi_bind(lapply(names(e$families),function(name) {
+    x<-e$families[[name]]
+    data.frame(requirement=name,status="authenticated historical source membership",note=paste(unlist(x),collapse="; "))
+  }))
+  comparison<-attempt$manifest$source_evidence_files$prior_comparison
+  if(!is.null(comparison))analysis$prior_run_reconciliation<-bmi_bind(list(utils::read.csv(comparison$path,stringsAsFactors=FALSE),analysis$prior_run_reconciliation[analysis$prior_run_reconciliation$requirement!="prior_run_keys_and_fields",]))
   counters<-attempt$source_audit
   counters$bmi_methods<-receipt$source_method_counts;counters$base_missingness<-receipt$base_missingness
   for(domain in names(counters))for(counter in names(counters[[domain]])) {

@@ -1,6 +1,6 @@
 {
-  "analysis_id": "bmi_hypercapnia_observed_curve_audit_v2",
-  "bundle_schema": 5,
+  "analysis_id": "bmi_hypercapnia_rfs_curve_audit_v1",
+  "bundle_schema": 6,
   "population_scope_id": "original_selected_encounters_v1",
   "bmi_policy_id": "available_encounter_or_prior_bmi_v1",
   "source_policy_id": "unadjusted_pco2_v1",
@@ -40,5 +40,22 @@
     }
   ],
   "maxit": 25,
-  "standardization_policy": "outcome_observed_v1"
+  "standardization_policy": "outcome_observed_v1",
+  "rfs_policy_id": "historical_source_membership_v1",
+  "analysis_populations": [
+    "primary",
+    "obesity_only",
+    "primary_current",
+    "obesity_only_current",
+    "all_obesity"
+  ],
+  "full_model_populations": [
+    "primary",
+    "obesity_only"
+  ],
+  "diagnostic_bin_width": 1,
+  "diagnostic_bmi_range": [
+    35,
+    55
+  ]
 }

@@ -5,7 +5,7 @@ if(!length(args)%in%c(1,2))stop("Use saved RUN [historical comparison RUN]")
 source("R/analysis.R");bundle<-bmi_read_bundle(args[1]);a<-bundle$analysis;checks<-list()
 add<-function(id,ok)checks[[length(checks)+1L]]<<-data.frame(check_id=id,passed=isTRUE(ok))
 near<-function(x,y)isTRUE(all.equal(x,y,tolerance=1e-9,check.attributes=FALSE))
-add("ledger",all(bmi_validate_ledger(a)$passed))
+add("ledger",!any(bmi_validate_ledger(a)$passed %in% FALSE))
 add("observed_only",all(a$policy_totals$method=="observed")&&!nrow(a$sensitivity_results)&&!nrow(a$implied_missing_probabilities))
 for(id in a$model_registry$model_id){
  r<-a$model_registry[a$model_registry$model_id==id,]

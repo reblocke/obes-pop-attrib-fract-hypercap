@@ -2,7 +2,7 @@
 # Private typed input only. No selection, fitting, or source acceptance.
 args <- commandArgs(trailingOnly = TRUE)
 if (length(args) != 2L || file.exists(args[2])) stop("Use private CSV and fresh RDS output paths.")
-source("R/bmi_hypercapnia_triangulation.R")
+source("R/analysis.R")
 header <- names(utils::read.csv(args[1], nrows = 0, check.names = FALSE))
 base <- c(triangulation_columns, if ("bmi_evidence_state" %in% header) "bmi_evidence_state")
 expected <- c(base, triangulation_index_day_columns)

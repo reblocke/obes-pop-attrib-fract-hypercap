@@ -10,7 +10,7 @@ dir.create(review,recursive=TRUE,mode="0700");review<-normalizePath(review)
 # Tripwires remain active in this process and each independent Quarto session.
 load_common_input<-load_triangulation_input<-bmi_load_input<-fit_bmi_model<-fit_registered_models<-bmi_run_analysis<-function(...)stop("Rendering may not open clinical inputs or fit models")
 receipt<-list(status="started",bundle_manifest_sha256=tri_sha256(file.path(run,"bundle_manifest.json")),clinical_input_reads=0L,model_refits=0L,
-  render_sources=bmi_hash_files(c("R/reporting.R","R/report_views.R","scripts/render_bmi_hypercapnia.R","reports/bmi_hypercapnia.qmd","reports/bmi_hypercapnia_audit.qmd","reports/bmi_report.css")))
+  render_sources=bmi_hash_files(c("R/reporting.R","R/report_views.R","R/rfs_reporting.R","scripts/render_bmi_hypercapnia.R","reports/bmi_hypercapnia.qmd","reports/bmi_hypercapnia_audit.qmd","reports/bmi_report.css")))
 jsonlite::write_json(receipt,file.path(review,"render-receipt.json"),auto_unbox=TRUE,pretty=TRUE)
 bmi_export_figures(bundle,file.path(review,"figures"))
 Sys.setenv(BMI_RUN_DIR=run,BMI_REVIEW_DIR=review)

@@ -1,22 +1,12 @@
 # BMI and documented hypercapnia
 
-**Current revision: observed-population curves and expanded scientific/audit reports.**
-Gas curves and one-unit BMI-shift scenarios describe patients with the corresponding
-usable outcome; ICD estimates use known diagnosis capture. Full-cohort MAR/MNAR
-projections are superseded and remain in the frozen historical run. IPW is deferred.
-Evidence availability and BMI frequencies still describe C. Timing, matched-definition
-and linear-form checks remain in the expanded Results.
-
-The scientific report now has paper-style Introduction, detailed Methods, expanded
-Results (including all primary coefficients and key diagnostics), and draft conclusion
-wording. The complete audit retains every variable/model/covariance/failure entry,
-with verified sharing of identical summaries. Both render from explicit version-5
-saved aggregates; old bundles cannot be relabeled. PR #9 merged as `ca24564`; a
-fresh clinical run completed from the clean matching Mini checkout. All 103
-automated numerical checks passed, including unchanged cohorts, coefficients,
-covariance and observed-patient scenarios. Both clinical HTML/PDF reports and all
-figure exports passed recorded layout QC;
-investigator scientific review remains pending.
+**Current revision: historical source-entry populations.** The primary analysis
+includes fixed first BMI-eligible indexes represented through at least one
+non-OBESITY source pathway, retaining OBESITY overlaps. Obesity-only source entry
+is the principal selection sensitivity. Historical flags record extraction
+membership; zero does not establish clinical absence. The combined cohort is an
+audit reference. Revised clinical execution/review status is recorded separately
+from the earlier version-5 clinical run.
 
 Two reports share one immutable aggregate bundle:
 
@@ -49,9 +39,9 @@ CSV/RDS aggregates, F0–F5 exports, the three F1 alternatives and `figures/gall
 A failed render preserves estimation: rerender the printed run rather than refit.
 
 ```bash
-make render RUN="artifacts/triangulation/<exact-version-5-run>"
-make render-html RUN="artifacts/triangulation/<exact-version-5-run>"
-make render-pdf RUN="artifacts/triangulation/<exact-version-5-run>"
+make render RUN="artifacts/triangulation/<exact-version-6-run>"
+make render-html RUN="artifacts/triangulation/<exact-version-6-run>"
+make render-pdf RUN="artifacts/triangulation/<exact-version-6-run>"
 ```
 
 Renders consume saved aggregates only and create fresh review directories.
@@ -61,7 +51,7 @@ require a new run; hashes prevent silent reuse. HTML/PDF renders run sequentiall
 Review the saved numerical identities and prepare export checks with:
 
 ```bash
-Rscript scripts/review_bmi_run.R "artifacts/triangulation/<exact-version-5-run>"
+Rscript scripts/review_bmi_run.R "artifacts/triangulation/<exact-version-6-run>"
 python3 scripts/check_report_exports.py "artifacts/triangulation/<run>/reviews/<review>"
 ```
 
@@ -72,17 +62,18 @@ and `pdftoppm`. It checks page bounds, symbols and formats, then prepares page
 overviews and figure sheets. It does not certify manual visual or scientific
 review; record those checks separately in the review directory.
 
-After actual figure/page inspection, run the acceptance checks against that review:
+Run data-free numerical and adapter checks separately from rendering:
 
 ```bash
-make test BMI_TEST_REVIEW="artifacts/triangulation/<run>/reviews/<review>"
+make test
+make render-test REVIEW="artifacts/triangulation/<run>/reviews/<review>"
 ```
 
-The 73-check runner preserves a result ledger under ignored artifacts. Checks
-requiring rendered reports or visual inspection fail explicitly when their actual
-receipts are absent. Source-adapter tests use Python; one optional SQL case needs
-the existing upstream Python environment. `PREP_PYTHON` selects it. No patient data
-are used by tests. See [acceptance requirements](docs/CURVE_AUDIT_ACCEPTANCE.csv).
+Every test run writes a fresh receipt. Rendering checks require actual completed
+HTML/PDF reports; visual and scientific approval remain separate. Python adapter
+checks require the existing upstream pandas/DuckDB environment, selected with
+`PREP_PYTHON`; skips are reported explicitly. Historical acceptance receipts remain
+unchanged. The RFS requirements are in the [current plan](docs/BMI_HYPERCAPNIA_TRIANGULATION_PLAN.md).
 
 ## Scientific definitions
 
@@ -94,7 +85,7 @@ approved encounter/prior reported and observed height/weight hierarchy, without
 statistical imputation; age retains the birth-year proxy.
 
 Q contains resolved indexes; C is Q complete for inherited BMI, age, sex,
-race/ethnicity and region. Models use a natural BMI spline with knots at C's
+race/ethnicity and region. Within each RFS group, models use a natural BMI spline with knots at that group's C
 5th/35th/65th/95th percentiles, linear age and inherited categorical references.
 Gas curves standardize to their outcome-observed model populations. ICD curves use C_icd with established diagnosis
 capture, including positive and negative patients. Denominators are printed.
@@ -142,17 +133,14 @@ candidate covariates. The older selected-index input and its passing source chec
 alone cannot supply the full new audit. Qualification failures retain a partial
 audit and block inference; unknown totals are not zeros.
 
-The original-list source and pre-index companion are accepted for this use.
-On 2026-10-16, the owner authorized acceptance and clinical execution; fresh
-preflight and one clinical estimation completed on the clean merged Mini checkout
-at `f18d383` (PR #7). All 21 registered positions are retained: 20 fits succeeded,
-and constant ICD capture availability is explicitly not fitted. Aggregate
-numerical reconciliation passes. The version-4 clinical reports and 153 figure exports are historical. Their original
-QC receipt is preserved; crossed flow connectors and detached captions identified
-afterward are being repaired in the current revision.
-Investigator numerical/scientific review remains pending. Exact run paths,
-hashes and protected receipts are recorded in ignored release storage and
-WORKLOG. Read the
+The original-list source was accepted for the earlier observed-population study.
+Its version-5 run from `ca24564` and completed numerical/layout reviews remain
+historical. The RFS revision adds authenticated metadata without changing those
+clinical fields or indexes. Its metadata-enriched input passed source preflight;
+clinical estimation and report review for the new hierarchy remain pending until
+performed from released code. Investigator scientific approval is separate.
+Exact private run paths and hashes remain in ignored release storage and WORKLOG.
+Read the
 [current plan](docs/BMI_HYPERCAPNIA_TRIANGULATION_PLAN.md),
 [source assessment](docs/TRIANGULATION_SOURCE_ASSESSMENT.md),
 [clinical handoff](docs/CLINICAL_RUN_HANDOFF.md) and
@@ -170,3 +158,26 @@ WORKLOG. Read the
 Exact aggregate audits may expose rare categories and remain protected. Public
 sharing or abstract submission requires separate review. Historical source files
 are retained for provenance; the Makefile has one current scientific workflow.
+
+## Add authenticated RFS and BMI provenance
+
+Use the accepted original encounter product and existing covariate mapping to
+enrich the qualified input. [RFS evidence](config/rfs_evidence.example.json) records each historical family's source,
+zero semantics, extraction limitations and outcome overlap, with hashed producing
+code/receipt references. This command does not rebuild upstream data or pull gases.
+
+```bash
+make enrich-rfs SOURCE_CONFIG="/private/reviewed-source.json" \
+  INPUT="/private/prior-input.rds" MANIFEST="/private/prior-manifest.json" \
+  PRIOR_RUN="/private/prior-aggregate-run" \
+  RFS_EVIDENCE="/private/authenticated-rfs-evidence.json" OUTPUT="/private/fresh-rfs-input"
+```
+
+The fresh schema-4 input/manifest and pre-index companion must pass preflight;
+clinical estimation still requires a clean merged Mini checkout. The enrichment
+checks exact prior clinical-field and index identity. Unavailable historical
+trigger evidence stays unresolved; current BMI never reconstructs the entry trigger.
+
+The audit includes limited current-measurement and overlapping all-OBESITY
+supporting analyses. Numeric demographic coding is preserved; inherited Unknown
+categories remain nonmissing. The White reference includes unknown ethnicity.

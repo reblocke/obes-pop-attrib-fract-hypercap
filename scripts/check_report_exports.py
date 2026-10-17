@@ -48,11 +48,11 @@ def main():
         subprocess.run(['pdftoppm','-r','100','-png',str(pdf),str(dest/'page')],check=True,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
         paths=sorted(dest.glob('page-*.png'),key=lambda p:int(p.stem.split('-')[-1]))
         sheets([(p.stem,p) for p in paths],dest/'overview',330,5,10)
-    for png in sorted((review/'figures').glob('*.png')):
+    for png in sorted((review/'figures').rglob('*.png')):
         im=Image.open(png);rgb=im.convert('RGB');r,g,b=rgb.split()
         checks=geometry(png.with_suffix('.pdf'))
-        results['figures'].append(dict(id=png.stem,dpi=im.info.get('dpi'),size=im.size,vector=png.with_suffix('.svg').exists(),grayscale=ImageChops.difference(r,g).getbbox() is None and ImageChops.difference(g,b).getbbox() is None,pages=checks))
-    sheets([(p.stem,p) for p in sorted((review/'figures').glob('*.png'))],qc/'figure-sheets',748,2,4)
+        results['figures'].append(dict(id=str(png.relative_to(review/'figures').with_suffix('')),dpi=im.info.get('dpi'),size=im.size,vector=png.with_suffix('.svg').exists(),grayscale=ImageChops.difference(r,g).getbbox() is None and ImageChops.difference(g,b).getbbox() is None,pages=checks))
+    sheets([(p.stem,p) for p in sorted((review/'figures').rglob('*.png'))],qc/'figure-sheets',748,2,4)
     (qc/'automated-export-checks.json').write_text(json.dumps(results,indent=2)+'\n')
     issues=[]
     for name,r in results['reports'].items():

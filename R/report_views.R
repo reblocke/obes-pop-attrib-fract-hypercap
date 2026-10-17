@@ -163,7 +163,9 @@ bmi_pif_view <- function(a,ids) {
   z<-a$policy_totals[a$policy_totals$model_id %in% ids,,drop=FALSE]
   if(!nrow(z))return(z)
   for(v in c("pct_shifted","p_observed","p_shifted","difference_per1000","difference_low_per1000","difference_high_per1000","PIF","PIF_low","PIF_high"))if(!v %in% names(z))z[[v]]<-NA_real_
-  data.frame(Model=ifelse(z$status=="estimated",z$model_id,paste(z$model_id,z$status,z$reason,sep="; ")),Reference=z$reference_id,N=z$n_reference,
+  r<-a$model_registry[match(z$model_id,a$model_registry$model_id),,drop=FALSE]
+  for(v in c("n_shifted","mean_decrement","maximum_decrement"))if(!v %in% names(z))z[[v]]<-NA_real_
+  data.frame(Model=ifelse(z$status=="estimated",z$model_id,paste(z$model_id,z$status,z$reason,sep="; ")),Reference=z$reference_id,`Model N`=z$n_model,`Reference N`=z$n_reference,Events=r$n_events,`Patients shifted`=z$n_shifted,`Mean decrement`=z$mean_decrement,`Maximum decrement`=z$maximum_decrement,
     `Eligible (%)`=bmi_number(z$pct_shifted,4),`Observed probability (%)`=bmi_number(100*z$p_observed,4),
     `Shifted probability (%)`=bmi_number(100*z$p_shifted,4),`Difference per 1000 (95% CI)`=bmi_ci(z$difference_per1000,z$difference_low_per1000,z$difference_high_per1000),
     `PIF % (95% CI)`=bmi_ci(100*z$PIF,100*z$PIF_low,100*z$PIF_high),check.names=FALSE)
@@ -189,7 +191,7 @@ bmi_scientific_results <- function(a,section) {
   }
   if(section=="conclusion") {
     z<-a$fixed_bmi_contrasts[a$fixed_bmi_contrasts$model_id %in% bmi_primary_ids(),,drop=FALSE]
-    direction<-if(nrow(z)==3&&all(z$status=="estimated")&&all(z$conf_low_per1000>0))"Higher BMI was associated with higher modeled probability of documented hypercapnia at the prespecified BMI 45 versus 40 comparison."else"BMI–hypercapnia relationships varied by definition and require interpretation alongside the displayed estimates and intervals."
+    direction<-"We estimated BMI–hypercapnia probability relationships within the fixed-index, non-OBESITY-supported source-entry population. Outcome-specific contrasts and their uncertainty are reported separately; they do not constitute a between-group test."
     cat("> **Example conclusion, pending investigator review:** ",direction," Gas-based estimates describe patients with usable blood-gas evidence in this selected acute-care cohort; diagnosis-based estimates describe patients with known diagnosis capture. Differences in evidence availability limit comparisons between these populations. Secondary one-unit BMI-shift contrasts are descriptive model scenarios and do not establish effects of weight loss or cases prevented.\n\n",sep="")
   }
 }

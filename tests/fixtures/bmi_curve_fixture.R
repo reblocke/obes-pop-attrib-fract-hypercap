@@ -9,6 +9,15 @@ make_bmi_curve_fixture <- function(n_patients=1200L,seed=20261016L,with_index_da
     sex=rep(sample(c("0","1","2"),n_patients,TRUE,prob=c(.5,.47,.03)),each=2),
     race_ethnicity=rep(sample(as.character(0:6),n_patients,TRUE,prob=c(.5,.18,.14,.07,.04,.03,.04)),each=2),
     location=rep(sample(as.character(0:3),n_patients,TRUE),each=2),stringsAsFactors=FALSE)
+  for(name in bmi_rfs_fields)d[[name]]<-0L
+  d$OBESITY_rfs<-as.integer(patient%%3!=0)
+  d$ABG_rfs<-as.integer(patient%%3!=1)
+  d$bmi_method<-sample(c("current","prior","calculated"),n,TRUE)
+  d$reported_bmi<-d$bmi;d$reported_date<-d$encounter_date-ifelse(d$bmi_method=="prior",180,0)
+  d$height_date<-d$weight_date<-d$encounter_date
+  d$height_inches<-65;d$weight_pounds<-d$bmi*65^2/703
+  d$bmi_reason<-"artificial valid source";d$raw_race<-d$race_ethnicity;d$raw_ethnicity<-"0"
+  d$obesity_trigger<-"trigger_unresolved"
   d$has_abg<-rbinom(n,1,plogis(-.1+.025*(d$bmi-40)));d$has_vbg<-rbinom(n,1,.45)
   latent<-38+.23*(d$bmi-30)+.025*(d$age_at_encounter-50)+rnorm(n,0,6)
   d$abg_pco2<-ifelse(d$has_abg==1&runif(n)>.09,pmax(12,latent+rnorm(n,0,2)),NA_real_)
@@ -29,5 +38,6 @@ make_bmi_curve_fixture <- function(n_patients=1200L,seed=20261016L,with_index_da
     d$encounter_date[13]<-NA;d$bmi[13:14]<-40
     d<-rbind(d,d[15,,drop=FALSE]);row.names(d)<-NULL
   }
+  d$bmi_evidence_state[!is.na(d$bmi)]<-"valid"
   d
 }

@@ -309,3 +309,28 @@ Readiness is **ready_with_limitations** for this selected-cohort source use.
 Preflight `preflight-20261016T173924-11359` verifies identity/mappings without models.
 Human scientific review, clean merged release and clinical estimation are not
 claimed. No additional export is indicated by these checks.
+
+## 2026-10-17 — Historical RFS metadata extension
+
+Read-only inspection authenticated the six FULL_DATA family indicators and raw
+race/ethnicity dictionaries. The accepted producer revision is recorded in the
+private integrated acceptance receipt; its cleaner creates family membership and
+its merger converts nonmembership to zero. These flags establish source-file
+representation, not exhaustive clinical criterion satisfaction. No separate
+obesity-only indicator exists in the inspected accepted product schema.
+
+A fresh schema-4 input preserves exact clinical keys/indexes, BMI, covariates and
+outcomes from the hash-bound prior version-5 run. Metadata join tests and source
+preflight pass; no replacement export or preprocessing rebuild was required.
+BMI provenance comes from the existing accepted mapper. The new RFS evidence and
+pre-index companion have their own hashes. An initially selected stale broader
+mapping was rejected by the exact-key check; the intended original-list mapping
+was then bound to the prior run. This was configuration correction, not a change
+to the accepted source population.
+
+Remaining evidence limits: historical exact extraction thresholds/windows and
+individual obesity triggers are not inferred from current producer defaults or
+final BMI. Outcome-incorporation/depletion is audited from the fixed indexes.
+Clinical estimation, numerical review, layout QC and investigator scientific
+approval retain separate states. Other-project keyed decomposition and the
+unidentified historical diagram discrepancy remain explicitly unassessed.

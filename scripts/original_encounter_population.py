@@ -6,6 +6,7 @@ from pathlib import Path
 from prepare_common_index_input import PreparationError, require_original_keys
 
 POPULATION_ID = "original_selected_encounters_v1"
+RFS_COLUMNS = tuple(f"{family}_rfs" for family in ("OBESITY", "ABG", "VBG", "RESPFAIL", "VENTSUPPORT", "PREDISPOSITION"))
 ORIGINAL_COLUMNS = ("patient_id", "encounter_id", "pat_enc_hash", "encounter_date",
                     "encounter_type", "first_encounter")
 
@@ -35,7 +36,7 @@ def verify_original_list(frame):
             "original_first_flag_is_prefilter": False}
 
 
-def read_original_list(config, readers):
+def read_original_list(config, readers, *, include_metadata=False):
     if config.get("population_scope_id") != POPULATION_ID:
         raise PreparationError("New mapping requires the original encounter population policy")
     bundle = config["encounter_bundle"]
@@ -44,7 +45,7 @@ def read_original_list(config, readers):
     frame = readers["encounters.reader"].read_encounters(
         Path(bundle["path"]), variant="FULL_DATA", receipt_path=Path(bundle["receipt_path"]),
         expected_receipt_sha256=bundle["expected_receipt_sha256"],
-        validation_report_path=Path(bundle["validation_report_path"]), columns=list(ORIGINAL_COLUMNS))
+        validation_report_path=Path(bundle["validation_report_path"]), columns=list(ORIGINAL_COLUMNS) + (list(RFS_COLUMNS) + ["race", "ethnicity"] if include_metadata else []))
     return frame, verify_original_list(frame)
 
 

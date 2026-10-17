@@ -44,3 +44,13 @@ make triangulation-render INPUT="/accepted/input.rds" MANIFEST="/reviewed/v3.jso
 ```
 
 The original local RDS remains a historical comparator. The earlier broader mapping and its preflight are superseded; corrected original-list qualification and preflight pass on the Mini. The separately named automated-reviewed manifest and source-freeze receipt retain explicit limitations and human-review status. Do not apply those labels to the historical RDS. Clinical models require clean merged code; the current implementation branches are not yet merged. Retain within-list index uncertainty and the approved uncapped measurement-recency policy before fitting. No replacement export or external message is required by the completed source checks.
+
+## RFS revision — 2026-10-17
+
+The schema-4 metadata enrichment requires accepted FULL_DATA family flags, mapping
+provenance, a hash-bound RFS semantics record and the exact prior clinical run.
+`make enrich-rfs` creates a fresh input and companion; old files are untouched.
+A missing family value remains unknown. Exact historical query thresholds/windows
+and entry-trigger identity are not reconstructed from current defaults or BMI.
+The updated preflight checks metadata semantics and evidence hashes. Releasing
+code does not itself qualify source or establish scientific approval.

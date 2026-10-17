@@ -252,3 +252,27 @@ The uncapped prior-measurement policy is retained. Any alternative tie resolutio
 requirement for the historical global first flag, recency cap or different date
 anchor would require an explicit new decision and dependent qualification.
 Review/release and synchronize clean merged code before clinical estimation.
+
+## 2026-10-17 — Historical source-entry partition supersedes combined-cohort primary
+
+Approved implementation: select the same first BMI-eligible index, then classify
+historical RFS source-file membership. Primary requires any confirmed non-OBESITY
+family; OBESITY overlaps stay primary. Obesity-only requires OBESITY=1 and five
+authenticated non-OBESITY zeros. Other records remain unresolved, with all-zero
+source discrepancies identified. Source zeros are not clinical absence. BMI≥40
+is descriptive. The combined cohort is a reconciliation reference.
+
+Refit primary and obesity-only populations independently with group-specific
+prespecified spline quantiles. Current-measurement sensitivities reuse their parent
+basis and the already selected BMI: current reported BMI or calculation using both
+current-encounter components. Register three encounter-wide outcomes for each;
+register three supporting all-OBESITY outcome fits in the audit regardless of
+results, avoiding an outcome-selected activation rule. No new missing-outcome
+projection or demographic numeric recoding is authorized. Preserve retained
+Unknown categories and label their contents accurately.
+
+Use input schema 4, bundle schema 6 and analysis identity
+`bmi_hypercapnia_rfs_curve_audit_v1`. Historical inputs/results are immutable and
+cannot be relabeled. The original BMI hierarchy, index and clinical fields must
+reconcile exactly before clinical estimation. Source acceptance, execution,
+numerical, visual and scientific reviews remain distinct. Submission is excluded.
