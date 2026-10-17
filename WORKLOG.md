@@ -825,3 +825,63 @@ of interpretation, sparse upper-BMI support, apparent fit and gas-observation
 MAR/MNAR assumptions (including sign-changing sensitivity scenarios) before
 abstract claims. No new source export or operational decision is required by the
 observed checks. No abstract was submitted or clinical result published.
+
+## 2026-10-16 — Observed-population scientific/audit refresh (in progress)
+
+User approved an expanded mini-paper, full audit, observed-data timing/matched/
+functional-form checks, and review/commit/push/merge followed by a fresh clinical
+run on the Mini. Full-cohort gas MAR/MNAR projections are superseded; IPW is deferred.
+
+Pre-edit assessment confirmed crossed detailed-flow connectors, detached figure
+captions, repeated frequency panels and fragmented result tables. The previous
+clinical audit has 1,224 pages. Its original artifacts and QC receipt are preserved;
+those earlier presentation limitations are not treated as acceptable for this release.
+
+Branch: `codex/observed-bmi-paper-audit`, based on `1626a6d`. Baseline artificial
+A–E checks passed; the refreshed 900-patient fixture reproduces all baseline model
+coefficients and covariance entries exactly. The new bundle is version 5 and
+binds outcome-observed standardization. Rendering remains aggregate-only.
+
+Mini check: reachable; a separate GLP-1 preparation process is active in its own
+external workspace. No writes to that workspace or accepted products are planned.
+Clinical execution will use a separate clean merged checkout and a fresh run.
+Existing installed R/Quarto dependencies are available locally; no installation.
+
+Verification in progress: expanded acceptance checks, full artificial HTML/PDF
+renders, complete table coverage/alias reconstruction, native figure and PDF
+inspection, release review, then clinical source/hash verification and rerun.
+
+The final 1,200-patient fixture estimated and passed 86 aggregate numerical checks.
+Native/overview inspection found long basis hashes overlapping scientific table
+columns; the initial render was stopped and retained as a failed presentation
+attempt. Optional LaTeX token breaks repair this without truncating identifiers.
+A new render reads the same saved bundle. All 24 adapter tests passed on the Mini
+using its existing activated R/Python runtime; the first invocation lacked Rscript
+on SSH PATH and was corrected without installing anything.
+
+The complete artificial audit rendered to 769 pages. A new text-box collision
+scan exposed punctuation-delimited model IDs crossing cells, a candidate-C title
+outside the figure boundary and dense residual-count ticks. Repairs add optional
+breaks at identifier separators, wrap titles and use two residual-count ticks;
+no values, scales or complete table rows are removed.
+
+The focused audit proof cleared every table out-of-bounds/symbol/text-collision
+finding. The only remaining flags were the unchanged old F4 plots in that proof;
+the source repair now uses two count ticks. The final release render regenerates
+all figures/reports from the unchanged 1,200-patient aggregate bundle.
+
+Release verification completed: all 73 artificial acceptance checks passed against
+review `20261016T223223-29309`; all 86 aggregate numerical checks passed; all 24
+source-adapter tests passed on the Mini. Both HTML/PDF reports render from saved
+aggregates (32 scientific and 815 audit pages, 303 figure sets). Automated bounds,
+replacement-symbol and text-collision scans found no issues. Visual review covers
+all figure/page overviews plus native main/dense examples; all changed final audit
+pages were rechecked against the fully scanned proof. It is not an independent
+manual verification of every numerical cell. F1-A remains preferred; alternatives
+are retained. Private receipts and earlier failure logs remain ignored.
+
+Read-only candidate review covered staged/unstaged/new source files relative to
+1626a6d; no further actionable defect remained. Clinical refresh is still pending
+merge and the clean matching Mini checkout. Accepted input/manifest hashes were
+reverified unchanged; no competing analysis was active. The Mini cannot authenticate
+to GitHub directly, so the merged revision will be transferred as a Git bundle.

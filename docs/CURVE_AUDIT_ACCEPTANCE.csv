@@ -39,7 +39,7 @@ D08,Coefficient covariance dimensions/names agree with the model matrix and coef
 D09,"Every fitted model, including observation/diagnostic models, has a linked sample profile and diagnostic section.",tests/run_bmi_curve_tests.R; actual export/QC receipts for F checks
 D10,Model-based inference and apparent performance are labeled correctly.,tests/run_bmi_curve_tests.R; actual export/QC receipts for F checks
 D11,Unseen reference categories do not trigger silent target restriction.,tests/run_bmi_curve_tests.R; actual export/QC receipts for F checks
-E01,Fixed-BMI common-reference predictions match independent row-level averaging.,tests/run_bmi_curve_tests.R; actual export/QC receipts for F checks
+E01,Fixed-BMI declared-reference predictions match independent row-level averaging.,tests/run_bmi_curve_tests.R; actual export/QC receipts for F checks
 E02,Correlated BMI/covariate artificial data demonstrate why multiplying a marginal curve by a marginal BMI density is not used for adjusted PIF.,tests/run_bmi_curve_tests.R; actual export/QC receipts for F checks
 E03,"Paired policy predictions retain original covariates, index, and population.",tests/run_bmi_curve_tests.R; actual export/QC receipts for F checks
 E04,One-unit shift acts only above 30 with no floor; exact 30 remains unchanged.,tests/run_bmi_curve_tests.R; actual export/QC receipts for F checks
@@ -51,7 +51,7 @@ E09,Empty bins have zero mass/contribution and unavailable conditional means.,te
 E10,"Analytic gradients match independent finite differences for curves, differences, PIFs, and contributions.",tests/run_bmi_curve_tests.R; actual export/QC receipts for F checks
 E11,Contribution covariance reproduces the overall difference variance.,tests/run_bmi_curve_tests.R; actual export/QC receipts for F checks
 E12,Unsupported transformed values are counted; no silent floor or re-eligibility filtering.,tests/run_bmi_curve_tests.R; actual export/QC receipts for F checks
-E13,MAR/MNAR identity at the sensitivity anchor is exact within numerical tolerance.,tests/run_bmi_curve_tests.R; actual export/QC receipts for F checks
+E13,Active scenarios use observed populations only; historical MAR/MNAR calls reject.,tests/run_bmi_curve_tests.R; actual export/QC receipts for F checks
 E14,Scenario changes do not alter fitted primary models or cohort membership.,tests/run_bmi_curve_tests.R; actual export/QC receipts for F checks
 F01,Clean-session artificial execution produces both reports and all required tables/figures.,tests/run_bmi_curve_tests.R; actual export/QC receipts for F checks
 F02,Reports consume saved aggregates with tripwires proving no clinical-input read or model refit.,tests/run_bmi_curve_tests.R; actual export/QC receipts for F checks
@@ -64,3 +64,11 @@ F08,"No patient identifiers, individual predictions, model frames, or direct dat
 F09,Old bundles fail clearly rather than being relabeled or auto-migrated.,tests/run_bmi_curve_tests.R; actual export/QC receipts for F checks
 F10,Default commands/instructions have one current scientific authority and no hidden historical dispatch.,tests/run_bmi_curve_tests.R; actual export/QC receipts for F checks
 F11,Input/config/source identities are recorded and changed inputs cannot silently reuse cached results.,tests/run_bmi_curve_tests.R; actual export/QC receipts for F checks
+G01,"Each registered curve reproduces independent averaging over its declared observed reference.",tests/run_bmi_curve_tests.R; actual export/QC receipts
+G02,"Unknown ICD capture does not shrink the broader gas-observed target to the matched subset.",tests/run_bmi_curve_tests.R; actual export/QC receipts
+G03,"Registered coefficients and model sizes reproduce independently fitted models.",tests/run_bmi_curve_tests.R; actual export/QC receipts
+G04,"Wrong reference identities and version-4 bundles fail explicitly.",tests/run_bmi_curve_tests.R; actual export/QC receipts
+G05,"Missing figures fail; categorical labels decode; wrapped identifiers retain every character.",tests/run_bmi_curve_tests.R; actual export/QC receipts
+G06,"Identical-summary sharing reconstructs every original value and denominator.",tests/run_bmi_curve_tests.R; actual export/QC receipts
+G07,"Actual PDF/HTML alias exports reconstruct every original stage profile.",tests/run_bmi_curve_tests.R; actual export/QC receipts
+G08,"Every F1 alternative and secondary figure has all required exports from one bundle.",tests/run_bmi_curve_tests.R; actual export/QC receipts

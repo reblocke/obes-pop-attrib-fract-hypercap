@@ -4,12 +4,12 @@
 
 The 2026-10-16 curve/audit refactor supersedes the single-linear-BMI coefficient,
 PIF-first 140-position registry and historical-version replay. The current plan
-is `docs/BMI_HYPERCAPNIA_TRIANGULATION_PLAN.md`; its 65 acceptance requirements
+is `docs/BMI_HYPERCAPNIA_TRIANGULATION_PLAN.md`; its 73 acceptance requirements
 are in `docs/CURVE_AUDIT_ACCEPTANCE.csv`. The user additionally confirmed the
 original selected encounter population and known-capture ICD reference.
 
 Primary deliverables are `reports/bmi_hypercapnia.qmd` and
-`reports/bmi_hypercapnia_audit.qmd`, generated from one version-4 aggregate bundle.
+`reports/bmi_hypercapnia_audit.qmd`, generated from one version-5 aggregate bundle.
 The scientific report centers BMI probability curves, observation and BMI
 frequencies. The audit contains every applicable stage/variable and every planned
 model, including full coefficients, covariance, failures and diagnostics. Do not
@@ -52,16 +52,16 @@ bundles must fail clearly; no automatic relabeling/migration is authorized.
   Linear-form sensitivity uses identical samples, without automatic selection.
 - Every planned primary/timing/observation/matched/linear fit has a registry entry.
   No substituted estimators, pooled categories or hidden na.omit exclusions.
-- Gas curves standardize over C; ICD over C_icd; observation over C; matched pairs
-  use identical within-pair rows. Explain the transport assumption for untested
+- Gas curves standardize over their outcome-observed model population; ICD over C_icd; observation over C; matched pairs
+  use identical within-pair rows. Do not project physiological outcomes to untested
   patients. Do not describe documented index occurrence as incidence/prevention.
 - Secondary default: observed BMI >30 minus exactly one, no floor/reselection;
   BMI=30 unchanged. Named caps are disabled by default. Pair actual patient
   covariates and index; original-BMI-band contributions and covariance reconcile
   exactly to total difference/PIF. Never integrate a marginal risk curve*density.
-- C40 reuses the broader fit. MNAR fixes factual observation strata and evaluates
-  its offset at transformed BMI too; its anchor reproduces MAR. Assumptions are
-  separate from model-based pointwise intervals. No weights or facility clustering
+- C40 retains descriptive profiles only. Full-cohort MAR/MNAR projections are
+  historical; IPW is deferred. Observed-data timing/matched/linear checks remain.
+  Assumptions are separate from model-based pointwise intervals. No weights or facility clustering
   inferred from geographic region; no new missingness reconstruction by stealth.
 
 ## Workflow and source readiness
@@ -105,7 +105,17 @@ Export source, SVG/PDF, 300-dpi PNG/JPG and retain three F1 alternatives. Never
 claim completed visual inspection or numerical review from export success alone.
 
 Run independent artificial checks, adverse cases and actual full HTML/PDF renders.
-All 65 checks need evidence; F render/visual checks require the actual review
+All 73 checks need evidence; F render/visual checks require the actual review
 receipt. Preserve failures and repair safely. Log substantive changes, commands,
 outputs, failures and next steps in WORKLOG.md. No commit/push/submission or
 external communication follows automatically from this refactor ticket.
+
+## Current report/release amendment — 2026-10-16
+
+Expanded mini-paper: detailed Methods, primary coefficients and diagnostic Results,
+observed-data sensitivities and example conclusions. Complete audit retains all
+values with explicit verified identical-summary aliases. Required figures must
+fail rendering when missing; captions remain with vector figures. Use version 5
+`bmi_hypercapnia_observed_curve_audit_v2`; reject old bundles, never relabel them.
+The owner explicitly authorized review/commit/push/PR/merge and a fresh Mini
+clinical run for this revision. That approval does not extend to submission.

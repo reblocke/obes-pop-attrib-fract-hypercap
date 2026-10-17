@@ -1,3 +1,24 @@
+# Observed-population report revision — 2026-10-16
+
+The approved version-5 workflow retains the accepted original-list input,
+pre-index companion, BMI derivation, outcome definitions, fitted models and
+source qualification. Gas curves, contrasts and secondary scenarios now
+standardize to their outcome-observed populations; ICD uses known diagnosis
+capture. Full-C MAR/MNAR projections are historical only. IPW is deferred.
+
+The new reports and artificial verification are in progress. A fresh clinical
+run is required after release because the curve reference populations changed;
+old aggregates must not be relabeled. No additional source export or upstream
+rebuild is required by this change. Investigator scientific review remains a
+separate, unasserted state.
+
+The earlier release below is preserved as history. Its successful exports and
+recorded QC did not detect all presentation defects: this revision repairs
+crossed flow connectors, compressed panels, detached captions and incomplete
+symbol rendering, and requires a new visual-review receipt.
+
+## Historical version-4 release record
+
 ## Current source acceptance and execution — 2026-10-16
 
 The owner explicitly accepted the checked original-selected-encounter source,

@@ -6,7 +6,7 @@ bmi_matrix <- function(model,d) {
   if(!identical(colnames(x),names(stats::coef(model$fit))))stop("Prediction basis/column identity mismatch")
   x
 }
-bmi_mean_prediction <- function(model,reference,config,bmi=NULL,observed=rep(TRUE,nrow(reference)),r=1,gradient_multiplier=1,coefficients=NULL) {
+bmi_mean_prediction <- function(model,reference,config,bmi=NULL,coefficients=NULL) {
   if(!nrow(reference))stop("Empty reference")
   beta<-if(is.null(coefficients))stats::coef(model$fit)else coefficients
   sums<-0;grad<-setNames(rep(0,length(beta)),names(beta));n<-nrow(reference)
@@ -14,8 +14,7 @@ bmi_mean_prediction <- function(model,reference,config,bmi=NULL,observed=rep(TRU
     ix<-start:min(n,start+config$chunk_size-1);d<-reference[ix,,drop=FALSE]
     if(!is.null(bmi))d$bmi<-if(length(bmi)==1)bmi else bmi[ix]
     x<-bmi_matrix(model,d)
-    offset<-ifelse(observed[ix],0,log(r)+log(gradient_multiplier)*(d$bmi-40)/5)
-    p<-stats::plogis(drop(x%*%beta)+offset)
+    p<-stats::plogis(drop(x%*%beta))
     sums<-sums+sum(p);grad<-grad+colSums(x*(p*(1-p)))
   }
   list(probability=sums/n,gradient=grad/n)
@@ -63,17 +62,17 @@ bmi_pair_quantities <- function(p0,p1,v) {
   data.frame(p_observed=a,p_observed_low=ci0[1],p_observed_high=ci0[2],p_shifted=b,p_shifted_low=ci1[1],p_shifted_high=ci1[2],absolute_difference=a-b,difference_per1000=1000*(a-b),difference_low_per1000=1000*ci[1],difference_high_per1000=1000*ci[2],
     PIF=if(a>0)1-b/a else NA_real_,PIF_low=relci[1],PIF_high=relci[2],variance_difference=variance)
 }
-standardize_policy_and_contributions <- function(model,reference,reference_id,policy,config,method="observed",r=1,gradient_multiplier=1) {
-  base<-data.frame(model_id=model$row$model_id,reference_id=reference_id,policy_id=policy$policy_id,method=method,r=r,gradient_multiplier=gradient_multiplier,
+standardize_policy_and_contributions <- function(model,reference,reference_id,policy,config,method="observed") {
+  if(method!="observed")stop("Full-cohort MAR/MNAR scenarios are historical only")
+  base<-data.frame(model_id=model$row$model_id,reference_id=reference_id,policy_id=policy$policy_id,method=method,
     n_reference=if(model$row$status=="pending_source")NA_integer_ else nrow(reference),n_model=model$row$n_model,outcome_id=model$row$outcome_id,window=model$row$window)
   fail<-function(reason,status="prediction_unavailable")list(policy_totals=cbind(base,status=status,reason=reason),policy_contributions=data.frame(),policy_contribution_covariance=data.frame(),prediction_support=data.frame())
   if(is.null(model$fit))return(fail(model$row$failure_reason,model$row$status))
   if(!nrow(reference))return(fail("Empty reference population"))
   shifted<-bmi_policy_transform(reference$bmi,policy)
-  observed<-if(method %in% c("mar","mnar"))!is.na(reference[[model$row$field]])else rep(TRUE,nrow(reference))
   attempt<-tryCatch({
-    p0<-bmi_mean_prediction(model,reference,config,observed=observed,r=r,gradient_multiplier=gradient_multiplier)
-    p1<-bmi_mean_prediction(model,reference,config,bmi=shifted,observed=observed,r=r,gradient_multiplier=gradient_multiplier)
+    p0<-bmi_mean_prediction(model,reference,config)
+    p1<-bmi_mean_prediction(model,reference,config,bmi=shifted)
     v<-stats::vcov(model$fit);support<-bmi_support(model,reference,shifted)
     total<-cbind(base,bmi_pair_quantities(p0,p1,v),n_shifted=sum(shifted!=reference$bmi),pct_shifted=100*mean(shifted!=reference$bmi),
       mean_decrement=mean(reference$bmi-shifted),maximum_decrement=max(reference$bmi-shifted),status="estimated",reason="")
@@ -82,8 +81,8 @@ standardize_policy_and_contributions <- function(model,reference,reference_id,po
     for(b in bands) {
       ix<-which(bin==b);mass<-length(ix)/nrow(reference)
       if(length(ix)) {
-        q0<-bmi_mean_prediction(model,reference[ix,,drop=FALSE],config,observed=observed[ix],r=r,gradient_multiplier=gradient_multiplier)
-        q1<-bmi_mean_prediction(model,reference[ix,,drop=FALSE],config,bmi=shifted[ix],observed=observed[ix],r=r,gradient_multiplier=gradient_multiplier)
+        q0<-bmi_mean_prediction(model,reference[ix,,drop=FALSE],config)
+        q1<-bmi_mean_prediction(model,reference[ix,,drop=FALSE],config,bmi=shifted[ix])
         contribution<-mass*(q0$probability-q1$probability);gradient<-mass*(q0$gradient-q1$gradient)
         a<-mass*q0$probability;g<-mass*q1$probability;se<-sqrt(bmi_delta_variance(gradient,v))
       }else{q0<-q1<-list(probability=NA_real_);contribution<-a<-g<-se<-0;gradient<-rep(0,ncol(v))}
@@ -93,7 +92,7 @@ standardize_policy_and_contributions <- function(model,reference,reference_id,po
     }
     contributions<-bmi_bind(rows);gradient_matrix<-do.call(rbind,grads);cv<-gradient_matrix%*%v%*%t(gradient_matrix)
     covariance<-expand.grid(bin1=bands,bin2=bands);covariance$covariance<-as.vector(cv)
-    for(name in c("model_id","reference_id","policy_id","method","r","gradient_multiplier"))covariance[[name]]<-base[[name]]
+    for(name in c("model_id","reference_id","policy_id","method"))covariance[[name]]<-base[[name]]
     if(max(abs(c(sum(contributions$A)-p0$probability,sum(contributions$G)-p1$probability,sum(contributions$D)-total$absolute_difference,sum(cv)-total$variance_difference)))>1e-9)stop("Paired contribution reconciliation failed")
     support$reference_id<-reference_id;support$policy_id<-policy$policy_id;support$method<-method
     list(policy_totals=total,policy_contributions=contributions,policy_contribution_covariance=covariance,prediction_support=support)
@@ -120,7 +119,7 @@ bmi_run_analysis <- function(raw,config,source_status="artificial",audit_only=FA
   ledger<-bmi_ledger(ctx);profiles<-profile_stage_variables(ctx$members,dict,config);evidence<-derive_evidence_states(ctx,config)
   tables<-c(ledger,profiles,evidence,list(variable_dictionary=dict,source_audit=data.frame(requirement=c("population","BMI","gas/ICD","timing","clinical_inference"),
     status=c(source_status,source_status,source_status,ctx$day_status,if(source_status=="artificial")"artificial_only"else"pending_scientific_review"),
-    note=c("Authenticated original selected encounters only; broader mapping gap historical","Encounter/prior reported then observed height/weight; no imputation","Unadjusted, specimen-authenticated; unknown remains unknown", "Fixed selected index; calendar date not elapsed 24h","Source acceptance does not establish MAR or causal interpretation"))))
+    note=c("Authenticated original selected encounters only; broader mapping gap historical","Encounter/prior reported then observed height/weight; no imputation","Unadjusted, specimen-authenticated; unknown remains unknown", "Fixed selected index; calendar date not elapsed 24h","Observed-population associations do not establish population transport or causal interpretation"))))
   if(!is.null(companion))tables<-bmi_merge_companion(tables,companion,raw)
   tables$distribution_bins<-bmi_bind(list(tables$distribution_bins,bmi_pattern_bins(ctx,config)))
   tables$population_registry<-tables$cohort_nodes
@@ -147,30 +146,15 @@ bmi_run_analysis <- function(raw,config,source_status="artificial",audit_only=FA
     for(id in names(models)) {
       message("[standardization] ",id)
       m<-models[[id]];spec<-m$row
-      refid<-if(spec$family=="matched")spec$training_population_id else if(spec$outcome_id=="icd"&&spec$family!="observation")"C_icd"else"C"
+      refid<-if(spec$family=="observation")"C"else spec$training_population_id
       ref<-ctx$members[[refid]]
       curves[[id]]<-standardize_probability_curves(m,ref,refid,config)
       if(!is.null(m$fit)&&nrow(ref)) {curve_support[[id]]<-bmi_support(m,ref);curve_support[[id]]$reference_id<-refid;curve_support[[id]]$policy_id<-"none; relationship";curve_support[[id]]$method<-"fixed_BMI_curve"}
       if(spec$family %in% c("primary","timing","matched")) {
         fixed[[id]]<-bmi_fixed_contrast(m,ref,refid,config)
         for(policy in config$policies)if(isTRUE(policy$enabled)) {
-          targets<-list(observed=m$data)
-          if(spec$family=="matched")targets<-setNames(list(ref),refid) else if(spec$outcome_id=="icd")targets<-list(C_icd=ref)else targets<-c(targets,list(C=ref,C40=ctx$members$C40))
-          if(policy$target!="observed_and_common_reference") {
-            if(!policy$target %in% names(ctx$members))stop("Unknown explicitly enabled policy target")
-            target<-if(spec$outcome_id=="icd"&&policy$target=="C")"C_icd"else policy$target
-            targets<-setNames(list(ctx$members[[target]]),target)
-          }
-          for(target in names(targets))policies[[paste(id,policy$policy_id,target)]]<-standardize_policy_and_contributions(m,targets[[target]],target,policy,config,if(target %in% c("C","C40"))"mar"else"observed")
-          if(isTRUE(config$mnar_enabled)&&spec$outcome_id!="icd"&&spec$family!="matched")for(r in unlist(config$mnar_r))for(g in unlist(config$mnar_gradient_multiplier)) {
-            key<-paste(id,policy$policy_id,"mnar",r,g)
-            policies[[key]]<-standardize_policy_and_contributions(m,ref,refid,policy,config,"mnar",r,g)
-            if(!is.null(m$fit)&&any(is.na(ref[[spec$field]])))for(b in c(30,40,45,50)) {
-              unknown<-ref[is.na(ref[[spec$field]]),,drop=FALSE]
-              pred<-tryCatch(bmi_mean_prediction(m,unknown,config,bmi=b,observed=rep(FALSE,nrow(unknown)),r=r,gradient_multiplier=g)$probability,error=function(e)NA_real_)
-              implied[[length(implied)+1L]]<-data.frame(model_id=id,r=r,gradient_multiplier=g,bmi=b,probability=pred,n_unobserved=nrow(unknown),interpretation="fixed-observation-stratum sensitivity; assumptions not estimates")
-            }
-          }
+          if (!identical(policy$target,"model_observed")) stop("Unreviewed standardization target")
+          policies[[paste(id,policy$policy_id,refid)]]<-standardize_policy_and_contributions(m,ref,refid,policy,config,"observed")
         }
       }
     }

@@ -1,3 +1,21 @@
+## Observed-population reporting decision — confirmed 2026-10-16
+
+- Primary gas standardization now uses each outcome-observed model population,
+  including window-specific timing and same-sample linear checks. ICD remains
+  known-capture; matched pairs retain their explicit shared populations.
+- Full-C gas MAR/MNAR and C40 projections are historical only. IPW is deferred.
+  Full-C usable-evidence and BMI displays remain descriptive selection context.
+- The observed BMI >30 minus-one scenario is unchanged, without floor/reselection;
+  PIF is a descriptive model-standardized distribution-shift contrast.
+- Scientific report: expanded paper with full Methods, all primary coefficients,
+  key diagnostic/scenario verification, and observed-data sensitivity Results.
+  The audit retains every applicable variable, model, covariance and failure.
+- The owner explicitly authorized code review, commit/push/PR/merge followed by
+  fresh estimation on the Mini using the existing qualified source. No source
+  replacement, upstream rebuild, publication or submission is authorized.
+- Schema 5 and a new analysis identity prevent relabeling old full-C projections.
+  Superseded analysis and QC receipts remain immutable historical evidence.
+
 ## Release and source-acceptance decision — 2026-10-16
 
 The owner explicitly accepted the checked original-selected-encounter source,
