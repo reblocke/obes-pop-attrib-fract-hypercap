@@ -291,3 +291,23 @@ Rendering and visual review use the saved aggregates. Investigator numerical and
 scientific approval remain pending; successful numerical reconciliation does not
 approve interpretation or submission. Additional external-project/diagram audits
 and unavailable historical entry-trigger details retain their explicit status.
+
+## 2026-10-17 — Obesity-only becomes descriptive
+
+The owner approved replacing the obesity-only model-based sensitivity with a
+descriptive selection and evidence-availability audit. Gas-related source entry
+selects on testing and potentially results; absence from those pathways depletes
+an independent gas comparator. Historical file membership is not exhaustive gas
+acquisition, so residual captured gases remain visible and are not recoded away.
+No adjusted obesity-only outcome/observation model, timing/matched/linear fit,
+current-measurement model, probability curve or PIF is planned. This decision
+applies regardless of numerical estimability and supersedes the prior two-group
+modeling hierarchy.
+
+Primary fixed indexes, inclusion of overlaps, primary models/reference populations,
+BMI policy and one-unit scenario are unchanged. Primary current-measurement and
+overlapping all-OBESITY supporting models remain. The all-OBESITY group does not
+replace the descriptive group or form a disjoint comparator. Use new schema 7 /
+`bmi_hypercapnia_rfs_curve_audit_v2`; preserve and reject older bundles rather
+than relabel them. Source acceptance and investigator scientific approval remain
+separate.

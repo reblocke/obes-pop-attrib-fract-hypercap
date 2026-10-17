@@ -351,3 +351,17 @@ all-OBESITY supporting population overlaps primary and does not replace that
 sensitivity. Historical exact-query/trigger limits, external-project keyed
 decomposition and investigator scientific review remain unresolved as described
 above. No replacement export is indicated by the completed checks.
+
+### Obesity-only selection interpretation — 2026-10-17
+
+Obesity-only is now a descriptive evidence audit. Removing gas-related entry
+pathways selects against gas evaluability; it does not create an independent
+physiological comparison population. Historical source-file membership and raw
+current-encounter gas capture are distinct. Sparse residual gases remain in the
+counts; their exact historical extraction explanation is unadjudicated. Do not
+force these counts to zero or reconstruct entry flags from outcomes.
+
+The qualified schema-4 input, accepted original-key linkage, clinical fields and
+indexes remain unchanged. No new export or mapping rule is required for this
+hierarchy change. New schema-7 estimation must verify input/evidence hashes and
+primary-estimate invariance; previous execution receipts retain their old scope.

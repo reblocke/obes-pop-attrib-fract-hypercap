@@ -124,6 +124,11 @@ bmi_run_analysis <- function(raw,config,source_status="artificial",audit_only=FA
   combined<-bmi_namespace(combined,"combined")
   audits<-bmi_rfs_audits(ctx,config)
   results<-list(combined);expected<-list()
+  for(group in unlist(config$descriptive_populations)) {
+    d<-q[q$rfs_group==group,,drop=FALSE]
+    if(ctx$day_status=="pending")d[triangulation_index_day_columns]<-NULL
+    results[[group]]<-bmi_namespace(bmi_run_population_analysis(d,config,source_status,audit_only=TRUE),group)
+  }
   parent_basis<-list()
   for(group in unlist(config$analysis_populations)) {
     parent<-sub("_current$","",group)

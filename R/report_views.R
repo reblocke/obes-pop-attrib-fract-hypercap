@@ -8,7 +8,7 @@ bmi_population_label <- function(x) {
     C_icd="Known diagnosis capture",missing_adjustment="Incomplete adjustment",M_abg="Matched ICD / ABG",M_any_gas="Matched ICD / combined gas",
     C_abg_encounter="ABG outcome observed",C_any_gas_encounter="Combined outcome observed",
     "combined::Q"="All resolved common indexes", "primary::Q"="Non-OBESITY-supported entry",
-    "obesity_only::Q"="Obesity-only source entry", "unresolved::Q"="RFS membership unresolved")
+    "obesity_only::Q"="Obesity-only entry: descriptive audit", "unresolved::Q"="RFS membership unresolved")
   out<-unname(labels[x]);bad<-is.na(out);out[bad]<-gsub("_"," ",x[bad],fixed=TRUE);out
 }
 bmi_category_labels <- function(v,x,dictionary) {
@@ -194,6 +194,6 @@ bmi_scientific_results <- function(a,section) {
   if(section=="conclusion") {
     z<-a$fixed_bmi_contrasts[a$fixed_bmi_contrasts$model_id %in% bmi_primary_ids(),,drop=FALSE]
     direction<-"We estimated BMI–hypercapnia probability relationships within the fixed-index, non-OBESITY-supported source-entry population. Outcome-specific contrasts and their uncertainty are reported separately; they do not constitute a between-group test."
-    cat("> **Example conclusion, pending investigator review:** ",direction," Gas-based estimates describe patients with usable blood-gas evidence in this selected acute-care cohort; diagnosis-based estimates describe patients with known diagnosis capture. Differences in evidence availability limit comparisons between these populations. Secondary one-unit BMI-shift contrasts are descriptive model scenarios and do not establish effects of weight loss or cases prevented.\n\n",sep="")
+    cat("> **Example conclusion, pending investigator review:** ",direction," Gas-based estimates describe patients with usable blood-gas evidence in this selected acute-care cohort; diagnosis-based estimates describe patients with known diagnosis capture. Obesity-only entry is an evidence-availability audit because gas-related source selection depletes an independent physiological comparator. The primary association remains subject to outcome-dependent entry and selective gas measurement. Secondary one-unit BMI-shift contrasts are descriptive model scenarios and do not establish effects of weight loss or cases prevented.\n\n",sep="")
   }
 }

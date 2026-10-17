@@ -3,7 +3,7 @@ RFS01,Three-valued membership and overlap,tests/run_rfs_tests.R,automated fixtur
 RFS02,Source-membership zero does not imply outcome absence,tests/run_rfs_tests.R,automated fixture assertion
 RFS03,Metadata and gas changes preserve index,tests/run_rfs_tests.R,automated fixture assertion
 RFS04,Exact-key metadata joins and unknown retention,tests/test_rfs_enrichment.py,existing preparation Python environment required
-RFS05,Separate main-group fitting and saved basis identities,tests/run_rfs_tests.R,configured registry and basis checks
+RFS05,Retained modeled populations and saved basis identities,tests/run_rfs_tests.R,configured registry and basis checks
 RFS06,Current-measurement sensitivity preserves selected BMI,tests/run_rfs_tests.R,authenticated selected-source chronology
 RFS07,Paired equations and full covariance decomposition,tests/bmi_curve_checks.R,independent artificial numerical checks
 RFS08,Explicit estimator failures and zero/no-change quantities,tests/bmi_curve_checks.R,independent adverse fixtures
@@ -17,3 +17,6 @@ RFS15,Clinical provenance and raw demographic cross-tab,bmi_provenance.csv,suppo
 RFS16,Figure native-size and grayscale inspection,visual-review-receipt.json,actual visual review required
 RFS17,Cross-project decomposition and diagram discrepancy,prior_run_reconciliation.csv,not assessed remains explicit until authenticated
 RFS18,Investigator scientific approval,scientific-review-receipt.json,owner scientific review required
+RFS19,Obesity-only retained descriptively without models or predictions,tests/run_rfs_tests.R,positive gas fixtures must not activate modeling
+RFS20,Retained primary estimates unchanged,primary-invariance.json,authenticated before-after aggregate comparison
+RFS21,Raw availability uses full fixed-index denominator,RFS-evidence,actual export and independent denominator checks

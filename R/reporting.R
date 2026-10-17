@@ -2,6 +2,8 @@
 validate_analysis_bundle <- function(a) {
   if(!setequal(names(a),bmi_table_names)||!all(vapply(a,is.data.frame,logical(1))))stop("Unexpected aggregate table contract")
   for(name in names(a)) {
+    if("model_id" %in% names(a[[name]]) && nrow(a[[name]]) &&
+       any(grepl("^obesity_only(_current)?::",a[[name]]$model_id)))stop("Obesity-only models are superseded; retain descriptive evidence only")
     if(any(grepl("^(patient_id|encounter_id|selected_row|index_date|encounter_date|individual_prediction)$",names(a[[name]]))))stop("Private row-level field in bundle: ",name)
     if(any(vapply(a[[name]],function(v)inherits(v,"Date")||inherits(v,"POSIXt"),logical(1))))stop("Direct dates in aggregate bundle")
   }
@@ -51,7 +53,7 @@ bmi_write_bundle <- function(a,path,config,receipt,mode="fixture") {
   jsonlite::write_json(receipt,file.path(path,"input_receipt.json"),auto_unbox=TRUE,pretty=TRUE,digits=NA)
   writeLines(capture.output(sessionInfo()),file.path(path,"session-info.txt"))
   files<-list.files(path,full.names=TRUE)
-  manifest<-list(schema_version=6L,analysis_id=config$analysis_id,run_id=basename(path),mode=mode,
+  manifest<-list(schema_version=7L,analysis_id=config$analysis_id,run_id=basename(path),mode=mode,
     created_utc=format(Sys.time(),tz="UTC",usetz=TRUE),estimation_sources=bmi_hash_files(bmi_estimation_files()),
     files=as.list(setNames(vapply(files,tri_sha256,character(1)),basename(files))),
     source_status=if(mode=="fixture")"artificial_only"else receipt$source_status,
@@ -65,7 +67,7 @@ bmi_write_bundle <- function(a,path,config,receipt,mode="fixture") {
 bmi_read_bundle <- function(path,check_sources=TRUE) {
   mf<-file.path(path,"bundle_manifest.json");if(!file.exists(mf))stop("Missing bundle manifest")
   m<-jsonlite::read_json(mf,simplifyVector=FALSE)
-  if(!identical(m$schema_version,6L)||!identical(m$analysis_id,"bmi_hypercapnia_rfs_curve_audit_v1"))stop("Superseded analysis; rerun under the current design")
+  if(!identical(m$schema_version,7L)||!identical(m$analysis_id,"bmi_hypercapnia_rfs_curve_audit_v2"))stop("Superseded analysis; rerun under the current design")
   for(name in names(m$files)) {
     if(basename(name)!=name||!file.exists(file.path(path,name))||!identical(tri_sha256(file.path(path,name)),m$files[[name]]))stop("Bundle hash mismatch: ",name)
   }
@@ -190,7 +192,7 @@ bmi_export_population_figures <- function(bundle,output) {
   add<-function(id,draw,height,caption,kind="scientific figure") {
     if(id %in% c("F1-A","F1-B","F1-C","F2") && !is.null(bundle$manifest$source_group)) {
       source_draw<-draw;group<-bundle$manifest$source_group
-      group_label<-c(primary="Non-OBESITY-supported entry",obesity_only="Obesity-only source entry",primary_current="Non-OBESITY-supported; current BMI",obesity_only_current="Obesity-only; current BMI",all_obesity="Any OBESITY source entry (overlapping)")[[group]]
+      group_label<-c(primary="Non-OBESITY-supported entry",primary_current="Non-OBESITY-supported; current BMI",all_obesity="Any OBESITY source entry (overlapping)")[[group]]
       draw<-local({source_draw<-source_draw;label<-paste(group_label,"| encounter-wide");y<-if(id=="F2").92 else .95
         function(){source_draw();grid::grid.text(label,x=.02,y=y,just=c("left","top"),gp=grid::gpar(fontsize=9))}})
     }

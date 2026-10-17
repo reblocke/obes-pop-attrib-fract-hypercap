@@ -1,9 +1,23 @@
+# Raw outcome availability on the full fixed-index RFS populations, before adjustment.
+bmi_rfs_availability <- function(a) {
+  rows<-list()
+  for(group in c("primary","obesity_only"))for(o in c("abg","any_gas","icd")) {
+    subgroups<-if(group=="primary")c("non_obesity_only","overlap","non_obesity_with_unknown_obesity")else"obesity_only"
+    z<-a$rfs_outcomes[a$rfs_outcomes$subgroup %in% subgroups & a$rfs_outcomes$outcome_id==o & a$rfs_outcomes$ascertainment_window=="encounter",]
+    if(nrow(z)!=length(subgroups))stop("Missing RFS availability rows")
+    n<-sum(z$N);m<-sum(z$evaluable);interval<-bmi_wilson(m,n)
+    rows[[length(rows)+1L]]<-data.frame(population_id=group,outcome_id=o,N=n,M=m,unknown=sum(z$unknown),
+      percent=if(n>0)100*m/n else NA_real_,conf_low=100*interval[1],conf_high=100*interval[2])
+  }
+  bmi_bind(rows)
+}
+
 # Population-aware views; all numerical figures read saved aggregates only.
 bmi_export_figures <- function(bundle,output) {
   dir.create(output,recursive=TRUE,showWarnings=FALSE)
   all_captions<-all_manifests<-all_atlas<-list()
   root_draw<-function(draw)function(){draw();if(bundle$manifest$mode=="fixture")grid::grid.text("ARTIFICIAL DATA ONLY",x=.985,y=.995,just=c("right","top"),gp=grid::gpar(fontsize=9,col="grey25"))}
-  for(group in c("combined","unresolved",unlist(bundle$config$analysis_populations))) {
+  for(group in c("combined","unresolved",unlist(bundle$config$descriptive_populations),unlist(bundle$config$analysis_populations))) {
     view<-bmi_group_view(bundle$analysis,group)
     if(!nrow(view$cohort_nodes))next
     child<-bundle;child$analysis<-view;child$manifest$source_group<-group
@@ -43,11 +57,32 @@ bmi_export_figures <- function(bundle,output) {
       ggplot2::labs(title="Historical source-entry membership across BMI",subtitle="Fixed common indexes; counts, not equal-area densities",x="BMI (kg/m2)",y="Indexed patients")+bmi_theme()+
       ggplot2::theme(legend.text=ggplot2::element_text(size=9))
     stem<-file.path(output,"RFS-entry");bmi_export(root_draw(function()print(plot)),stem,height_mm=190)
-    caption<-"Historical source-entry subgroup counts by BMI, pooling the two acute settings on fixed indexes. Overlap remains in primary; obesity-only is a separate selection sensitivity. Membership records source-file representation, not exhaustive clinical criteria. Unresolved and all-zero discrepancies are retained. All groups partition the common indexed population. No association or causal bias correction follows from this partition."
+    caption<-"Historical source-entry subgroup counts by BMI, pooling the two acute settings on fixed indexes. Overlap remains in primary; obesity-only is a descriptive selection audit without adjusted outcome models. Membership records source-file representation, not exhaustive clinical criteria. Unresolved and all-zero discrepancies are retained. All groups partition the common indexed population. No association or causal bias correction follows from this partition."
     if(bundle$manifest$mode=="fixture")caption<-paste("ARTIFICIAL DATA ONLY.",caption)
     all_captions[["entry"]]<-data.frame(figure_id="RFS-entry",caption=caption,alt_text=caption,source_tables="rfs_by_bmi")
   }
-  for(id in c("RFS-flow","RFS-entry"))if(file.exists(file.path(output,paste0(id,".png")))) {
+  if(nrow(a$rfs_outcomes)) {
+    availability<-bmi_rfs_availability(a)
+    utils::write.csv(availability,file.path(output,"rfs-evidence-display.csv"),row.names=FALSE)
+    availability$y<-ifelse(availability$population_id=="primary",2,1)
+    availability$label<-paste0(format(availability$M,big.mark=",",trim=TRUE)," / ",format(availability$N,big.mark=",",trim=TRUE),"\n",ifelse(is.na(availability$percent),"unavailable",paste0(bmi_number(availability$percent,3),"%")))
+    labels<-vapply(c("abg","any_gas","icd"),function(o)paste(strwrap(bmi_outcome_label(o),22),collapse="\n"),character(1))
+    availability$outcome_label<-factor(labels[match(availability$outcome_id,c("abg","any_gas","icd"))],levels=labels)
+    plot<-ggplot2::ggplot(availability,ggplot2::aes(percent,y))+
+      ggplot2::geom_segment(ggplot2::aes(x=conf_low,xend=conf_high,yend=y),linewidth=.7,na.rm=TRUE)+
+      ggplot2::geom_point(size=2,na.rm=TRUE)+
+      ggplot2::geom_text(ggplot2::aes(label=label),x=50,nudge_y=-.27,size=3.2,lineheight=.95)+
+      ggplot2::facet_wrap(~outcome_label,nrow=1)+
+      ggplot2::scale_x_continuous(limits=c(0,100),breaks=c(0,50,100),labels=function(x)paste0(x,"%"))+
+      ggplot2::scale_y_continuous(limits=c(.35,2.35),breaks=c(1,2),labels=c("Obesity-only","Primary"))+
+      ggplot2::labs(title="Evidence availability by source-entry population",subtitle="Full fixed-index populations; raw proportions and Wilson 95% intervals",x="Outcome evaluable",y=NULL)+bmi_theme()+
+      ggplot2::theme(strip.text=ggplot2::element_text(size=9,face="bold"),panel.spacing.x=grid::unit(5,"mm"))
+    bmi_export(root_draw(function()print(plot)),file.path(output,"RFS-evidence"),height_mm=125)
+    caption<-"Raw encounter-wide outcome evaluability among all fixed indexes in each RFS group, before adjustment completeness. Labels give evaluable/full N and percentages; intervals are 95% Wilson intervals. Primary includes non-OBESITY pathways and their OBESITY overlaps. Obesity-only is descriptive: gas-related source pathways select on testing and potentially results, depleting an independent gas comparator. Usable evidence is not identical to gas acquisition; absent historical source membership does not establish no gas was collected. Sparse residual gas records remain in the counts without recoding flags. ICD refers to known diagnosis capture, not ICD positivity. No adjusted curve or PIF is estimated for obesity-only."
+    if(bundle$manifest$mode=="fixture")caption<-paste("ARTIFICIAL DATA ONLY.",caption)
+    all_captions[["evidence"]]<-data.frame(figure_id="RFS-evidence",caption=caption,alt_text=caption,source_tables="rfs_outcomes;rfs_summary")
+  }
+  for(id in c("RFS-flow","RFS-entry","RFS-evidence"))if(file.exists(file.path(output,paste0(id,".png")))) {
     all_manifests[[id]]<-data.frame(figure_id=id,panel_id="all",file_path=file.path(output,paste0(id,".png")),export_paths=paste(file.path(output,paste0(id,c(".svg",".pdf",".png",".jpg"))),collapse=";"),source_path="R/rfs_reporting.R",figure_type="source-entry audit",intended_use="private research review",width_px=round(190/25.4*300),dpi_x=300,dpi_y=300,color_mode="grayscale",vector_status="SVG/PDF",qc_status="exported; actual visual review pending")
   }
   utils::write.csv(bmi_bind(all_captions),file.path(output,"captions.csv"),row.names=FALSE)
@@ -60,5 +95,5 @@ bmi_export_figures <- function(bundle,output) {
     html<-c(html,paste0("<article><h2>",id,"</h2><a href='",id,".png'><img loading='lazy' src='",id,".png' alt='",id,"'></a><p>",captions$caption[i],"</p></article>"))
   }
   writeLines(html,file.path(output,"gallery.html"))
-  jsonlite::write_json(list(same_saved_values=TRUE,clinical_reads=0,model_refits=0,visual_inspection="pending",populations=bundle$config$analysis_populations),file.path(output,"figure-data-receipt.json"),auto_unbox=TRUE,pretty=TRUE)
+  jsonlite::write_json(list(same_saved_values=TRUE,clinical_reads=0,model_refits=0,visual_inspection="pending",populations=bundle$config$analysis_populations,descriptive_populations=bundle$config$descriptive_populations),file.path(output,"figure-data-receipt.json"),auto_unbox=TRUE,pretty=TRUE)
 }

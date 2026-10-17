@@ -1,14 +1,19 @@
 # BMI and documented hypercapnia
 
-**Current revision: historical source-entry populations.** The primary analysis
-includes fixed first BMI-eligible indexes represented through at least one
-non-OBESITY source pathway, retaining OBESITY overlaps. Obesity-only source entry
-is the principal selection sensitivity. Historical flags record extraction
-membership; zero does not establish clinical absence. The combined cohort is an
-audit reference. The version-6 clinical analysis completed on the Mini from
-merged revision `4fdf4eb`; all 162 aggregate numerical checks passed. Both reports
-and scoped export/layout review are complete. Investigator numerical/scientific
-approval remains pending, separate from the earlier version-5 clinical run.
+**Current revision: primary curves and a descriptive source-entry audit.** The
+primary analysis retains fixed first BMI-eligible indexes represented through at
+least one non-OBESITY pathway, including OBESITY overlaps. Obesity-only source
+entry supplies cohort, profile and outcome-availability counts; no adjusted
+obesity-only curves or PIFs are registered. Gas-related entry can select on testing
+and results, so removing those pathways depletes an independent physiological
+comparator. Historical flags describe extraction membership, not exhaustive gas
+acquisition. Sparse residual gases remain in the audit without recoding flags.
+
+Version 7 (`bmi_hypercapnia_rfs_curve_audit_v2`) supersedes the earlier version-6
+modeling hierarchy and rejects its bundles. The qualified schema-4 input, index,
+clinical fields and primary estimand are unchanged. Revised clinical execution
+and report review remain pending until run from released code. Previous clinical
+runs and reviews retain their original labels and investigator approval states.
 
 Two reports share one immutable aggregate bundle:
 
@@ -41,9 +46,9 @@ CSV/RDS aggregates, F0–F5 exports, the three F1 alternatives and `figures/gall
 A failed render preserves estimation: rerender the printed run rather than refit.
 
 ```bash
-make render RUN="artifacts/triangulation/<exact-version-6-run>"
-make render-html RUN="artifacts/triangulation/<exact-version-6-run>"
-make render-pdf RUN="artifacts/triangulation/<exact-version-6-run>"
+make render RUN="artifacts/triangulation/<exact-version-7-run>"
+make render-html RUN="artifacts/triangulation/<exact-version-7-run>"
+make render-pdf RUN="artifacts/triangulation/<exact-version-7-run>"
 ```
 
 For prose/table-only revisions, reuse completed figures after the bundle and
@@ -61,7 +66,7 @@ require a new run; hashes prevent silent reuse. HTML/PDF renders run sequentiall
 Review the saved numerical identities and prepare export checks with:
 
 ```bash
-Rscript scripts/review_bmi_run.R "artifacts/triangulation/<exact-version-6-run>"
+Rscript scripts/review_bmi_run.R "artifacts/triangulation/<exact-version-7-run>"
 python3 scripts/check_report_exports.py "artifacts/triangulation/<run>/reviews/<review>"
 ```
 
@@ -144,20 +149,13 @@ candidate covariates. The older selected-index input and its passing source chec
 alone cannot supply the full new audit. Qualification failures retain a partial
 audit and block inference; unknown totals are not zeros.
 
-The original-list source was accepted for the earlier observed-population study.
-Its version-5 run from `ca24564` and completed numerical/layout reviews remain
-historical. The RFS revision adds authenticated metadata without changing those
-clinical fields or indexes. Its metadata-enriched input passed source preflight,
-and clinical estimation completed once from clean merged revision `4fdf4eb`.
-Post-run input/evidence hashes match and all 162 aggregate numerical checks pass.
-Sparse obesity-only fits retain their separation/rank-deficiency statuses; no
-fallback estimator supplies an apparent comparison. Investigator numerical and
-scientific approval remain separate from automated checks and layout review.
-Both HTML/PDF reports and three main-figure alternatives are available in the
-private review folder with a key-figure gallery. Every PDF page and figure received
-automated export checks; manual inspection covers all scientific page overviews,
-selected native scientific/audit pages and key figures. This is not a claim of
-individual human inspection of the entire complete audit.
+The original-list source and metadata-enriched schema-4 input retain their
+existing acceptance and exact-key evidence. The previous version-6 run completed
+from `4fdf4eb` with 162 numerical checks. Its reports remain historical. The revised
+hierarchy requires a fresh run from released code; existing clinical results
+cannot acquire new labels. Source products, BMI derivations, selected indexes and
+outcome rules do not change. Investigator numerical/scientific approval and
+additional cross-project/diagram work remain separate.
 Exact private run paths and hashes remain in ignored release storage and WORKLOG.
 Read the
 [current plan](docs/BMI_HYPERCAPNIA_TRIANGULATION_PLAN.md),
@@ -197,7 +195,7 @@ clinical estimation still requires a clean merged Mini checkout. The enrichment
 checks exact prior clinical-field and index identity. Unavailable historical
 trigger evidence stays unresolved; current BMI never reconstructs the entry trigger.
 
-The audit includes limited current-measurement and overlapping all-OBESITY
+The audit includes primary current-measurement and overlapping all-OBESITY
 supporting analyses. Numeric demographic coding is preserved; inherited Unknown
 categories remain nonmissing. The White reference includes unknown ethnicity.
 
