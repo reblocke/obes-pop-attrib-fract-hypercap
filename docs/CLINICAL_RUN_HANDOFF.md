@@ -1,3 +1,16 @@
+# Current RFS execution — 2026-10-17
+
+PR #12 merged as `4fdf4eb`; the qualified schema-4 input completed final preflight
+and one clinical estimation on the clean matching Mini checkout. All 162
+aggregate numerical checks passed and input/evidence hashes remain unchanged.
+The version-6 run, exact source identities and review receipts live in ignored
+release storage. Rerender that exact saved run for presentation changes; do not
+repeat estimation merely to repair a report. Investigator review is separate.
+
+The dated sections below preserve earlier qualification and release histories;
+their unrun/pending statements describe those checkpoints, not the current RFS
+execution state. Earlier bundles cannot be relabeled or rendered as version 6.
+
 # Upstream mapper pin adoption — 2026-10-17
 
 The owner approved adopting the corrected mapper after upstream

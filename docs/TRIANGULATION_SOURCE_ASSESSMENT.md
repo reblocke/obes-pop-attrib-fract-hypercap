@@ -334,3 +334,20 @@ final BMI. Outcome-incorporation/depletion is audited from the fixed indexes.
 Clinical estimation, numerical review, layout QC and investigator scientific
 approval retain separate states. Other-project keyed decomposition and the
 unidentified historical diagram discrepancy remain explicitly unassessed.
+
+### Released RFS source and execution checkpoint — 2026-10-17
+
+Final preflight and one clinical estimation completed on the clean Mini checkout
+at merged revision `4fdf4eb`. Exact prior clinical fields and indexes remain
+unchanged. All bound source-evidence and input hashes still match after execution;
+all 162 saved-aggregate numerical checks pass. Source acceptance is for documented
+historical membership and the approved observed-outcome analysis, not exhaustive
+clinical criterion ascertainment or causal interpretation.
+
+Obesity-only outcome evaluability is severely depleted. Separation and rank
+deficiency remain explicit model statuses, with descriptive counts preserved;
+nonestimability is not evidence of no BMI association. The prespecified
+all-OBESITY supporting population overlaps primary and does not replace that
+sensitivity. Historical exact-query/trigger limits, external-project keyed
+decomposition and investigator scientific review remain unresolved as described
+above. No replacement export is indicated by the completed checks.

@@ -5,8 +5,10 @@ includes fixed first BMI-eligible indexes represented through at least one
 non-OBESITY source pathway, retaining OBESITY overlaps. Obesity-only source entry
 is the principal selection sensitivity. Historical flags record extraction
 membership; zero does not establish clinical absence. The combined cohort is an
-audit reference. Revised clinical execution/review status is recorded separately
-from the earlier version-5 clinical run.
+audit reference. The version-6 clinical analysis completed on the Mini from
+merged revision `4fdf4eb`; all 162 aggregate numerical checks passed. Both reports
+and scoped export/layout review are complete. Investigator numerical/scientific
+approval remains pending, separate from the earlier version-5 clinical run.
 
 Two reports share one immutable aggregate bundle:
 
@@ -63,8 +65,9 @@ Rscript scripts/review_bmi_run.R "artifacts/triangulation/<exact-version-6-run>"
 python3 scripts/check_report_exports.py "artifacts/triangulation/<run>/reviews/<review>"
 ```
 
-The numerical command optionally accepts a second historical run for an
-authenticated comparison of unchanged models/cohorts and observed scenarios.
+The numerical command accepts one saved run. Prior-run index and field equality
+are source-qualification checks; coefficients from separately fitted RFS
+populations and spline bases are not expected to remain identical.
 The export command uses an existing Python with Pillow and Poppler's `pdftotext`
 and `pdftoppm`. It checks page bounds, symbols and formats, then prepares page
 overviews and figure sheets. It does not certify manual visual or scientific
@@ -144,9 +147,17 @@ audit and block inference; unknown totals are not zeros.
 The original-list source was accepted for the earlier observed-population study.
 Its version-5 run from `ca24564` and completed numerical/layout reviews remain
 historical. The RFS revision adds authenticated metadata without changing those
-clinical fields or indexes. Its metadata-enriched input passed source preflight;
-clinical estimation and report review for the new hierarchy remain pending until
-performed from released code. Investigator scientific approval is separate.
+clinical fields or indexes. Its metadata-enriched input passed source preflight,
+and clinical estimation completed once from clean merged revision `4fdf4eb`.
+Post-run input/evidence hashes match and all 162 aggregate numerical checks pass.
+Sparse obesity-only fits retain their separation/rank-deficiency statuses; no
+fallback estimator supplies an apparent comparison. Investigator numerical and
+scientific approval remain separate from automated checks and layout review.
+Both HTML/PDF reports and three main-figure alternatives are available in the
+private review folder with a key-figure gallery. Every PDF page and figure received
+automated export checks; manual inspection covers all scientific page overviews,
+selected native scientific/audit pages and key figures. This is not a claim of
+individual human inspection of the entire complete audit.
 Exact private run paths and hashes remain in ignored release storage and WORKLOG.
 Read the
 [current plan](docs/BMI_HYPERCAPNIA_TRIANGULATION_PLAN.md),

@@ -64,3 +64,26 @@ reconciliation. Do not edit other projects.
 Completion: revised code, independent checks, source-qualified enriched input,
 reconciled clinical execution, complete reports/figures and change log. Any remaining
 source or scientific review limitation must accompany the delivery.
+
+## Execution checkpoint — 2026-10-17
+
+PR #12 merged as `4fdf4eb`. The clean Mini checkout passed final source preflight
+and completed one clinical estimation. All 162 aggregate numerical checks pass;
+post-run input and evidence hashes match. The configured registry contains all
+planned positions, including constant-outcome, separation and rank-deficiency
+statuses. Sparse obesity-only fits are not replaced with another estimator.
+
+Both reports and figure alternatives are generated from that saved bundle;
+presentation repairs do not authorize another estimation. Exact private paths,
+hashes, rendering and scoped visual-review receipts remain in ignored release
+storage. Investigator numerical/scientific approval and cross-project keyed
+decomposition remain distinct outstanding work. Historical query parameters and
+individual entry triggers remain unavailable, rather than reconstructed.
+
+Clinical HTML/PDF rendering and table/covariance coverage checks completed from
+saved aggregates with zero clinical input reads or refits. All-export checks pass
+for 57 scientific pages, 3,681 audit pages and 1,554 figure sets. The separate
+visual receipt identifies the native key figures, scientific overviews and
+representative audit pages actually inspected; it does not claim manual review
+of every audit page. A remains preferred. Full CSVs retain exact numeric lookup
+where dense PDF tables wrap tokens. Investigator approval remains pending.

@@ -21,3 +21,17 @@ Baseline dd6b927. This is an implementation/evidence map, not scientific approva
 Actual clinical/visual review receipts live with fresh private runs. Unsupported
 historical trigger/query details remain unavailable; published defaults are not
 proof of historical query settings. No other repository's outputs are edited.
+
+Release checkpoint: PR #12 merged as `4fdf4eb`; the qualified metadata-enriched
+input completed one clinical analysis on the clean Mini checkout. All 162
+aggregate numerical checks passed and post-run evidence hashes match. Required
+obesity-only nonestimability is retained. Software/source/automated numerical
+completion does not close RFS17's additional cross-project/diagram work or
+RFS18's investigator scientific approval. Actual clinical report/export review
+receipts remain private and separate from artificial acceptance evidence.
+
+Both clinical HTML/PDF reports now pass complete table/covariance coverage and
+all-export geometry/format checks. The scoped visual receipt records actual key
+figure and page inspection; it does not assert individual human review of the
+full audit atlas. A fresh clinical requirement ledger retains RFS17 as unassessed
+and RFS18 as pending investigator review. No clinical artifacts are committed.
