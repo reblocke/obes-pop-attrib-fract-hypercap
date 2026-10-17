@@ -1086,3 +1086,37 @@ clinical input/indexes; revised clinical estimation remains pending until releas
 and the clean merged Mini checkout check. Generated materials remain ignored.
 Previous failed reviews and immutable inputs/bundles are preserved. There are no
 configured GitHub CI checks; actual local/Mini evidence is reported separately.
+
+## 2026-10-17 — RFS clinical execution and aggregate review
+
+PR #12 squash-merged as `4fdf4eb2394f5afcb2dd93fbe5c5250c548d1649`.
+The isolated Mini checkout was synchronized through a verified Git bundle;
+HEAD, origin/main and clean tree matched before execution. Existing accepted
+products, source checkouts and other research processes were not modified.
+The guarded controller completed `make preflight` and exactly one `make analyze`
+with the fresh schema-4 input. Final preflight was
+`curve-preflight-20261017T154641-49407`; the saved clinical run is
+`curve-analyze-20261017T155732-49775`.
+
+Both Mini and local `scripts/review_bmi_run.R` passed all 162 aggregate numerical
+checks. All 51 configured positions are retained: successful fits, constant
+observation outcomes, separation and rank deficiency. Obesity-only models are
+not replaced with simplified/penalized estimators. The primary and supporting
+models are separately fitted; equality of historical coefficients is not a
+release requirement. Prior exact clinical fields/indexes remain unchanged.
+Post-run input and all bound evidence hashes match; the source receipt records
+automated verification without inventing human approval.
+
+Only the manifest-listed aggregate files and numerical receipts were copied
+locally. Their archive hash and bundle hashes were verified. Clinical inputs,
+candidate metadata, keys, dates and model objects stayed on the Mini. `make render`
+reads this saved run under aggregate-only tripwires. Exact artifacts and receipts
+remain in ignored `artifacts/triangulation/clinical-rfs-release-20261017/`.
+
+The README-builder pass corrected the obsolete two-run numerical-review example
+and updated the plan, decision/source/response logs and clinical handoff with
+actual execution status. All 25 local documentation links resolve and
+`git diff --check` passes. Remaining historical query/trigger evidence,
+cross-project keyed decomposition and investigator interpretation retain their
+explicit unresolved status. Rendering/export QC is recorded separately below;
+no abstract submission or public clinical release is authorized here.

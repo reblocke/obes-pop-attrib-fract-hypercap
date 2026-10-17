@@ -276,3 +276,18 @@ Use input schema 4, bundle schema 6 and analysis identity
 cannot be relabeled. The original BMI hierarchy, index and clinical fields must
 reconcile exactly before clinical estimation. Source acceptance, execution,
 numerical, visual and scientific reviews remain distinct. Submission is excluded.
+
+### RFS release and clinical execution — 2026-10-17
+
+The approved design was released in PR #12 (`4fdf4eb`) and estimated once on the
+clean matching Mini checkout. Source/input/index identities and all 162 aggregate
+numerical checks pass. No scientific rule, BMI definition or original index was
+changed during execution. Sparse obesity-only models retain their registered
+failure states; no simplification, penalization or promotion of an overlapping
+supporting population was adopted. Constant diagnosis-observation outcomes are
+reported as constant, not fitted models.
+
+Rendering and visual review use the saved aggregates. Investigator numerical and
+scientific approval remain pending; successful numerical reconciliation does not
+approve interpretation or submission. Additional external-project/diagram audits
+and unavailable historical entry-trigger details retain their explicit status.
