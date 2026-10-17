@@ -79,3 +79,11 @@ hashes, rendering and scoped visual-review receipts remain in ignored release
 storage. Investigator numerical/scientific approval and cross-project keyed
 decomposition remain distinct outstanding work. Historical query parameters and
 individual entry triggers remain unavailable, rather than reconstructed.
+
+Clinical HTML/PDF rendering and table/covariance coverage checks completed from
+saved aggregates with zero clinical input reads or refits. All-export checks pass
+for 57 scientific pages, 3,681 audit pages and 1,554 figure sets. The separate
+visual receipt identifies the native key figures, scientific overviews and
+representative audit pages actually inspected; it does not claim manual review
+of every audit page. A remains preferred. Full CSVs retain exact numeric lookup
+where dense PDF tables wrap tokens. Investigator approval remains pending.

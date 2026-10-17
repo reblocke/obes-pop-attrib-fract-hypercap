@@ -6,9 +6,9 @@ non-OBESITY source pathway, retaining OBESITY overlaps. Obesity-only source entr
 is the principal selection sensitivity. Historical flags record extraction
 membership; zero does not establish clinical absence. The combined cohort is an
 audit reference. The version-6 clinical analysis completed on the Mini from
-merged revision `4fdf4eb`; all 162 aggregate numerical checks passed. Report and
-visual-review status is recorded separately from investigator scientific approval
-and the earlier version-5 clinical run.
+merged revision `4fdf4eb`; all 162 aggregate numerical checks passed. Both reports
+and scoped export/layout review are complete. Investigator numerical/scientific
+approval remains pending, separate from the earlier version-5 clinical run.
 
 Two reports share one immutable aggregate bundle:
 
@@ -153,6 +153,11 @@ Post-run input/evidence hashes match and all 162 aggregate numerical checks pass
 Sparse obesity-only fits retain their separation/rank-deficiency statuses; no
 fallback estimator supplies an apparent comparison. Investigator numerical and
 scientific approval remain separate from automated checks and layout review.
+Both HTML/PDF reports and three main-figure alternatives are available in the
+private review folder with a key-figure gallery. Every PDF page and figure received
+automated export checks; manual inspection covers all scientific page overviews,
+selected native scientific/audit pages and key figures. This is not a claim of
+individual human inspection of the entire complete audit.
 Exact private run paths and hashes remain in ignored release storage and WORKLOG.
 Read the
 [current plan](docs/BMI_HYPERCAPNIA_TRIANGULATION_PLAN.md),

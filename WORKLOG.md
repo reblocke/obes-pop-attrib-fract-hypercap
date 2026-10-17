@@ -1120,3 +1120,25 @@ actual execution status. All 25 local documentation links resolve and
 cross-project keyed decomposition and investigator interpretation retain their
 explicit unresolved status. Rendering/export QC is recorded separately below;
 no abstract submission or public clinical release is authorized here.
+
+### Clinical report and export closeout
+
+Saved-run review `20261017T155850-35614` completed both HTML/PDF reports with zero
+clinical input reads or refits. Complete table/coefficient/covariance coverage
+passed. All-export QC checked every page and figure: 57 scientific pages, 3,681
+audit pages and 1,554 figure sets; no bounds, replacement-symbol, collision,
+grayscale or format issue was detected. All 27 JPG exports also match PNG dimensions
+and 300-dpi metadata. The scoped visual receipt records all scientific page
+overviews, five native scientific pages, eleven representative native audit pages,
+the six main A/B/C alternatives, paired displays and source-entry/flow figures.
+It does not claim manual inspection of every audit page or native atlas image.
+F1-A remains preferred; the other alternatives and full CSVs remain available.
+
+All 74 acceptance checks passed again against this completed clinical render/visual
+receipt (`kernel-tests-20261017T161730-38505`); computational fixtures remain
+artificial. A fresh RFS requirement receipt keeps additional external-project and
+diagram work unassessed and investigator approval pending. The separate private
+`clinical-release-review-receipt.json` binds exact code/input/manifest/companion,
+aggregate, numerical, integration and scoped visual evidence. Dense numeric tables
+can wrap tokens or require cross-panel row-order matching; complete CSVs retain
+exact lookup. No patient-level data or clinical artifacts enter Git.
