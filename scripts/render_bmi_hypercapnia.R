@@ -10,9 +10,33 @@ dir.create(review,recursive=TRUE,mode="0700");review<-normalizePath(review)
 # Tripwires remain active in this process and each independent Quarto session.
 load_common_input<-load_triangulation_input<-bmi_load_input<-fit_bmi_model<-fit_registered_models<-bmi_run_analysis<-function(...)stop("Rendering may not open clinical inputs or fit models")
 receipt<-list(status="started",bundle_manifest_sha256=tri_sha256(file.path(run,"bundle_manifest.json")),clinical_input_reads=0L,model_refits=0L,
-  render_sources=bmi_hash_files(c("R/reporting.R","R/report_views.R","R/rfs_reporting.R","scripts/render_bmi_hypercapnia.R","reports/bmi_hypercapnia.qmd","reports/bmi_hypercapnia_audit.qmd","reports/bmi_report.css")))
+  render_sources=bmi_hash_files(c("R/reporting.R","R/report_views.R","R/rfs_reporting.R","scripts/render_bmi_hypercapnia.R","reports/bmi_hypercapnia.qmd","reports/bmi_hypercapnia_audit.qmd","reports/bmi_report.css","reports/table_passthrough.R")))
 jsonlite::write_json(receipt,file.path(review,"render-receipt.json"),auto_unbox=TRUE,pretty=TRUE)
-bmi_export_figures(bundle,file.path(review,"figures"))
+reuse<-Sys.getenv("BMI_FIGURES_FROM")
+if(nzchar(reuse)) {
+  reuse<-normalizePath(reuse,mustWork=TRUE)
+  previous<-jsonlite::read_json(file.path(reuse,"render-receipt.json"),simplifyVector=FALSE)
+  if(!previous$status %in% c("completed","failed"))stop("Prior report job is still open; wait for its final receipt")
+  figure_sources<-c("R/reporting.R","R/report_views.R","R/rfs_reporting.R")
+  if(!identical(previous$bundle_manifest_sha256,receipt$bundle_manifest_sha256))stop("Reused figures belong to a different aggregate bundle")
+  if(!identical(previous$render_sources[figure_sources],bmi_hash_files(figure_sources)))stop("Figure-source hash mismatch; regenerate figures from the saved run")
+  marker<-file.path(reuse,"figures","figure-data-receipt.json")
+  if(!file.exists(marker))stop("Prior figure export is incomplete")
+  captions<-utils::read.csv(file.path(reuse,"figures","captions.csv"),stringsAsFactors=FALSE)
+  for(id in captions$figure_id)for(ext in c("pdf","svg","png")) {
+    path<-file.path(reuse,"figures",paste0(id,".",ext))
+    if(!file.exists(path)||file.info(path)$size==0)stop("Incomplete reused figure: ",id)
+  }
+  if(!file.copy(file.path(reuse,"figures"),review,recursive=TRUE))stop("Figure copy failed")
+  for(path in list.files(file.path(review,"figures"),pattern="figure-qc-manifest[.]csv$",recursive=TRUE,full.names=TRUE)) {
+    z<-utils::read.csv(path,stringsAsFactors=FALSE,check.names=FALSE)
+    for(name in intersect(c("file_path","export_paths"),names(z)))z[[name]]<-gsub(reuse,review,z[[name]],fixed=TRUE)
+    utils::write.csv(z,path,row.names=FALSE)
+  }
+  receipt$figures_reused_from<-reuse
+  receipt$previous_render_receipt_sha256<-tri_sha256(file.path(reuse,"render-receipt.json"))
+  receipt$figure_data_receipt_sha256<-tri_sha256(marker)
+} else bmi_export_figures(bundle,file.path(review,"figures"))
 Sys.setenv(BMI_RUN_DIR=run,BMI_REVIEW_DIR=review)
 formats<-if(format=="all")c("html","pdf")else format
 failures<-character()

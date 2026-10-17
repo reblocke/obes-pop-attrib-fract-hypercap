@@ -32,6 +32,8 @@ root<-Sys.getenv("BMI_REPO_ROOT");run<-Sys.getenv("BMI_RUN_DIR");review<-Sys.get
 if(!nzchar(root)||!dir.exists(run)||!dir.exists(review))stop("Use explicit saved-run rendering")
 source(file.path(root,"R","analysis.R"));Sys.setenv(BMI_REPORT_ID="scientific")
 load_common_input<-load_triangulation_input<-bmi_load_input<-fit_bmi_model<-fit_registered_models<-bmi_run_analysis<-function(...)stop("Render tripwire: clinical input/model fitting forbidden")
+source(file.path(root,"reports","table_passthrough.R"))
+bmi_report_table<-bmi_raw_table_writer(bmi_report_table)
 bundle<-bmi_read_bundle(run);a<-bundle$analysis
 captions<-utils::read.csv(file.path(review,"figures","captions.csv"),stringsAsFactors=FALSE)
 figure<-function(id)bmi_figure(id,review,captions)
@@ -66,7 +68,7 @@ The combined indexed cohort is a reconciliation reference. Non-OBESITY-only, ove
 
 ## Outcomes and adjustment
 
-Arterial hypercapnia requires ordinary authenticated ABG PaCO₂ ≥45 mm Hg. Combined gas accepts ABG PaCO₂ ≥45 or VBG PvCO₂ ≥50 mm Hg; both specimens are not required. No pH restriction is applied. Strict validity limits are 5<arterial<200 and 10<venous<250 mm Hg, with reviewed units. Available-evidence negatives do not establish that an unmeasured specimen is normal. Unusable or unavailable outcomes remain unknown.
+Arterial hypercapnia requires ordinary authenticated ABG PaCO~2~ ≥45 mm Hg. Combined gas accepts ABG PaCO~2~ ≥45 or VBG PvCO~2~ ≥50 mm Hg; both specimens are not required. No pH restriction is applied. Strict validity limits are 5<arterial<200 and 10<venous<250 mm Hg, with reviewed units. Available-evidence negatives do not establish that an unmeasured specimen is normal. Unusable or unavailable outcomes remain unknown.
 
 The ICD composite comprises J96.02, J96.12, J96.22, J96.92 and E66.2, with captured absence negative only under complete diagnosis capture. E66.2 introduces obesity-related ascertainment. Index-calendar-day gas sensitivities use collection date equal to encounter-start date, retaining the index.
 

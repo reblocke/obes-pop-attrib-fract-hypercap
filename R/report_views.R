@@ -6,7 +6,9 @@ bmi_population_label <- function(x) {
     n_frame_patients="Patients with confirmed eligibility",n_index_unresolved="First index unresolved",n_membership_uncertain="Patient eligibility uncertain",
     n_no_eligible_or_uncertain="No eligible or uncertain encounter",Q="Resolved first indexes (Q)",C="Complete adjustment (C)",C40="BMI ≥40 within C",
     C_icd="Known diagnosis capture",missing_adjustment="Incomplete adjustment",M_abg="Matched ICD / ABG",M_any_gas="Matched ICD / combined gas",
-    C_abg_encounter="ABG outcome observed",C_any_gas_encounter="Combined outcome observed")
+    C_abg_encounter="ABG outcome observed",C_any_gas_encounter="Combined outcome observed",
+    "combined::Q"="All resolved common indexes", "primary::Q"="Non-OBESITY-supported entry",
+    "obesity_only::Q"="Obesity-only source entry", "unresolved::Q"="RFS membership unresolved")
   out<-unname(labels[x]);bad<-is.na(out);out[bad]<-gsub("_"," ",x[bad],fixed=TRUE);out
 }
 bmi_category_labels <- function(v,x,dictionary) {
@@ -38,7 +40,7 @@ bmi_draw_panels <- function(plots,cells,heights,title) {
   };grid::popViewport()
 }
 bmi_draw_relationship <- function(p,obs,freq,variant) {
-  freq<-freq+ggplot2::labs(title="BMI frequency in C",subtitle=NULL,y="Patients (%)")+ggplot2::guides(fill=ggplot2::guide_legend(nrow=1))+ggplot2::theme(legend.key.height=grid::unit(3,"mm"),legend.margin=ggplot2::margin(0,0,0,0),plot.margin=grid::unit(c(1,3,1,3),"mm"))
+  freq<-freq+ggplot2::labs(title="BMI frequency in C",y="Patients (%)")+ggplot2::guides(fill=ggplot2::guide_legend(nrow=1))+ggplot2::theme(legend.key.height=grid::unit(3,"mm"),legend.margin=ggplot2::margin(0,0,0,0),plot.margin=grid::unit(c(1,3,1,3),"mm"))
   if(variant=="A") {
     cells<-rbind(cbind(1,1,1:3,1:3),cbind(2,2,1:3,1:3),c(3,3,1,3))
     plots<-c(p,obs,list(freq));h<-c(1.1,1,1.05)

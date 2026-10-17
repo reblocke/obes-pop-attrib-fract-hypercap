@@ -4,7 +4,7 @@ format:
   html:
     toc: true
     toc-depth: 3
-    embed-resources: true
+    embed-resources: false
     css: bmi_report.css
   pdf:
     pdf-engine: xelatex
@@ -32,11 +32,18 @@ if(!nzchar(root)||!dir.exists(run)||!dir.exists(review))stop("Use saved-run rend
 source(file.path(root,"R","analysis.R"))
 Sys.setenv(BMI_REPORT_ID="audit")
 load_common_input<-load_triangulation_input<-bmi_load_input<-fit_bmi_model<-fit_registered_models<-bmi_run_analysis<-function(...)stop("Render tripwire: clinical input/model fitting forbidden")
+source(file.path(root,"reports","table_passthrough.R"))
+bmi_report_table<-bmi_raw_table_writer(bmi_report_table)
 bundle<-bmi_read_bundle(run);a<-bundle$analysis
 knitr::opts_chunk$set(dev=if(knitr::is_latex_output())"cairo_pdf"else"png",fig.width=7,fig.height=8)
 captions<-utils::read.csv(file.path(review,"figures","captions.csv"),stringsAsFactors=FALSE)
 page<-bmi_page
-figure<-function(id)bmi_figure(id,review,captions)
+figure<-function(id) {
+  if(knitr::is_latex_output())return(bmi_figure(id,review,captions))
+  # Keep the complete audit portable with its adjacent vector-figure directory.
+  markup<-capture.output(bmi_figure(id,review,captions))
+  cat(gsub(paste0(review,"/"),"",markup,fixed=TRUE),sep="\n")
+}
 ```
 
 ```{r}

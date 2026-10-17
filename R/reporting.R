@@ -82,7 +82,12 @@ bmi_outcome_label <- function(o) unname(c(icd="Documented ICD composite",abg="Ar
 bmi_empty_plot <- function(title,reason) ggplot2::ggplot()+ggplot2::annotate("text",x=0,y=0,label=paste(strwrap(reason,24),collapse="\n"),size=3.3)+ggplot2::labs(title=paste(strwrap(title,24),collapse="\n"))+ggplot2::theme_void(base_size=10)+ggplot2::theme(plot.margin=grid::unit(rep(4,4),"mm"))
 bmi_curve_plot <- function(d,title,observation=FALSE) {
   good<-d[!is.na(d$probability),,drop=FALSE]
-  if(!nrow(good))return(bmi_empty_plot(title,if(nrow(d))paste(unique(d$status),collapse="; ")else"Not assessed"))
+  if(!nrow(good)) {
+    counts<-if(nrow(d))paste0("Model N=",ifelse(is.na(d$n_model[1]),"unavailable",format(d$n_model[1],big.mark=",")),"\nReference N=",ifelse(is.na(d$n_reference[1]),"pending",format(d$n_reference[1],big.mark=",")))else"Model/reference N unavailable"
+    return(bmi_empty_plot(title,if(nrow(d))paste(unique(d$status),collapse="; ")else"Not assessed")+
+      ggplot2::labs(title=paste(strwrap(title,20),collapse="\n"),subtitle=counts)+
+      ggplot2::theme(plot.title=ggplot2::element_text(size=10,face="bold"),plot.subtitle=ggplot2::element_text(size=9)))
+  }
   d<-good
   d$display_support<-ifelse(!d$within_training_bmi_range,"extrapolated",ifelse(d$locally_sparse %in% TRUE,"sparse","supported"))
   d$segment<-cumsum(c(TRUE,head(d$display_support,-1)!=tail(d$display_support,-1)))
@@ -107,7 +112,7 @@ bmi_frequency_plot <- function(a,reference_id,title,config) {
     ggplot2::geom_col(width=config$bmi_bin_width,colour="white",linewidth=.15)+
     ggplot2::scale_fill_manual(values=c("grey20","grey45","grey70","grey93"),labels=c("ABG only","VBG only","Both","Neither"),drop=FALSE)+
     ggplot2::guides(fill=ggplot2::guide_legend(nrow=2,byrow=TRUE))+
-    ggplot2::labs(title="BMI frequency",subtitle="All C patients; disjoint usable-gas patterns",x="BMI (kg/m2)",y="All C patients (%)",fill=NULL)+bmi_theme()
+    ggplot2::labs(title="BMI frequency",subtitle=paste0("C denominator N=",format(a$cohort_nodes$n[match(reference_id,a$cohort_nodes$population_id)],big.mark=","),"; disjoint usable-gas patterns"),x="BMI (kg/m2)",y="All C patients (%)",fill=NULL)+bmi_theme()
 }
 bmi_flow_plot <- function(a,detailed=FALSE) {
   ids<-if(detailed)a$cohort_nodes$population_id else c("source_records","encounter_versions","confirmed_eligible_encounters","excluded_encounters","uncertain_encounters","n_frame_patients","Q","n_index_unresolved","C","missing_adjustment","C_icd","C_abg_encounter","C_any_gas_encounter")
@@ -183,6 +188,12 @@ bmi_export <- function(draw,stem,width_mm=190,height_mm=210,formats=c("pdf","svg
 bmi_export_population_figures <- function(bundle,output) {
   a<-bundle$analysis;config<-bundle$config;dir.create(output,recursive=TRUE,showWarnings=FALSE);manifest<-list();captions<-list();atlas_index<-list()
   add<-function(id,draw,height,caption,kind="scientific figure") {
+    if(id %in% c("F1-A","F1-B","F1-C","F2") && !is.null(bundle$manifest$source_group)) {
+      source_draw<-draw;group<-bundle$manifest$source_group
+      group_label<-c(primary="Non-OBESITY-supported entry",obesity_only="Obesity-only source entry",primary_current="Non-OBESITY-supported; current BMI",obesity_only_current="Obesity-only; current BMI",all_obesity="Any OBESITY source entry (overlapping)")[[group]]
+      draw<-local({source_draw<-source_draw;label<-paste(group_label,"| encounter-wide");y<-if(id=="F2").92 else .95
+        function(){source_draw();grid::grid.text(label,x=.02,y=y,just=c("left","top"),gp=grid::gpar(fontsize=9))}})
+    }
     if(bundle$manifest$mode=="fixture") {
       original_draw<-draw
       draw<-local({original_draw<-original_draw;function(){original_draw();grid::grid.text("ARTIFICIAL DATA ONLY",x=.985,y=.995,just=c("right","top"),gp=grid::gpar(fontsize=9,col="grey25"))}})
@@ -192,7 +203,7 @@ bmi_export_population_figures <- function(bundle,output) {
     captions[[id]]<<-data.frame(figure_id=id,caption=caption,alt_text=caption,source_tables=if(grepl("F1",id))"probability_curves;observation_curves;distribution_bins"else if(grepl("F2",id))"policy_totals;policy_contributions"else if(grepl("F3",id))"variable_summary;category_counts;distribution_bins;distribution_curves"else if(grepl("F4",id))"model_registry;coefficients;coefficient_covariance;model_fit_diagnostics;model_residual_bins;model_influence_summary;model_support"else if(grepl("F5",id))"probability_curves;policy_totals;sensitivity_results;timing_audit"else"cohort_nodes;cohort_edges")
   }
   if(nrow(a$model_registry)) {
-    outcomes<-c("icd","abg","any_gas");p<-obs<-freq<-list()
+    outcomes<-c("abg","any_gas","icd");p<-obs<-freq<-list()
     for(o in outcomes) {
       ref<-"C"
       p[[o]]<-bmi_curve_plot(a$probability_curves[a$probability_curves$model_id==paste(o,"encounter/spline",sep="/"),],bmi_outcome_label(o))
@@ -211,7 +222,15 @@ bmi_export_population_figures <- function(bundle,output) {
     for(o in outcomes) {
       z<-a$policy_contributions;z<-z[z$model_id==paste(o,"encounter/spline",sep="/") & z$reference_id==if(o=="icd")"C_icd"else paste("C",o,"encounter",sep="_"),,drop=FALSE]
       z<-z[z$method=="observed",,drop=FALSE];z<-z[z$policy_id==config$policies[[1]]$policy_id,,drop=FALSE]
-      if(!nrow(z)){f2[[length(f2)+1L]]<-bmi_empty_plot(bmi_outcome_label(o),"Scenario unavailable");next}
+      if(!nrow(z)) {
+        id<-paste(o,"encounter/spline",sep="/")
+        r<-a$model_registry[a$model_registry$model_id==id,,drop=FALSE]
+        t<-a$policy_totals[a$policy_totals$model_id==id & a$policy_totals$policy_id==config$policies[[1]]$policy_id,,drop=FALSE]
+        counts<-paste0("Model N=",if(nrow(r)&&!is.na(r$n_model[1]))format(r$n_model[1],big.mark=",")else"unavailable","\nReference N=",if(nrow(t)&&!is.na(t$n_reference[1]))format(t$n_reference[1],big.mark=",")else"unavailable")
+        reason<-paste0("Scenario unavailable",if(nrow(r))paste0(":\n",r$status[1])else"")
+        for(title in c(bmi_outcome_label(o),"Signed BMI-band contributions"))f2[[length(f2)+1L]]<-bmi_empty_plot(title,reason)+ggplot2::labs(subtitle=counts)+ggplot2::theme(plot.subtitle=ggplot2::element_text(size=9))
+        next
+      }
       label<-a$policy_totals;label<-label[label$model_id==z$model_id[1]&label$reference_id==z$reference_id[1]&label$method==z$method[1]&label$policy_id==z$policy_id[1],]
       top<-bmi_bind(list(data.frame(bmi=(z$bin_low+z$bin_high)/2,p=z$mean_observed,scenario="Observed BMI"),data.frame(bmi=(z$bin_low+z$bin_high)/2,p=z$mean_shifted,scenario="Shifted BMI")))
       f2[[length(f2)+1L]]<-ggplot2::ggplot(top,ggplot2::aes(bmi,p,linetype=scenario,shape=scenario))+ggplot2::geom_line(linewidth=.5,na.rm=TRUE)+ggplot2::geom_point(size=1.7,na.rm=TRUE)+

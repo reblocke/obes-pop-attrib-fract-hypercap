@@ -44,6 +44,14 @@ make render-html RUN="artifacts/triangulation/<exact-version-6-run>"
 make render-pdf RUN="artifacts/triangulation/<exact-version-6-run>"
 ```
 
+For prose/table-only revisions, reuse completed figures after the bundle and
+figure-source hashes match; this still creates a fresh review:
+
+```bash
+make render-reports RUN="artifacts/triangulation/<run>" \
+  FIGURES_FROM="artifacts/triangulation/<same-run>/reviews/<completed-figure-review>"
+```
+
 Renders consume saved aggregates only and create fresh review directories.
 Figure edits do not repeat estimation. Estimator/source/configuration changes
 require a new run; hashes prevent silent reuse. HTML/PDF renders run sequentially.
@@ -181,3 +189,7 @@ trigger evidence stays unresolved; current BMI never reconstructs the entry trig
 The audit includes limited current-measurement and overlapping all-OBESITY
 supporting analyses. Numeric demographic coding is preserved; inherited Unknown
 categories remain nonmissing. The White reference includes unknown ethnicity.
+
+The complete audit HTML links to its adjacent `figures/` SVG directory instead of
+embedding thousands of panels. Move the whole review folder together. The scientific
+HTML remains self-contained; PDF reports retain complete tables and vector figures.

@@ -2,12 +2,15 @@
 bmi_export_figures <- function(bundle,output) {
   dir.create(output,recursive=TRUE,showWarnings=FALSE)
   all_captions<-all_manifests<-all_atlas<-list()
+  root_draw<-function(draw)function(){draw();if(bundle$manifest$mode=="fixture")grid::grid.text("ARTIFICIAL DATA ONLY",x=.985,y=.995,just=c("right","top"),gp=grid::gpar(fontsize=9,col="grey25"))}
   for(group in c("combined","unresolved",unlist(bundle$config$analysis_populations))) {
     view<-bmi_group_view(bundle$analysis,group)
     if(!nrow(view$cohort_nodes))next
-    child<-bundle;child$analysis<-view
+    child<-bundle;child$analysis<-view;child$manifest$source_group<-group
     folder<-file.path(output,group)
     bmi_export_population_figures(child,folder)
+    gallery_path<-file.path(folder,"gallery.html")
+    writeLines(gsub("../../../","../../../../",readLines(gallery_path,warn=FALSE),fixed=TRUE),gallery_path)
     captions<-utils::read.csv(file.path(folder,"captions.csv"),stringsAsFactors=FALSE)
     captions$figure_id<-paste0(group,"/",captions$figure_id)
     captions$caption<-paste0("Source-entry population: ",group,". ",
@@ -24,8 +27,9 @@ bmi_export_figures <- function(bundle,output) {
   a<-bundle$analysis
   partition<-a$cohort_edges[a$cohort_edges$partition_id=="rfs_index",,drop=FALSE]
   if(nrow(partition)) {
-    bmi_export(function()print(bmi_edge_plot(a,partition)),file.path(output,"RFS-flow"),height_mm=150)
+    bmi_export(root_draw(function()print(bmi_edge_plot(a,partition))),file.path(output,"RFS-flow"),height_mm=150)
     caption<-"Fixed common indexes partition into primary non-OBESITY-supported source entry, obesity-only source entry and unresolved RFS. Overlapping OBESITY/non-OBESITY membership remains primary. Counts and units derive from the ledger; all-OBESITY supporting models overlap and are not a fourth partition branch."
+    if(bundle$manifest$mode=="fixture")caption<-paste("ARTIFICIAL DATA ONLY.",caption)
     all_captions[["flow"]]<-data.frame(figure_id="RFS-flow",caption=caption,alt_text=caption,source_tables="cohort_nodes;cohort_edges")
   }
   z<-a$rfs_by_bmi
@@ -36,10 +40,11 @@ bmi_export_figures <- function(bundle,output) {
     plot<-ggplot2::ggplot(z,ggplot2::aes((bin_low+bin_high)/2,n))+
       ggplot2::geom_col(ggplot2::aes(width=bin_high-bin_low),fill="grey35")+
       ggplot2::facet_wrap(~subgroup,ncol=1,labeller=ggplot2::as_labeller(function(x)bmi_wrap(gsub("_"," ",x),55)))+
-      ggplot2::labs(title="Historical source-entry membership across BMI",subtitle="Fixed common indexes; counts, not equal-area densities",x="BMI (kg/m2)",y="Indexed patients",fill="Source-entry subgroup")+bmi_theme()+
+      ggplot2::labs(title="Historical source-entry membership across BMI",subtitle="Fixed common indexes; counts, not equal-area densities",x="BMI (kg/m2)",y="Indexed patients")+bmi_theme()+
       ggplot2::theme(legend.text=ggplot2::element_text(size=9))
-    stem<-file.path(output,"RFS-entry");bmi_export(function()print(plot),stem,height_mm=190)
+    stem<-file.path(output,"RFS-entry");bmi_export(root_draw(function()print(plot)),stem,height_mm=190)
     caption<-"Historical source-entry subgroup counts by BMI, pooling the two acute settings on fixed indexes. Overlap remains in primary; obesity-only is a separate selection sensitivity. Membership records source-file representation, not exhaustive clinical criteria. Unresolved and all-zero discrepancies are retained. All groups partition the common indexed population. No association or causal bias correction follows from this partition."
+    if(bundle$manifest$mode=="fixture")caption<-paste("ARTIFICIAL DATA ONLY.",caption)
     all_captions[["entry"]]<-data.frame(figure_id="RFS-entry",caption=caption,alt_text=caption,source_tables="rfs_by_bmi")
   }
   for(id in c("RFS-flow","RFS-entry"))if(file.exists(file.path(output,paste0(id,".png")))) {

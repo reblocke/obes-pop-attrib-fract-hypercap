@@ -40,12 +40,12 @@ def sheets(items,out,width,columns,per_sheet):
         canvas.save(out/f'sheet-{start//per_sheet+1:03}.png')
 
 def main():
-    ap=argparse.ArgumentParser();ap.add_argument('review',type=Path);args=ap.parse_args();review=args.review.resolve();qc=review/'qc';qc.mkdir(exist_ok=True)
-    results={'review':str(review),'manual_review':'pending','reports':{},'figures':[]}
+    ap=argparse.ArgumentParser();ap.add_argument('review',type=Path);ap.add_argument('--overview-dpi',type=int,default=100);args=ap.parse_args();assert 40<=args.overview_dpi<=150;review=args.review.resolve();qc=review/'qc';qc.mkdir(exist_ok=True)
+    results={'review':str(review),'manual_review':'pending','overview_dpi':args.overview_dpi,'qc_script_sha256':hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),'reports':{},'figures':[]}
     for name in ['bmi_hypercapnia','bmi_hypercapnia_audit']:
         pdf=review/(name+'.pdf');dest=qc/name;dest.mkdir(exist_ok=True)
         pages=geometry(pdf);results['reports'][name]={'sha256':hashlib.sha256(pdf.read_bytes()).hexdigest(),'pages':pages}
-        subprocess.run(['pdftoppm','-r','100','-png',str(pdf),str(dest/'page')],check=True,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
+        subprocess.run(['pdftoppm','-r',str(args.overview_dpi),'-png',str(pdf),str(dest/'page')],check=True,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
         paths=sorted(dest.glob('page-*.png'),key=lambda p:int(p.stem.split('-')[-1]))
         sheets([(p.stem,p) for p in paths],dest/'overview',330,5,10)
     for png in sorted((review/'figures').rglob('*.png')):

@@ -6,6 +6,7 @@ CONFIG ?= config/bmi_hypercapnia_analysis.json
 test:
 	Rscript --vanilla tests/run_rfs_tests.R
 	Rscript --vanilla tests/run_bmi_curve_tests.R
+	Rscript --vanilla tests/test_table_passthrough.R
 	"$(PREP_PYTHON)" -m unittest discover -s tests -p 'test_preparation*.py'
 	"$(PREP_PYTHON)" -m unittest discover -s tests -p 'test_original_population.py'
 	"$(PREP_PYTHON)" -m unittest discover -s tests -p 'test_source_qualification.py'
@@ -19,15 +20,15 @@ preflight cohort-audit analyze:
 	Rscript --vanilla scripts/run_bmi_hypercapnia.R "$@" "$(INPUT)" "$(MANIFEST)" "$(CONFIG)"
 
 render:
-	@test -n "$(RUN)" || (echo 'Set RUN to an explicit saved version-5 aggregate run.'; exit 1)
+	@test -n "$(RUN)" || (echo 'Set RUN to an explicit saved version-6 aggregate run.'; exit 1)
 	Rscript --vanilla scripts/render_bmi_hypercapnia.R "$(RUN)" all
 
 render-html:
-	@test -n "$(RUN)" || (echo 'Set RUN to an explicit saved version-5 aggregate run.'; exit 1)
+	@test -n "$(RUN)" || (echo 'Set RUN to an explicit saved version-6 aggregate run.'; exit 1)
 	Rscript --vanilla scripts/render_bmi_hypercapnia.R "$(RUN)" html
 
 render-pdf:
-	@test -n "$(RUN)" || (echo 'Set RUN to an explicit saved version-5 aggregate run.'; exit 1)
+	@test -n "$(RUN)" || (echo 'Set RUN to an explicit saved version-6 aggregate run.'; exit 1)
 	Rscript --vanilla scripts/render_bmi_hypercapnia.R "$(RUN)" pdf
 
 prepare:
@@ -57,3 +58,8 @@ enrich-rfs:
 render-test:
 	@test -n "$(REVIEW)" || (echo "Set REVIEW to actual completed report directory"; exit 1)
 	Rscript --vanilla tests/check_rfs_render.R "$(REVIEW)"
+
+# Rebuild prose/tables from the same bundle using source-matched completed figures.
+render-reports:
+	@test -n "$(RUN)" -a -n "$(FIGURES_FROM)" || (echo "Set RUN and FIGURES_FROM to the same saved-run review"; exit 1)
+	BMI_FIGURES_FROM="$(FIGURES_FROM)" Rscript --vanilla scripts/render_bmi_hypercapnia.R "$(RUN)" all

@@ -1009,3 +1009,37 @@ Repairs preserve source/index rules and calculations; failed runs remain intact.
 Kernel computation and RFS checks pass; full render/visual review remains underway.
 The RFS review map and new requirements are in docs/RFS_AUDIT_RESPONSE.md and
 RFS_AUDIT_ACCEPTANCE.csv. The previous 73-check receipt is not overwritten.
+
+### Report rendering/QC corrections
+
+The artificial scientific PDF rendered to 57 pages. Native geometry detected
+missing CO2 subscript glyphs in Methods; switched those body symbols to Pandoc
+subscript markup. Complete audit self-contained HTML conversion was very slow
+with over two thousand full-range panels. The audit now links its adjacent SVG
+folder portably, and generated complete HTML/LaTeX tables are passed through as
+opaque raw blocks. Independent tests confirm identical table payloads, including
+negative, zero, small nonzero and unavailable states; no table values are removed.
+
+Added `render-reports` to reuse a completed figure collection only when its exact
+bundle and figure-source hashes match, preserving a fresh review/receipt. Wrong
+bundle and wrong figure-source checks fail explicitly. This avoids new estimation
+or repeated full figure export for prose/font repairs. Draw-once/replay exports
+preserve vector masters and 300-dpi review formats; stress displays inspected.
+QC supports 50-dpi page overviews while retaining native PDF geometry checks and
+selected native-size manual inspection. Actual full integration/visual completion
+is still pending; interrupted/failed reviews are not promoted to passed.
+
+Native-size inspection of the artificial relationship panels identified missing
+model/reference Ns when a model was nonestimable. Added those labels without
+inventing a curve, and made the BMI-frequency C denominator explicit. A targeted
+failed-panel check passed. The interrupted figure review is recorded as failed;
+a fresh full render uses the same saved estimates (no estimation rerun). The
+aggregate-only numerical review independently passed 152 checks. No GitHub CI
+checks are configured for this PR; local/Mini checks are reported separately.
+
+The same review repaired the secondary figure's unavailable branch: it now keeps
+both planned positions per outcome, prints model/reference Ns and the failure
+status, and does not shift other outcomes into the wrong panel. Root flow boxes
+use explicit source-entry labels. All six relationship alternatives and both
+secondary figures were inspected in an aggregate-only key-figure preview before
+restarting the complete audit export; A remains preferred, with B more compressed.
