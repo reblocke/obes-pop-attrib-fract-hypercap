@@ -30,6 +30,8 @@ validate_triangulation_input <- function(data) {
   day_present <- triangulation_index_day_columns %in% names(data)
   if (any(day_present) && !all(day_present)) stop("Incomplete index-calendar-day columns.")
   day <- if (all(day_present)) data[c("patient_id", "encounter_id", triangulation_index_day_columns)] else NULL
+  original_metadata_keys <- data[c("patient_id", "encounter_id")]
+  metadata <- data[intersect(bmi_metadata_fields, names(data))]
   bmi_state <- data$bmi_evidence_state
   data <- as.data.frame(data[triangulation_columns])
   if (!is.null(bmi_state)) {
@@ -88,7 +90,7 @@ validate_triangulation_input <- function(data) {
   data$.key_conflict <- duplicated(keys) | duplicated(keys, fromLast = TRUE)
   # Deduplication/index ambiguity use primary fields only. Discordant early
   # evidence cannot alter a primary index or promote another encounter.
-  data$.index_day_conflict <- FALSE
+  data$.index_day_conflict <- rep(FALSE, nrow(data))
   if (!is.null(day)) {
     day <- unique(day)
     day_keys <- tri_encounter_key(day)
@@ -101,6 +103,17 @@ validate_triangulation_input <- function(data) {
     }
   } else {
     for (name in triangulation_index_day_columns) data[[name]] <- rep(NA_real_, nrow(data))
+  }
+  # Metadata conflicts cannot create a clinical-key conflict or change index selection.
+  if (ncol(metadata)) {
+    metadata_keys <- tri_encounter_key(original_metadata_keys)
+    for (name in names(metadata)) {
+      data[[name]] <- metadata[[name]][match(tri_encounter_key(data), metadata_keys)]
+      for (key in unique(metadata_keys[duplicated(metadata_keys)])) {
+        values <- unique(metadata[[name]][metadata_keys == key])
+        if (length(values) > 1L) data[[name]][tri_encounter_key(data) == key] <- NA
+      }
+    }
   }
   attr(data, "exact_duplicates_removed") <- n_input - nrow(data)
   attr(data, "n_conflicting_keys") <- nrow(unique(keys[data$.key_conflict, , drop = FALSE]))
@@ -196,7 +209,7 @@ load_triangulation_input <- function(input_path, manifest_path, schema_version =
   manifest <- jsonlite::read_json(manifest_path, simplifyVector = TRUE)
   required <- c("schema_version", "input_sha256", "source_identity", "reviewed_by", "reviewed_on", "evidence_reference", "columns", "binary_codes", "encounter_type_codes", "category_values", "semantics", "source_qualification", "source_evidence_files", "index_day")
   if (length(setdiff(required, names(manifest))) || !identical(manifest$schema_version, schema_version)) stop("Invalid manifest schema; estimation requires version ", schema_version, ".")
-  if (schema_version == 3L && (!identical(manifest$study_design, study_design) ||
+  if (schema_version %in% c(3L, 4L) && (!identical(manifest$study_design, study_design) ||
       !identical(manifest$population_policy, "first_2022_adult_ED_inpatient_BMI_ge30_before_gas_and_completeness"))) {
     stop("Manifest does not qualify the common-index BMI >=30 study population.")
   }
@@ -238,6 +251,15 @@ load_triangulation_input <- function(input_path, manifest_path, schema_version =
   if (!setequal(names(mapping), triangulation_columns) || anyDuplicated(mapping) || !all(mapping %in% names(raw))) stop("Incomplete, duplicate, or unavailable source column mapping.")
   data <- as.data.frame(raw[unname(mapping[triangulation_columns])])
   names(data) <- triangulation_columns
+  if (schema_version == 4L) {
+    if (!identical(manifest$rfs_policy_id, "historical_source_membership_v1") ||
+        !"rfs" %in% names(evidence)) stop("Missing authenticated RFS metadata evidence")
+    mapped_metadata <- unlist(manifest$metadata_columns, use.names = TRUE)
+    if (!all(bmi_rfs_fields %in% names(mapped_metadata)) || anyDuplicated(mapped_metadata) ||
+        !all(names(mapped_metadata) %in% bmi_metadata_fields) || !all(mapped_metadata %in% names(raw))) stop("Invalid metadata mapping")
+    for (name in names(mapped_metadata)) data[[name]] <- raw[[mapped_metadata[[name]]]]
+    bmi_validate_metadata(data)
+  }
   if (!is.null(manifest$bmi_policy_id)) {
     if (!identical(manifest$bmi_policy_id, "available_encounter_or_prior_bmi_v1") ||
         !is.character(manifest$bmi_evidence_column) || length(manifest$bmi_evidence_column) != 1L ||
@@ -299,7 +321,7 @@ load_common_input <- function(input_path, manifest_path) {
   manifest <- jsonlite::read_json(manifest_path, simplifyVector = FALSE)
   policy <- common_source_policy()
   if (!identical(manifest$source_policy_id, policy$source_policy_id)) stop("New clinical input requires unadjusted_pco2_v1 source policy.")
-  loaded <- load_triangulation_input(input_path, manifest_path, schema_version = 3L, study_design = common_design_id)
+  loaded <- load_triangulation_input(input_path, manifest_path, schema_version = if (identical(manifest$schema_version, 4L)) 4L else 3L, study_design = common_design_id)
   entry <- loaded$manifest$source_evidence_files$fields
   field_path <- entry$path
   if (!grepl("^(/|[A-Za-z]:)", field_path)) field_path <- file.path(dirname(manifest_path), field_path)

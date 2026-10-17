@@ -9,7 +9,7 @@ bmi_add_basis <- function(d,basis) {
   for(j in 1:3)d[[paste0("bmi_ns",j)]]<-b[,j]
   d
 }
-bmi_model_registry <- function(day_status) {
+bmi_model_registry <- function(day_status, role="full") {
   rows<-list();add<-function(id,family,outcome,window,population,field,form="spline") {
     rows[[length(rows)+1L]]<<-data.frame(model_id=id,family=family,outcome_id=outcome,window=window,
       training_population_id=population,field=field,model_form=form,source_status=if(window=="index_calendar_day")day_status else "qualified",stringsAsFactors=FALSE)
@@ -21,7 +21,12 @@ bmi_model_registry <- function(day_status) {
   for(w in c("encounter","index_calendar_day"))for(o in if(w=="encounter")c("abg","vbg","any_gas","icd")else c("abg","vbg","any_gas"))
     add(paste("observation",o,w,sep="/"),"observation",o,w,"C",paste0("observed_",o,"_",w))
   for(pair in c("abg","any_gas"))for(o in c("icd",pair))add(paste("matched",pair,o,sep="/"),"matched",o,"encounter",paste0("M_",pair),o)
-  bmi_bind(rows)
+  result <- bmi_bind(rows)
+  if (role == "supporting") {
+    result <- result[result$family=="primary",,drop=FALSE]
+    result$family <- "supporting"
+  }
+  result
 }
 bmi_observation_fields <- function(d) {
   for(w in c("encounter","index_calendar_day"))for(o in if(w=="encounter")c("abg","vbg","any_gas","icd")else c("abg","vbg","any_gas")) {
@@ -99,7 +104,7 @@ bmi_model_diagnostics <- function(model,config) {
         observed=mean(y[ix]),fitted=mean(p[ix]),mean_response_residual=mean(y[ix]-p[ix]),mean_deviance_residual=mean(stats::residuals(fit,type="deviance")[ix]))
     }
   }
-  group("BMI",5*floor(d$bmi/5));group("age",10*floor(d$age_at_encounter/10))
+  group("BMI",config$bmi_bin_width*floor(d$bmi/config$bmi_bin_width));group("age",10*floor(d$age_at_encounter/10))
   for(v in c("sex","race_ethnicity","location"))group(v,as.character(d[[v]]))
   cuts<-unique(stats::quantile(p,seq(0,1,.1),type=config$quantile_type))
   group("fitted_probability",if(length(cuts)>1)cut(p,c(-Inf,cuts[-c(1,length(cuts))],Inf),labels=FALSE)else rep(1,n))
@@ -121,13 +126,13 @@ bmi_model_diagnostics <- function(model,config) {
   support<-list()
   for(v in c("age_at_encounter","sex","race_ethnicity","location")) {
     grp<-if(v=="age_at_encounter")as.character(10*floor(d[[v]]/10))else as.character(d[[v]])
-    key<-paste(5*floor(d$bmi/5),grp,sep=":")
-    support[[v]]<-bmi_bind(lapply(split(seq_len(n),key),function(ix)data.frame(model_id=id,variable_id=v,level=grp[ix[1]],bin_low=5*floor(d$bmi[ix[1]]/5),n=length(ix),events=sum(y[ix]),nonevents=sum(1-y[ix]),sparse=length(ix)<config$sparse_n||min(sum(y[ix]),sum(1-y[ix]))<config$sparse_events)))
+    key<-paste(config$bmi_bin_width*floor(d$bmi/config$bmi_bin_width),grp,sep=":")
+    support[[v]]<-bmi_bind(lapply(split(seq_len(n),key),function(ix)data.frame(model_id=id,variable_id=v,level=grp[ix[1]],bin_low=config$bmi_bin_width*floor(d$bmi[ix[1]]/config$bmi_bin_width),n=length(ix),events=sum(y[ix]),nonevents=sum(1-y[ix]),sparse=length(ix)<config$sparse_n||min(sum(y[ix]),sum(1-y[ix]))<config$sparse_events)))
   }
   list(model_fit_diagnostics=metrics,model_residual_bins=bmi_bind(bins),model_influence_summary=influence,model_support=bmi_bind(support))
 }
 fit_registered_models <- function(ctx,basis,config) {
-  registry<-bmi_model_registry(ctx$day_status);models<-list()
+  registry<-bmi_model_registry(ctx$day_status,if(is.null(config$fit_role))"full"else config$fit_role);models<-list()
   for(i in seq_len(nrow(registry))) {
     spec<-registry[i,,drop=FALSE];d<-ctx$members[[spec$training_population_id]]
     message(sprintf("[model %d/%d] %s",i,nrow(registry),spec$model_id))

@@ -3,6 +3,7 @@ title: "BMI and documented hypercapnia in acute care"
 subtitle: "Expanded scientific report for investigator review"
 format:
   html:
+    html-table-processing: none
     toc: true
     toc-depth: 2
     embed-resources: true
@@ -32,6 +33,8 @@ root<-Sys.getenv("BMI_REPO_ROOT");run<-Sys.getenv("BMI_RUN_DIR");review<-Sys.get
 if(!nzchar(root)||!dir.exists(run)||!dir.exists(review))stop("Use explicit saved-run rendering")
 source(file.path(root,"R","analysis.R"));Sys.setenv(BMI_REPORT_ID="scientific")
 load_common_input<-load_triangulation_input<-bmi_load_input<-fit_bmi_model<-fit_registered_models<-bmi_run_analysis<-function(...)stop("Render tripwire: clinical input/model fitting forbidden")
+source(file.path(root,"reports","table_passthrough.R"))
+bmi_report_table<-bmi_raw_table_writer(bmi_report_table)
 bundle<-bmi_read_bundle(run);a<-bundle$analysis
 captions<-utils::read.csv(file.path(review,"figures","captions.csv"),stringsAsFactors=FALSE)
 figure<-function(id)bmi_figure(id,review,captions)
@@ -48,148 +51,109 @@ cat("Source: ",bundle$manifest$source_status,"; analysis completed: ",bundle$man
 
 # Introduction
 
-The relationship between BMI and hypercapnia in acute-care records can be described through physiological measurements and documented diagnoses. These definitions capture different aspects of the same clinical question. Blood gases are available for a selected subset of patients, whereas diagnosis capture follows a different process. A curve without its population and evidence-availability context can therefore be misleading.
-
-We examined how documented index-encounter hypercapnia probability varied across BMI in the original selected TriNetX-derived acute-care cohort. The primary analysis describes BMI relationships within each evaluable outcome population. A secondary model scenario describes the relative and absolute change in predicted probability under a one-unit BMI reduction among patients with observed BMI above 30. It is not a causal estimate of weight-loss treatment benefit.
+We describe BMI–hypercapnia relationships within a selected acute-care cohort while exposing how historical source-entry pathways shape the observed population. These pathways record representation in reason-for-suspicion (RFS) source files; they do not necessarily identify every clinical criterion present at an encounter. Separating entry routes can change the observed association itself and does not eliminate outcome-dependent selection.
 
 # Methods
 
-## Data source, candidate population and index selection
+## Source, eligibility and fixed index
 
-Candidates were restricted to the authenticated original FULL_DATA selected encounter list. This is a selected cohort, not all acute-care patients or a national population. Prior encounters supplied measurement history but did not become additional candidate visits. Eligibility required an emergency or inpatient encounter beginning in 2022, age at least 18 under the approved birth-year age proxy, and valid available BMI at least 30 kg/m².
+The authenticated original FULL_DATA encounter list defines candidate visits. Adults had a 2022 emergency or inpatient encounter and available valid BMI ≥30 kg/m². Age uses the inherited birth-year proxy. Each patient contributes the first qualifying encounter before gas availability and adjustment completeness. Earlier unresolved eligibility, conflicting evidence and earliest-date ties remain unresolved. Later encounters never replace an obesity-only index.
 
-Each patient contributed the first qualifying encounter, selected before assessing gas availability or adjustment completeness. Earlier unresolved eligibility, conflicting evidence and earliest-date ties remained unresolved; a later more complete encounter was never substituted. Reliable exclusions took precedence over unrelated missing fields. The audit distinguishes records, encounter versions and patients, exclusive first-failure exclusions, and overlapping exclusion reasons.
+BMI follows the approved encounter/prior reported-value hierarchy, followed by calculation from observed height and weight, with inherited rounding and validity rules. One-unit diagnostic bins around BMI 40 and 50 describe measurement and selection; they are not a regression-discontinuity design. No statistical BMI imputation is performed. Available BMI is not necessarily contemporaneous with the outcome. The audit reports measurement methods, lags, unknown chronology and consequences of the existing rules. Signed lags equal encounter-start date minus measurement date: positive means prior, zero means the same calendar day, and negative means later during the encounter. Component gaps are absolute differences between height and weight dates.
 
-BMI followed the approved encounter/prior evidence hierarchy: reported BMI, then calculation from observed height and weight, with inherited transport and rounding rules. No statistical BMI imputation was performed. Completed-missing BMI did not qualify; unresolved source evidence remained distinct from completed missingness. The pre-index audit companion and the selected input were hash-bound and reconciled. The complete audit reports source counter scope and fields unavailable before index selection.
+## Historical source-entry populations
 
-## Analysis populations and evidence definitions
+A confirmed positive ABG, VBG, RESPFAIL, VENTSUPPORT or PREDISPOSITION source flag establishes the primary population, including encounters also represented through OBESITY. The principal selection sensitivity requires OBESITY membership and authenticated zeros in all five other families. Unknown flags remain unknown. All-six-zero discrepancies remain visible and require source investigation. RFS metadata are applied after the common index is selected.
 
-**Q** comprises resolved eligible patient indexes. **C** comprises Q with complete inherited BMI, age, sex, race/ethnicity and geographic region. Known categorical unknown levels retain their inherited coding and are distinguished from actual missing values. No covariates were imputed or categories pooled.
+The combined indexed cohort is a reconciliation reference. Non-OBESITY-only, overlapping and unknown-OBESITY/confirmed-non-OBESITY subgroups are descriptive. BMI ≥40 remains a descriptive stratum and is not equated with obesity-route membership. An overlapping all-OBESITY supporting analysis is confined to the audit.
 
-The arterial outcome required an authenticated, ordinary unadjusted arterial PCO~2~ of at least 45 mm Hg. The combined outcome accepted arterial PCO~2~ at least 45 or venous PCO~2~ at least 50 mm Hg. Encounter maxima were evaluated after explicit unit normalization and strict validity screens: 5 < arterial PCO~2~ < 200 and 10 < venous PCO~2~ < 250 mm Hg. Adjusted results and unspecified specimen codes did not establish ordinary specimen-specific positivity without their approved evidence. No pH restriction was added.
+## Outcomes and adjustment
 
-Untested, unusable and unavailable physiological evidence was not coded as a negative outcome. A combined negative means that the available usable specimens were below their thresholds; it does not establish that an unmeasured specimen was normal. Evidence-availability analyses describe usable results, not necessarily the clinical decision to order a test.
+Arterial hypercapnia requires ordinary authenticated ABG PaCO~2~ ≥45 mm Hg. Combined gas accepts ABG PaCO~2~ ≥45 or VBG PvCO~2~ ≥50 mm Hg; both specimens are not required. No pH restriction is applied. Strict validity limits are 5<arterial<200 and 10<venous<250 mm Hg, with reviewed units. Available-evidence negatives do not establish that an unmeasured specimen is normal. Unusable or unavailable outcomes remain unknown.
 
-The ICD composite comprises J96.02, J96.12, J96.22, J96.92 and E66.2. Captured absence was negative only with complete encounter diagnosis capture; unknown capture was excluded from the ICD reference rather than projected. E66.2 incorporates obesity-related ascertainment and affects interpretation of the BMI association.
+The ICD composite comprises J96.02, J96.12, J96.22, J96.92 and E66.2, with captured absence negative only under complete diagnosis capture. E66.2 introduces obesity-related ascertainment. Index-calendar-day gas sensitivities use collection date equal to encounter-start date, retaining the index.
 
-## Regression and probability curves
+Adjustment retains linear age and the inherited sex, combined race/ethnicity and geographic-region coding. Completeness means nonmissing values for inherited analysis variables, including retained Unknown categories. The White reference category includes non-Hispanic or unknown ethnicity; inherited race-category precedence is unchanged. Raw race × ethnicity cross-tabs are shown only when authenticated.
 
-Outcome models used logistic regression with a natural cubic BMI spline. Numeric knots were fixed at the type-7 5th, 35th, 65th and 95th percentiles of C: two interior knots, two boundary knots and three basis columns. The same basis was reused in fitting and prediction. Adjustment used linear age and the inherited sex, race/ethnicity and geographic-region categories, with explicit reference levels. Geographic region was not treated as a facility cluster.
+## Models, probabilities and uncertainty
 
-At each plotted BMI, predictions retained each reference patient's other covariates and were averaged. **Gas curves standardized over the corresponding outcome-observed model population. ICD curves standardized over C_icd, the known-capture population.** Observation models standardized over C. Thus the gas curves do not estimate outcomes among untested patients, and curves from different definitions do not automatically have a common target population.
+Primary and obesity-only models are fitted separately. Each group's adjustment-complete BMI distribution supplies type-7 spline quantiles .05/.35/.65/.95: two interior knots, two boundaries and three natural-spline basis columns. The basis remains fixed within group across outcomes, timing, matched analyses and predictions. Current-measurement sensitivities reuse their parent basis. Constant outcomes, duplicate knots, separation, rank and convergence failures remain explicit without estimator substitution.
 
-Pointwise 95% probability intervals used the full coefficient covariance and a delta calculation on the logit scale, conditional on the empirical reference. The prespecified BMI 45 versus 40 contrast retained covariance between predictions. These intervals exclude uncertainty from source selection, model misspecification and clinical interpretation; they are not simultaneous curve bands. Support checks distinguish the observed BMI range from sparse BMI/covariate strata.
+Gas curves standardize over each model's outcome-evaluable population; ICD uses known capture within group. Observation curves describe usable-evidence availability within group. No physiological outcomes are projected to untested patients. Fixed BMI 45 versus 40 contrasts require training-range support. Local counts and marginal covariate coverage expose sparsity even inside the global BMI range; these checks do not establish joint covariate support.
 
-## Secondary BMI scenario and burden decomposition
+Pointwise 95% intervals use full coefficient covariance and condition on the empirical reference and fixed spline basis. They omit uncertainty from selection, measurement error and unmeasured confounding. Apparent calibration is in-sample; fitted/observed mean agreement is not independent validation.
 
-For observed BMI above 30, the secondary scenario subtracted exactly one kg/m²; BMI equal to 30 was unchanged. Eligibility used observed BMI: 30.2 became 29.2, without a floor or reselection. Each patient's index, other covariates and observed-population membership were fixed.
+## Secondary scenario and supporting checks
 
-Paired predictions produced observed-BMI probability p~0~, shifted-BMI probability p~1~, the absolute difference p~0~ − p~1~, and the model-standardized potential impact fraction PIF = 1 − p~1~/p~0~. The PIF depends on the sample's BMI and covariate distribution and is not a constant fraction attributable to each BMI unit. Probability, difference and ratio uncertainty used full-covariance delta calculations; PIF intervals were transformed from the log probability ratio.
+The named secondary scenario subtracts exactly one BMI unit when observed BMI >30; BMI=30 is unchanged. There is no floor or reselection. Paired predictions hold index, RFS membership and other covariates fixed. Reported quantities are observed and shifted mean probabilities, their signed difference and PIF=1−p_shifted/p_observed. Signed original-BMI-band contributions and their full covariance reproduce the total difference and variance. Marginal curve-density integration is not used.
 
-Signed contributions were calculated from paired predictions within original five-unit BMI bands, weighted by their original population mass. Contributions sum exactly to the overall difference; cross-band covariance reproduces its variance. Adjusted PIFs were not calculated by multiplying a marginal BMI curve and marginal BMI density. Predictions below the fitted BMI range after shifting remain visible in support diagnostics.
-
-## Sensitivity analyses and verification
-
-Calendar-day sensitivity outcomes retained original indexes and required collection date equal to encounter-start date, not elapsed 24 hours. Their curves and scenarios used the corresponding day-outcome-observed population. Comparisons across windows therefore combine ascertainment and observed-population differences.
-
-Matched ICD/ABG and ICD/combined analyses used identical patients within each pair. Linear-BMI sensitivities used exactly the same training samples as their spline comparators; fit comparisons did not select the primary form. Observation models, constant outcomes and failed or pending fits remained registered. Full-cohort MAR/MNAR outcome projections and IPW were excluded from the current analysis; earlier projections remain in the immutable historical run.
-
-Checks covered rank, separation, convergence, reference categories, sample accounting, observed-versus-fitted summaries, apparent fit, residuals, influence and prediction support. Influence flags did not remove observations. The cohort ledger was the count authority. Report rendering consumed saved aggregates without clinical reads or refitting.
+Same-sample linear-BMI checks and matched ICD/gas analyses remain registered. A limited current-measurement sensitivity uses the already-selected BMI when reported at the index or calculated from height and weight both authenticated to that encounter. Full-cohort MAR/MNAR projections and IPW are excluded. The report is rendered from saved aggregates without clinical reads or refitting.
 
 # Results
 
-## Cohort construction and participant characteristics
+## Cohort partition and selection mechanisms
 
 ```{r}
-#| label: cohort-results
 #| results: asis
-bmi_scientific_results(a,"cohort")
-figure("F0-main")
-pop<-a$population_registry
-bmi_report_table(pop[pop$population_id %in% c("Q","C","C_icd","C40","C_abg_encounter","C_any_gas_encounter"),c("population_id","grain","n_patients","status")],"Analysis populations",keys="population_id")
-vars<-c("bmi","age_at_encounter","sex","race_ethnicity","location")
-for(v in vars){
- z<-a$variable_summary[a$variable_summary$variable_id==v & a$variable_summary$population_id %in% c("Q","C","C_abg_encounter","C_any_gas_encounter"),]
- bmi_grouped_report(z,paste("Participant profile:",v),groups="variable_id")
- if(v %in% c("sex","race_ethnicity","location"))bmi_report_table(a$category_counts[a$category_counts$variable_id==v & a$category_counts$population_id %in% c("C","C_abg_encounter","C_any_gas_encounter"),],paste("Complete categories:",v),keys=c("population_id","level"))
+bmi_report_table(a$rfs_summary,"Fixed-index RFS partition",keys="population_id")
+bmi_report_table(a$rfs_semantics,"Source-pathway/outcome relationship and evidence status",keys="requirement")
+bmi_report_table(a$rfs_outcomes,"Outcome evaluability and positivity by entry subgroup",keys="subgroup")
+figure("RFS-flow");figure("RFS-entry")
+bmi_report_table(a$prior_run_reconciliation,"Keyed reconciliation and unresolved comparisons",keys="requirement")
+```
+
+Inspect the obesity-only event counts before interpreting its curves. An outcome constrained by entry criteria is not independent physiological evidence; constant outcomes and nonestimability do not establish no BMI association. Source membership is never recoded from current outcomes.
+
+```{r}
+#| results: asis
+for(group in c("primary","obesity_only")) {
+ cat("\n## Source-entry population: ",group,"\n\n",sep="")
+ v<-bmi_group_view(a,group)
+ bmi_report_table(v$population_registry[v$population_registry$population_id %in% c("Q","C","missing_adjustment","C_icd","C_abg_encounter","C_any_gas_encounter"),],"Population and evidence accounting",keys="population_id")
+ profile<-v$variable_summary[v$variable_summary$variable_id %in% c("bmi","age_at_encounter","sex","race_ethnicity","location") & v$variable_summary$population_id %in% c("Q","C","C_abg_encounter","C_any_gas_encounter"),]
+ bmi_grouped_report(profile,"Participant profiles",groups="variable_id")
+ bmi_scientific_results(v,"outcomes")
+ figure(paste0(group,"/F1-A"));figure(paste0(group,"/F1-detail"))
+ bmi_report_table(v$fixed_bmi_contrasts[v$fixed_bmi_contrasts$model_id %in% primary,],"Supported BMI 45 versus 40 contrasts",keys="model_id")
+ bmi_scientific_results(v,"curves")
+ bmi_report_table(v$bmi_basis,"Saved group-specific numeric basis",keys="basis_id")
+ for(id in primary) {
+  bmi_report_table(v$model_registry[v$model_registry$model_id==id,],"Encounter-wide spline fit status",keys="model_id")
+  bmi_report_table(bmi_coefficient_view(v,id),"Complete primary coefficients",keys="Term")
+  bmi_report_table(v$model_fit_diagnostics[v$model_fit_diagnostics$model_id==id,],"Apparent fit diagnostics",keys="metric")
+ }
+ bmi_report_table(bmi_pif_view(v,primary),"Secondary observed-population BMI scenario",keys="Model")
+ figure(paste0(group,"/F2"))
+ bmi_report_table(v$prediction_support,"Curve-grid and transformed support diagnostics",keys="model_id")
+ bmi_report_table(v$timing_audit,"Fixed-index timing transitions",keys="outcome_id")
+ bmi_report_table(v$linear_spline_comparison,"Same-sample linear checks",keys="outcome_id")
+ for(o in c("abg","any_gas")){figure(paste0(group,"/F5-timing-",o));figure(paste0(group,"/F5-matched-",o))}
 }
 ```
 
-Differences between observed and unavailable-evidence groups describe selection into the physiological analyses. They do not prove that adjustment has removed that selection. The audit supplies every retained/excluded stage profile, complete missingness patterns and source-scoped BMI derivation counters.
-
-## Outcomes, evidence availability and BMI relationships
+## Measurement provenance and limited current-measurement checks
 
 ```{r}
-#| label: relationship-results
 #| results: asis
-bmi_scientific_results(a,"outcomes")
-bmi_report_table(a$observation_patterns[a$observation_patterns$window=="encounter",],"Disjoint usable-gas evidence patterns",keys="population_id")
-figure("F1-A")
-figure("F1-detail")
-bmi_scientific_results(a,"curves")
-bmi_report_table(a$fixed_bmi_contrasts[a$fixed_bmi_contrasts$model_id %in% primary,],"Fixed BMI 45 versus 40 contrasts",keys="model_id")
-```
-
-The full-range plot retains the upper BMI tail; the detail panel only changes the displayed range. Sparse tails can have wide intervals or unstable apparent calibration despite lying inside the observed BMI range. ABG and combined-gas populations overlap and must not be summed. Their curves describe different observed groups, so between-curve differences are not independent tests of diagnostic definitions.
-
-## Primary model estimates and diagnostic checks
-
-The following sections expose the complete primary coefficients, including intercept and spline terms. Spline basis coefficients have no standalone clinical odds-ratio interpretation. Reference levels are unestimated references, not estimated zeros. Apparent fit summaries describe the training sample and are not external validation.
-
-```{r}
-#| label: primary-verification
-#| results: asis
-bmi_report_table(a$bmi_basis,"Fixed numeric spline basis",keys="basis_id")
-for(id in primary){
- cat("\n### ",id,"\n\n",sep="")
- r<-a$model_registry[a$model_registry$model_id==id,]
- bmi_report_table(r[c("n_model","n_events","n_nonevents","n_parameters","model_rank","status","warnings","failure_reason")],"Sample and fitting status")
- bmi_report_table(bmi_coefficient_view(a,id),"Complete primary coefficients",keys="Term")
- bmi_report_table(a$model_fit_diagnostics[a$model_fit_diagnostics$model_id==id,],"Apparent model fit",keys="metric")
- bmi_report_table(a$model_influence_summary[a$model_influence_summary$model_id==id,],"Influence summaries; no exclusions",keys="metric")
- figure(paste0("F4-",match(id,a$model_registry$model_id)))
+bmi_report_table(a$bmi_provenance[a$bmi_provenance$stage=="Q",],"BMI sources and lags at fixed indexes",keys="subgroup")
+for(group in c("primary_current","obesity_only_current")) {
+ v<-bmi_group_view(a,group)
+ cat("\n### ",group,"\n\n",sep="")
+ bmi_report_table(v$model_registry,"Current-measurement fit status",keys="model_id")
+ bmi_report_table(bmi_pif_view(v,primary),"Current-measurement scenario",keys="Model")
 }
 ```
 
-## Secondary one-unit BMI shift and signed contributions
+# Discussion and example conclusion
+
+The revised analysis estimates BMI relationships separately by historical source-entry mechanism while preserving the same clinical episode. Agreement between groups is not required: their BMI distributions, observed outcomes and entry mechanisms differ. Separate confidence intervals do not constitute a between-group test, and subgroup PIFs must not be averaged.
+
+A defensible conclusion should describe the direction and shape actually supported by the revised primary curves, then explain whether the obesity-only sensitivity is estimable and informative. No claim of preventable disease or treatment benefit follows from the secondary scenario. Selection into the original files, selective gas measurement, BMI timing and measurement uncertainty, residual confounding and sparse tails remain limitations.
+
+The accompanying audit retains full model output, reconciliation and supporting analyses. Source acceptance, numerical review, visual inspection and investigator scientific approval are distinct states.
 
 ```{r}
-#| label: secondary-results
 #| results: asis
-bmi_report_table(bmi_pif_view(a,primary),"Observed-population secondary scenario",keys="Model")
-figure("F2")
-bmi_report_table(a$prediction_support[a$prediction_support$model_id %in% primary & a$prediction_support$policy_id!="none; relationship",],"Counterfactual support and extrapolation",keys="model_id")
-bmi_grouped_report(a$policy_contributions[a$policy_contributions$model_id %in% primary,],"Signed original-BMI-band contributions",groups=c("model_id","reference_id","policy_id","method"))
+cat("**Example wording for the revised primary population:**\n\n")
+bmi_scientific_results(bmi_group_view(a,"primary"),"conclusion")
 ```
-
-These PIFs summarize modeled changes within the evaluable populations. They do not estimate a population-wide fraction of preventable hypercapnia. Negative contributions, if present, are retained. Patients at BMI 30 remain in the denominator while contributing no BMI change.
-
-## Timing, matched definitions and functional form
-
-```{r}
-#| label: sensitivity-results
-#| results: asis
-bmi_report_table(a$timing_audit,"Fixed-index evidence-window transitions",keys="outcome_id")
-for(o in c("abg","any_gas"))figure(paste0("F5-timing-",o))
-ids<-a$model_registry$model_id[a$model_registry$family %in% c("timing","matched")]
-bmi_report_table(bmi_pif_view(a,ids),"Observed-population timing and matched scenarios",keys="Model")
-for(o in c("abg","any_gas"))figure(paste0("F5-matched-",o))
-bmi_report_table(a$linear_spline_comparison,"Same-sample linear versus spline checks; no automatic model selection",keys=c("outcome_id","window"))
-bmi_report_table(a$model_registry[c("model_id","n_model","n_events","status","failure_reason")],"All planned fit positions",keys="model_id")
-```
-
-Matched comparisons hold the within-pair population constant but retain the distinct outcome definitions. Calendar-day samples can be smaller and differently selected than encounter-wide samples. The audit contains complete coefficients, covariance and diagnostics for each sensitivity and observation model, including unavailable positions.
-
-# Discussion and draft conclusion
-
-This analysis separates the BMI relationship among patients with evaluable outcomes from the availability of that evidence in the original cohort. The distinction supports a clearer descriptive interpretation while leaving the sampling limitations visible. Known-capture diagnoses provide a complementary recorded outcome, including the obesity-containing E66.2 code.
-
-Residual confounding, selection into gas measurement, incomplete source capture, the timing and provenance of available BMI, and sparse upper-tail support limit interpretation. Restricting standardization to observed populations avoids extrapolating physiological outcomes to untested patients; it does not remove selection bias or establish causal exchangeability. The one-unit shift changes the model's BMI input while holding other recorded covariates fixed, which need not reproduce a real weight-loss intervention.
-
-```{r}
-#| label: conclusion-wording
-#| results: asis
-bmi_scientific_results(a,"conclusion")
-```
-
-The complete audit accompanies this paper as the verification record. Successful execution and numerical reconciliation remain distinct from investigator scientific approval and abstract readiness.

@@ -960,3 +960,129 @@ render/coverage assertions; model tests still use artificial data. The private
 `clinical-release-review-receipt.json` binds code, input, manifest, companion,
 bundle, numerical and visual evidence. The final documentation update changes no
 analysis/render source and requires no refit.
+
+## 2026-10-17 — RFS-stratified implementation checkpoint
+
+Baseline dd6b927, clean before starting codex/rfs-curve-audit. Implemented one
+fixed-index selection followed by historical source-membership partition; separate
+main-group spline bases and configured model registry; limited current-measurement
+and overlapping all-OBESITY supporting fits. Added schema-4 metadata enrichment
+from accepted products and schema-6 aggregate-only reports. Preserved original
+clinical fields/indexes, available-BMI policy and paired equations.
+
+Read-only Mini inspection found a clean preprocessing checkout and no competing
+analysis process. The accepted producer receipt names 252d4ae; that revision's
+cleaner sets family membership and its merger fills nonmembership with zero.
+The six expected flags and raw race/ethnicity exist in FULL_DATA; mapped BMI
+provenance is retained upstream. Historical exact extraction thresholds/windows
+are not inferred from current catalog defaults; that limitation remains explicit.
+A fresh isolated staging/lease directory is under the private Mini release root.
+
+First independent RFS computation checks passed (16 checks); retained kernel
+computation checks passed after adapting the new table contract and corrected
+label expectation. Five metadata join checks passed in the existing Mini Python
+environment. Local optional pandas/DuckDB-dependent checks were skipped explicitly.
+First default fixture exposed an artificial BMI-state inconsistency after changed
+RNG draw ordering; fixture repair synchronizes nonmissing BMI validity states.
+Full new render, export inspection, source enrichment, review/release and clinical
+execution are still pending at this checkpoint. No scientific approval asserted.
+
+### RFS source and integration follow-up
+
+Fresh metadata preparation passed exact original-key/index and clinical-field
+comparison against the prior schema-5 aggregate run/input hashes. The private
+schema-4 input and companion are in the isolated Mini preparation directory;
+source preflight completed without clinical fitting. Alternative-index counts
+are a supporting audit only; unavailable alternatives mean no resolved alternative,
+not necessarily absence of any potentially qualifying visit.
+
+The first private configuration referenced the superseded broader mapper and was
+rejected by the metadata key join. Corrected to the original-list mapper already
+bound to prior source evidence. Adapter metadata tests passed (5); preparation
+checks passed (16) after activating the existing R runtime; original-population
+and source-qualification tests passed (5 and 3). Initial missing-Rscript test
+errors were environment invocation failures, retained in the private logs.
+
+Artificial rendering exposed empty-group handling in the existing validator,
+empty atlas CSV handling, and namespace filtering of global partition edges.
+Repairs preserve source/index rules and calculations; failed runs remain intact.
+Kernel computation and RFS checks pass; full render/visual review remains underway.
+The RFS review map and new requirements are in docs/RFS_AUDIT_RESPONSE.md and
+RFS_AUDIT_ACCEPTANCE.csv. The previous 73-check receipt is not overwritten.
+
+### Report rendering/QC corrections
+
+The artificial scientific PDF rendered to 57 pages. Native geometry detected
+missing CO2 subscript glyphs in Methods; switched those body symbols to Pandoc
+subscript markup. Complete audit self-contained HTML conversion was very slow
+with over two thousand full-range panels. The audit now links its adjacent SVG
+folder portably, and generated complete HTML/LaTeX tables are passed through as
+opaque raw blocks. Independent tests confirm identical table payloads, including
+negative, zero, small nonzero and unavailable states; no table values are removed.
+
+Added `render-reports` to reuse a completed figure collection only when its exact
+bundle and figure-source hashes match, preserving a fresh review/receipt. Wrong
+bundle and wrong figure-source checks fail explicitly. This avoids new estimation
+or repeated full figure export for prose/font repairs. Draw-once/replay exports
+preserve vector masters and 300-dpi review formats; stress displays inspected.
+QC supports 50-dpi page overviews while retaining native PDF geometry checks and
+selected native-size manual inspection. Actual full integration/visual completion
+is still pending; interrupted/failed reviews are not promoted to passed.
+
+Native-size inspection of the artificial relationship panels identified missing
+model/reference Ns when a model was nonestimable. Added those labels without
+inventing a curve, and made the BMI-frequency C denominator explicit. A targeted
+failed-panel check passed. The interrupted figure review is recorded as failed;
+a fresh full render uses the same saved estimates (no estimation rerun). The
+aggregate-only numerical review independently passed 152 checks. No GitHub CI
+checks are configured for this PR; local/Mini checks are reported separately.
+
+The same review repaired the secondary figure's unavailable branch: it now keeps
+both planned positions per outcome, prints model/reference Ns and the failure
+status, and does not shift other outcomes into the wrong panel. Root flow boxes
+use explicit source-entry labels. All six relationship alternatives and both
+secondary figures were inspected in an aggregate-only key-figure preview before
+restarting the complete audit export; A remains preferred, with B more compressed.
+
+The complete artificial export produced 1,985 figure sets; the 57-page scientific
+PDF has no native text-geometry or replacement-glyph issues. Its Methods page was
+inspected, and all eight key PNGs exactly match the inspected preview hashes.
+The audit HTML converter reached a measured 6.8-GB physical footprint while
+Quarto reparsed raw HTML tables. The installed Quarto schema/filter confirms
+`html-table-processing: none` bypasses that pass. Stopped only that converter;
+the parent retained complete figures and continued the audit PDF. This failed
+HTML attempt remains recorded. The correction will use aggregate-only
+`render-reports`, including portable lazy-loaded audit SVGs; no refit is needed.
+The retained integration checks were updated for source-group figure paths.
+
+Full artificial export QC detected 19 figure issues and two clipped audit group
+headings. The affected ECDFs had a single stored coordinate and were blank under
+geom_line, with an automatically expanded probability axis and a clipped endpoint
+tick. The display now uses steps/points, a [0,1] probability scale and an explicit
+single-value axis; stored coordinates are unchanged. F2 uses fewer y ticks in
+short panels. Multi-field audit group headings break between fields. A targeted
+preview checks all previously failing figure IDs before the next full export.
+No clinical estimation has occurred and no failed visual receipt is promoted.
+
+Removed the obsolete optional historical coefficient-equality comparison from the
+aggregate review command: separate RFS populations and bases intentionally change
+models. The command reviews one saved run and records its own source hash. Prior
+index/clinical-field equality remains authenticated preparation evidence. This
+engineering cleanup changes no estimation equation or saved result.
+
+## 2026-10-17 — RFS software release verification
+
+The corrected artificial review completed both HTML/PDF reports. All-export QC
+passed57 scientific pages,4155 audit pages and1985figure sets with no detected
+bounds/symbol/collision/format issue. Full74acceptance checks pass against that
+actual review, in addition to19RFS checks,29Mini adapter checks and raw-table
+payload checks. The scoped visual receipt distinguishes inspected native figures,
+all scientific page overviews, representative audit pages and automated checks
+of every export. No investigator/scientific approval is inferred.
+
+All source/index/model definitions remain unchanged by presentation corrections.
+Source enrichment and preflight already passed exact comparison with the prior
+clinical input/indexes; revised clinical estimation remains pending until release
+and the clean merged Mini checkout check. Generated materials remain ignored.
+Previous failed reviews and immutable inputs/bundles are preserved. There are no
+configured GitHub CI checks; actual local/Mini evidence is reported separately.

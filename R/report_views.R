@@ -6,7 +6,9 @@ bmi_population_label <- function(x) {
     n_frame_patients="Patients with confirmed eligibility",n_index_unresolved="First index unresolved",n_membership_uncertain="Patient eligibility uncertain",
     n_no_eligible_or_uncertain="No eligible or uncertain encounter",Q="Resolved first indexes (Q)",C="Complete adjustment (C)",C40="BMI ≥40 within C",
     C_icd="Known diagnosis capture",missing_adjustment="Incomplete adjustment",M_abg="Matched ICD / ABG",M_any_gas="Matched ICD / combined gas",
-    C_abg_encounter="ABG outcome observed",C_any_gas_encounter="Combined outcome observed")
+    C_abg_encounter="ABG outcome observed",C_any_gas_encounter="Combined outcome observed",
+    "combined::Q"="All resolved common indexes", "primary::Q"="Non-OBESITY-supported entry",
+    "obesity_only::Q"="Obesity-only source entry", "unresolved::Q"="RFS membership unresolved")
   out<-unname(labels[x]);bad<-is.na(out);out[bad]<-gsub("_"," ",x[bad],fixed=TRUE);out
 }
 bmi_category_labels <- function(v,x,dictionary) {
@@ -38,7 +40,7 @@ bmi_draw_panels <- function(plots,cells,heights,title) {
   };grid::popViewport()
 }
 bmi_draw_relationship <- function(p,obs,freq,variant) {
-  freq<-freq+ggplot2::labs(title="BMI frequency in C",subtitle=NULL,y="Patients (%)")+ggplot2::guides(fill=ggplot2::guide_legend(nrow=1))+ggplot2::theme(legend.key.height=grid::unit(3,"mm"),legend.margin=ggplot2::margin(0,0,0,0),plot.margin=grid::unit(c(1,3,1,3),"mm"))
+  freq<-freq+ggplot2::labs(title="BMI frequency in C",y="Patients (%)")+ggplot2::guides(fill=ggplot2::guide_legend(nrow=1))+ggplot2::theme(legend.key.height=grid::unit(3,"mm"),legend.margin=ggplot2::margin(0,0,0,0),plot.margin=grid::unit(c(1,3,1,3),"mm"))
   if(variant=="A") {
     cells<-rbind(cbind(1,1,1:3,1:3),cbind(2,2,1:3,1:3),c(3,3,1,3))
     plots<-c(p,obs,list(freq));h<-c(1.1,1,1.05)
@@ -149,7 +151,7 @@ bmi_grouped_report <- function(d,caption,groups,record=TRUE) {
   if(!nrow(d))return(bmi_report_table(d,caption,record=record))
   groups<-intersect(groups,names(d));key<-do.call(paste,c(d[groups],sep=" | "))
   for(ix in split(seq_len(nrow(d)),factor(key,levels=unique(key)))) {
-    cat("\n**",paste(paste(groups,as.character(d[ix[1],groups]),sep="="),collapse="; "),"**\n\n",sep="")
+    cat("\n**",paste(paste(groups,as.character(d[ix[1],groups]),sep="="),collapse=";  \n"),"**\n\n",sep="")
     if(record)bmi_coverage(d[ix,,drop=FALSE],caption)
     x<-d[ix,setdiff(names(d),groups),drop=FALSE]
     absent<-names(x)[vapply(x,function(v)all(is.na(v)),logical(1))]
@@ -163,7 +165,9 @@ bmi_pif_view <- function(a,ids) {
   z<-a$policy_totals[a$policy_totals$model_id %in% ids,,drop=FALSE]
   if(!nrow(z))return(z)
   for(v in c("pct_shifted","p_observed","p_shifted","difference_per1000","difference_low_per1000","difference_high_per1000","PIF","PIF_low","PIF_high"))if(!v %in% names(z))z[[v]]<-NA_real_
-  data.frame(Model=ifelse(z$status=="estimated",z$model_id,paste(z$model_id,z$status,z$reason,sep="; ")),Reference=z$reference_id,N=z$n_reference,
+  r<-a$model_registry[match(z$model_id,a$model_registry$model_id),,drop=FALSE]
+  for(v in c("n_shifted","mean_decrement","maximum_decrement"))if(!v %in% names(z))z[[v]]<-NA_real_
+  data.frame(Model=ifelse(z$status=="estimated",z$model_id,paste(z$model_id,z$status,z$reason,sep="; ")),Reference=z$reference_id,`Model N`=z$n_model,`Reference N`=z$n_reference,Events=r$n_events,`Patients shifted`=z$n_shifted,`Mean decrement`=z$mean_decrement,`Maximum decrement`=z$maximum_decrement,
     `Eligible (%)`=bmi_number(z$pct_shifted,4),`Observed probability (%)`=bmi_number(100*z$p_observed,4),
     `Shifted probability (%)`=bmi_number(100*z$p_shifted,4),`Difference per 1000 (95% CI)`=bmi_ci(z$difference_per1000,z$difference_low_per1000,z$difference_high_per1000),
     `PIF % (95% CI)`=bmi_ci(100*z$PIF,100*z$PIF_low,100*z$PIF_high),check.names=FALSE)
@@ -189,7 +193,7 @@ bmi_scientific_results <- function(a,section) {
   }
   if(section=="conclusion") {
     z<-a$fixed_bmi_contrasts[a$fixed_bmi_contrasts$model_id %in% bmi_primary_ids(),,drop=FALSE]
-    direction<-if(nrow(z)==3&&all(z$status=="estimated")&&all(z$conf_low_per1000>0))"Higher BMI was associated with higher modeled probability of documented hypercapnia at the prespecified BMI 45 versus 40 comparison."else"BMI–hypercapnia relationships varied by definition and require interpretation alongside the displayed estimates and intervals."
+    direction<-"We estimated BMI–hypercapnia probability relationships within the fixed-index, non-OBESITY-supported source-entry population. Outcome-specific contrasts and their uncertainty are reported separately; they do not constitute a between-group test."
     cat("> **Example conclusion, pending investigator review:** ",direction," Gas-based estimates describe patients with usable blood-gas evidence in this selected acute-care cohort; diagnosis-based estimates describe patients with known diagnosis capture. Differences in evidence availability limit comparisons between these populations. Secondary one-unit BMI-shift contrasts are descriptive model scenarios and do not establish effects of weight loss or cases prevented.\n\n",sep="")
   }
 }

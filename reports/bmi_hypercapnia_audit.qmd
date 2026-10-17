@@ -2,9 +2,10 @@
 title: "BMI–hypercapnia: complete construction and model audit"
 format:
   html:
+    html-table-processing: none
     toc: true
     toc-depth: 3
-    embed-resources: true
+    embed-resources: false
     css: bmi_report.css
   pdf:
     pdf-engine: xelatex
@@ -32,11 +33,19 @@ if(!nzchar(root)||!dir.exists(run)||!dir.exists(review))stop("Use saved-run rend
 source(file.path(root,"R","analysis.R"))
 Sys.setenv(BMI_REPORT_ID="audit")
 load_common_input<-load_triangulation_input<-bmi_load_input<-fit_bmi_model<-fit_registered_models<-bmi_run_analysis<-function(...)stop("Render tripwire: clinical input/model fitting forbidden")
+source(file.path(root,"reports","table_passthrough.R"))
+bmi_report_table<-bmi_raw_table_writer(bmi_report_table)
 bundle<-bmi_read_bundle(run);a<-bundle$analysis
 knitr::opts_chunk$set(dev=if(knitr::is_latex_output())"cairo_pdf"else"png",fig.width=7,fig.height=8)
 captions<-utils::read.csv(file.path(review,"figures","captions.csv"),stringsAsFactors=FALSE)
 page<-bmi_page
-figure<-function(id)bmi_figure(id,review,captions)
+figure<-function(id) {
+  if(knitr::is_latex_output())return(bmi_figure(id,review,captions))
+  # Keep the complete audit portable with its adjacent vector-figure directory.
+  markup<-capture.output(bmi_figure(id,review,captions))
+  markup<-gsub("<img ","<img loading=\"lazy\" ",markup,fixed=TRUE)
+  cat(gsub(paste0(review,"/"),"",markup,fixed=TRUE),sep="\n")
+}
 ```
 
 ```{r}
@@ -61,14 +70,14 @@ bmi_report_table(a$variable_dictionary,"Complete variable dictionary",keys="vari
 
 ## Detailed observational cohort construction
 
-Source records, encounter versions and patients have distinct counting units. First-failure exclusions are exclusive at their declared grain; all-reason counts overlap. Gas and ICD samples are parallel overlapping analytic branches.
+Source records, encounter versions and patients have distinct counting units. Global pre-index accounting belongs to the combined reference. Subgroup input/eligibility recheck nodes begin with already fixed indexes; they are not new upstream extraction counts or a new clinical selection. First-failure exclusions are exclusive at their declared grain; all-reason counts overlap. Gas and ICD samples are parallel overlapping analytic branches.
 
 ```{r}
 #| label: detailed-flow
 #| results: asis
-ids<-tools::file_path_sans_ext(basename(list.files(file.path(review,"figures"),pattern="^F0-detail-.*\\.png$",full.names=TRUE)))
+ids<-tools::file_path_sans_ext(list.files(file.path(review,"figures"),pattern="^F0-detail-.*\\.png$",recursive=TRUE))
 for(id in ids){figure(id);page()}
-for(t in c("cohort_nodes","cohort_edges","exclusion_reasons","exclusion_overlaps","population_registry","timing_audit","observation_patterns","evidence_by_bmi","numerical_reconciliation")) {
+for(t in c("rfs_summary","rfs_outcomes","rfs_combinations","rfs_by_bmi","bmi_provenance","demographic_crosswalk","prior_run_reconciliation","rfs_semantics","expected_models","cohort_nodes","cohort_edges","exclusion_reasons","exclusion_overlaps","population_registry","timing_audit","observation_patterns","evidence_by_bmi","numerical_reconciliation")) {
  cat("\n### ",gsub("_"," ",t),"\n\n",sep="");bmi_report_table(a[[t]],t,keys=intersect(c("population_id","outcome_id"),names(a[[t]])))
 }
 ```
@@ -89,12 +98,12 @@ for(t in c("variable_summary","category_counts","missingness_patterns","comissin
 #| label: full-stage-atlas-figures
 #| results: asis
 bmi_report_table(utils::read.csv(file.path(review,"figures","atlas-index.csv")),"Atlas index: every plotted stage maps to an identical-profile representative",keys="variable_id")
-for(p in list.files(file.path(review,"figures"),pattern="^F3-.*\\.png$",full.names=TRUE)) {figure(tools::file_path_sans_ext(basename(p)));page()}
+for(p in list.files(file.path(review,"figures"),pattern="^F3-.*\\.png$",recursive=TRUE)) {figure(tools::file_path_sans_ext(p));page()}
 ```
 
 ## Every planned regression
 
-The basis is fixed at common-reference BMI percentiles 5, 35, 65 and 95; age remains linear. No automatic estimator substitution, category pooling or model selection occurs. Model-based intervals condition on the empirical reference. Apparent fit is assessed on training data. Influence flags do not remove patients.
+Each population basis is fixed at its adjustment-complete BMI percentiles 5, 35, 65 and 95; age remains linear. No automatic estimator substitution, category pooling or model selection occurs. Model-based intervals condition on the empirical reference. Apparent fit is assessed on training data. Influence flags do not remove patients.
 
 ```{r}
 #| label: full-regression-audit
@@ -110,7 +119,7 @@ if(nrow(a$model_registry))for(id in a$model_registry$model_id) {
     bmi_covariance_report(z,"Complete coefficient correlation","term1","term2","correlation")
   }else bmi_report_table(z,t,keys=intersect(c("term","metric","variable_id"),names(z))[1:min(1,length(intersect(c("term","metric","variable_id"),names(z))))])
  }
- fid<-paste0("F4-",match(id,a$model_registry$model_id));figure(fid)
+ group<-a$model_registry$analysis_population_id[a$model_registry$model_id==id];view<-bmi_group_view(a,group);fid<-paste0(group,"/F4-",match(sub(paste0("^",group,"::"),"",id),view$model_registry$model_id));figure(fid)
 }
 bmi_report_table(a$linear_spline_comparison,"Same-sample linear-versus-spline comparisons",keys="outcome_id")
 ```
@@ -122,7 +131,7 @@ Curves are policy-independent. Gas curves and scenarios standardize to their out
 ```{r}
 #| label: audit-relationships
 #| results: asis
-for(id in c("F1-A","F1-B","F1-C","F1-detail","F2")){figure(id);page()}
+for(group in c("primary","obesity_only"))for(id in c("F1-A","F1-B","F1-C","F1-detail","F2")){figure(paste0(group,"/",id));page()}
 for(t in c("fixed_bmi_contrasts","prediction_support","policy_registry","policy_totals","policy_contributions","policy_contribution_covariance")) {
  cat("\n### ",gsub("_"," ",t),"\n\n",sep="")
  if(t=="policy_contribution_covariance"&&nrow(a[[t]])){
@@ -131,7 +140,7 @@ for(t in c("fixed_bmi_contrasts","prediction_support","policy_registry","policy_
  }else if(t %in% c("policy_contributions","implied_missing_probabilities"))bmi_grouped_report(a[[t]],t,groups=c("model_id","reference_id","policy_id","method"))
  else bmi_report_table(a[[t]],t,keys=intersect(c("model_id","reference_id"),names(a[[t]])))
 }
-for(p in list.files(file.path(review,"figures"),pattern="^F5-.*\\.png$",full.names=TRUE)){figure(tools::file_path_sans_ext(basename(p)));page()}
+for(p in list.files(file.path(review,"figures"),pattern="^F5-.*\\.png$",recursive=TRUE)){figure(tools::file_path_sans_ext(p));page()}
 ```
 
 ## Export and review record

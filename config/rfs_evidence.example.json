@@ -1,0 +1,74 @@
+{
+  "policy_id": "historical_source_membership_v1",
+  "membership_semantics": "selected_source_file_membership",
+  "accepted_receipt_sha256": "PENDING_TRUSTED_RECEIPT_HASH",
+  "families": {
+    "OBESITY_rfs": {
+      "source_product": "PENDING_ACCEPTED_FULL_DATA_IDENTITY",
+      "producer_revision": "PENDING_ACTUAL_PRODUCER",
+      "unit": "original patient-encounter key",
+      "anchor": "historical family/setting source-file representation",
+      "allowed_values": "0/1; missing remains unknown",
+      "zero_semantics": "PENDING_AUTHENTICATED_NONMEMBERSHIP_SEMANTICS",
+      "earliest_event_rule": "PENDING_HISTORICAL_EXTRACTION_EVIDENCE_OR_EXPLICIT_UNAVAILABLE",
+      "relationship": "PENDING_TEST_GAS_DIAGNOSIS_THRESHOLD_WINDOW_INCORPORATION"
+    },
+    "ABG_rfs": {
+      "source_product": "PENDING_ACCEPTED_FULL_DATA_IDENTITY",
+      "producer_revision": "PENDING_ACTUAL_PRODUCER",
+      "unit": "original patient-encounter key",
+      "anchor": "historical family/setting source-file representation",
+      "allowed_values": "0/1; missing remains unknown",
+      "zero_semantics": "PENDING_AUTHENTICATED_NONMEMBERSHIP_SEMANTICS",
+      "earliest_event_rule": "PENDING_HISTORICAL_EXTRACTION_EVIDENCE_OR_EXPLICIT_UNAVAILABLE",
+      "relationship": "PENDING_TEST_GAS_DIAGNOSIS_THRESHOLD_WINDOW_INCORPORATION"
+    },
+    "VBG_rfs": {
+      "source_product": "PENDING_ACCEPTED_FULL_DATA_IDENTITY",
+      "producer_revision": "PENDING_ACTUAL_PRODUCER",
+      "unit": "original patient-encounter key",
+      "anchor": "historical family/setting source-file representation",
+      "allowed_values": "0/1; missing remains unknown",
+      "zero_semantics": "PENDING_AUTHENTICATED_NONMEMBERSHIP_SEMANTICS",
+      "earliest_event_rule": "PENDING_HISTORICAL_EXTRACTION_EVIDENCE_OR_EXPLICIT_UNAVAILABLE",
+      "relationship": "PENDING_TEST_GAS_DIAGNOSIS_THRESHOLD_WINDOW_INCORPORATION"
+    },
+    "RESPFAIL_rfs": {
+      "source_product": "PENDING_ACCEPTED_FULL_DATA_IDENTITY",
+      "producer_revision": "PENDING_ACTUAL_PRODUCER",
+      "unit": "original patient-encounter key",
+      "anchor": "historical family/setting source-file representation",
+      "allowed_values": "0/1; missing remains unknown",
+      "zero_semantics": "PENDING_AUTHENTICATED_NONMEMBERSHIP_SEMANTICS",
+      "earliest_event_rule": "PENDING_HISTORICAL_EXTRACTION_EVIDENCE_OR_EXPLICIT_UNAVAILABLE",
+      "relationship": "PENDING_TEST_GAS_DIAGNOSIS_THRESHOLD_WINDOW_INCORPORATION"
+    },
+    "VENTSUPPORT_rfs": {
+      "source_product": "PENDING_ACCEPTED_FULL_DATA_IDENTITY",
+      "producer_revision": "PENDING_ACTUAL_PRODUCER",
+      "unit": "original patient-encounter key",
+      "anchor": "historical family/setting source-file representation",
+      "allowed_values": "0/1; missing remains unknown",
+      "zero_semantics": "PENDING_AUTHENTICATED_NONMEMBERSHIP_SEMANTICS",
+      "earliest_event_rule": "PENDING_HISTORICAL_EXTRACTION_EVIDENCE_OR_EXPLICIT_UNAVAILABLE",
+      "relationship": "PENDING_TEST_GAS_DIAGNOSIS_THRESHOLD_WINDOW_INCORPORATION"
+    },
+    "PREDISPOSITION_rfs": {
+      "source_product": "PENDING_ACCEPTED_FULL_DATA_IDENTITY",
+      "producer_revision": "PENDING_ACTUAL_PRODUCER",
+      "unit": "original patient-encounter key",
+      "anchor": "historical family/setting source-file representation",
+      "allowed_values": "0/1; missing remains unknown",
+      "zero_semantics": "PENDING_AUTHENTICATED_NONMEMBERSHIP_SEMANTICS",
+      "earliest_event_rule": "PENDING_HISTORICAL_EXTRACTION_EVIDENCE_OR_EXPLICIT_UNAVAILABLE",
+      "relationship": "PENDING_TEST_GAS_DIAGNOSIS_THRESHOLD_WINDOW_INCORPORATION"
+    }
+  },
+  "evidence_files": [
+    {
+      "path": "PENDING_PRODUCING_CODE_OR_ACCEPTED_RECEIPT",
+      "sha256": "PENDING_TRUSTED_HASH"
+    }
+  ],
+  "human_review": "Not asserted by template"
+}
