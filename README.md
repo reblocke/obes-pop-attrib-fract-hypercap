@@ -11,8 +11,12 @@ The scientific report now has paper-style Introduction, detailed Methods, expand
 Results (including all primary coefficients and key diagnostics), and draft conclusion
 wording. The complete audit retains every variable/model/covariance/failure entry,
 with verified sharing of identical summaries. Both render from explicit version-5
-saved aggregates; old bundles cannot be relabeled. The refreshed clinical results
-remain pending until the new merged-code run and its review receipts are complete.
+saved aggregates; old bundles cannot be relabeled. PR #9 merged as `ca24564`; a
+fresh clinical run completed from the clean matching Mini checkout. All 103
+automated numerical checks passed, including unchanged cohorts, coefficients,
+covariance and observed-patient scenarios. Both clinical HTML/PDF reports and all
+figure exports passed recorded layout QC;
+investigator scientific review remains pending.
 
 Two reports share one immutable aggregate bundle:
 
