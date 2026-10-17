@@ -1069,3 +1069,20 @@ aggregate review command: separate RFS populations and bases intentionally chang
 models. The command reviews one saved run and records its own source hash. Prior
 index/clinical-field equality remains authenticated preparation evidence. This
 engineering cleanup changes no estimation equation or saved result.
+
+## 2026-10-17 — RFS software release verification
+
+The corrected artificial review completed both HTML/PDF reports. All-export QC
+passed57 scientific pages,4155 audit pages and1985figure sets with no detected
+bounds/symbol/collision/format issue. Full74acceptance checks pass against that
+actual review, in addition to19RFS checks,29Mini adapter checks and raw-table
+payload checks. The scoped visual receipt distinguishes inspected native figures,
+all scientific page overviews, representative audit pages and automated checks
+of every export. No investigator/scientific approval is inferred.
+
+All source/index/model definitions remain unchanged by presentation corrections.
+Source enrichment and preflight already passed exact comparison with the prior
+clinical input/indexes; revised clinical estimation remains pending until release
+and the clean merged Mini checkout check. Generated materials remain ignored.
+Previous failed reviews and immutable inputs/bundles are preserved. There are no
+configured GitHub CI checks; actual local/Mini evidence is reported separately.
