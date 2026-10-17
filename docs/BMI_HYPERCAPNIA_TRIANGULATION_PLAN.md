@@ -34,6 +34,24 @@ review, commit, push, PR and merge before clinical execution on the Mini.
    run once into a fresh directory, reconcile against the former fit and inspect
    clinical exports. Keep source/execution/numerical/visual/scientific states separate.
 
+## Completed observed-population release — 2026-10-16
+
+PR #9 merged as `ca24564`. Fresh source preflight and one clinical analysis ran
+from the matching clean isolated Mini checkout. Input and bound evidence hashes
+remain unchanged. All 103 automated numerical checks passed, including agreement
+with the former cohorts, fitted coefficients/covariance and observed scenarios.
+The curve standardization reference changed as approved; no source, index,
+adjustment or fitting rule changed during execution.
+
+Both HTML/PDF reports rendered locally from the copied aggregate bundle without
+clinical reads or refitting. The scientific PDF has 32 pages; the complete audit
+has 808. All 215 figure layouts and all report pages were inspected in overview,
+with main/dense examples inspected at full size. Automated bounds, symbol and
+text-collision checks found no issues. F1-A remains preferred. Dense audit tables
+remain closely spaced; complete machine-readable exports accompany them.
+Investigator numerical/scientific approval remains pending. Private run identities,
+commands and review scope are indexed in WORKLOG.md and ignored receipts.
+
 ## Preserved historical implementation record (superseded targets)
 
 The following records the released version-4 workflow and its actual execution.

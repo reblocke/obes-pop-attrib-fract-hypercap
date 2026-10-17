@@ -6,11 +6,15 @@ source qualification. Gas curves, contrasts and secondary scenarios now
 standardize to their outcome-observed populations; ICD uses known diagnosis
 capture. Full-C MAR/MNAR projections are historical only. IPW is deferred.
 
-The new reports and artificial verification are in progress. A fresh clinical
-run is required after release because the curve reference populations changed;
-old aggregates must not be relabeled. No additional source export or upstream
-rebuild is required by this change. Investigator scientific review remains a
-separate, unasserted state.
+PR #9 merged as `ca24564` after 73 artificial acceptance checks, 24 adapter
+checks, complete artificial renders and recorded visual review. A fresh source
+preflight and clinical estimation completed from a clean matching Mini checkout.
+All 103 aggregate numerical checks passed, including unchanged cohorts, models,
+covariance and observed scenarios versus the historical run. Input, manifest and
+all bound evidence hashes remain unchanged. Both clinical HTML/PDF reports
+and all figure exports passed recorded layout QC.
+No additional source export or upstream rebuild was needed. Investigator
+scientific review remains a separate, unasserted state.
 
 The earlier release below is preserved as history. Its successful exports and
 recorded QC did not detect all presentation defects: this revision repairs

@@ -12,10 +12,11 @@ The unchanged source is retained at Git commit `1626a6db8ac5d347df7f5c0444b5bcac
 `curve-analyze-20261016T160703-17017` and its hashed bundle remain immutable.
 It includes the earlier full-C gas projections and MNAR scenarios. These are
 superseded scientific outputs; the current renderer rejects them rather than
-changing their labels. The new observed-population run will retain its own
-identity and compare unchanged models/cohorts and observed scenarios against
-that historical bundle. Earlier visual-QC limitations are documented in the
-current handoff; historical receipts are not overwritten.
+changing their labels. The new observed-population run
+`curve-analyze-20261016T225112-24371`, estimated from merged `ca24564`, retains its
+own identity. Its automated comparison confirms unchanged models/cohorts and
+observed scenarios against that historical bundle. Earlier visual-QC limitations
+are documented in the current handoff; historical receipts are not overwritten.
 
 ## Earlier archive index (historical command descriptions)
 

@@ -885,3 +885,45 @@ Read-only candidate review covered staged/unstaged/new source files relative to
 merge and the clean matching Mini checkout. Accepted input/manifest hashes were
 reverified unchanged; no competing analysis was active. The Mini cannot authenticate
 to GitHub directly, so the merged revision will be transferred as a Git bundle.
+
+
+### Observed-population clinical refresh completed — 2026-10-16
+
+Implementation PR #9 squash-merged as ca24564b9963266d6ff54652d0680a4056a51869
+(tree 394dec1fb18a5b4fd39d423dc508408f33a041e5). No GitHub checks were configured;
+recorded local/Mini tests preceded merge. The Mini could not authenticate directly
+to GitHub, so a Git bundle supplied the merged commit to a new clean isolated
+checkout at `/Volumes/RESEARCH FAST/bmi-observed-paper-release-20261016/checkout`.
+HEAD and origin/main matched; unrelated dirty research checkouts were untouched.
+
+Using the unchanged qualified input and clinical-reviewed manifest, `make preflight`
+completed as `curve-preflight-20261016T224526-24328`, then `make analyze` completed
+once as `curve-analyze-20261016T225112-24371`. All 21 model positions remain explicit;
+20 fitted and one constant ICD capture-availability position is unestimable.
+`Rscript scripts/review_bmi_run.R NEW_RUN OLD_RUN` passed 103 automated numerical
+checks. Eleven bound evidence file hashes, the input hash and manifest hash remain
+unchanged. The existing owner source acceptance was reused; no new human review
+was invented. The execution lease is marked completed.
+
+Aggregate-only copies are under ignored
+`artifacts/triangulation/clinical-observed-release-20261016/`. `make render RUN=...`
+created review `20261016T225140-32053` locally, without clinical input reads or
+refitting. Both HTML/PDF reports completed: 32 scientific and 808 audit pages,
+215 figure sets. `scripts/check_report_exports.py` found no out-of-bounds text,
+replacement symbols, text collisions or export-format defects. All page/figure
+overviews were visually scanned; main figures and dense report examples were
+inspected at full size. Complete machine-readable table coverage remains checked.
+The exact scope and hashes are in `visual-review-receipt.json`, `QC_REVIEW.md` and
+the figure QC manifest. Dense audit numeric columns remain closely spaced, with
+full CSVs available for exact retrieval. F1-A remains preferred; B/C are retained.
+
+Source accepted, execution complete, automated numerical review passed and scoped
+visual review complete are distinct states. Investigator numerical/scientific
+review and abstract submission remain pending. Historical products are unchanged;
+all clinical artifacts, numerical results and review images remain ignored.
+
+All 73 acceptance checks passed again with the actual clinical report review for
+render/coverage assertions; model tests still use artificial data. The private
+`clinical-release-review-receipt.json` binds code, input, manifest, companion,
+bundle, numerical and visual evidence. The final documentation update changes no
+analysis/render source and requires no refit.
