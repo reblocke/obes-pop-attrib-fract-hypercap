@@ -9,14 +9,14 @@ history in Git and immutable version-5 clinical bundle.
 Select the existing first qualifying adult 2022 ED/inpatient BMI≥30 index from
 original FULL_DATA keys before RFS, gas or adjustment availability. Partition at
 that fixed index: primary any non-OBESITY source membership; obesity-only
-sensitivity OBESITY=1 and all five other flags authenticated zero; unresolved
+descriptive audit OBESITY=1 and all five other flags authenticated zero; unresolved
 otherwise. All-zero discrepancies require investigation. Overlap remains primary.
 Flags describe historical source-file membership, not exhaustive clinical criteria.
 Do not reconstruct extraction without its obesity query or promote later indexes.
 
 Retain ordinary ABG≥45, ABG≥45 or VBG≥50, known-capture five-code ICD, established
-validity/units, adjustment and available-BMI hierarchy. Independently fit natural
-BMI splines per RFS group using C quantiles .05/.35/.65/.95 (type 7). Preserve
+validity/units, adjustment and available-BMI hierarchy. Fit primary natural
+BMI splines using primary C quantiles .05/.35/.65/.95 (type 7). Preserve
 all planned observation, matched, calendar-day and same-sample linear positions.
 No full-cohort projection, MAR/MNAR, IPW, new recoding or BMI imputation.
 
@@ -36,12 +36,12 @@ training support for 40/45 contrasts. Retain failures without estimator substitu
    overlaps, boundary counts, BMI/provenance lags, demographic cross-tabs,
    fine bins 35–55, retained/excluded profiles and explicit unavailable quantities.
 4. Generate the configured model registry, group-specific basis identities,
-   complete output and schema-6 aggregate bundle. Fit limited current-measurement
-   sensitivities using the selected current BMI, and all-OBESITY supporting fits.
+   complete output and schema-7 aggregate bundle. Fit the primary current-measurement
+   sensitivity using the selected current BMI, and all-OBESITY supporting fits.
    Current-measurement sensitivities reuse the parent basis; all-OBESITY gets its
    own basis. These supporting groups each have three encounter-wide spline fits.
 5. Render scientific and complete-audit reports from aggregates only. Produce
-   parallel F1-A/B/C, source-entry/flow figures and paired contribution exhibits.
+   primary F1-A/B/C, raw availability and source-entry/flow figures and paired contribution exhibits.
    Inspect native-size/grayscale exports under the figure QC skill.
 6. Review/test/release code, qualify fresh metadata on the Mini, execute once from
    clean merged code and reconcile. Preserve every prior input/run/review receipt.
@@ -87,3 +87,30 @@ visual receipt identifies the native key figures, scientific overviews and
 representative audit pages actually inspected; it does not claim manual review
 of every audit page. A remains preferred. Full CSVs retain exact numeric lookup
 where dense PDF tables wrap tokens. Investigator approval remains pending.
+
+## Approved hierarchy correction — 2026-10-17
+
+Obesity-only is a descriptive selection/evidence-availability audit, irrespective
+of whether a particular dataset could numerically fit its models. Remove its
+outcome, observation, timing, matched, linear and current-measurement model
+positions and PIFs. Retain all fixed-index partition counts, variable/BMI profiles,
+raw outcome availability/positivity, unknowns and residual gases. Historical
+source membership does not prove exhaustive acquisition; the exact cause of
+residual source-membership/gas differences remains unadjudicated.
+
+Retain the complete primary registry, primary current-measurement sensitivity
+using its parent basis, and the overlapping all-OBESITY supporting analysis with
+its own basis. Primary source-entry selection can affect the observed association;
+this organization does not resolve selection bias. No index, BMI, covariate,
+outcome, reference-population or paired-scenario rule changes.
+
+Use schema 7 and `bmi_hypercapnia_rfs_curve_audit_v2`. Reject version-6 bundles;
+keep them immutable under their original specification. Verify primary coefficients,
+reference Ns, curves, scenarios and contributions against the previous run. Add
+raw availability counts/proportions with full fixed-index denominators and Wilson
+intervals. Do not confuse lack of usable evidence with proof no gas was acquired.
+Proceed through tests, complete artificial HTML/PDF renders and figure QC, release,
+then one clean merged Mini preflight/clinical run from the unchanged qualified
+input. Scientific review, additional cross-project audit and submission remain
+separate. The earlier execution checkpoint above describes the superseded
+version-6 hierarchy, not results for this revision.

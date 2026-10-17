@@ -1,13 +1,14 @@
 # Current RFS amendment — 2026-10-17
 
 The approved RFS plan supersedes the combined-cohort primary population below.
-Use schema-6 `bmi_hypercapnia_rfs_curve_audit_v1` and schema-4 metadata-qualified
+Use schema-7 `bmi_hypercapnia_rfs_curve_audit_v2` and schema-4 metadata-qualified
 inputs. Select the common clinical index first, then partition source membership.
 Primary includes any non-OBESITY positive, including overlaps; obesity-only requires
 OBESITY=1 plus five authenticated zeros. Unknown is not zero. Combined results
-are an audit reference; no new combined primary fit. Each main group gets its
-own fixed spline basis. Current-measurement supporting models reuse the parent
-basis; all-OBESITY supporting models use their own. Generate model positions from
+are an audit reference; no new combined primary fit. Obesity-only is a descriptive selection/evidence audit with no adjusted models,
+curves or PIFs, including no obesity-only current-measurement models. Primary
+current-measurement models reuse the primary basis; overlapping all-OBESITY
+supporting models use their own. Generate model positions from
 saved configuration, never a fixed total. No clinical-field or index change is
 implicit in metadata enrichment. Preserve source products and previous bundles.
 Run data-free tests, full render integration and human review as distinct checks.
@@ -25,7 +26,7 @@ are in `docs/CURVE_AUDIT_ACCEPTANCE.csv`. The user additionally confirmed the
 original selected encounter population and known-capture ICD reference.
 
 Primary deliverables are `reports/bmi_hypercapnia.qmd` and
-`reports/bmi_hypercapnia_audit.qmd`, generated from one version-6 aggregate bundle.
+`reports/bmi_hypercapnia_audit.qmd`, generated from one version-7 aggregate bundle.
 The scientific report centers BMI probability curves, observation and BMI
 frequencies. The audit contains every applicable stage/variable and every planned
 model, including full coefficients, covariance, failures and diagnostics. Do not
@@ -131,7 +132,7 @@ external communication follows automatically from this refactor ticket.
 Expanded mini-paper: detailed Methods, primary coefficients and diagnostic Results,
 observed-data sensitivities and example conclusions. Complete audit retains all
 values with explicit verified identical-summary aliases. Required figures must
-fail rendering when missing; captions remain with vector figures. Use version 6
-`bmi_hypercapnia_rfs_curve_audit_v1`; reject old bundles, never relabel them.
+fail rendering when missing; captions remain with vector figures. Use version 7
+`bmi_hypercapnia_rfs_curve_audit_v2`; reject old bundles, never relabel them.
 The owner explicitly authorized review/commit/push/PR/merge and a fresh Mini
 clinical run for this revision. That approval does not extend to submission.

@@ -72,9 +72,12 @@ bmi_report_table(a$variable_dictionary,"Complete variable dictionary",keys="vari
 
 Source records, encounter versions and patients have distinct counting units. Global pre-index accounting belongs to the combined reference. Subgroup input/eligibility recheck nodes begin with already fixed indexes; they are not new upstream extraction counts or a new clinical selection. First-failure exclusions are exclusive at their declared grain; all-reason counts overlap. Gas and ICD samples are parallel overlapping analytic branches.
 
+Obesity-only is a descriptive selection audit. It retains full profiles, evaluability and event counts, including any residual captured gases despite absent historical gas-family membership. No obesity-only adjusted curve, observation model, current-measurement model or PIF is planned. Entry-pathway exclusion selects against gas evidence; an apparent absence of documented outcomes is not independent physiological evidence. Exact historical extraction rules remain distinct from current outcome definitions.
+
 ```{r}
 #| label: detailed-flow
 #| results: asis
+figure("RFS-evidence")
 ids<-tools::file_path_sans_ext(list.files(file.path(review,"figures"),pattern="^F0-detail-.*\\.png$",recursive=TRUE))
 for(id in ids){figure(id);page()}
 for(t in c("rfs_summary","rfs_outcomes","rfs_combinations","rfs_by_bmi","bmi_provenance","demographic_crosswalk","prior_run_reconciliation","rfs_semantics","expected_models","cohort_nodes","cohort_edges","exclusion_reasons","exclusion_overlaps","population_registry","timing_audit","observation_patterns","evidence_by_bmi","numerical_reconciliation")) {
@@ -131,7 +134,7 @@ Curves are policy-independent. Gas curves and scenarios standardize to their out
 ```{r}
 #| label: audit-relationships
 #| results: asis
-for(group in c("primary","obesity_only"))for(id in c("F1-A","F1-B","F1-C","F1-detail","F2")){figure(paste0(group,"/",id));page()}
+for(group in unlist(bundle$config$analysis_populations))for(id in c("F1-A","F1-B","F1-C","F1-detail","F2")){figure(paste0(group,"/",id));page()}
 for(t in c("fixed_bmi_contrasts","prediction_support","policy_registry","policy_totals","policy_contributions","policy_contribution_covariance")) {
  cat("\n### ",gsub("_"," ",t),"\n\n",sep="")
  if(t=="policy_contribution_covariance"&&nrow(a[[t]])){

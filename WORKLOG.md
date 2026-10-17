@@ -1142,3 +1142,44 @@ diagram work unassessed and investigator approval pending. The separate private
 aggregate, numerical, integration and scoped visual evidence. Dense numeric tables
 can wrap tokens or require cross-panel row-order matching; complete CSVs retain
 exact lookup. No patient-level data or clinical artifacts enter Git.
+
+## 2026-10-17 — Obesity-only descriptive selection audit
+
+The owner approved removing obesity-only adjusted modeling because source-entry
+selection depletes the intended physiological comparator. Preserved a pre-edit
+artificial aggregate baseline. Config now registers primary, primary-current and
+overlapping all-OBESITY fits; obesity-only remains a descriptive population.
+Its original indexes, profiles, evaluability/events and residual gases remain.
+New schema 7 / rfs_curve_audit_v2 rejects older modeling bundles. Scientific and
+audit reports remove obesity-only curve/PIF positions and add raw full-denominator
+availability with Wilson intervals. Tests enforce descriptive-only behavior,
+configured registry identities, old-bundle rejection and primary invariance.
+Complete artificial rendering, scoped figure QC, release and fresh clinical
+execution remain pending at this checkpoint. No source product or input changed.
+
+### Artificial verification checkpoint
+
+All 22 RFS checks, 67 default computation checks and raw HTML/LaTeX table tests
+pass. All 29 Python adapter/source tests pass in the Mini's existing configured
+runtime. The first Mini adapter invocation lacked Rscript on PATH; its failed log
+is preserved, and activation of the existing runtime resolves it without installs.
+The local minimal Python run explicitly skipped optional SQL-dependent cases;
+those cases passed on the Mini. The pre-edit versus revised artificial aggregate
+comparison passes across 45 retained primary/primary-current/all-OBESITY tables,
+excluding only elapsed fitting time. Coefficients, covariance, reference Ns,
+curves, scenarios and signed contribution quantities are unchanged.
+
+Native inspection caught clipped titles/counts in the first raw-availability
+layout, then adjacent tick crowding. Preserved both aborted presentation reviews
+and their reasons; the immutable estimation bundle is unchanged. The replacement
+uses a shared-y faceted layout, centered count labels and explicit panel spacing.
+Its focused native preview passes bounds/symbol/collision checks at the intended
+190-mm width. A complete fresh HTML/PDF render and scoped review are in progress;
+no second artificial estimation was needed for these presentation repairs.
+Exact private test logs and comparison hashes are in ignored
+`artifacts/triangulation/rfs-selection-update-20261017/`.
+
+The interrupted Quarto job left an untracked `.rmarkdown` intermediate. Preserved
+it with its hash in the aborted ignored review directory and added the matching
+report-intermediate ignore rule to prevent accidental staging of generated
+aggregate report text. Existing source/data files were not removed.

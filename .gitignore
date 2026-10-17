@@ -18,6 +18,7 @@ full_db.rds
 /reports/*.out
 /reports/*.toc
 /reports/*.knit.md
+/reports/*.rmarkdown
 /reports/*_files/
 reports/.RData
 

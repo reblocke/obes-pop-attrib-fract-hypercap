@@ -20,15 +20,15 @@ preflight cohort-audit analyze:
 	Rscript --vanilla scripts/run_bmi_hypercapnia.R "$@" "$(INPUT)" "$(MANIFEST)" "$(CONFIG)"
 
 render:
-	@test -n "$(RUN)" || (echo 'Set RUN to an explicit saved version-6 aggregate run.'; exit 1)
+	@test -n "$(RUN)" || (echo 'Set RUN to an explicit saved version-7 aggregate run.'; exit 1)
 	Rscript --vanilla scripts/render_bmi_hypercapnia.R "$(RUN)" all
 
 render-html:
-	@test -n "$(RUN)" || (echo 'Set RUN to an explicit saved version-6 aggregate run.'; exit 1)
+	@test -n "$(RUN)" || (echo 'Set RUN to an explicit saved version-7 aggregate run.'; exit 1)
 	Rscript --vanilla scripts/render_bmi_hypercapnia.R "$(RUN)" html
 
 render-pdf:
-	@test -n "$(RUN)" || (echo 'Set RUN to an explicit saved version-6 aggregate run.'; exit 1)
+	@test -n "$(RUN)" || (echo 'Set RUN to an explicit saved version-7 aggregate run.'; exit 1)
 	Rscript --vanilla scripts/render_bmi_hypercapnia.R "$(RUN)" pdf
 
 prepare:

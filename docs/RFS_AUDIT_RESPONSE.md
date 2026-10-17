@@ -35,3 +35,15 @@ all-export geometry/format checks. The scoped visual receipt records actual key
 figure and page inspection; it does not assert individual human review of the
 full audit atlas. A fresh clinical requirement ledger retains RFS17 as unassessed
 and RFS18 as pending investigator review. No clinical artifacts are committed.
+
+### Approved selection-audit correction — 2026-10-17
+
+The obesity-only group retains descriptive profiles, raw evaluability/event counts
+and source-entry reconciliation; adjusted models/curves/PIFs are removed from the
+current plan. Primary and primary-current models remain unchanged, and all-OBESITY
+remains overlapping supporting context. A raw-availability figure exposes the
+selection consequence without treating unknown gases as negatives. Historical
+query details and residual gas/membership differences remain explicitly unresolved.
+Schema 7 rejects the superseded version-6 hierarchy; it does not erase its
+clinical run, failed models or receipts. Current-run verification is recorded
+separately after release.
