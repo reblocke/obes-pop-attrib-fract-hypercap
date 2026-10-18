@@ -1,5 +1,11 @@
 # Aggregate-only presentation. No patient records, model fitting or scientific recoding.
 bmi_wrap <- function(x,width=28) vapply(x,function(z)paste(strwrap(z,width),collapse="\n"),character(1))
+bmi_variable_label <- function(variable,dictionary) {
+  label<-dictionary$display_label[match(variable,dictionary$variable_id)]
+  if(!length(label)||is.na(label)||!nzchar(label))label<-gsub("_"," ",variable)
+  for(term in c("BMI","ABG","VBG","ICD","RFS"))label<-gsub(paste0("\\b",tolower(term),"\\b"),term,label,ignore.case=TRUE)
+  paste0(toupper(substr(label,1,1)),substring(label,2))
+}
 bmi_population_label <- function(x) {
   labels<-c(source_records="Original candidate records",encounter_versions="Distinct candidate encounters",source_patients="Patients in original population",
     confirmed_eligible_encounters="Confirmed eligible encounters",excluded_encounters="Excluded encounters",uncertain_encounters="Eligibility uncertain",
@@ -22,7 +28,7 @@ bmi_category_labels <- function(v,x,dictionary) {
 }
 bmi_draw_panels <- function(plots,cells,heights,title) {
   grid::grid.newpage();grid::grid.text(title,x=.02,y=.99,just=c("left","top"),gp=grid::gpar(fontsize=12,fontface="bold"))
-  grid::pushViewport(grid::viewport(y=.47,height=.90,layout=grid::grid.layout(length(heights),max(cells[,4]),heights=grid::unit(heights,"null"))))
+  grid::pushViewport(grid::viewport(y=.47,height=.84,layout=grid::grid.layout(length(heights),max(cells[,4]),heights=grid::unit(heights,"null"))))
   grobs<-lapply(plots,ggplot2::ggplotGrob)
   for(row in unique(cells[,1])) {
     ix<-which(cells[,1]==row);if(length(ix)<2)next
@@ -40,7 +46,15 @@ bmi_draw_panels <- function(plots,cells,heights,title) {
   };grid::popViewport()
 }
 bmi_draw_relationship <- function(p,obs,freq,variant) {
-  freq<-freq+ggplot2::labs(title="BMI frequency in C",y="Patients (%)")+ggplot2::guides(fill=ggplot2::guide_legend(nrow=1))+ggplot2::theme(legend.key.height=grid::unit(3,"mm"),legend.margin=ggplot2::margin(0,0,0,0),plot.margin=grid::unit(c(1,3,1,3),"mm"))
+  for(i in seq_along(p)) {
+    p[[i]]<-p[[i]]+ggplot2::labs(title=paste(LETTERS[i],bmi_outcome_short(names(p)[i])),x=NULL)
+    obs[[i]]<-obs[[i]]+ggplot2::labs(title=paste(LETTERS[i+3],if(names(obs)[i]=="icd")"Diagnosis capture"else paste("Usable",bmi_outcome_short(names(obs)[i]))),x=NULL)
+    if(variant!="B" && i>1) {
+      p[[i]]<-p[[i]]+ggplot2::labs(y=NULL)
+      obs[[i]]<-obs[[i]]+ggplot2::labs(y=NULL)
+    }
+  }
+  freq<-freq+ggplot2::labs(title="G  BMI distribution",y="Patients (%)")+ggplot2::guides(fill=ggplot2::guide_legend(nrow=1))+ggplot2::theme(legend.key.height=grid::unit(3,"mm"),legend.margin=ggplot2::margin(0,0,0,0),plot.margin=grid::unit(c(1,3,1,3),"mm"))
   if(variant=="A") {
     cells<-rbind(cbind(1,1,1:3,1:3),cbind(2,2,1:3,1:3),c(3,3,1,3))
     plots<-c(p,obs,list(freq));h<-c(1.1,1,1.05)
@@ -53,12 +67,14 @@ bmi_draw_relationship <- function(p,obs,freq,variant) {
     order<-c("abg","any_gas","icd");plots<-c(p[order],list(freq),obs[order])
     cells<-rbind(cbind(1,1,1:3,1:3),c(2,2,1,3),cbind(3,3,1:3,1:3));h<-c(1.1,1.05,1)
   }
-  bmi_draw_panels(plots,cells,h,"BMI, documented hypercapnia and evidence availability")
+  bmi_draw_panels(plots,cells,h,"BMI and documented hypercapnia")
+  grid::grid.text("Shading: 95% CI   |   Dotted: locally sparse   |   Dashed: outside training BMI range",
+    x=.5,y=.012,gp=grid::gpar(fontsize=9.5))
 }
 bmi_edge_plot <- function(a,e) {
   ids<-c(e$from[1],e$to);n<-a$cohort_nodes[match(ids,a$cohort_nodes$population_id),,drop=FALSE]
   n$x<-c(0,rep(2,nrow(e)));n$y<-c((nrow(e)+1)/2,rev(seq_len(nrow(e))))
-  n$text<-paste(bmi_wrap(bmi_population_label(n$population_id),27),paste0("N = ",ifelse(is.na(n$n),"unavailable",format(n$n,big.mark=",",trim=TRUE))),n$grain,sep="\n")
+  n$text<-paste(bmi_wrap(bmi_population_label(n$population_id),27),paste0("N = ",ifelse(is.na(n$n),"unavailable",format(n$n,big.mark=",",trim=TRUE))),gsub("_"," ",n$grain),sep="\n")
   segments<-rbind(data.frame(x=.65,y=n$y[1],xe=1,ye=n$y[1]),data.frame(x=1,y=n$y[1],xe=1,ye=n$y[-1]))
   arrows<-data.frame(x=1,y=n$y[-1],xe=1.35,ye=n$y[-1])
   ggplot2::ggplot(n,ggplot2::aes(x,y))+
@@ -67,7 +83,7 @@ bmi_edge_plot <- function(a,e) {
     ggplot2::geom_rect(ggplot2::aes(xmin=x-.65,xmax=x+.65,ymin=y-.35,ymax=y+.35),fill="white",colour="grey35")+
     ggplot2::geom_text(ggplot2::aes(label=text),size=3.4,lineheight=.95)+
     ggplot2::scale_x_continuous(limits=c(-.8,2.8))+ggplot2::scale_y_continuous(limits=c(.45,nrow(e)+.55))+
-    ggplot2::labs(title=paste("Cohort accounting:",e$relation[1]),subtitle=if(e$relation[1]=="partition")paste("Partition:",e$partition_id[1])else"Children are not an exclusive partition")+
+    ggplot2::labs(title=if(e$partition_id[1]=="rfs_index")"Source-entry partition at the fixed index"else paste("Cohort accounting:",e$relation[1]),subtitle=if(e$partition_id[1]=="rfs_index")"Mutually exclusive patient groups; overlap remains in primary"else if(e$relation[1]=="partition")paste("Partition:",gsub("_"," ",e$partition_id[1]))else"Children are not an exclusive partition")+
     ggplot2::theme_void(base_size=11)+ggplot2::theme(plot.margin=grid::unit(rep(4,4),"mm"),plot.title=ggplot2::element_text(face="bold"))
 }
 bmi_page <- function() if(knitr::is_latex_output())cat("\n\\clearpage\n\n")
@@ -164,15 +180,16 @@ bmi_primary_ids <- function()paste(c("abg","any_gas","icd"),"encounter/spline",s
 bmi_pif_view <- function(a,ids) {
   z<-a$policy_totals[a$policy_totals$model_id %in% ids,,drop=FALSE]
   if(!nrow(z))return(z)
-  for(v in c("pct_shifted","p_observed","p_shifted","difference_per1000","difference_low_per1000","difference_high_per1000","PIF","PIF_low","PIF_high"))if(!v %in% names(z))z[[v]]<-NA_real_
+  for(v in c("pct_shifted","p_observed","p_observed_low","p_observed_high","p_shifted","p_shifted_low","p_shifted_high","difference_per1000","difference_low_per1000","difference_high_per1000","PIF","PIF_low","PIF_high"))if(!v %in% names(z))z[[v]]<-NA_real_
   r<-a$model_registry[match(z$model_id,a$model_registry$model_id),,drop=FALSE]
   for(v in c("n_shifted","mean_decrement","maximum_decrement"))if(!v %in% names(z))z[[v]]<-NA_real_
   data.frame(Model=ifelse(z$status=="estimated",z$model_id,paste(z$model_id,z$status,z$reason,sep="; ")),Reference=z$reference_id,`Model N`=z$n_model,`Reference N`=z$n_reference,Events=r$n_events,`Patients shifted`=z$n_shifted,`Mean decrement`=z$mean_decrement,`Maximum decrement`=z$maximum_decrement,
-    `Eligible (%)`=bmi_number(z$pct_shifted,4),`Observed probability (%)`=bmi_number(100*z$p_observed,4),
-    `Shifted probability (%)`=bmi_number(100*z$p_shifted,4),`Difference per 1000 (95% CI)`=bmi_ci(z$difference_per1000,z$difference_low_per1000,z$difference_high_per1000),
+    `Eligible (%)`=bmi_number(z$pct_shifted,4),`Observed probability % (95% CI)`=bmi_ci(100*z$p_observed,100*z$p_observed_low,100*z$p_observed_high),
+    `Shifted probability % (95% CI)`=bmi_ci(100*z$p_shifted,100*z$p_shifted_low,100*z$p_shifted_high),`Difference per 1000 (95% CI)`=bmi_ci(z$difference_per1000,z$difference_low_per1000,z$difference_high_per1000),
     `PIF % (95% CI)`=bmi_ci(100*z$PIF,100*z$PIF_low,100*z$PIF_high),check.names=FALSE)
 }
 bmi_ci <- function(x,l,h)paste0(bmi_number(x,4)," (",bmi_number(l,4),", ",bmi_number(h,4),")")
+bmi_percent_ci <- function(x,l,h)ifelse(is.na(x),"unavailable",paste0(bmi_number(x,4),"% (95% CI ",bmi_number(l,4),"–",bmi_number(h,4),"%)"))
 bmi_coefficient_view <- function(a,id) {
   d<-a$coefficients[a$coefficients$model_id==id,,drop=FALSE]
   if(!nrow(d))return(d)
@@ -184,7 +201,9 @@ bmi_scientific_results <- function(a,section) {
   if(section=="cohort")cat("The original candidate ledger contained **",count("source_records")," records**, with **",count("Q")," resolved first eligible patient indexes** and **",count("C")," patients complete for adjustment**. First-index resolution remained uncertain for ",count("n_index_unresolved")," patients; no later encounter replaced these unresolved indexes. These are different counting units and are not interchangeable denominators.\n\n",sep="")
   if(section=="outcomes")for(id in bmi_primary_ids()) {
     r<-a$model_registry[a$model_registry$model_id==id,,drop=FALSE];if(!nrow(r))next
-    cat(bmi_outcome_label(r$outcome_id),": ",fmt(r$n_events)," documented-positive outcomes among ",fmt(r$n_model)," model patients. Model status: ",r$status,". ",r$failure_reason,"\n\n",sep="")
+    interval<-if(is.na(r$n_model)||is.na(r$n_events)||r$n_model<=0)c(NA_real_,NA_real_)else bmi_wilson(r$n_events,r$n_model)
+    cat(bmi_outcome_label(r$outcome_id),": ",fmt(r$n_events)," documented-positive outcomes among ",fmt(r$n_model)," model patients; observed positivity ",
+      bmi_percent_ci(100*r$n_events/r$n_model,100*interval[1],100*interval[2])," (Wilson interval). Model status: ",r$status,". ",r$failure_reason,"\n\n",sep="")
   }
   if(section=="curves")for(id in bmi_primary_ids()) {
     z<-a$fixed_bmi_contrasts[a$fixed_bmi_contrasts$model_id==id,,drop=FALSE];if(!nrow(z))next
@@ -194,6 +213,6 @@ bmi_scientific_results <- function(a,section) {
   if(section=="conclusion") {
     z<-a$fixed_bmi_contrasts[a$fixed_bmi_contrasts$model_id %in% bmi_primary_ids(),,drop=FALSE]
     direction<-"We estimated BMI–hypercapnia probability relationships within the fixed-index, non-OBESITY-supported source-entry population. Outcome-specific contrasts and their uncertainty are reported separately; they do not constitute a between-group test."
-    cat("> **Example conclusion, pending investigator review:** ",direction," Gas-based estimates describe patients with usable blood-gas evidence in this selected acute-care cohort; diagnosis-based estimates describe patients with known diagnosis capture. Obesity-only entry is an evidence-availability audit because gas-related source selection depletes an independent physiological comparator. The primary association remains subject to outcome-dependent entry and selective gas measurement. Secondary one-unit BMI-shift contrasts are descriptive model scenarios and do not establish effects of weight loss or cases prevented.\n\n",sep="")
+    cat("> **Example conclusion, pending investigator review:** ",direction," Gas-based estimates describe patients with usable blood-gas evidence in this selected acute-care cohort; diagnosis-based estimates describe patients with known diagnosis capture. The primary association remains subject to outcome-dependent entry and selective gas measurement. Secondary one-unit BMI-shift contrasts are descriptive model scenarios and do not establish effects of weight loss or cases prevented.\n\n",sep="")
   }
 }
