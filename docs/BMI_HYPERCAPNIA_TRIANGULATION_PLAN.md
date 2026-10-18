@@ -114,3 +114,21 @@ then one clean merged Mini preflight/clinical run from the unchanged qualified
 input. Scientific review, additional cross-project audit and submission remain
 separate. The earlier execution checkpoint above describes the superseded
 version-6 hierarchy, not results for this revision.
+
+## Corrected-hierarchy execution — 2026-10-17
+
+PR #14 merged as `043fea6`. Its clean, matching Mini checkout passed fresh
+preflight and completed one schema-7 clinical estimation from the unchanged
+qualified schema-4 input. All 128 aggregate numerical checks and 50 authenticated
+before/after comparisons pass. The retained primary, primary-current and
+all-OBESITY coefficients, covariance, Ns, curves, scenarios and contributions
+are unchanged. All 15 bound input/evidence hashes match after execution.
+
+Obesity-only remains in descriptive ledgers/profiles and raw outcome counts, with
+no adjusted model or prediction positions. Source membership and residual gases
+are preserved. Both reports and scoped export/visual review completed from the saved aggregate
+bundle with no clinical reads or refits: 44 scientific pages, 2,965 audit pages,
+1,239 figure sets and 18 JPG candidates. Every page/export received automated
+checks; native inspection covers the explicit receipt scope. All 74 receipt-bound
+acceptance checks pass. Investigator approval, additional
+cross-project work and the historical extraction explanation remain separate.

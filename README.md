@@ -11,9 +11,14 @@ acquisition. Sparse residual gases remain in the audit without recoding flags.
 
 Version 7 (`bmi_hypercapnia_rfs_curve_audit_v2`) supersedes the earlier version-6
 modeling hierarchy and rejects its bundles. The qualified schema-4 input, index,
-clinical fields and primary estimand are unchanged. Revised clinical execution
-and report review remain pending until run from released code. Previous clinical
-runs and reviews retain their original labels and investigator approval states.
+clinical fields and primary estimand are unchanged. Fresh clinical estimation
+completed from merged `043fea6`: 128 aggregate numerical checks and 50
+authenticated before/after comparisons pass; all 15 bound input/evidence hashes
+are unchanged. Both HTML/PDF reports, export checks and scoped visual review are
+complete; all 74 receipt-bound acceptance checks pass. Native inspection covers
+all scientific overviews and selected report pages/key figures, with its limits
+recorded explicitly. Previous runs retain their original labels. Investigator
+approval remains separate.
 
 Two reports share one immutable aggregate bundle:
 
@@ -151,10 +156,11 @@ audit and block inference; unknown totals are not zeros.
 
 The original-list source and metadata-enriched schema-4 input retain their
 existing acceptance and exact-key evidence. The previous version-6 run completed
-from `4fdf4eb` with 162 numerical checks. Its reports remain historical. The revised
-hierarchy requires a fresh run from released code; existing clinical results
-cannot acquire new labels. Source products, BMI derivations, selected indexes and
-outcome rules do not change. Investigator numerical/scientific approval and
+from `4fdf4eb` with 162 numerical checks. Its reports remain historical. The version-7
+run completed from `043fea6` after fresh source preflight on a clean matching Mini
+checkout. Primary/supporting estimates and source hashes are unchanged. Source
+products, BMI derivations, selected indexes and outcome rules did not change.
+Investigator numerical/scientific approval and
 additional cross-project/diagram work remain separate.
 Exact private run paths and hashes remain in ignored release storage and WORKLOG.
 Read the

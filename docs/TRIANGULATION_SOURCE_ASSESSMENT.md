@@ -365,3 +365,14 @@ The qualified schema-4 input, accepted original-key linkage, clinical fields and
 indexes remain unchanged. No new export or mapping rule is required for this
 hierarchy change. New schema-7 estimation must verify input/evidence hashes and
 primary-estimate invariance; previous execution receipts retain their old scope.
+
+### Corrected-hierarchy source verification — 2026-10-17
+
+Fresh preflight passed on clean merged `043fea6`, and one clinical run completed.
+All 15 bound input/evidence hashes match after execution. Fifty authenticated
+aggregate comparisons preserve all retained primary/supporting scientific fields;
+the current input/manifest/companion identities match the prior run. No new
+mapping, gas extraction, source product or qualification substitution was needed.
+The 128 aggregate numerical checks are distinct from investigator review. The
+exact historical extraction/trigger explanation for residual gases remains
+unadjudicated; it is not manufactured from current outcomes.

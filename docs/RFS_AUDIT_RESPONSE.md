@@ -47,3 +47,14 @@ query details and residual gas/membership differences remain explicitly unresolv
 Schema 7 rejects the superseded version-6 hierarchy; it does not erase its
 clinical run, failed models or receipts. Current-run verification is recorded
 separately after release.
+
+### Corrected-hierarchy clinical execution
+
+PR #14 merged as `043fea6`; fresh Mini source preflight and one clinical estimation
+completed. All 128 aggregate numerical checks, 50 authenticated scientific-field
+comparisons and 15 post-run bound hashes pass. Obesity-only has no adjusted model
+or prediction positions, while primary/supporting estimates are unchanged.
+Both reports and scoped export/visual review completed from saved aggregates
+without clinical reads or refits. All 74 receipt-bound acceptance checks pass.
+Investigator approval and unassessed historical/cross-project items retain their
+status; no individual human inspection of every native audit page is asserted.
