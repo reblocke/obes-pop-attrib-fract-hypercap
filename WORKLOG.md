@@ -1201,3 +1201,49 @@ retains its expected warning. The actual source/render checks and restricted
 clinical review remain distinct from artificial numerical tests. PR #14 releases
 the implemented correction with clinical estimation pending until the merged
 revision is synchronized to the Mini. Generated artifacts remain ignored.
+
+## 2026-10-17 — Corrected hierarchy released and clinically estimated
+
+PR #14 squash-merged as `043fea61a7712d72bbbad295192e60f1e791d3ca` with the exact
+reviewed tree `3db6f3d8a03b8fe4dbbd9fe3c97ddf17f0d18d77`. No GitHub checks are
+configured; local/qualified-runtime checks and actual receipts supplied the gates.
+Before Mini writes, rechecked active jobs, worktree status and leases; none
+conflicted. A fresh release lease and duplicate-estimation guard protect the
+isolated checkout. Synchronized only merged code through a Git bundle; accepted
+source products and the original research checkout remain untouched.
+
+Fresh Mini preflight saved `curve-preflight-20261017T174450-51464` with zero model
+fits. One clinical estimation saved `curve-analyze-20261017T175520-51541`; all 128
+aggregate numerical checks pass. Post-run verification confirms all 15 bound
+input/evidence hashes and the clean merged checkout. Aggregate-only copying and
+50 authenticated comparisons against the immutable version-6 run pass: retained
+primary/primary-current/all-OBESITY scientific fields are unchanged, excluding
+only fitting runtime. Obesity-only has no registered models or predictions.
+
+Design change: obesity-only becomes descriptive. Data/estimator changes: none in
+retained analyses. Label/report changes: selection/evidence interpretation and
+raw full-denominator availability. Engineering: schema-7 identity/rejection,
+focused tests and protection of Quarto intermediates. Exact run/source/hash and
+review evidence stays in ignored `clinical-rfs-selection-release-20261017/`.
+Clinical reports/export review are in progress from the saved aggregates without
+clinical reads or refits. Investigator scientific approval remains pending.
+
+### Clinical report/review closeout
+
+Review `20261017T175634-66768` completed both clinical HTML/PDF reports from the
+same immutable bundle, with zero clinical reads or refits and complete table/
+coefficient/covariance coverage. Automated QC passes for all 44 scientific pages,
+2,965 audit pages, 1,239 figure sets and 18 JPG exports. The visual receipt covers
+all scientific page overviews, five native scientific pages, nine native audit
+pages and eleven key figures. It explicitly excludes a claim of individual human
+inspection of every native audit page/atlas image. F1-A remains preferred; B/C
+and the raw source-entry evidence exhibit are retained. Dense tables may wrap
+numeric tokens; complete CSVs preserve precise keyed lookup.
+
+All 74 checks pass again against the completed clinical render/visual receipt;
+the computation fixtures remain artificial. A separate clinical review receipt
+binds code, source, bundle, 128 numerical checks, 50 comparisons, 15 hashes,
+integration and scoped visual evidence. RFS17 remains not_assessed and RFS18
+pending investigator review. Current private links are in
+`artifacts/triangulation/clinical-rfs-selection-release-20261017/CURRENT_REVIEW.md`.
+No clinical artifacts or patient-level inputs are staged or published.

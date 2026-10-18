@@ -311,3 +311,15 @@ replace the descriptive group or form a disjoint comparator. Use new schema 7 /
 `bmi_hypercapnia_rfs_curve_audit_v2`; preserve and reject older bundles rather
 than relabel them. Source acceptance and investigator scientific approval remain
 separate.
+
+### Execution of the descriptive-only decision
+
+Merged PR #14 (`043fea6`) passed fresh source preflight and completed the new
+clinical run. Authenticated source/field evidence and primary/supporting results
+are unchanged. The 128 numerical and 50 comparison checks record computational
+verification, not investigator scientific approval. Historical source-membership
+zeros are not rewritten from residual gas results.
+
+Both report formats and scoped export/visual review completed from saved
+aggregates, with all 74 receipt-bound acceptance checks passing. This records the
+implementation and review scope without creating investigator scientific approval.

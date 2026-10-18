@@ -3,10 +3,14 @@
 The approved version-7 workflow retains obesity-only as a descriptive selection
 and evidence-availability audit. It registers no obesity-only adjusted models,
 curves or PIFs. Primary, primary-current and overlapping all-OBESITY supporting
-fits retain their prior definitions. Reuse the unchanged qualified schema-4 input;
-release this correction before a fresh clean Mini preflight and estimation.
-The previous version-6 bundle below remains immutable under its own identity.
-New execution and numerical/visual review must be recorded separately.
+fits retain their prior definitions. The unchanged qualified schema-4 input was
+reused. PR #14 merged as `043fea6`, followed by fresh clean Mini preflight and one
+clinical estimation. All 128 numerical checks, 50 authenticated before/after
+comparisons and 15 post-run bound hashes pass. Retained primary/supporting
+results are unchanged. The previous version-6 bundle below remains immutable;
+both current HTML/PDF reports, complete table coverage and scoped export/visual
+review are complete. Investigator approval remains pending. Rerender the exact
+saved version-7 aggregate run for presentation; no clinical refit is required.
 
 # Prior version-6 RFS execution — 2026-10-17
 
