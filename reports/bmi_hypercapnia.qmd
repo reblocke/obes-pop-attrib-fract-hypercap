@@ -19,6 +19,7 @@ format:
     number-sections: true
     header-includes:
       - \usepackage{longtable,booktabs,array,graphicx}
+      - \catcode`₂=\active\protected\def₂{\textsubscript{2}}
 execute:
   echo: false
   warning: true
@@ -63,7 +64,7 @@ BMI follows the approved encounter/prior reported-value hierarchy, followed by c
 
 ## Historical source-entry populations
 
-A confirmed positive ABG, VBG, RESPFAIL, VENTSUPPORT or PREDISPOSITION source flag establishes the primary population, including encounters also represented through OBESITY. Obesity-only membership requires OBESITY and authenticated zeros in all five other families. This population supplies a descriptive selection and evidence-availability audit, without adjusted outcome curves or PIFs. Gas-related entry pathways select on testing and potentially results, so their exclusion depletes an independent physiological comparator. Unknown flags remain unknown. All-six-zero discrepancies remain visible and require source investigation. RFS metadata are applied after the common index is selected.
+A confirmed positive ABG, VBG, RESPFAIL, VENTSUPPORT or PREDISPOSITION source flag establishes the primary population, including encounters also represented through OBESITY. Obesity-only membership requires OBESITY and authenticated zeros in all five other families. Obesity-only indexes are excluded from scientific comparisons: removing the gas-related entry pathways selects against the evidence needed to assess the physiological outcomes. Their counts remain in the flow for reconciliation; source discrepancies and descriptive profiles are confined to the audit. Unknown flags remain unknown. All-six-zero discrepancies require source investigation. RFS metadata are applied after the common index is selected.
 
 The combined indexed cohort is a reconciliation reference. Non-OBESITY-only, overlapping and unknown-OBESITY/confirmed-non-OBESITY subgroups are descriptive. BMI ≥40 remains a descriptive stratum and is not equated with obesity-route membership. An overlapping all-OBESITY supporting analysis is confined to the audit.
 
@@ -79,7 +80,7 @@ Adjustment retains linear age and the inherited sex, combined race/ethnicity and
 
 Primary models use type-7 BMI quantiles .05/.35/.65/.95 from the primary adjustment-complete population: two interior knots, two boundaries and three natural-spline basis columns. The basis remains fixed across primary outcomes, timing, matched analyses and predictions. The primary current-measurement sensitivity reuses this basis. The overlapping all-OBESITY supporting analysis uses its own basis and is reported in the audit. Obesity-only and obesity-only current-measurement models are not registered. Constant outcomes, duplicate knots, separation, rank and convergence failures in planned models remain explicit without estimator substitution.
 
-Gas curves standardize over each model's outcome-evaluable population; ICD uses known capture within group. Observation curves describe usable-evidence availability within group. No physiological outcomes are projected to untested patients. Fixed BMI 45 versus 40 contrasts require training-range support. Local counts and marginal covariate coverage expose sparsity even inside the global BMI range; these checks do not establish joint covariate support.
+Gas curves standardize over each model's outcome-evaluable population; ICD uses known capture within group. Observation curves describe usable gas-evidence availability. Complete diagnosis capture is reported as a source fact, not as ICD positivity or a constant availability curve. No physiological outcomes are projected to untested patients. Fixed BMI 45 versus 40 contrasts require training-range support. Local counts and marginal covariate coverage expose sparsity even inside the global BMI range; these checks do not establish joint covariate support.
 
 Pointwise 95% intervals use full coefficient covariance and condition on the empirical reference and fixed spline basis. They omit uncertainty from selection, measurement error and unmeasured confounding. Apparent calibration is in-sample; fitted/observed mean agreement is not independent validation.
 
@@ -91,24 +92,16 @@ Same-sample linear-BMI checks and matched ICD/gas analyses remain registered. A 
 
 # Results
 
-## Cohort partition and selection mechanisms
+## Primary cohort and usable evidence
 
 ```{r}
 #| results: asis
 bmi_report_table(a$rfs_summary,"Fixed-index RFS partition",keys="population_id")
-bmi_report_table(a$rfs_semantics,"Source-pathway/outcome relationship and evidence status",keys="requirement")
-bmi_report_table(a$rfs_outcomes,"Outcome evaluability and positivity by entry subgroup",keys="subgroup")
-figure("RFS-flow");figure("RFS-entry");figure("RFS-evidence")
-bmi_report_table(a$prior_run_reconciliation,"Keyed reconciliation and unresolved comparisons",keys="requirement")
-```
-
-## Obesity-only source entry: descriptive selection audit
-
-Obesity-only indexes remain in the flow, descriptive profiles and outcome counts. They do not supply a model-based selection sensitivity. Low gas evaluability reflects the source-entry mechanism and does not establish physiological absence or no BMI association. Historical source-file membership is not exhaustive acquisition ascertainment: any residual captured gas results remain visible, and their exact relationship to the original extraction rule remains unresolved. Source flags are never recoded from current outcomes. Selection mechanisms can also affect the primary association itself; this partition does not remove selection bias.
-
-```{r}
-#| results: asis
-bmi_report_table(a$rfs_outcomes[a$rfs_outcomes$subgroup=="obesity_only",],"Obesity-only descriptive evaluability and event counts",keys=c("outcome_id","ascertainment_window"))
+figure("RFS-flow");figure("RFS-evidence")
+capture<-bmi_rfs_availability(a)
+capture<-capture[capture$population_id=="primary" & capture$outcome_id=="icd",]
+cat("Diagnosis capture was known for ",format(capture$M,big.mark=",",trim=TRUE)," of ",format(capture$N,big.mark=",",trim=TRUE),
+    " primary indexes. This describes source coverage, not the presence of an ICD hypercapnia code; observed ICD positivity is reported below. The complete source-entry reconciliation and residual-gas audit are in the companion audit report.\n\n",sep="")
 ```
 
 ```{r}
@@ -142,7 +135,7 @@ for(group in unlist(bundle$config$full_model_populations)) {
 
 ```{r}
 #| results: asis
-bmi_report_table(a$bmi_provenance[a$bmi_provenance$stage=="Q",],"BMI sources and lags at fixed indexes",keys="subgroup")
+bmi_report_table(a$bmi_provenance[a$bmi_provenance$stage=="Q" & a$bmi_provenance$subgroup %in% c("non_obesity_only","overlap","non_obesity_with_unknown_obesity"),],"Primary BMI sources and lags at fixed indexes",keys="subgroup")
 for(group in grep("_current$",unlist(bundle$config$analysis_populations),value=TRUE)) {
  v<-bmi_group_view(a,group)
  cat("\n### ",group,"\n\n",sep="")
@@ -153,7 +146,7 @@ for(group in grep("_current$",unlist(bundle$config$analysis_populations),value=T
 
 # Discussion and example conclusion
 
-The primary analysis estimates BMI relationships among non-OBESITY-supported indexes while preserving the same clinical episode. Obesity-only source entry is a descriptive audit of selection and evidence availability. It is not an independent physiological comparator. The all-OBESITY supporting population overlaps primary; separate confidence intervals do not constitute a between-group test, and subgroup PIFs must not be averaged.
+The primary analysis estimates BMI relationships among non-OBESITY-supported indexes while preserving the same clinical episode. Excluding an obesity-only entry route does not remove outcome-dependent entry or selective gas measurement from the retained population. No weighting or transport to excluded indexes is attempted: near-absent gas observation in the excluded entry route does not supply an independent physiological comparator. The overlapping supporting analyses remain in the audit and do not constitute between-group tests.
 
 A defensible conclusion should describe the direction and shape actually supported by the primary curves and the outcome-dependent selection exposed by the evidence audit. No claim of preventable disease or treatment benefit follows from the secondary scenario. Selection into the original files, selective gas measurement, BMI timing and measurement uncertainty, residual confounding and sparse tails remain limitations.
 

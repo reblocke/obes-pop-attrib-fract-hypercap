@@ -1,16 +1,13 @@
-# Current curve-first, audit-first workflow. Run from repository root.
+# Current curve/audit workflow; run from the repository root.
 PREP_PYTHON ?= python3
 CONFIG ?= config/bmi_hypercapnia_analysis.json
-.PHONY: test fixture preflight cohort-audit analyze render render-html render-pdf prepare map qualify preparation-test source-qualification-test
+.PHONY: test source-test fixture preflight cohort-audit analyze render render-html render-pdf render-reports prepare map qualify enrich-rfs
 
 test:
-	Rscript --vanilla tests/run_rfs_tests.R
-	Rscript --vanilla tests/run_bmi_curve_tests.R
-	Rscript --vanilla tests/test_table_passthrough.R
-	"$(PREP_PYTHON)" -m unittest discover -s tests -p 'test_preparation*.py'
-	"$(PREP_PYTHON)" -m unittest discover -s tests -p 'test_original_population.py'
-	"$(PREP_PYTHON)" -m unittest discover -s tests -p 'test_source_qualification.py'
-	"$(PREP_PYTHON)" -m unittest discover -s tests -p 'test_rfs_enrichment.py'
+	Rscript --vanilla tests/run_e2e.R
+
+source-test:
+	"$(PREP_PYTHON)" tests/run_source_checks.py
 
 fixture:
 	Rscript --vanilla scripts/run_bmi_hypercapnia.R fixture "$(CONFIG)"
@@ -31,35 +28,20 @@ render-pdf:
 	@test -n "$(RUN)" || (echo 'Set RUN to an explicit saved version-7 aggregate run.'; exit 1)
 	Rscript --vanilla scripts/render_bmi_hypercapnia.R "$(RUN)" pdf
 
-prepare:
-	@test -n "$(SOURCE_CONFIG)" -a -n "$(OUTPUT)" || (echo 'Set reviewed SOURCE_CONFIG and fresh private OUTPUT.'; exit 1)
-	"$(PREP_PYTHON)" scripts/prepare_common_index_input.py --config "$(SOURCE_CONFIG)" --output "$(OUTPUT)"
+# Rebuild prose/tables using source-matched figures from the same saved run.
+render-reports:
+	@test -n "$(RUN)" -a -n "$(FIGURES_FROM)" || (echo 'Set RUN and FIGURES_FROM to the same saved-run review.'; exit 1)
+	BMI_FIGURES_FROM="$(FIGURES_FROM)" Rscript --vanilla scripts/render_bmi_hypercapnia.R "$(RUN)" all
 
-map:
-	@test -n "$(SOURCE_CONFIG)" -a -n "$(OUTPUT)" || (echo 'Set SOURCE_CONFIG and fresh external OUTPUT.'; exit 1)
-	"$(PREP_PYTHON)" scripts/map_common_index_covariates.py --config "$(SOURCE_CONFIG)" --output "$(OUTPUT)"
+map prepare:
+	@test -n "$(SOURCE_CONFIG)" -a -n "$(OUTPUT)" || (echo 'Set reviewed SOURCE_CONFIG and fresh private OUTPUT.'; exit 1)
+	"$(PREP_PYTHON)" scripts/$(if $(filter map,$@),map_common_index_covariates,prepare_common_index_input).py --config "$(SOURCE_CONFIG)" --output "$(OUTPUT)"
 
 qualify:
 	@test -n "$(SOURCE_CONFIG)" -a -n "$(PREPARED)" -a -n "$(OUTPUT)" || (echo 'Set SOURCE_CONFIG, PREPARED and fresh OUTPUT.'; exit 1)
 	"$(PREP_PYTHON)" scripts/qualify_common_index_source.py --config "$(SOURCE_CONFIG)" --prepared "$(PREPARED)" --output "$(OUTPUT)"
 
-preparation-test:
-	"$(PREP_PYTHON)" -m unittest discover -s tests -p 'test_preparation*.py'
-	"$(PREP_PYTHON)" -m unittest discover -s tests -p 'test_original_population.py'
-
-source-qualification-test:
-	"$(PREP_PYTHON)" -m unittest discover -s tests -p 'test_source_qualification.py'
-
-# Existing accepted metadata only; no new clinical outcome extraction.
+# Accepted metadata only; no new clinical outcome extraction.
 enrich-rfs:
-	@test -n "$(SOURCE_CONFIG)" -a -n "$(INPUT)" -a -n "$(MANIFEST)" -a -n "$(RFS_EVIDENCE)" -a -n "$(OUTPUT)" -a -n "$(PRIOR_RUN)" || (echo "Set SOURCE_CONFIG INPUT MANIFEST RFS_EVIDENCE OUTPUT PRIOR_RUN"; exit 1)
+	@test -n "$(SOURCE_CONFIG)" -a -n "$(INPUT)" -a -n "$(MANIFEST)" -a -n "$(RFS_EVIDENCE)" -a -n "$(OUTPUT)" -a -n "$(PRIOR_RUN)" || (echo 'Set SOURCE_CONFIG INPUT MANIFEST RFS_EVIDENCE OUTPUT PRIOR_RUN.'; exit 1)
 	"$(PREP_PYTHON)" scripts/enrich_rfs_input.py --source-config "$(SOURCE_CONFIG)" --input "$(INPUT)" --manifest "$(MANIFEST)" --rfs-evidence "$(RFS_EVIDENCE)" --output "$(OUTPUT)" --prior-run "$(PRIOR_RUN)"
-
-render-test:
-	@test -n "$(REVIEW)" || (echo "Set REVIEW to actual completed report directory"; exit 1)
-	Rscript --vanilla tests/check_rfs_render.R "$(REVIEW)"
-
-# Rebuild prose/tables from the same bundle using source-matched completed figures.
-render-reports:
-	@test -n "$(RUN)" -a -n "$(FIGURES_FROM)" || (echo "Set RUN and FIGURES_FROM to the same saved-run review"; exit 1)
-	BMI_FIGURES_FROM="$(FIGURES_FROM)" Rscript --vanilla scripts/render_bmi_hypercapnia.R "$(RUN)" all

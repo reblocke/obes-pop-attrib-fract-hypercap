@@ -1,134 +1,155 @@
-# RFS-stratified BMI–hypercapnia implementation plan
+# Current scientific and interface guide
 
-Approved 2026-10-17; baseline `dd6b9277f69d75b343014c91c29f26ef6234cfd9`.
-This supersedes the combined-cohort primary organization, retaining its dated
-history in Git and immutable version-5 clinical bundle.
+This is the authority for the RFS curve/audit analysis. The retained filename
+reflects the earlier triangulation design; that design is retired. Machine
+configuration is [bmi_hypercapnia_analysis.json](../config/bmi_hypercapnia_analysis.json),
+with input fields in the [variable dictionary](../config/variable_dictionary.csv).
+The active identity is `bmi_hypercapnia_rfs_curve_audit_v2`, aggregate schema 7,
+metadata-qualified input schema 4. Prior schemas fail explicitly; no replay or
+migration layer is maintained. See [decisions](DECISIONS.md) for dated history.
 
-## Scientific authority
+## Population and index
 
-Select the existing first qualifying adult 2022 ED/inpatient BMI≥30 index from
-original FULL_DATA keys before RFS, gas or adjustment availability. Partition at
-that fixed index: primary any non-OBESITY source membership; obesity-only
-descriptive audit OBESITY=1 and all five other flags authenticated zero; unresolved
-otherwise. All-zero discrepancies require investigation. Overlap remains primary.
-Flags describe historical source-file membership, not exhaustive clinical criteria.
-Do not reconstruct extraction without its obesity query or promote later indexes.
+Candidates are authenticated original FULL_DATA selected ED/inpatient encounters
+(`original_selected_encounters_v1`), not every visit in captured history. Select
+one index per patient before gas availability or adjustment completeness: the
+first 2022 EMER/IMP encounter at age ≥18 with valid available BMI ≥30. Age uses the
+approved birth-year proxy. Earlier unresolved eligibility, conflicting defining
+evidence and earliest-day ties remain unresolved; a later more complete encounter
+cannot replace them. A reliable exclusion overrides unrelated missing evidence.
 
-Retain ordinary ABG≥45, ABG≥45 or VBG≥50, known-capture five-code ICD, established
-validity/units, adjustment and available-BMI hierarchy. Fit primary natural
-BMI splines using primary C quantiles .05/.35/.65/.95 (type 7). Preserve
-all planned observation, matched, calendar-day and same-sample linear positions.
-No full-cohort projection, MAR/MNAR, IPW, new recoding or BMI imputation.
+BMI follows `available_encounter_or_prior_bmi_v1`: valid current reported BMI,
+then prior reported BMI, then observed height/weight calculation, with inherited
+transport, rounding and plausibility screens. Completed missing BMI does not
+qualify; incomplete source or conflicting chronology remains unresolved. There
+is no statistical BMI/covariate imputation or measurement-recency cap. Available
+BMI is not necessarily contemporaneous or measured before the outcome.
 
-Standardize each model to its outcome-evaluable population. Secondary paired
-scenario: observed BMI>30 minus exactly one, no floor/reselection; BMI=30 unchanged.
-Persist support and exact signed contribution/covariance reconciliation. Require
-training support for 40/45 contrasts. Retain failures without estimator substitution.
+Classify RFS membership at that fixed index, using the six authenticated original
+family indicators, not current outcome/draw flags or numeric `rfsgroup` codes:
 
-## Implementation checkpoints
+| Population | Definition and role |
+|---|---|
+| `primary` | Any confirmed ABG, VBG, RESPFAIL, VENTSUPPORT or PREDISPOSITION membership; retain OBESITY overlaps |
+| `obesity_only` | OBESITY=1 and all five other families authenticated zero; descriptive audit only |
+| RFS unresolved | Membership cannot be established; all-six-zero source discrepancies remain explicit |
+| `primary_current` | Primary patients with verified current-encounter BMI source; supporting models, unchanged index |
+| `all_obesity` | Any confirmed OBESITY membership; overlapping supporting models, not a disjoint comparator |
 
-1. Authenticate historical flags/producer, extraction semantics, dictionaries,
-   exact original-key linkage, BMI provenance and raw demographic categories.
-   Extend accepted metadata transport; no upstream rebuild or gas re-extraction.
-2. Enrich the qualified input into a fresh schema-4 input and pre-index companion.
-   Bind prior input/manifest/run and RFS evidence. Verify index/field invariance.
-3. Construct the partition ledger and RFS outcome-incorporation tables. Show
-   overlaps, boundary counts, BMI/provenance lags, demographic cross-tabs,
-   fine bins 35–55, retained/excluded profiles and explicit unavailable quantities.
-4. Generate the configured model registry, group-specific basis identities,
-   complete output and schema-7 aggregate bundle. Fit the primary current-measurement
-   sensitivity using the selected current BMI, and all-OBESITY supporting fits.
-   Current-measurement sensitivities reuse the parent basis; all-OBESITY gets its
-   own basis. These supporting groups each have three encounter-wide spline fits.
-5. Render scientific and complete-audit reports from aggregates only. Produce
-   primary F1-A/B/C, raw availability and source-entry/flow figures and paired contribution exhibits.
-   Inspect native-size/grayscale exports under the figure QC skill.
-6. Review/test/release code, qualify fresh metadata on the Mini, execute once from
-   clean merged code and reconcile. Preserve every prior input/run/review receipt.
+Source flags denote historical extraction membership, not every criterion present
+clinically. Unknown is not zero. Obesity-only gas evaluability is depleted by the
+entry mechanism; residual captured gases stay in the audit without recoding flags.
+No obesity-only adjusted model, curve, PIF, scientific comparison or weighting
+analysis is registered. Combined indexes remain a reconciliation reference.
 
-## Verification and review
+## Outcomes and reference populations
 
-`make test` is data-free numerical/adapter verification; missing optional Python
-SQL dependencies are explicitly skipped, not passed. `make fixture` performs
-actual artificial estimation and full rendering. `make render-test REVIEW=...`
-checks actual completed HTML/PDF table coverage and aggregate-only tripwires.
-Human visual/scientific reviews have separate receipts and cannot be synthesized
-from automated export success. New run-specific acceptance receipts never overwrite
-the previous 73-check clinical ledger.
+Primary ascertainment uses the selected encounter, with ordinary unadjusted PCO₂
+and authenticated specimen/units under `unadjusted_pco2_v1`:
 
-Compare prior keys/fields and count alternative-index changes without fitting an
-alternative design. Reuse the BMI-coverage cross-project audit and identify remaining
-unassessed decomposition/diagram evidence explicitly. Counts alone are not keyed
-reconciliation. Do not edit other projects.
+| Outcome | Definition |
+|---|---|
+| Arterial | Valid ABG PaCO₂ ≥45 mm Hg |
+| Combined gas | Valid ABG PaCO₂ ≥45 or VBG PvCO₂ ≥50 mm Hg; either usable specimen suffices |
+| Documented ICD | J96.02, J96.12, J96.22, J96.92 or E66.2 with known diagnosis capture |
 
-Completion: revised code, independent checks, source-qualified enriched input,
-reconciled clinical execution, complete reports/figures and change log. Any remaining
-source or scientific review limitation must accompany the delivery.
+Strict gas validity is 5<arterial<200 and 10<venous<250 mm Hg. Missing/unusable gas
+results remain unknown. A combined negative describes available evidence, not
+normality of an unmeasured specimen. No target ICD code in a complete available
+extract is captured absence; unavailable/incomplete capture stays unknown. ICD
+capture is a source-coverage count, not ICD positivity or an informative constant
+availability curve. E66.2 is explicitly part of the outcome.
 
-## Execution checkpoint — 2026-10-17
+Q is resolved indexes; C is Q complete for inherited BMI, age, sex, race/ethnicity
+and region. Retained named Unknown categories count as nonmissing; completeness
+does not establish knowledge of every underlying attribute. Numeric demographic
+coding is unchanged; the White reference includes unknown ethnicity.
 
-PR #12 merged as `4fdf4eb`. The clean Mini checkout passed final source preflight
-and completed one clinical estimation. All 162 aggregate numerical checks pass;
-post-run input and evidence hashes match. The configured registry contains all
-planned positions, including constant-outcome, separation and rank-deficiency
-statuses. Sparse obesity-only fits are not replaced with another estimator.
+Gas curves/scenarios standardize within each outcome-evaluable model population.
+ICD uses known-capture C_icd. Observation displays use C. Calendar-day gas
+sensitivities retain indexes and require collection date = encounter-start date,
+not elapsed 24 hours. Unavailable sensitivity source is pending, distinct from
+individual missing outcomes. Matched ICD/gas comparisons use identical within-pair
+rows; they do not require both gas specimens. Linear-BMI sensitivity uses the same
+sample as its spline counterpart. BMI ≥40 remains descriptive only.
 
-Both reports and figure alternatives are generated from that saved bundle;
-presentation repairs do not authorize another estimation. Exact private paths,
-hashes, rendering and scoped visual-review receipts remain in ignored release
-storage. Investigator numerical/scientific approval and cross-project keyed
-decomposition remain distinct outstanding work. Historical query parameters and
-individual entry triggers remain unavailable, rather than reconstructed.
+## Estimation and interpretation
 
-Clinical HTML/PDF rendering and table/covariance coverage checks completed from
-saved aggregates with zero clinical input reads or refits. All-export checks pass
-for 57 scientific pages, 3,681 audit pages and 1,554 figure sets. The separate
-visual receipt identifies the native key figures, scientific overviews and
-representative audit pages actually inspected; it does not claim manual review
-of every audit page. A remains preferred. Full CSVs retain exact numeric lookup
-where dense PDF tables wrap tokens. Investigator approval remains pending.
+Use logistic regression with a three-column natural BMI spline, linear age and
+the inherited sex/race-ethnicity/region factors. Resolve numeric knots using C
+quantiles .05/.35/.65/.95 (type 7): middle knots interior, outer knots boundary.
+Primary models reuse the primary basis, including current-measurement supporting
+models; all-OBESITY uses its own basis. Persist numeric knots and factor references.
+Do not compare raw spline coefficients from different bases as the same contrast.
 
-## Approved hierarchy correction — 2026-10-17
+Registry positions come from saved configuration. Constant outcomes, duplicated
+knots, rank deficiency, separation, inadequate variation and convergence failures
+retain explicit statuses; no automatic simplification, penalization, pooled
+categories or hidden complete-case exclusions. Every model retains all coefficients,
+standard errors, intervals, reference levels and full covariance, plus sample/event
+counts, diagnostics and failures.
 
-Obesity-only is a descriptive selection/evidence-availability audit, irrespective
-of whether a particular dataset could numerically fit its models. Remove its
-outcome, observation, timing, matched, linear and current-measurement model
-positions and PIFs. Retain all fixed-index partition counts, variable/BMI profiles,
-raw outcome availability/positivity, unknowns and residual gases. Historical
-source membership does not prove exhaustive acquisition; the exact cause of
-residual source-membership/gas differences remains unadjudicated.
+Curves are model-standardized documented index-encounter probabilities. Intervals
+are pointwise and model-based, conditional on the empirical reference population
+and fixed basis. They exclude source-selection, measurement-error and unmeasured-
+confounding uncertainty. Local sample/event and covariate counts reveal sparsity;
+being within the global training BMI range does not prove joint support. Apparent
+calibration and mean fitted probability are in-sample diagnostics, not validation.
+The 45-versus-40 contrast is reported only where supported, with both probabilities,
+difference, ratio and uncertainty.
 
-Retain the complete primary registry, primary current-measurement sensitivity
-using its parent basis, and the overlapping all-OBESITY supporting analysis with
-its own basis. Primary source-entry selection can affect the observed association;
-this organization does not resolve selection bias. No index, BMI, covariate,
-outcome, reference-population or paired-scenario rule changes.
+The named secondary policy `bmi_gt30_minus1_v1` subtracts exactly one from observed
+BMI >30; BMI=30 stays unchanged, no floor/reselection/index/RFS/covariate change.
+Compute paired observed and shifted probabilities, their absolute difference and
+PIF = 1 − shifted/observed probability using full-covariance delta-method intervals.
+Signed contributions by original BMI band reconcile to the total difference and
+its variance. Changing display bins cannot change the patient-level PIF. Never
+multiply a marginal curve by marginal BMI density to obtain adjusted PIF.
+Report model/reference N, number shifted, actual decrement and transformed-support
+limits. Negative differences remain negative; undefined estimates are not zero.
 
-Use schema 7 and `bmi_hypercapnia_rfs_curve_audit_v2`. Reject version-6 bundles;
-keep them immutable under their original specification. Verify primary coefficients,
-reference Ns, curves, scenarios and contributions against the previous run. Add
-raw availability counts/proportions with full fixed-index denominators and Wilson
-intervals. Do not confuse lack of usable evidence with proof no gas was acquired.
-Proceed through tests, complete artificial HTML/PDF renders and figure QC, release,
-then one clean merged Mini preflight/clinical run from the unchanged qualified
-input. Scientific review, additional cross-project audit and submission remain
-separate. The earlier execution checkpoint above describes the superseded
-version-6 hierarchy, not results for this revision.
+No full-cohort MAR/MNAR projection, IPW, causal prevention or incident-disease claim
+is part of the analysis. Source-entry partitioning does not eliminate selection
+bias, selective gas measurement or residual confounding.
 
-## Corrected-hierarchy execution — 2026-10-17
+## Outputs and interfaces
 
-PR #14 merged as `043fea6`. Its clean, matching Mini checkout passed fresh
-preflight and completed one schema-7 clinical estimation from the unchanged
-qualified schema-4 input. All 128 aggregate numerical checks and 50 authenticated
-before/after comparisons pass. The retained primary, primary-current and
-all-OBESITY coefficients, covariance, Ns, curves, scenarios and contributions
-are unchanged. All 15 bound input/evidence hashes match after execution.
+The cohort ledger is the count authority. Record grain (record/encounter/patient)
+and partition versus overlap. Q reconciles to primary + obesity-only + unresolved;
+each group splits into complete/incomplete adjustment, and each complete group
+into outcome-known/unknown. Do not add overlapping gas/model samples.
 
-Obesity-only remains in descriptive ledgers/profiles and raw outcome counts, with
-no adjusted model or prediction positions. Source membership and residual gases
-are preserved. Both reports and scoped export/visual review completed from the saved aggregate
-bundle with no clinical reads or refits: 44 scientific pages, 2,965 audit pages,
-1,239 figure sets and 18 JPG candidates. Every page/export received automated
-checks; native inspection covers the explicit receipt scope. All 74 receipt-bound
-acceptance checks pass. Investigator approval, additional
-cross-project work and the historical extraction explanation remain separate.
+A run contains immutable aggregate data, CSV exports, configuration, registry,
+source/input/evidence identities and hashes. No identifiers, exact dates, individual
+predictions/diagnostics, model frames or fitted model objects enter the bundle.
+Result keys include population, model, outcome, window, model form, reference
+population and scenario policy where applicable. Failed/unavailable positions
+remain present. Exact aggregate clinical audits are private.
+
+| Command from repository root | Behavior |
+|---|---|
+| `make test` | Repeatable artificial E2E estimation, both report formats and artifact assertions; [test scope](../tests/README.md) |
+| `make fixture` | Artificial run and reports without the E2E assertions |
+| `make preflight INPUT=... MANIFEST=...` | Validate qualified source and ledger without models |
+| `make cohort-audit INPUT=... MANIFEST=...` | Save source/cohort audit without model fitting |
+| `make analyze INPUT=... MANIFEST=...` | Estimate once on clean merged Mini checkout |
+| `make render RUN=...` | Fresh HTML/PDF review from explicit saved aggregates only |
+| `make render-html RUN=...` / `make render-pdf RUN=...` | One output format for both reports |
+| `make render-reports RUN=... FIGURES_FROM=...` | Prose/table rebuild using hash-matched figures from the same saved run |
+
+`scripts/review_bmi_run.R RUN` independently reconciles saved numerical quantities.
+`scripts/check_report_exports.py REVIEW` checks exports and prepares visual-review
+sheets using existing Pillow/Poppler. Neither creates investigator approval.
+
+The scientific mini-paper contains detailed Methods, primary relationships,
+observation/BMI displays, verification-oriented Results and example conclusions.
+The audit contains complete stage/variable profiles, all models/covariances,
+failures, provenance and supporting analyses; full coordinate exports accompany
+full-range plots. No preview may substitute for a complete table. F1-A is preferred;
+B/C remain alternatives. See [figure QC](PUBLICATION_FIGURE_QC_PLAN.md).
+
+Preparation, mapping, qualification and RFS metadata enrichment are separate
+source operations described in [the source contract](SOURCE_CONTRACT.md).
+Estimation failures preserve evidence; rendering failures are rerendered from the
+same run without reading clinical input or refitting. Source or estimator changes
+require a fresh qualified run and preserved prior evidence.

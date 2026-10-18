@@ -12,6 +12,32 @@ bmi_rfs_availability <- function(a) {
   bmi_bind(rows)
 }
 
+# The scientific exhibit describes gas observation in primary indexes only.
+# Other source-entry groups and diagnosis-capture counts remain audit tables.
+bmi_rfs_evidence_plot <- function(availability) {
+  d<-availability[availability$population_id=="primary" & availability$outcome_id %in% c("abg","any_gas"),,drop=FALSE]
+  d$y<-match(d$outcome_id,c("any_gas","abg"))
+  d$label<-paste0(format(d$M,big.mark=",",trim=TRUE)," / ",format(d$N,big.mark=",",trim=TRUE),"\n",
+    bmi_percent_ci(d$percent,d$conf_low,d$conf_high))
+  # Retain the exact interval endpoints; cap marks and an inset scale improve
+  # visibility without artificially widening the intervals of a large cohort.
+  endpoints<-c(d$conf_low,d$conf_high)
+  limits<-if(any(is.finite(endpoints)))range(endpoints[is.finite(endpoints)])else c(0,100)
+  padding<-max(1,diff(limits)*.15)
+  ggplot2::ggplot(d,ggplot2::aes(percent,y))+
+    ggplot2::geom_segment(ggplot2::aes(x=conf_low,xend=conf_high,yend=y),linewidth=.8,na.rm=TRUE)+
+    ggplot2::geom_segment(ggplot2::aes(x=conf_low,xend=conf_low,y=y-.045,yend=y+.045),linewidth=.6,na.rm=TRUE)+
+    ggplot2::geom_segment(ggplot2::aes(x=conf_high,xend=conf_high,y=y-.045,yend=y+.045),linewidth=.6,na.rm=TRUE)+
+    ggplot2::geom_point(size=1.6,na.rm=TRUE)+
+    ggplot2::geom_text(ggplot2::aes(label=label),x=mean(limits),nudge_y=-.27,size=3.4,lineheight=1.1)+
+    ggplot2::scale_x_continuous(labels=function(x)paste0(x,"%"))+
+    ggplot2::coord_cartesian(xlim=c(max(0,limits[1]-padding),min(100,limits[2]+padding)))+
+    ggplot2::scale_y_continuous(limits=c(.35,2.35),breaks=c(1,2),labels=c("ABG or VBG","ABG"))+
+    ggplot2::labs(title="Usable blood-gas evidence in the primary population",subtitle="Full fixed-index denominator; proportions with Wilson 95% CIs",
+      x="Patients with usable evidence (%) — inset scale",y=NULL)+bmi_theme()+
+    ggplot2::theme(panel.grid.major.y=ggplot2::element_blank(),panel.grid.minor=ggplot2::element_blank())
+}
+
 # Population-aware views; all numerical figures read saved aggregates only.
 bmi_export_figures <- function(bundle,output) {
   dir.create(output,recursive=TRUE,showWarnings=FALSE)
@@ -54,8 +80,7 @@ bmi_export_figures <- function(bundle,output) {
     plot<-ggplot2::ggplot(z,ggplot2::aes((bin_low+bin_high)/2,n))+
       ggplot2::geom_col(ggplot2::aes(width=bin_high-bin_low),fill="grey35")+
       ggplot2::facet_wrap(~subgroup,ncol=1,labeller=ggplot2::as_labeller(function(x)bmi_wrap(gsub("_"," ",x),55)))+
-      ggplot2::labs(title="Historical source-entry membership across BMI",subtitle="Fixed common indexes; counts, not equal-area densities",x="BMI (kg/m2)",y="Indexed patients")+bmi_theme()+
-      ggplot2::theme(legend.text=ggplot2::element_text(size=9))
+      ggplot2::labs(title="Historical source-entry membership across BMI",subtitle="Fixed common indexes; patient counts",x="BMI (kg/m²)",y="Indexed patients")+bmi_theme()
     stem<-file.path(output,"RFS-entry");bmi_export(root_draw(function()print(plot)),stem,height_mm=190)
     caption<-"Historical source-entry subgroup counts by BMI, pooling the two acute settings on fixed indexes. Overlap remains in primary; obesity-only is a descriptive selection audit without adjusted outcome models. Membership records source-file representation, not exhaustive clinical criteria. Unresolved and all-zero discrepancies are retained. All groups partition the common indexed population. No association or causal bias correction follows from this partition."
     if(bundle$manifest$mode=="fixture")caption<-paste("ARTIFICIAL DATA ONLY.",caption)
@@ -63,22 +88,11 @@ bmi_export_figures <- function(bundle,output) {
   }
   if(nrow(a$rfs_outcomes)) {
     availability<-bmi_rfs_availability(a)
+    availability$displayed<-availability$population_id=="primary" & availability$outcome_id %in% c("abg","any_gas")
     utils::write.csv(availability,file.path(output,"rfs-evidence-display.csv"),row.names=FALSE)
-    availability$y<-ifelse(availability$population_id=="primary",2,1)
-    availability$label<-paste0(format(availability$M,big.mark=",",trim=TRUE)," / ",format(availability$N,big.mark=",",trim=TRUE),"\n",ifelse(is.na(availability$percent),"unavailable",paste0(bmi_number(availability$percent,3),"%")))
-    labels<-vapply(c("abg","any_gas","icd"),function(o)paste(strwrap(bmi_outcome_label(o),22),collapse="\n"),character(1))
-    availability$outcome_label<-factor(labels[match(availability$outcome_id,c("abg","any_gas","icd"))],levels=labels)
-    plot<-ggplot2::ggplot(availability,ggplot2::aes(percent,y))+
-      ggplot2::geom_segment(ggplot2::aes(x=conf_low,xend=conf_high,yend=y),linewidth=.7,na.rm=TRUE)+
-      ggplot2::geom_point(size=2,na.rm=TRUE)+
-      ggplot2::geom_text(ggplot2::aes(label=label),x=50,nudge_y=-.27,size=3.2,lineheight=.95)+
-      ggplot2::facet_wrap(~outcome_label,nrow=1)+
-      ggplot2::scale_x_continuous(limits=c(0,100),breaks=c(0,50,100),labels=function(x)paste0(x,"%"))+
-      ggplot2::scale_y_continuous(limits=c(.35,2.35),breaks=c(1,2),labels=c("Obesity-only","Primary"))+
-      ggplot2::labs(title="Evidence availability by source-entry population",subtitle="Full fixed-index populations; raw proportions and Wilson 95% intervals",x="Outcome evaluable",y=NULL)+bmi_theme()+
-      ggplot2::theme(strip.text=ggplot2::element_text(size=9,face="bold"),panel.spacing.x=grid::unit(5,"mm"))
-    bmi_export(root_draw(function()print(plot)),file.path(output,"RFS-evidence"),height_mm=125)
-    caption<-"Raw encounter-wide outcome evaluability among all fixed indexes in each RFS group, before adjustment completeness. Labels give evaluable/full N and percentages; intervals are 95% Wilson intervals. Primary includes non-OBESITY pathways and their OBESITY overlaps. Obesity-only is descriptive: gas-related source pathways select on testing and potentially results, depleting an independent gas comparator. Usable evidence is not identical to gas acquisition; absent historical source membership does not establish no gas was collected. Sparse residual gas records remain in the counts without recoding flags. ICD refers to known diagnosis capture, not ICD positivity. No adjusted curve or PIF is estimated for obesity-only."
+    plot<-bmi_rfs_evidence_plot(availability)
+    bmi_export(root_draw(function()print(plot)),file.path(output,"RFS-evidence"),height_mm=85)
+    caption<-"Encounter-wide usable gas evidence among all primary fixed indexes, before adjustment completeness. Labels give evaluable/full N, percentage and 95% Wilson CI; capped intervals use their exact endpoints on a labeled inset scale. ABG: arterial blood gas; VBG: venous blood gas. The combined row accepts either usable specimen; the two rows overlap and are not summed. These percentages describe evidence availability, not hypercapnia positivity. Primary includes non-OBESITY pathways and their OBESITY overlaps. Complete diagnosis capture, when present, is a source fact rather than ICD positivity and is reported separately. Obesity-only counts and residual-gas discrepancies are confined to the cohort flow and audit; they do not define a scientific comparator or weighting analysis."
     if(bundle$manifest$mode=="fixture")caption<-paste("ARTIFICIAL DATA ONLY.",caption)
     all_captions[["evidence"]]<-data.frame(figure_id="RFS-evidence",caption=caption,alt_text=caption,source_tables="rfs_outcomes;rfs_summary")
   }

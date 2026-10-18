@@ -7,6 +7,7 @@ import subprocess
 import tempfile
 from types import SimpleNamespace
 import unittest
+from unittest.mock import patch
 
 ROOT=Path(__file__).resolve().parents[1]
 spec=importlib.util.spec_from_file_location("preparation", ROOT/"scripts/prepare_common_index_input.py")
@@ -24,6 +25,14 @@ def item(key="001", row=None, state="matched"):
 
 
 class PreparationChecks(unittest.TestCase):
+    def test_retired_population_schema_rejected_before_source_access(self):
+        config=json.loads((ROOT/'config/common_index_mapping.example.json').read_text())
+        config['schema_version']=1
+        with tempfile.TemporaryDirectory() as path, patch.object(
+            prep,'verify_file',side_effect=AssertionError('retired schema touched source')):
+            with self.assertRaisesRegex(prep.PreparationError,'version|schema|superseded'):
+                prep.prepare(config,Path(path))
+
     def test_unadjusted_specimens_and_conflicts(self):
         self.assertEqual(prep.gas_record(record(),POLICY,VOCAB)[:3],("abg",45,True))
         self.assertEqual(prep.gas_record(record("2021-4",50),POLICY,VOCAB)[:2],("vbg",50))
@@ -112,7 +121,7 @@ class PreparationChecks(unittest.TestCase):
             self.assertNotIn('ARTIFICIAL-PATIENT',result.stdout+result.stderr)
 
     def test_reader_pin_and_restricted_output_guard(self):
-        config=json.loads((ROOT/'config/common_index_preparation.example.json').read_text())
+        config=json.loads((ROOT/'config/common_index_mapping.example.json').read_text())
         config['upstream_revision']='unreviewed'
         with self.assertRaisesRegex(prep.PreparationError,'reader pin'):
             prep.pinned_readers(config)
