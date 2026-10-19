@@ -124,7 +124,12 @@ source/input/evidence identities and hashes. No identifiers, exact dates, indivi
 predictions/diagnostics, model frames or fitted model objects enter the bundle.
 Result keys include population, model, outcome, window, model form, reference
 population and scenario policy where applicable. Failed/unavailable positions
-remain present. Exact aggregate clinical audits are private.
+remain present. Reports, figures and aggregate audit/result tables may be versioned
+and shared under the owner's 2026-10-18 clarification; raw and patient-level data
+remain excluded. The [collaborator snapshot](../results/2026-10-18/README.md)
+versions complete report PDFs, B/F2, a local gallery and all 49 CSVs with hashes.
+Local execution bundles remain ignored; the reading snapshot cannot be used as
+a `make render` run directory.
 
 | Command from repository root | Behavior |
 |---|---|
@@ -145,8 +150,10 @@ The scientific mini-paper contains detailed Methods, primary relationships,
 observation/BMI displays, verification-oriented Results and example conclusions.
 The audit contains complete stage/variable profiles, all models/covariances,
 failures, provenance and supporting analyses; full coordinate exports accompany
-full-range plots. No preview may substitute for a complete table. F1-A is preferred;
-B/C remain alternatives. See [figure QC](PUBLICATION_FIGURE_QC_PLAN.md).
+full-range plots. No preview may substitute for a complete table. The owner selected
+F1-B and F2 as the working main figures on 2026-10-18; A/C remain alternatives.
+The saved scientific PDF embeds A with identical values; use standalone B for
+the selected presentation. See [figure QC](PUBLICATION_FIGURE_QC_PLAN.md).
 
 Preparation, mapping, qualification and RFS metadata enrichment are separate
 source operations described in [the source contract](SOURCE_CONTRACT.md).

@@ -22,6 +22,10 @@ and implementations are recoverable through the [archive index](../archive/READM
 | 2026-10-17 | Confine obesity-only to flow/audit, not scientific comparisons. ICD capture is a count separate from positivity; omit constant availability curves. Print CIs beside estimated percentages. |
 | 2026-10-17 | Adopt upstream mapper `751d794` and exact corresponding module hash together. Previously accepted products keep their original producer/runtime identities. |
 | 2026-10-17 | Remove obsolete compatibility layers and duplicate historical source trees. Git remains the historical source archive; preserve raw inputs, accepted products, clinical bundles/reports and immutable Stata original. E2E artifacts become the primary verification path. |
+| 2026-10-18 | Owner reconfirmed November 4, 2026 as the ATS 2027 deadline and granted provisional scientific approval of the current analysis. Figure selection was still pending at that point (subsequent choice below). Do not draft abstract text yet; submission is not authorized by this approval. |
+| 2026-10-18 | Owner subsequently selected **primary/F1-B and primary/F2** as the main figures for now, superseding the earlier F1-A recommendation. This is the working figure selection; final submission packaging remains separate. Provisional scientific approval and the instruction to defer abstract drafting remain in effect. |
+| 2026-10-18 | Owner clarified that analysis outputs—reports, figures and aggregate result tables—may be included in Git. Raw and patient-level data remain excluded. This supersedes the earlier blanket instruction that all aggregates remain private; the current ignored-output location is a packaging issue. |
+| 2026-10-18 | Owner authorized versioning the clinical reports, B/F2 figures, gallery and aggregate tables, with README/LLM navigation and email-ready PDFs, followed by review and PR release. `results/2026-10-18/` is a reading snapshot of the existing run, not a new analysis. Raw/patient data stay excluded; abstract drafting remains deferred. |
 
 Current machine identities are input schema 4, aggregate schema 7 and
 `bmi_hypercapnia_rfs_curve_audit_v2`. Older results keep their original labels and
@@ -37,8 +41,8 @@ includes unknown ethnicity. No causal-prevention/incidence claim is authorized.
 | Prior BMI/component age | Retain the approved availability hierarchy without a recency cap and report aggregate lags/current-measurement sensitivity. A new cutoff is a scientific decision requiring dependent qualification. |
 | Unresolved within-list eligibility/ties | Preserve explicit unresolved states, no later replacement. Any alternative tie/anchor rule needs approval and fresh reconciliation. |
 | Cross-project count differences | Additional original-key decomposition and the historical diagram arithmetic question remain unassessed; aggregate counts alone cannot attribute differences to BMI. |
-| Interpretation | Source acceptance/numerical agreement do not validate selection assumptions, causal language or transport to untested patients. Investigator interpretation and submission approval remain separate. |
-| Final presentation | F1-A preferred, B/C retained. Existing scoped QC is recorded; final venue-size/portal checks and investigator figure approval remain outstanding. |
+| Interpretation | Owner granted provisional scientific approval on 2026-10-18 for the current analysis. Selection assumptions, causal-language limits and lack of transport to untested patients remain unchanged. Submission approval remains separate. |
+| Final presentation | F1-B and F2 selected by the owner for working main use on 2026-10-18; A/C remain alternatives. The saved scientific PDF still embeds A with the same estimates; use standalone B for the selected layout. Final venue-size/portal checks and submission packaging remain outstanding. |
 
 ## Execution history, without compatibility promises
 

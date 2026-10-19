@@ -28,7 +28,8 @@ full_db.dta
 /artifacts/evidence/
 __pycache__/
 
-# Patient-level triangulation renders, figures, and local input manifests
+# Local analysis runs and input manifests; reviewed aggregate outputs may be
+# versioned separately. This rule is not a prohibition on sharing analysis results.
 /artifacts/triangulation/
 /config/triangulation_input.local.json
 /config/common_index_preparation.local.json

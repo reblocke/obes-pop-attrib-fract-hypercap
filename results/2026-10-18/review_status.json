@@ -1,0 +1,77 @@
+{
+  "updated": "2026-10-18",
+  "analysis_id": "bmi_hypercapnia_rfs_curve_audit_v2",
+  "source_run_id": "curve-analyze-20261017T175520-51541",
+  "source_review_id": "20261017T205353-20587",
+  "source_qualification": "Identity-bound source declarations passed in the accepted clinical run; see source_audit.csv for exact statuses and remaining limitations.",
+  "analysis_completed": true,
+  "numerical_review": {
+    "status": "automated saved-aggregate reconciliation recorded",
+    "scope": "Source review records 29 coordinate checks and 47 annotation checks; package retains original values and verifies byte identities. Investigator numerical adjudication is not separately recorded."
+  },
+  "owner_scientific_approval": {
+    "status": "provisional",
+    "date": "2026-10-18",
+    "source": "Owner instruction recorded in docs/DECISIONS.md"
+  },
+  "owner_figure_selection": {
+    "status": "working main set selected",
+    "figures": [
+      "primary/F1-B",
+      "primary/F2"
+    ],
+    "date": "2026-10-18"
+  },
+  "abstract_drafting": "deferred",
+  "submission_approval": "not granted",
+  "original_bundle_review_flags": {
+    "numerically_reviewed": false,
+    "scientifically_reviewed": false,
+    "note": "Immutable creation-time flags, not overwritten by subsequent reviews or owner decisions."
+  },
+  "historical_visual_review": {
+    "source_receipt_sha256": "84d9fb989aa051d9612a2c228ab12871c9f88a849bd9c2ca2de92df7990dd3a6",
+    "source_render_receipt_sha256": "ac99e8f043dba6d382d725930846edf5e93b41932a024b2a965dd0d96bd467d3",
+    "automated_report_pages": {
+      "scientific": 34,
+      "audit": 2970
+    },
+    "native_key_layouts": 39,
+    "scope": "Scoped agent inspection: key layouts, selected audit templates and sampled assembled pages. Not individual visual inspection of all audit pages. Original reviewer recommended A; subsequent owner selection is B/F2."
+  },
+  "package_review": {
+    "reviewer": "Codex agent",
+    "figure_copy_hashes": "All eight selected exports match the original export-identity ledger.",
+    "new_pdf": {
+      "pages": 2,
+      "figure_width_mm": 189.7944,
+      "scaled": false,
+      "caption_font_pt": 9.5,
+      "native_assembled_pages_inspected": [
+        1,
+        2
+      ],
+      "grayscale_pages_inspected": [
+        1,
+        2
+      ],
+      "findings": "No clipping or label collisions in final pages; intervals remain visible. Repaired missing CO2 subscript glyphs using an existing embedded Unicode font. Original vector plots are unchanged."
+    },
+    "gallery": {
+      "local_link_checks": "passed",
+      "local_links": 22,
+      "external_assets": 0,
+      "browser_visual_check": "unavailable: browser security policy blocks local file URLs; no bypass attempted"
+    },
+    "report_copy_inspection": "Exact copies of previously reviewed PDFs; no new all-page visual-inspection claim.",
+    "data_scope": "All 49 CSV headers and categorical/distribution variable sets checked; no identifier columns, individual dates, patient predictions, model frames, source-access paths or credentials. Identifier names in audit variable profiles are metadata, not values."
+  },
+  "clinical_input_reads_during_packaging": 0,
+  "model_refits_during_packaging": 0,
+  "limitations": [
+    "Historical exact RFS queries/triggers remain partly unresolved.",
+    "Obesity-only remains audit-only and selective sampling affects interpretation.",
+    "Prior BMI timing and measurement/selection bias remain scientific limitations.",
+    "Cross-project original-key decomposition and historical diagram discrepancy remain unassessed."
+  ]
+}
