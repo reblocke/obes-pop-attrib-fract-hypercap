@@ -13,6 +13,14 @@ feasible. Preserve unrelated edits. Do not build compatibility layers, alternate
 launchers, generic frameworks or tests merely to retain obsolete versions.
 Historical source is recoverable through Git and `archive/README.md`.
 
+For collaborator or LLM-assisted reading, use `docs/LLM_GUIDE.json` for the dated
+approval state, selected figure identities and result-table navigation. It is a
+documentation companion, not a second analysis configuration. Keep it aligned
+with `docs/DECISIONS.md`; do not treat access to the repository as permission to
+draft, rerun, share or submit beyond the owner's current request.
+The versioned reading snapshot is `results/2026-10-18/`; verify its manifest and
+use its aggregate tables for current numerical claims. It is not a runnable bundle.
+
 ## Scientific invariants
 
 - Use authenticated original FULL_DATA ED/inpatient encounter keys. History
@@ -80,7 +88,10 @@ numerical review and investigator scientific approval are separate states.
   bundles clearly rather than relabeling or migrating them.
 - Raw inputs, accepted source products, prior bundles/results and Git history are
   immutable. Never export identifiers, exact dates, patient predictions, model
-  frames or model objects in aggregate bundles. Aggregates remain private.
+  frames or model objects in aggregate bundles. The owner permits reports, figures
+  and aggregate result tables in Git and collaborator review material. Do not
+  confuse the ignored local run directory with a ban on versioning these outputs;
+  keep raw/patient-level data and source-access secrets excluded.
 - Preserve the scientific mini-paper and complete audit: all applicable variables,
   coefficients, covariance matrices, diagnostics and failures; no table previews.
   Required missing figures must fail the render.

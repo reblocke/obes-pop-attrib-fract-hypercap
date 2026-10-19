@@ -123,7 +123,16 @@ key decomposition and the previously noted historical diagram discrepancy remain
 unassessed. Prior-measurement age, selection/measurement mechanisms and causal
 interpretation remain scientific limitations after source acceptance.
 
-Keep patient identifiers, exact dates, raw records, row-level derivations, model
-frames and individual predictions in protected execution only. Clinical aggregate
-bundles can disclose rare categories and also remain private. Public sharing,
-coauthor approval and submission require separate review.
+Keep patient identifiers, exact individual dates, raw records, row-level derivations,
+model frames and individual predictions in protected execution only. On 2026-10-18
+the owner clarified that reports, figures and aggregate result tables may be
+included in Git and shared as analysis outputs. Local source-access details,
+credentials and patient-level evidence remain excluded. The blanket ignore rule
+for local runs is not a restriction on versioning aggregate outputs. This permission
+does not authorize abstract submission or imply coauthor approval.
+
+The [versioned reading snapshot](../results/2026-10-18/README.md) contains the
+clinical reports, selected figures and complete aggregate tables. Its manifest
+records original bundle/review identities without source-access paths or patient
+records. This packages existing results; it does not requalify inputs or rerun
+estimation. Private input and execution receipts remain outside Git.

@@ -132,3 +132,115 @@ staged privacy checks pass. The unchanged source-boundary receipt remains
 incomplete: 18 checks passed and nine require unavailable DuckDB. No dependency
 installation or clinical rerun was performed. Generated evidence remains ignored;
 the release receipt in the review directory records the final commit and PR.
+
+## 2026-10-18 — Investigator approval and figure selection
+
+Owner reconfirmed the ATS 2027 deadline as November 4, 2026 and granted provisional
+scientific approval, requesting the figures for separate review and no abstract
+drafting yet. Recorded this decision without changing scientific rules or treating
+it as figure/submission approval.
+
+Displayed the clinical review `20261017T205353-20587` main alternatives F1-A/B/C
+and secondary F2; the publication gallery retains the supporting views and full
+captions. Reverified its clinical bundle-manifest identity and all 3,765 figure
+export hashes. Inspected the four displayed PNGs; no figures were regenerated and
+no clinical data were read or models refitted. The separate private record
+`artifacts/triangulation/investigator-review-20261018/approval-status.json` binds
+the provisional approval and pending figure choice to this exact run/review.
+The date is owner-confirmed, not newly portal-verified. No abstract text was written.
+
+## 2026-10-18 — Selected figures and collaborator documentation
+
+Owner selected primary/F1-B and primary/F2 as the working main figures and requested
+a human-oriented README plus machine-readable LLM instructions for a collaborator.
+Used the readme-builder skill. Preserved provisional scientific approval and the
+instruction to defer abstract drafting; final submission packaging remains separate.
+
+The README now leads with the study question, clinical packet reading order,
+selected figures and interpretation limits, followed by methods/code navigation
+and reproduction. It states that the existing scientific PDF embeds A while the
+selected standalone B uses identical values, and that private results are absent
+from a Git clone. `docs/LLM_GUIDE.json`, linked from AGENTS.md, supplies dated
+authority/evidence pointers, approval boundaries, result keys, units and missing-
+evidence handling without becoming another analysis configuration. The scientific
+guide, decision log and figure QC note now reflect B/F2; prior exports and review
+receipts remain unchanged. A separate private `figure-selection.json` links the
+owner's choice to the previous approval record and exact clinical exports.
+
+Verification: all 27 relative documentation links resolve; the JSON parses and its
+authority/output paths, analysis identity, selected figure hashes, result columns
+and main population/window/model/policy filters match the saved clinical bundle.
+Six `make -n` checks verify documented targets without execution. All 42 tracked
+analysis/configuration/report/test source files match their pre-edit hashes, and
+`git diff --check` passes. Evidence is in
+`artifacts/triangulation/collaborator-docs-20261018/verification.json`.
+No estimation, report regeneration, dependency installation, abstract drafting,
+external sharing, commit or push occurred in this documentation task.
+
+## 2026-10-18 — Correct output-sharing scope
+
+Owner clarified that analysis outputs may be included in Git; only raw and
+patient-level data need to remain excluded. The previous collaborator wording
+overstated the restriction by calling the entire review set private. Verified
+that `.gitignore` currently excludes `artifacts/triangulation/`, including the
+scientific/audit reports, figures and aggregate tables; historical rendered outputs
+are already tracked elsewhere. The current review set consists of reports,
+gallery/figure exports and QC evidence, with aggregate CSVs in its parent run.
+
+Corrected README, LLM guide, agent guidance, source/scientific contracts and the
+decision log. Clarified the ignore-rule comment without unignoring local runs or
+patient data. No outputs were added to Git in this clarification; packaging them
+for versioning remains distinct from permission to include them. JSON parsing,
+relative-link checks and `git diff --check` verify this documentation-only change.
+No clinical rerun, abstract text, external sharing or release was performed.
+
+## 2026-10-18 — Versioned collaborator outputs and email PDFs
+
+Owner authorized adding clinical reports, selected B/F2 figures, gallery and
+aggregate tables to Git, updating human/LLM navigation, and reviewing/releasing
+through a PR. Used readme-builder, figure-and-medical-illustration-qc and PDF skills.
+This packages existing results without a new analysis or abstract draft.
+
+`results/2026-10-18/` contains exact copies of the 34-page scientific PDF, 2,970-page
+audit PDF, eight B/F2 exports, saved configuration and all 49 aggregate CSVs.
+It adds a two-page vector-figure PDF with full captions, an offline B/F2 gallery,
+human/machine table indexes, a package manifest and a separate dated review-state
+record. Original reports and their creation-time approval flags remain unchanged;
+the owner's later provisional approval and figure selection are recorded separately.
+The scientific PDF still embeds F1-A; standalone B contains the same estimates.
+
+README now links directly to the snapshot and explains the repository layout,
+email starting set, historical files and source-access boundary. LLM_GUIDE.json
+points to portable package paths and exact main-model IDs, avoiding accidental
+selection of matched-sample sensitivities by population/window/form alone. The
+snapshot is explicitly not a runnable aggregate bundle. Raw/patient data, model
+frames/predictions, binary run objects, source-access receipts and local logs stay
+excluded. `.gitattributes` preserves snapshot bytes across checkouts so CSV line-
+ending normalization cannot invalidate recorded hashes.
+
+Verification: 60 source copies match their original hashes; 68 packaged files are
+manifested. All 49 tables (300,772 aggregate rows) retain their complete fields and
+rows. The three intended main-model rows reproduce saved PIF and absolute-difference
+scaling. All 122 documentation links and 22 gallery asset/links resolve locally;
+the gallery has no external assets. Both new PDF pages were inspected at original
+figure width and in grayscale. A missing CO₂ caption glyph was repaired with an
+existing embedded Unicode font. PDF text and CSV field/category checks found no
+patient identifiers, individual dates, source-access paths or credentials.
+
+Browser visual inspection of the local HTML was blocked by the browser URL policy;
+this was not bypassed and is recorded separately from completed PDF visual checks.
+The complete audit retains its prior automated/full-table checks and sampled visual
+review; no new claim of individual visual inspection of all 2,970 pages is made.
+Evidence and repeatable packaging/check scripts are in the ignored
+`artifacts/triangulation/collaborator-package-20261018/` directory. The package README
+also provides a dependency-free integrity check usable from a clone. No analysis,
+source pull, dependency installation, email or abstract drafting occurred.
+
+Final release review exported the staged index into a clean temporary checkout
+without private data/local runs and repeated package verification successfully.
+All 43 analysis/configuration/report/test source files match the pre-edit baseline;
+the 69 snapshot files retain exact bytes after Git checkout. `git diff --cached
+--check` passes. The new package index/captions use LF endings; original CSVs are
+unchanged. Full estimation E2E was not repeated for this output/documentation-only
+release. `final-staged-verification.json` records the clean-checkout evidence;
+the release receipt will bind the resulting PR and merged revision.

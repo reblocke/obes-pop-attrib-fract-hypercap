@@ -1,2 +1,5 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+# Reviewed output snapshots have byte-bound manifests; do not normalize their files.
+/results/** -text

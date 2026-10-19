@@ -1,5 +1,30 @@
 # Publication figure refinement — 2026-10-17
 
+## Current owner selection — 2026-10-18
+
+The owner selected **primary/F1-B and primary/F2** as the working main figures.
+This supersedes the earlier F1-A recommendation below; A/C remain alternatives.
+The existing scientific PDF embeds A, which uses the same values as B. Use the
+standalone B export for the selected layout. The saved review and its original
+recommendations remain unchanged. Scientific approval is provisional; final
+submission packaging and approval are separate. Abstract drafting remains deferred.
+
+## Collaborator snapshot — 2026-10-18
+
+[The versioned snapshot](../results/2026-10-18/README.md) contains exact B/F2 exports
+and a new two-page PDF with full captions. The vector figures remain at their
+original approximately 190-mm width; captions use an embedded 9.5-point Unicode
+font. Both new pages were inspected, including grayscale, and a missing CO₂
+caption glyph was repaired. Original reports/exports and all 49 aggregate CSVs
+match their source hashes; no models were refitted.
+
+The compact HTML gallery has local assets, full captions and source-table links.
+Its links were checked directly; browser visual inspection was unavailable because
+the browser security policy blocks local file URLs. This limitation is recorded
+separately from the completed PDF inspection. The complete audit is an unchanged
+copy with the prior scoped review, not a claim of new visual review of every page.
+See the [review receipt](../results/2026-10-18/review_status.json).
+
 ## Brief and scope
 
 Refine every current scientific figure and its alternatives, and propagate the
@@ -59,7 +84,8 @@ The final review is `20261017T205353-20587` under the unchanged clinical run
 complete audit has 2,970 pages. All 1,242 figure sets retain vector masters and
 300-dpi PNG reviews; all 39 key layouts additionally have JPG candidates. Eight
 unassessed supporting layouts remain explicitly outside the submission candidates.
-F1-A is preferred, with B/C preserved for comparison.
+F1-A was recommended at that review, with B/C preserved for comparison; the
+owner's subsequent B/F2 selection is recorded above.
 
 The historical 74-check acceptance run and 27 focused RFS checks passed for this
 dated review; current verification uses the E2E workflow in `tests/README.md`. Twenty-nine
