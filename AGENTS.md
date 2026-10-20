@@ -2,7 +2,7 @@
 
 ## Scope and change discipline
 
-The current analysis is schema 8 (`bmi_hypercapnia_rfs_curve_audit_v3`). Read
+The current analysis is schema 9 (`bmi_hypercapnia_rfs_curve_audit_v4`). Read
 `docs/BMI_HYPERCAPNIA_TRIANGULATION_PLAN.md` and `docs/SOURCE_CONTRACT.md` before
 substantive work. Configuration and the variable dictionary live in `config/`;
 the cohort ledger is the sole count authority.
@@ -43,7 +43,7 @@ use its aggregate tables for current numerical claims. It is not a runnable bund
   establish an unmeasured specimen normal.
 - ICD is J96.02/J96.12/J96.22/J96.92/E66.2. Captured absence is negative only when
   encounter diagnosis capture is complete. Capture is not ICD positivity.
-  Calendar-day gas sensitivities keep indexes and use collection=start date.
+  Calendar-day gas sensitivities keep indexes and use recorded-result date=start date.
 - Within each RFS group, resolve the three-degree-of-freedom natural BMI spline
   from its covariate-complete reference's type-7 .05/.35/.65/.95 quantiles.
   Reuse that numeric basis across outcomes and predictions; current-measurement
@@ -107,5 +107,6 @@ numerical review and investigator scientific approval are separate states.
 - Refactoring alone does not authorize clinical reruns, commit/push/merge,
   external communication or submission.
 
-The [paired-ABG supplement](docs/PAIRED_ABG_SUPPLEMENT.md) adds two same-sample
-secondary positions with a separate source gate; original PIFs remain unchanged.
+The [same-day arterial supplement](docs/SAME_DAY_ABG_SUPPLEMENT.md) adds two
+recorded-day co-occurrence positions with a separate source gate. It does not
+establish same-sample pairing; original PIFs and primary analyses remain unchanged.

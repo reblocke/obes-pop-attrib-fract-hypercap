@@ -1,0 +1,26 @@
+{
+  "policy_id": "same_day_arterial_cooccurrence_v1",
+  "canonical_database_sha256": "PENDING_SOURCE_DIGEST",
+  "date_field": "date",
+  "date_semantics": "recorded_result_calendar_date",
+  "day_selection": "any_coobserved_day_within_index_encounter",
+  "arterial_pco2_code": "2019-8",
+  "arterial_ph_code": "2744-1",
+  "pco2_lower_exclusive": 5,
+  "pco2_upper_exclusive": 200,
+  "hypercapnia_threshold_inclusive": 45,
+  "acidemia_threshold_exclusive": 7.35,
+  "ph_lower_exclusive": 6.5,
+  "ph_upper_exclusive": 7.8,
+  "ph_units": [
+    "ph",
+    "[ph]"
+  ],
+  "arterial_specimen_values": [],
+  "source_policy_id": "unadjusted_pco2_v1",
+  "correction_policy": "captured_records_without_inferred_corrections",
+  "clinical_policy_authorization": "Owner-approved plan 2026-10-20",
+  "date_evidence": "PENDING_EXPORT_DICTIONARY_AND_CAPTURED_DATE_CHECK",
+  "ph_evidence": "PENDING_ARTERIAL_CODE_AND_UNIT_CHECK",
+  "evidence_files": []
+}

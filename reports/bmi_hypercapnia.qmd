@@ -72,7 +72,7 @@ The combined indexed cohort is a reconciliation reference. Non-OBESITY-only, ove
 
 Arterial hypercapnia requires ordinary authenticated ABG PaCO~2~ ≥45 mm Hg. Combined gas accepts ABG PaCO~2~ ≥45 or VBG PvCO~2~ ≥50 mm Hg; both specimens are not required. No pH restriction is applied to the established primary outcomes. Strict validity limits are 5<arterial<200 and 10<venous<250 mm Hg, with reviewed units. Available-evidence negatives do not establish that an unmeasured specimen is normal. Unusable or unavailable outcomes remain unknown.
 
-The ICD composite comprises J96.02, J96.12, J96.22, J96.92 and E66.2, with captured absence negative only under complete diagnosis capture. E66.2 introduces obesity-related ascertainment. Index-calendar-day gas sensitivities use collection date equal to encounter-start date, retaining the index.
+The ICD composite comprises J96.02, J96.12, J96.22, J96.92 and E66.2, with captured absence negative only under complete diagnosis capture. E66.2 introduces obesity-related ascertainment. Index-calendar-day gas sensitivities use recorded-result date equal to encounter-start date, retaining the index. This export does not authenticate collection times.
 
 Adjustment retains linear age and the inherited sex, combined race/ethnicity and geographic-region coding. Completeness means nonmissing values for inherited analysis variables, including retained Unknown categories. The White reference category includes non-Hispanic or unknown ethnicity; inherited race-category precedence is unchanged. Raw race × ethnicity cross-tabs are shown only when authenticated.
 
@@ -145,21 +145,26 @@ for(group in grep("_current$",unlist(bundle$config$analysis_populations),value=T
 ```
 
 
-## Same-sample arterial hypercapnia with acidemia
+## Same-day arterial PCO₂/pH co-occurrence
 
-This secondary analysis requires authenticated arterial PCO~2~ and pH from the same blood sample during the existing index encounter. Same encounter or date alone is insufficient. Both endpoints use the same valid pairs and patients: any PaCO~2~ ≥45 mm Hg, and any such sample also having pH <7.35. Thresholds precede display rounding. The primary numeric BMI spline basis and inherited adjustment are retained; each curve standardizes over the common paired population. No additional PIF is calculated.
+This secondary analysis uses any recorded calendar date within the existing index encounter with both usable ordinary arterial PCO~2~ and arterial pH. It is **same recorded-day co-occurrence; not verified same-sample pairing**. The export dates when results were recorded; it does not identify a shared blood sample, collection time or elapsed 24-hour interval. Validity screens are 5<PCO~2~<200 mm Hg and 6.5<pH<7.8, applied before display rounding.
+
+Both endpoints use the same patients with at least one co-observed day: any PaCO~2~ ≥45 on such a day, and any such day also containing pH <7.35. Results may come from different samples. Elevated PCO~2~ on one date and low pH on another cannot establish co-occurrence. Patients without a valid co-observed day have unknown supplemental outcomes. Additional unusable or single-analyte records remain audited without erasing usable days. A negative describes eligible recorded evidence only. The primary numeric BMI spline basis, inherited adjustment and common supplemental reference population are retained. No additional PIF is calculated.
 
 ```{r}
-#| label: paired-abg-supplement
+#| label: same-day-abg-supplement
 #| results: asis
-bmi_report_table(a$pairing_status,"Pairing feasibility and source status",keys="module")
-bmi_report_table(a$pairing_reconciliation,"Paired-ABG patient and evidence reconciliation",keys="stage")
-figure("S1-paired-ABG")
-bmi_report_table(a$fixed_bmi_contrasts[grepl("::paired_abg/",a$fixed_bmi_contrasts$model_id),],"Paired-ABG BMI 45 versus 40 contrasts",keys="model_id")
-bmi_report_table(a$paired_curve_crossings,"Paired endpoint curve-order check",keys="status")
+bmi_report_table(a$cooccurrence_status,"Recorded-day source qualification",keys="module")
+z<-a$cooccurrence_reconciliation
+shown<-data.frame(Stage=z$stage,Patients=z$n,Events=z$events,
+  Observed=ifelse(is.na(z$proportion),"Unavailable",sprintf("%.2f%% (95%% CI %.2f–%.2f%%)",100*z$proportion,100*z$conf_low,100*z$conf_high)),Status=z$status)
+bmi_report_table(shown,"Four-stage patient/evidence reconciliation; raw proportions with Wilson 95% intervals",keys="Stage")
+figure("S1-same-day-ABG")
+bmi_report_table(a$fixed_bmi_contrasts[grepl("::same_day_abg/",a$fixed_bmi_contrasts$model_id),],"Co-occurrence BMI 45 versus 40 contrasts",keys="model_id")
+bmi_report_table(a$same_day_curve_crossings,"Supplemental endpoint curve-order check",keys="status")
 ```
 
-Requiring paired evidence introduces additional selection. These results describe documented findings among evaluable pairs, not unobserved physiology. A normal paired sample can coexist with an elevated unpaired PCO~2~; the original arterial outcome is preserved. Acidemia does not establish acute respiratory failure, and absence of an acidemic-hypercapnia pair does not establish chronic compensation. Measurements may have occurred after treatment. Separate logistic curves can cross despite nested observed outcomes; flagged crossings require scientific review, not rearrangement or an automatic change of model. The two endpoints are correlated; interval overlap does not test a difference between associations.
+Requiring both analytes on the same date introduces additional selection. The reconciliation separates patient restriction, restriction to co-observed days, and addition of low pH. Values can represent different samples or periods before and after treatment; co-occurrence does not establish simultaneous hypercapnic acidemia, acute respiratory failure or chronic compensation. Primary arterial findings on other dates remain unchanged. Separate logistic curves can cross despite nested observed outcomes; flagged crossings require scientific review, not clipping or a replacement model. The endpoints are correlated; interval overlap does not test differences between their BMI associations.
 
 # Discussion and example conclusion
 

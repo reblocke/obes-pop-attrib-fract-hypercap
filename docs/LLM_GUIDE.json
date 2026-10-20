@@ -164,7 +164,7 @@
     "saved_aggregate_render": "make render RUN=\"artifacts/triangulation/<exact-saved-run>\"",
     "source_boundary_checks": "make source-test PREP_PYTHON=\"/existing/environment/bin/python\"",
     "clinical_execution_authority": "docs/SOURCE_CONTRACT.md",
-    "latest_recorded_local_test_limits": "See the paired-ABG release receipt and WORKLOG.md for current artificial E2E and source-boundary verification. Clinical pairing is unavailable; software tests do not supply clinical results.",
+    "latest_recorded_local_test_limits": "Current same-day release checks and clinical qualification are recorded separately in WORKLOG.md; artificial results do not supply clinical estimates.",
     "boundaries": "Reports, figures and aggregate result tables may be versioned for collaborator review. Do not include raw/patient-level data, identifiers, individual dates, model frames, individual predictions, credentials or source-access secrets. This guide does not authorize dependency installation, private-input access, refitting, changes to accepted evidence, unsolicited external messages or submission. Rendering uses saved aggregates only.",
     "package_integrity_check": "See results/2026-10-18/README.md for the dependency-free Python SHA-256 verification command."
   },
@@ -178,6 +178,19 @@
     "original_reading_snapshot": "unchanged; schema 7",
     "scientific_review": "pending; original approval does not certify new results",
     "feasibility_report": "results/2026-10-20-paired-abg/README.md",
+    "clinical_models_fitted": 0,
+    "role": "historical; superseded by same-day co-occurrence; no sample pairing recovered"
+  },
+  "same_day_abg_supplement": {
+    "specification": "docs/SAME_DAY_ABG_SUPPLEMENT.md",
+    "software_analysis_id": "bmi_hypercapnia_rfs_curve_audit_v4",
+    "bundle_schema": 9,
+    "clinical_status": "pending_source_qualification",
+    "models": 2,
+    "new_PIFs": 0,
+    "interpretation": "same recorded-day co-occurrence; not verified same-sample pairing",
+    "original_reading_snapshot": "unchanged; schema 7",
+    "scientific_review": "pending for new results",
     "clinical_models_fitted": 0
   }
 }

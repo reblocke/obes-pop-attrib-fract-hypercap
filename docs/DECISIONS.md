@@ -82,3 +82,16 @@ Same-sample linkage is therefore unavailable, not an assessed zero-pair result.
 No clinical supplemental models are fitted; no approximate pairing is adopted.
 The existing clinical snapshot and B/F2 remain unchanged. See the
 [separate feasibility report](../results/2026-10-20-paired-abg/README.md).
+
+## 2026-10-20 — Recorded-day co-occurrence replaces unavailable pairing
+
+The owner selected any co-observed recorded date within the existing index
+encounter and retained 6.5<pH<7.8 with acidemia pH<7.35. Hypercapnia is ≥45 mm Hg
+on co-observed days; the narrower endpoint requires a low pH on the same date,
+potentially from another sample. Different dates cannot be combined. No index
+reselection, primary model/PIF change, supplemental PIF or abstract drafting.
+The two optional positions use the same primary patients/reference and numeric
+spline basis. The new module is `same_day_arterial_cooccurrence_v1`, aggregate
+schema 9 / analysis v4. Historical pairing reports and the primary B/F2 snapshot
+remain immutable. Source qualification, estimation, numerical/visual review and
+investigator approval will be recorded separately after release.

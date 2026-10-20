@@ -29,7 +29,7 @@ bmi_bind <- function(x) {
 }
 bmi_config <- function(path = "config/bmi_hypercapnia_analysis.json") {
   x <- jsonlite::read_json(path, simplifyVector = FALSE)
-  if (!identical(x$analysis_id, "bmi_hypercapnia_rfs_curve_audit_v3") || x$bundle_schema != 8 ||
+  if (!identical(x$analysis_id, "bmi_hypercapnia_rfs_curve_audit_v4") || x$bundle_schema != 9 ||
       x$population_scope_id != "original_selected_encounters_v1" || x$source_policy_id != "unadjusted_pco2_v1" ||
       x$bmi_policy_id != "available_encounter_or_prior_bmi_v1") stop("Unreviewed analysis/source/population policy")
   if (!identical(x$standardization_policy,"outcome_observed_v1") || !identical(x$mnar_enabled,FALSE)) stop("Full-cohort MAR/MNAR projections are superseded")
@@ -274,7 +274,7 @@ bmi_load_input <- function(input,manifest,audit_only=FALSE) {
     if(!identical(loaded$companion$schema_version,1L)||loaded$companion$clinical_models_fitted!=0)stop("Invalid cohort-audit companion")
     # Independent identity and count validation also occurs when merging the ledger.
   }
-  bmi_pairing_load(loaded,manifest)
+  bmi_cooccurrence_load(loaded,manifest)
 }
 bmi_partial_audit <- function(reason,config) {
   a<-setNames(rep(list(data.frame()),length(bmi_table_names)),bmi_table_names)
