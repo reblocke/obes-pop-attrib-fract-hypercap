@@ -96,18 +96,53 @@ bmi_export_figures <- function(bundle,output) {
     if(bundle$manifest$mode=="fixture")caption<-paste("ARTIFICIAL DATA ONLY.",caption)
     all_captions[["evidence"]]<-data.frame(figure_id="RFS-evidence",caption=caption,alt_text=caption,source_tables="rfs_outcomes;rfs_summary")
   }
-  for(id in c("RFS-flow","RFS-entry","RFS-evidence"))if(file.exists(file.path(output,paste0(id,".png")))) {
+  all_captions[["paired"]]<-bmi_paired_figure(bundle,output)
+  for(id in c("RFS-flow","RFS-entry","RFS-evidence","S1-paired-ABG"))if(file.exists(file.path(output,paste0(id,".png")))) {
     all_manifests[[id]]<-data.frame(figure_id=id,panel_id="all",file_path=file.path(output,paste0(id,".png")),export_paths=paste(file.path(output,paste0(id,c(".svg",".pdf",".png",".jpg"))),collapse=";"),source_path="R/rfs_reporting.R",figure_type="source-entry audit",intended_use="private research review",width_px=round(190/25.4*300),dpi_x=300,dpi_y=300,color_mode="grayscale",vector_status="SVG/PDF",qc_status="exported; actual visual review pending")
   }
   utils::write.csv(bmi_bind(all_captions),file.path(output,"captions.csv"),row.names=FALSE)
   utils::write.csv(bmi_bind(all_manifests),file.path(output,"figure-qc-manifest.csv"),row.names=FALSE)
   utils::write.csv(bmi_bind(all_atlas),file.path(output,"atlas-index.csv"),row.names=FALSE)
   captions<-bmi_bind(all_captions)
-  html<-c("<!doctype html><meta charset='utf-8'><title>RFS figure comparison</title><style>body{font:16px sans-serif;max-width:1100px;margin:auto}img{width:100%}</style><h1>RFS figure alternatives</h1><p>F1-A remains provisional preferred. Counts and all alternatives use the same saved aggregates.</p>")
+  html<-c("<!doctype html><meta charset='utf-8'><title>RFS figure comparison</title><style>body{font:16px sans-serif;max-width:1100px;margin:auto}img{width:100%}</style><h1>RFS figure alternatives</h1><p>F1-B and F2 are the investigator-selected main figures. S1 is a secondary paired-evidence supplement. Counts and all alternatives use the same saved aggregates.</p>")
   for(i in seq_len(nrow(captions))) {
     id<-captions$figure_id[i]
     html<-c(html,paste0("<article><h2>",id,"</h2><a href='",id,".png'><img loading='lazy' src='",id,".png' alt='",id,"'></a><p>",captions$caption[i],"</p></article>"))
   }
   writeLines(html,file.path(output,"gallery.html"))
   jsonlite::write_json(list(same_saved_values=TRUE,clinical_reads=0,model_refits=0,visual_inspection="pending",populations=bundle$config$analysis_populations,descriptive_populations=bundle$config$descriptive_populations),file.path(output,"figure-data-receipt.json"),auto_unbox=TRUE,pretty=TRUE)
+}
+
+bmi_paired_figure <- function(bundle,output) {
+  a<-bundle$analysis;s<-a$pairing_status
+  curves<-a$probability_curves[grepl("::paired_abg/",a$probability_curves$model_id),]
+  ids<-paste0("primary::paired_abg/encounter/",c("hypercapnia","acidemic_hypercapnia"),"/spline")
+  plots<-list()
+  for(i in seq_along(ids)) {
+    z<-curves[curves$model_id==ids[i],,drop=FALSE]
+    r<-a$model_registry[a$model_registry$model_id==ids[i],,drop=FALSE]
+    plots[[i]]<-bmi_curve_plot(z,c("PaCO₂ ≥45 among valid pairs","PaCO₂ ≥45 and pH <7.35")[i])
+    if(nrow(r)&&!is.na(r$n_model))plots[[i]]<-plots[[i]]+ggplot2::labs(subtitle=paste0("Same model/ref N = ",format(r$n_model,big.mark=","),"\nEvents = ",format(r$n_events,big.mark=",")))
+  }
+  bins<-a$distribution_bins[a$distribution_bins$population_id=="primary::C_paired_abg"&a$distribution_bins$variable_id=="bmi",]
+  if(nrow(bins)) {
+    freq<-ggplot2::ggplot(bins,ggplot2::aes((lower+upper)/2,n))+
+      ggplot2::geom_col(ggplot2::aes(width=upper-lower),fill="grey45")+
+      ggplot2::labs(title="BMI distribution in the shared paired population",x="BMI (kg/m²)",y="Patients")+bmi_theme()
+  }else freq<-bmi_empty_plot("Paired population unavailable",if(nrow(s))s$reason[1]else"Pairing audit not supplied")
+  draw<-function() {
+    grid::grid.newpage()
+    grid::grid.text("BMI and hypercapnia in same-sample arterial pairs",x=.02,y=.98,just=c("left","top"),gp=grid::gpar(fontsize=11,fontface="bold"))
+    grid::grid.text(if(bundle$manifest$mode=="fixture")"ARTIFICIAL DATA ONLY | secondary analysis"else"Primary source-entry population | encounter-wide secondary analysis",x=.02,y=.94,just=c("left","top"),gp=grid::gpar(fontsize=9))
+    grid::pushViewport(grid::viewport(y=.46,height=.87,layout=grid::grid.layout(2,2,heights=grid::unit(c(2,1),"null"))))
+    for(i in 1:2)print(plots[[i]],vp=grid::viewport(layout.pos.row=1,layout.pos.col=i))
+    print(freq,vp=grid::viewport(layout.pos.row=2,layout.pos.col=1:2));grid::popViewport()
+  }
+  bmi_export(draw,file.path(output,"S1-paired-ABG"),height_mm=180)
+  caption<-paste("Same-sample arterial PCO₂ and pH at the fixed index encounter. Both endpoints use identical paired samples, patients, adjustment and primary numeric BMI spline basis.",
+    "PaCO₂ ≥45 mm Hg defines paired hypercapnia; adding pH <7.35 on the same sample defines the narrower endpoint. Curves standardize to the shared outcome-evaluable primary population, with pointwise model-based 95% intervals; dotted segments mark sparse support.",
+    "The lower panel counts paired patients by original BMI. Pairing availability and unknown evidence are reported separately. No supplemental PIF is calculated. Unavailable or failed estimates remain empty, not zero.",
+    "Requiring a valid pair adds selection. Acidemia does not establish acute respiratory failure; absence does not establish compensation. Samples may follow treatment. Crossing curves require scientific review.")
+  if(bundle$manifest$mode=="fixture")caption<-paste("ARTIFICIAL DATA ONLY.",caption)
+  data.frame(figure_id="S1-paired-ABG",caption=caption,alt_text=caption,source_tables="probability_curves;model_registry;distribution_bins;pairing_status")
 }

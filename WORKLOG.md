@@ -244,3 +244,61 @@ the 69 snapshot files retain exact bytes after Git checkout. `git diff --cached
 unchanged. Full estimation E2E was not repeated for this output/documentation-only
 release. `final-staged-verification.json` records the clean-checkout evidence;
 the release receipt will bind the resulting PR and merged revision.
+
+## 2026-10-20 — Paired-ABG supplement implementation
+
+Baseline b93c8e3, branch codex/paired-abg-acidemia. Read ticket, source contract,
+scientific plan and figure-QC skill. Recorded failure cases and wrote independent
+source/paired-model fixtures before implementation. Source boundary tests passed.
+Initial synthetic acidemic example correctly returned separation; revised the
+artificial demonstration to exercise two fitted curves without changing clinical
+failure handling or base fixture variables. Captured pre-change base estimates
+in ignored paired-abg-development storage. Mini's original research checkout is
+dirty with unrelated historical work: preserved it and plan isolated release
+checkout. No new clinical model has been fitted or paired source accepted.
+
+The read-only Mini query completed on the actual accepted canonical source,
+covering 223,514 original study-input keys and 541,828 selected gas records.
+All had date-only precision; no specimen/panel/accession/collection-time or
+dedicated result_status/result_version fields were populated. Generic status
+columns exist but their correction semantics are unreviewed. Pairing is unavailable. The 192,909
+ordinary arterial PCO2 and 145,993 arterial pH records are not pair counts.
+No clinical supplemental models were fitted. A separate aggregate-only report
+is in `results/2026-10-20-paired-abg/`; the old reading snapshot is unchanged.
+
+Review reproduced and fixed fallback to an old valid pH when an authoritative
+new correction was unusable. Verified that case manually and retained the
+independent correction/ambiguity fixtures. The initial clinical enrichment
+stopped conservatively because dataframe subsetting stripped attributes; the
+second comparison found attribute-order differences. Original column values and
+all source attributes were identical. The corrected guard compares each original
+column and named source attribute, and checks first indexes independently.
+Fresh enrichment attempt 03 verified all 223,514 rows/indexes unchanged and
+loaded successfully with both outcomes unknown. Failed attempts were retained.
+The final adapter additionally binds the intermediate pairing summary hash.
+
+Source-boundary verification passed all 31 checks without skips in the existing
+Mini environment (receipt `source-tests-20261020T141115-11195`); no dependency
+installation or upstream rebuild occurred. Raw source products and the dirty
+historical Mini checkout were preserved. Main model coefficients, covariance,
+curves and PIF quantities match the pre-edit artificial baseline and the
+independent unchanged-input oracle. Native 190-mm grayscale S1 and the new
+scientific-report pages were inspected; full E2E/audit review continues below.
+
+Final `make test` passed in `e2e-20261020T135917-52754`. Expanded acceptance
+(component probability intervals, disabled optional module and constant narrow
+outcome) passed by replaying verification against the same source-matched saved
+run: `Rscript --vanilla tests/run_e2e.R artifacts/triangulation/curve-fixture-20261020T135947-52784`,
+receipt `e2e-20261020T141529-58534`. Reports contain 39 scientific pages and 3,459
+complete artificial audit pages; complete table counts and covariance dimensions
+reconcile independently. The 499 audit pages containing supplemental terms were
+rendered and checked for page-bound overflow (none). Detailed visual inspection
+covered S1 at native width/grayscale, all new scientific section pages 35–39,
+paired audit tables and both complete model blocks/contrast pages; the exact
+scope is in the public supplement review receipt. No claim of manual inspection
+of every unrelated audit page or investigator approval is made.
+
+The two-page public feasibility report and JPG/PDF/SVG/PNG unavailable S1 exports
+were inspected and hashed. Old snapshot bytes and primary numerical outputs are
+unchanged. No raw or patient-level product is staged. The supplied clinical
+input remains schema 4; aggregate software identity is v3/schema 8.

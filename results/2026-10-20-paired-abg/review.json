@@ -1,0 +1,89 @@
+{
+  "date": "2026-10-20",
+  "scope": "Paired-ABG supplement only; existing clinical reading snapshot is immutable",
+  "source_feasibility": "unavailable_same_sample_linkage",
+  "clinical_models_fitted": 0,
+  "source_audit_sha256": "358e9b619ea4b706ea4547fd2d6d9e4d9e42ae82822ae11658e30c86bc936f71",
+  "source_query": "Pinned accepted-source readers, exact-code selectors and original study-input keys; actual source audited, not inferred from documentation",
+  "source_boundary_checks": {
+    "status": "passed",
+    "checks": 31,
+    "skipped": 0,
+    "receipt_sha256": "35971929b0f094e2e81584d803e0e2cab41d2510c92da0f3c93d0d8a0528e88e"
+  },
+  "software_e2e": {
+    "status": "passed",
+    "receipt_sha256": "82fbadfe637900553473544799ee863ecec416a535faaa9c5b63b053ef34e662",
+    "estimation_sources": {
+      "R/analysis.R": "03aaa48bdd4436b56ee84e097e5bef92366f02a98a6720a34058aae5ac272117",
+      "R/input_contract.R": "3b49c78568c6f0ce1946ebf4543542f545bbc0daea5eb9034d8716c95c6750f4",
+      "R/cohort_audit.R": "b8bf1059ec05e7ca68b88b2439ac68e5c02796da550abcbeb9135617e198f144",
+      "R/bmi_models.R": "1ebaf82ce941d626e60e5d66686fedd08da06a42bc4b48c210b9812ae434e321",
+      "R/standardization.R": "8212a8a34e331349c8c961318081a63d8c1c3660f8ef8a3a7ff875fa16c602e6",
+      "R/rfs_analysis.R": "572aa6bbb06ca4017bb4428ab6b856e55342884dc2b6a2b383e67a4a014d348d",
+      "R/paired_abg.R": "9d645e040d660ba4e2c475afa1b94e135a5a9081b1ead1dd6c29599d9fab4b84",
+      "config/bmi_hypercapnia_analysis.json": "549f0541670bdb1f90e8b1baff43fe759c20da2a0ac70d25d94c1e2e0bce9965",
+      "config/variable_dictionary.csv": "2b950aeab80179659a66f90a99ebaa3b890ebfe0676a5a13fc62463625ffa020",
+      "config/common_index_source_policy.json": "bebad842c52f658b65215eeb44052afc8df32b85e02fe412f4eb713112b36763",
+      "config/common_index_bmi_policy.json": "988b2f7a2c1f968b30773502f76635520d37a4183ab64b182c1c813ae2f7ac59"
+    },
+    "checks": "Independent original and paired regressions/curves/full-covariance intervals; unchanged original PIFs; disabled/unavailable/constant positions; complete aggregate-only reports; privacy and hash failures"
+  },
+  "visual_review": {
+    "reviewer": "Codex visual inspection, not investigator approval",
+    "artifacts": [
+      "feasibility.pdf pages 1-2",
+      "S1 unavailable figure SVG/PDF/PNG/JPG exports",
+      "artificial S1 at native 190 mm and grayscale",
+      "artificial scientific PDF pages 35-39"
+    ],
+    "findings": "Legible labels, uncertainty ribbons, sparse-support lines and complete captions. No clipped symbols or fabricated clinical marks. Repaired missing synthetic BMI histogram before acceptance.",
+    "complete_audit_review": {
+      "total_pages": 3459,
+      "changed_content_pages_rendered": 499,
+      "out_of_page_text": 0,
+      "visually_inspected_pages": [
+        55,
+        129,
+        130,
+        131,
+        132,
+        133,
+        134,
+        3388,
+        3389,
+        3390,
+        3391,
+        3392,
+        3393,
+        3394,
+        3395,
+        3396,
+        3397,
+        3398,
+        3399,
+        3400,
+        3401,
+        3402,
+        3403,
+        3404,
+        3405,
+        3406,
+        3425,
+        3426,
+        3427,
+        3429
+      ],
+      "scope": "Every identified changed-content page rendered and geometry-checked; detailed visual inspection limited to the listed new figure/table/model/contrast pages. No claim of investigator scientific approval."
+    },
+    "scientific_pdf_pages": [
+      35,
+      36,
+      37,
+      38,
+      39
+    ]
+  },
+  "investigator_approval": "not asserted for new supplement",
+  "abstract_drafting": "not performed"
+}

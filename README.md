@@ -100,7 +100,7 @@ unmeasured confounding. The [source contract](docs/SOURCE_CONTRACT.md) and
 | [LLM reading guide](docs/LLM_GUIDE.json) / [agent instructions](AGENTS.md) | Structured evidence navigation and operating rules for assistants |
 | [Work log](WORKLOG.md) / [archive index](archive/README.md) | Execution evidence and recovery of superseded versions |
 
-The active analysis is `bmi_hypercapnia_rfs_curve_audit_v2` (aggregate schema 7).
+The active analysis is `bmi_hypercapnia_rfs_curve_audit_v3` (aggregate schema 8).
 `R/analysis.R` loads the current modules; `scripts/run_bmi_hypercapnia.R` audits
 and estimates; `scripts/render_bmi_hypercapnia.R` renders saved aggregates. The
 [scientific](reports/bmi_hypercapnia.qmd) and [audit](reports/bmi_hypercapnia_audit.qmd)
@@ -110,6 +110,7 @@ not another analysis configuration.
 The repository is laid out as follows:
 
 ```text
+results/2026-10-20-paired-abg/  Source-feasibility supplement; no new clinical models
 results/2026-10-18/  Clinical reading snapshot: PDFs, B/F2, gallery, 49 CSVs and hashes
 docs/                Scientific/source guides, decisions, figure QC and LLM navigation
 config/              Executable study settings, variable dictionary and source examples
@@ -148,7 +149,7 @@ fresh `artifacts/triangulation/e2e-.../receipt.json` with `status: passed`, alon
 does not reproduce clinical estimates or confer scientific approval. `make fixture`
 runs the artificial example without the E2E assertions.
 
-For presentation changes, use an explicitly selected saved schema-7 run:
+For presentation changes, use an explicitly selected saved schema-8 run:
 
 ```bash
 make render RUN="artifacts/triangulation/<exact-saved-run>"
@@ -197,3 +198,17 @@ companion on a clean, merged Mini checkout. Follow the [source contract](docs/SO
 `data/raw/full_db.rds` is a historical comparator, never a fallback input. Preserve
 prior products and reports; source corrections and new models require fresh,
 traceable runs. Submission and external sharing are separate actions.
+
+## Paired-ABG acidemia supplement
+
+The [supplement specification](docs/PAIRED_ABG_SUPPLEMENT.md) adds two secondary
+curves using arterial PCO₂ and pH from the same authenticated sample, on identical
+patients. Current software uses aggregate schema 8; the existing schema-7
+[clinical reading snapshot](results/2026-10-18/README.md) stays immutable and
+retains the original results and selected B/F2 figures. Pairing qualification is
+separate from existing source acceptance; encounter/date co-occurrence cannot
+support this endpoint. The [source-feasibility supplement](results/2026-10-20-paired-abg/README.md)
+includes a [PDF](results/2026-10-20-paired-abg/feasibility.pdf),
+[HTML](results/2026-10-20-paired-abg/feasibility.html) and aggregate evidence.
+The accepted source has date-only gas records without same-sample identifiers;
+both supplemental models are unavailable and no new clinical estimation occurred.

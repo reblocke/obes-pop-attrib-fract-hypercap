@@ -39,5 +39,17 @@ make_bmi_curve_fixture <- function(n_patients=1200L,seed=20261016L,with_index_da
     d<-rbind(d,d[15,,drop=FALSE]);row.names(d)<-NULL
   }
   d$bmi_evidence_state[!is.na(d$bmi)]<-"valid"
+  id<-as.integer(sub("ARTIFICIAL-P","",d$patient_id))
+  valid<-!is.na(d$abg_pco2)&id%%4!=0
+  d$paired_abg_state<-ifelse(valid,"valid_pair","no_valid_pair")
+  d$paired_abg_n_pairs<-as.integer(valid)
+  d$hypercapnia_paired<-ifelse(valid,as.integer(d$abg_pco2>=45),NA_integer_)
+  d$hypercapnia_acidemic<-ifelse(valid,as.integer(d$abg_pco2>=45 & id%%5!=0),NA_integer_)
+  # Missing BMI does not imply missing outcome evidence.
+  d$hypercapnia_acidemic[valid & is.na(d$hypercapnia_acidemic)]<-0L
+  d$paired_abg_unpaired_high<-as.integer(!valid & d$abg_pco2>=45);d$paired_abg_unpaired_high[is.na(d$paired_abg_unpaired_high)]<-0L
+  d$paired_abg_conflicts<-d$paired_abg_invalid<-0L
+  d$paired_abg_usable_pco2<-as.integer(!is.na(d$abg_pco2))
+  d$paired_abg_paired_pco2<-as.integer(valid)
   d
 }

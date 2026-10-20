@@ -46,7 +46,7 @@ fit_bmi_model <- function(spec,d,basis,config,n_reference=nrow(d)) {
     n_events=if(spec$source_status=="pending")NA_integer_ else sum(d[[spec$field]]==1),n_nonevents=if(spec$source_status=="pending")NA_integer_ else sum(d[[spec$field]]==0),
     n_parameters=NA_integer_,model_rank=NA_integer_,status="not_attempted",failure_reason="",warnings="",fit_runtime=0))
   fail<-function(status,reason){row$status<-status;row$failure_reason<-reason;row$fit_runtime<-unname(proc.time()[3]-start);list(row=row,fit=NULL,data=d,basis=basis,coefficients=data.frame(),covariance=data.frame(),references=data.frame())}
-  if(spec$source_status=="pending")return(fail("pending_source","Index-calendar-day source evidence unavailable"))
+  if(spec$source_status=="pending")return(fail("pending_source",if("source_reason" %in% names(spec))spec$source_reason else "Index-calendar-day source evidence unavailable"))
   if(!nrow(d))return(fail("no_evaluable_sample","Empty registered training population"))
   d$.outcome<-d[[spec$field]]
   if(anyNA(d[c(triangulation_adjustment,".outcome")]))stop("Registered sample contains hidden missing model fields")

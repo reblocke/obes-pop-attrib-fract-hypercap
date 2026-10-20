@@ -1,0 +1,18 @@
+{
+  "package": "paired_abg_feasibility_20261020",
+  "contains": "Aggregate source feasibility; no new clinical estimates or raw data",
+  "files": {
+    "README.md": "ed6d7611ad24fffe9c309011099ffdc9e7c28517dda8cc057466d65617e6a3b5",
+    "feasibility.html": "35618f8653487f5de4d981f3591f2228a3cf2125dfcca29f945e2fd3778f21fc",
+    "feasibility.json": "28d85234fc04a332207ee5b75add66ff40cc5966570121fdc8d6ed1d6929ef34",
+    "feasibility.pdf": "d808b06576464f1a06f455658dfa823a748689dda0d3626ba9c7a794ee44b697",
+    "feasibility.qmd": "fd440484173646b24d720c67cdbf9365a53b02e56a1acd4f693d48b818d535d4",
+    "figures/S1-paired-ABG.jpg": "782bd23ac11ad16c27bfbf1497fdfdd572b11998c5693bdc9fe8e9154a638d3a",
+    "figures/S1-paired-ABG.pdf": "adb127838e6ffac11dea159a46768ff5c92d844722b4b0f436255179c33fab74",
+    "figures/S1-paired-ABG.png": "ba0bba9d555d9b5feee6035e0fc2f2138ec964197adb7a099a19851cf0354f83",
+    "figures/S1-paired-ABG.svg": "4b9b0d60b60cf3757b53ebfbddc77f608a6ac208055da0232f98fee8ce4ee00d",
+    "figures/captions.csv": "4a03ad095de907aa9900ede31d2c64c769b9130c7d71d920716b7e2b903e5611",
+    "figures/figure-qc-manifest.csv": "9a0fc47ffa2537bb5122005e800c2f2fd9a4090f8b6309a898ba3c067cd9a470",
+    "review.json": "fde530428e378d939cb0b2b2588e37381f6f2af12f700a8963981d0d7c8eed37"
+  }
+}

@@ -4,7 +4,7 @@ This is the authority for the RFS curve/audit analysis. The retained filename
 reflects the earlier triangulation design; that design is retired. Machine
 configuration is [bmi_hypercapnia_analysis.json](../config/bmi_hypercapnia_analysis.json),
 with input fields in the [variable dictionary](../config/variable_dictionary.csv).
-The active identity is `bmi_hypercapnia_rfs_curve_audit_v2`, aggregate schema 7,
+The active identity is `bmi_hypercapnia_rfs_curve_audit_v3`, aggregate schema 8,
 metadata-qualified input schema 4. Prior schemas fail explicitly; no replay or
 migration layer is maintained. See [decisions](DECISIONS.md) for dated history.
 
@@ -160,3 +160,8 @@ source operations described in [the source contract](SOURCE_CONTRACT.md).
 Estimation failures preserve evidence; rendering failures are rerendered from the
 same run without reading clinical input or refitting. Source or estimator changes
 require a fresh qualified run and preserved prior evidence.
+
+## Same-sample arterial acidemia supplement
+
+See [the approved supplement](PAIRED_ABG_SUPPLEMENT.md). Exactly two secondary
+positions reuse primary indexes, adjustment and knots; no new PIF is computed.

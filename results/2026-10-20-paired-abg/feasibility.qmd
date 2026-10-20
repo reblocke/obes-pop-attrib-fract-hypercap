@@ -1,0 +1,97 @@
+---
+title: "Paired-ABG acidemia supplement: source feasibility"
+date: 2026-10-20
+format:
+  html:
+    embed-resources: true
+  pdf:
+    pdf-engine: xelatex
+    documentclass: article
+    papersize: a4
+    geometry: margin=10mm
+    fontsize: 10pt
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+```{r}
+library(jsonlite)
+s <- read_json("feasibility.json",simplifyVector=TRUE)
+stopifnot(s$status=="unavailable",s$source_unchanged,s$clinical_models_fitted==0)
+Sys.setenv(BMI_REPO_ROOT=normalizePath("../.."))
+source("../../R/analysis.R")
+dir.create("figures",showWarnings=FALSE)
+positions<-data.frame(model_id=paste0("primary::paired_abg/encounter/",c("hypercapnia","acidemic_hypercapnia"),"/spline"),status="Source unavailable",probability=NA_real_,n_model=NA_real_,n_reference=NA_real_)
+a <- list(pairing_status=data.frame(status=s$status,reason=s$reason),probability_curves=positions,model_registry=data.frame(),distribution_bins=data.frame())
+caption <- bmi_paired_figure(list(analysis=a,manifest=list(mode="source_audit")),"figures")
+write.csv(caption,"figures/captions.csv",row.names=FALSE)
+```
+
+## Finding
+
+**The paired-ABG acidemia analysis is unavailable for this accepted source.**
+Ordinary arterial PCO~2~ and arterial pH records exist, but their same-sample linkage
+cannot be authenticated. Encounter/date co-occurrence is insufficient. No clinical
+supplemental models, paired prevalences or supplemental PIFs have been estimated.
+The existing clinical results and selected B/F2 figures are unchanged.
+
+## What was checked
+
+The narrow read-only query used the pinned accepted-source reader and original
+patient/encounter keys for **`r format(s$n_input_encounters,big.mark=',')` study-input
+encounters**. It retained ordinary arterial PCO~2~ (LOINC 2019-8), arterial pH
+(2744-1), and selected adjusted/venous/unspecified comparator codes for audit.
+It did not rebuild preprocessing, change the index, select a later encounter or
+pair by record order. The source, input, manifest and configuration identities
+were stable during extraction. Event identifiers and dates remain private.
+
+```{r}
+labels<-c(candidate_records="Queried gas records",ordinary_arterial_pco2_records="Ordinary arterial PCO2 records",arterial_ph_records="Arterial pH records",date_only_records="Records with date-only precision",specimen_id_populated="Populated specimen identifiers",panel_id_populated="Populated panel identifiers",accession_id_populated="Populated accession identifiers",collection_time_populated="Populated collection times",result_status_populated="Populated result_status fields",result_version_populated="Populated result_version fields")
+knitr::kable(data.frame(Quantity=unname(labels),Records=format(unlist(s$aggregate_counts[names(labels)]),big.mark=",",trim=TRUE)),row.names=FALSE)
+```
+
+These are record counts, not distinct blood draws or patient prevalences. The
+arterial analyte counts cannot be added to infer pairs. Generic `status` and `order_status` columns exist, but their correction semantics
+are unreviewed; the dedicated status/version counts above do not establish that
+all status information is absent. Unique specimens, valid
+pairs, unpaired measurements, ambiguous links and endpoint prevalence are **not
+assessable**, not zero. All supplied pairing states are source-unavailable.
+
+## Planned analysis and unavailable positions
+
+Two secondary positions are implemented: any valid pair with PaCO~2~ ≥45 mm Hg,
+and any same pair also having pH <7.35. They retain identical patients and pairs,
+primary numeric spline knots, inherited adjustment and the original index.
+No pair means unknown, not a negative endpoint. The software retains explicit
+unavailable model positions without changing the existing analysis.
+
+```{r}
+#| fig-cap: "Supplement S1. Both secondary curves and the paired-population distribution are unavailable because this source cannot establish same-sample arterial PCO2 and pH. Empty positions do not indicate zero risk or zero patients. No clinical curve is drawn."
+#| out-width: 100%
+knitr::include_graphics(paste0("figures/S1-paired-ABG.",if(knitr::is_latex_output())"pdf"else"png"))
+```
+
+## What would permit estimation
+
+A future source would need authenticated, source-scoped same-sample identifiers
+(or independently validated unique collection-time linkage), reviewed ordinary
+arterial pH units and validity bounds, and documented duplicate/correction rules.
+The inherited producer's exclusive 6.5–7.8 pH screen was identified, but no new
+clinical pairing policy has been approved. This is a specific source limitation,
+not a request to replace the accepted dataset or permission to approximate pairs.
+
+Even with valid pairs, acidemia would not establish acute respiratory failure;
+absence would not establish compensation. Treatment timing and selection into
+paired measurement would remain limitations. Separate fitted curves can cross
+and would be flagged without clipping or substituting another estimator.
+
+## Evidence and review status
+
+The accompanying `feasibility.json` contains source/input identity hashes and the
+complete aggregate counters. The private extraction and additive-enrichment
+receipts remain on the Mini. The original clinical snapshot remains in
+`results/2026-10-18/`. Software tests, numerical verification, visual inspection and
+investigator interpretation are distinct; this report does not grant new
+scientific or submission approval. No abstract has been drafted.

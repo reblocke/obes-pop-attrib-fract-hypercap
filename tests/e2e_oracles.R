@@ -61,7 +61,9 @@ e2e_model_ids <- function(config) {
 }
 
 e2e_saved_values <- function(bundle, raw) {
-  a <- bundle$analysis; config <- bundle$config; q <- e2e_indexes(raw)
+  a <- bundle$analysis
+  for(name in names(a))if("model_id" %in% names(a[[name]]))a[[name]]<-a[[name]][!grepl("::paired_abg/",a[[name]]$model_id),,drop=FALSE]
+  config <- bundle$config; q <- e2e_indexes(raw)
   complete <- complete.cases(q[c("bmi", "age_at_encounter", "sex", "race_ethnicity", "location")])
   c <- q[complete, , drop=FALSE]
   e2e_near(a$cohort_nodes$n[a$cohort_nodes$population_id == "combined::Q"], nrow(q))

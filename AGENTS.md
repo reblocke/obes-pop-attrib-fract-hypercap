@@ -2,7 +2,7 @@
 
 ## Scope and change discipline
 
-The current analysis is schema 7 (`bmi_hypercapnia_rfs_curve_audit_v2`). Read
+The current analysis is schema 8 (`bmi_hypercapnia_rfs_curve_audit_v3`). Read
 `docs/BMI_HYPERCAPNIA_TRIANGULATION_PLAN.md` and `docs/SOURCE_CONTRACT.md` before
 substantive work. Configuration and the variable dictionary live in `config/`;
 the cohort ledger is the sole count authority.
@@ -106,3 +106,6 @@ numerical review and investigator scientific approval are separate states.
   and remaining limitations in WORKLOG.md.
 - Refactoring alone does not authorize clinical reruns, commit/push/merge,
   external communication or submission.
+
+The [paired-ABG supplement](docs/PAIRED_ABG_SUPPLEMENT.md) adds two same-sample
+secondary positions with a separate source gate; original PIFs remain unchanged.

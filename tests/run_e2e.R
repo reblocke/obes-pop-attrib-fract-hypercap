@@ -3,12 +3,13 @@
 args <- commandArgs(TRUE)
 if (length(args)>1L) stop("Use no arguments for a fresh run, or one saved artificial RUN to resume")
 Sys.setenv(BMI_REPO_ROOT=normalizePath("."))
-test_files <- c("tests/run_e2e.R","tests/e2e_oracles.R","tests/fixtures/bmi_curve_fixture.R")
+test_files <- c("tests/run_e2e.R","tests/e2e_oracles.R","tests/paired_e2e.R","tests/fixtures/bmi_curve_fixture.R")
 initial_test_hashes <- as.list(setNames(vapply(test_files,function(path)
   digest::digest(file=path,algo="sha256"),character(1)),test_files))
 source("R/analysis.R")
 source("tests/fixtures/bmi_curve_fixture.R")
 source("tests/e2e_oracles.R")
+source("tests/paired_e2e.R")
 require_tri_packages(c("jsonlite","digest","ggplot2","knitr","rmarkdown","lpSolve"))
 for (command in c("quarto","pdftotext","pdfinfo"))
   if (!nzchar(Sys.which(command))) stop("Required installed command unavailable: ",command)
@@ -58,6 +59,10 @@ tryCatch({
   check("independent cohort, regressions, curves and paired uncertainty", {
     numerical <- e2e_saved_values(bundle,make_bmi_curve_fixture())
     utils::write.csv(numerical,file.path(out,"independent-model-checks.csv"),row.names=FALSE)
+  })
+  check("paired ABG independent models",{
+    paired<-e2e_paired(bundle,make_bmi_curve_fixture())
+    utils::write.csv(paired,file.path(out,"paired-independent-model-checks.csv"),row.names=FALSE)
   })
   check("adverse eligibility, RFS, policy and failure states",e2e_adverse_cases())
   check("persisted aggregate privacy and coverage", {
@@ -136,7 +141,7 @@ tryCatch({
       path <- file.path(review,"figures",paste0(id,".",ext))
       stopifnot(file.exists(path),file.info(path)$size>0)
     }
-    required <- c("RFS-flow","RFS-evidence",paste0("primary/",c("F1-A","F1-B","F1-C","F2","F2-bands")))
+    required <- c("RFS-flow","RFS-evidence","S1-paired-ABG",paste0("primary/",c("F1-A","F1-B","F1-C","F2","F2-bands")))
     stopifnot(all(required %in% captions$figure_id),all(file.exists(file.path(review,"figures",paste0(required,".jpg")))))
     display <- utils::read.csv(file.path(review,"figures/rfs-evidence-display.csv"))
     displayed <- display[display$displayed,]
