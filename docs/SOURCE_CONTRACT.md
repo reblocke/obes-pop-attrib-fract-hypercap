@@ -53,7 +53,7 @@ The evidence ledger must cover:
   unavailable capture remains separately identifiable where supported.
 - Complete available diagnosis capture for a negative five-code composite; no other
   diagnosis is required. Incomplete/unavailable capture remains unknown.
-- Calendar-day collection=start dates and maxima bounded by encounter maxima;
+- Calendar-day recorded-result=start dates and maxima bounded by encounter maxima;
   unavailable evidence leaves sensitivities pending without invalidating qualified
   encounter-wide primary outcomes.
 - RFS metadata original-key joins, zero/missing semantics and exact preservation
@@ -162,3 +162,23 @@ Same-sample linkage is therefore unavailable, not an assessed zero-pair result.
 No clinical supplemental models are fitted; no approximate pairing is adopted.
 The existing clinical snapshot and B/F2 remain unchanged. See the
 [separate feasibility report](../results/2026-10-20-paired-abg/README.md).
+
+## Recorded-day arterial co-occurrence
+
+The [same-day supplement](SAME_DAY_ABG_SUPPLEMENT.md) supersedes the unavailable
+same-sample runtime. Direct inspection of the original laboratory CSV header,
+export manifest and dictionary confirmed no sample/panel/accession identifier;
+`source_id` denotes provenance, and laboratory `date` is a recorded-result date.
+This evidence supports recorded-day grouping, not a collection-time claim.
+Use a fresh `same_day_arterial_cooccurrence_v1` enrichment and retain the original
+input. Bind the exact accepted database, original input/manifest, recorded-date
+semantics, arterial codes, explicit units and owner-approved 6.5<pH<7.8 bounds.
+No upstream rebuild or replacement export is needed. The command is
+`make enrich-same-day-abg SOURCE_CONFIG=... INPUT=... MANIFEST=... OUTPUT=...`.
+Source values, dates and row identifiers stay private. Source qualification and
+clinical results remain pending until the new evidence and run are reconciled.
+
+The legacy source-policy identifier uses the term `collection_date`; that stored
+identifier remains unchanged to preserve input/receipt identities. The source
+field it actually checks is the recorded-result date. This wording correction
+does not change existing calendar-day selections or numerical results.

@@ -100,7 +100,7 @@ unmeasured confounding. The [source contract](docs/SOURCE_CONTRACT.md) and
 | [LLM reading guide](docs/LLM_GUIDE.json) / [agent instructions](AGENTS.md) | Structured evidence navigation and operating rules for assistants |
 | [Work log](WORKLOG.md) / [archive index](archive/README.md) | Execution evidence and recovery of superseded versions |
 
-The active analysis is `bmi_hypercapnia_rfs_curve_audit_v3` (aggregate schema 8).
+The active analysis is `bmi_hypercapnia_rfs_curve_audit_v4` (aggregate schema 9).
 `R/analysis.R` loads the current modules; `scripts/run_bmi_hypercapnia.R` audits
 and estimates; `scripts/render_bmi_hypercapnia.R` renders saved aggregates. The
 [scientific](reports/bmi_hypercapnia.qmd) and [audit](reports/bmi_hypercapnia_audit.qmd)
@@ -199,16 +199,18 @@ companion on a clean, merged Mini checkout. Follow the [source contract](docs/SO
 prior products and reports; source corrections and new models require fresh,
 traceable runs. Submission and external sharing are separate actions.
 
-## Paired-ABG acidemia supplement
+## Same-day arterial PCO₂/pH supplement
 
-The [supplement specification](docs/PAIRED_ABG_SUPPLEMENT.md) adds two secondary
-curves using arterial PCO₂ and pH from the same authenticated sample, on identical
-patients. Current software uses aggregate schema 8; the existing schema-7
-[clinical reading snapshot](results/2026-10-18/README.md) stays immutable and
-retains the original results and selected B/F2 figures. Pairing qualification is
-separate from existing source acceptance; encounter/date co-occurrence cannot
-support this endpoint. The [source-feasibility supplement](results/2026-10-20-paired-abg/README.md)
-includes a [PDF](results/2026-10-20-paired-abg/feasibility.pdf),
-[HTML](results/2026-10-20-paired-abg/feasibility.html) and aggregate evidence.
-The accepted source has date-only gas records without same-sample identifiers;
-both supplemental models are unavailable and no new clinical estimation occurred.
+The [supplement specification](docs/SAME_DAY_ABG_SUPPLEMENT.md) adds two models
+of same recorded-day co-occurrence, **not verified same-sample pairing**.
+Both use the same co-observed primary patients, inherited adjustment and primary
+BMI spline knots; no new PIF is computed. Current software uses aggregate schema 9.
+The primary clinical snapshot and selected B/F2 remain unchanged. Clinical
+qualification and new estimates are pending completion of this release.
+
+The [historical pairing-feasibility report](results/2026-10-20-paired-abg/README.md)
+remains available. Its raw-export trace confirmed that sample identifiers were
+not supplied in the original laboratory export. The new definition requires a
+common recorded date, not a specimen identifier. See the source contract for
+private enrichment and qualification; ordinary report rendering reads saved
+aggregates only. No abstract is drafted by this update.

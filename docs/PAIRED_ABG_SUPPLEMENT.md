@@ -1,4 +1,8 @@
-# Paired-ABG acidemia supplement
+# Paired-ABG acidemia supplement (historical)
+
+Superseded for active execution on 2026-10-20 by the
+[same-day co-occurrence supplement](SAME_DAY_ABG_SUPPLEMENT.md). The definitions
+and feasibility results below are historical; no same-sample results were fitted.
 
 Approved implementation scope: 2026-10-20; baseline `b93c8e3`. This adds a
 same-sample secondary analysis, not a replacement for the established results.

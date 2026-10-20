@@ -126,7 +126,7 @@ bmi_fixed_contrast <- function(model,reference,id,config) {
   attempt
 }
 bmi_run_population_analysis <- function(raw,config,source_status="artificial",audit_only=FALSE,companion=NULL) {
-  raw<-raw[,setdiff(names(raw),bmi_paired_fields),drop=FALSE]
+  raw<-raw[,setdiff(names(raw),bmi_same_day_fields),drop=FALSE]
   message("[analysis] Constructing cohort, stage profiles and evidence ledger")
   ctx<-construct_cohort_and_memberships(raw);dict<-bmi_dictionary(ctx$data,config)
   ledger<-bmi_ledger(ctx);profiles<-profile_stage_variables(ctx$members,dict,config);evidence<-derive_evidence_states(ctx,config)

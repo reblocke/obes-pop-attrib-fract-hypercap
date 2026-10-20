@@ -4,7 +4,7 @@ This is the authority for the RFS curve/audit analysis. The retained filename
 reflects the earlier triangulation design; that design is retired. Machine
 configuration is [bmi_hypercapnia_analysis.json](../config/bmi_hypercapnia_analysis.json),
 with input fields in the [variable dictionary](../config/variable_dictionary.csv).
-The active identity is `bmi_hypercapnia_rfs_curve_audit_v3`, aggregate schema 8,
+The active identity is `bmi_hypercapnia_rfs_curve_audit_v4`, aggregate schema 9,
 metadata-qualified input schema 4. Prior schemas fail explicitly; no replay or
 migration layer is maintained. See [decisions](DECISIONS.md) for dated history.
 
@@ -67,7 +67,7 @@ coding is unchanged; the White reference includes unknown ethnicity.
 
 Gas curves/scenarios standardize within each outcome-evaluable model population.
 ICD uses known-capture C_icd. Observation displays use C. Calendar-day gas
-sensitivities retain indexes and require collection date = encounter-start date,
+sensitivities retain indexes and require recorded-result date = encounter-start date,
 not elapsed 24 hours. Unavailable sensitivity source is pending, distinct from
 individual missing outcomes. Matched ICD/gas comparisons use identical within-pair
 rows; they do not require both gas specimens. Linear-BMI sensitivity uses the same
@@ -161,7 +161,10 @@ Estimation failures preserve evidence; rendering failures are rerendered from th
 same run without reading clinical input or refitting. Source or estimator changes
 require a fresh qualified run and preserved prior evidence.
 
-## Same-sample arterial acidemia supplement
+## Same-day arterial co-occurrence supplement
 
-See [the approved supplement](PAIRED_ABG_SUPPLEMENT.md). Exactly two secondary
-positions reuse primary indexes, adjustment and knots; no new PIF is computed.
+See [the approved supplement](SAME_DAY_ABG_SUPPLEMENT.md). Exactly two secondary
+positions reuse primary indexes, adjustment and knots on the same co-observed
+population. Any qualifying recorded date within the index encounter may contribute;
+threshold findings must share that date. This is not verified same-sample pairing.
+No new PIF is computed. The superseded pairing feasibility remains historical.

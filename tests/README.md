@@ -34,19 +34,19 @@ checklists, prose assertions, source-text assertions and synthetic human-review
 gates have been removed. The complete reports and their aggregate tables are the
 repeatable end-to-end artifacts; visual and investigator review remain separate.
 
-## Paired-ABG supplement: failure scenarios (before implementation)
+## Same-day supplement: failure scenarios (before implementation)
 
-An encounter/date join can invent acidemic hypercapnia; maximum CO2/minimum pH
-can combine different draws; max-CO2-only selection can miss a qualifying pair.
-Rounding near 7.35, mixing venous/adjusted records, conflicting corrections,
-duplicate records and reused identifiers can misclassify endpoints or double draws.
-Missing linkage must not become negative evidence. Partial pairing must preserve
-original positives. Enrichment can corrupt keys or silently alter first indexes.
-A generic model loop can add unwanted PIFs, recompute knots, change reference rows,
-or omit unavailable positions. Reports can show plausible but different denominators.
+An encounter-wide max/min can combine different recorded dates. Same-date values
+from different samples are allowed co-occurrence but must never be labeled verified
+pairing. Rounding near 7.35, mixing venous/adjusted records, invalid dates/units,
+duplicate transport and reused source-record identities can corrupt endpoints or
+counts. Missing evidence must not become negative. Other unusable records must not
+erase valid co-observed days. Enrichment must preserve original keys, fields and
+indexes. A generic model loop can add unwanted PIFs, recompute knots, alter reference
+rows or drop failed positions. Reports can show plausible but wrong denominators.
 
 Source-boundary fixtures below precede production code and independently specify
 expected outcomes. The typed-input E2E independently refits both models, checks
 identical rows/basis, all existing estimates, nesting and absence of new PIFs,
-then renders the complete reports and figure. These source checks are necessary
-because the existing typed-input E2E cannot detect invented specimen linkage.
+then renders the complete reports and figure. Source checks independently catch
+cross-date joins, corruption and invalid evidence before the typed-input boundary.

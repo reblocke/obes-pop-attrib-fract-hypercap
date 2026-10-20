@@ -78,10 +78,10 @@ Obesity-only is retained here solely for cohort reconciliation, source-quality c
 ```{r}
 #| label: detailed-flow
 #| results: asis
-figure("RFS-flow");figure("RFS-entry");figure("RFS-evidence");figure("S1-paired-ABG")
+figure("RFS-flow");figure("RFS-entry");figure("RFS-evidence");figure("S1-same-day-ABG")
 ids<-tools::file_path_sans_ext(list.files(file.path(review,"figures"),pattern="^F0-detail-.*\\.png$",recursive=TRUE))
 for(id in ids){figure(id);page()}
-for(t in c("pairing_status","pairing_reconciliation","pairing_availability","pairing_measurements","paired_curve_crossings","rfs_summary","rfs_outcomes","rfs_combinations","rfs_by_bmi","bmi_provenance","demographic_crosswalk","prior_run_reconciliation","rfs_semantics","expected_models","cohort_nodes","cohort_edges","exclusion_reasons","exclusion_overlaps","population_registry","timing_audit","observation_patterns","evidence_by_bmi","numerical_reconciliation")) {
+for(t in c("cooccurrence_status","cooccurrence_reconciliation","cooccurrence_availability","cooccurrence_measurements","same_day_curve_crossings","rfs_summary","rfs_outcomes","rfs_combinations","rfs_by_bmi","bmi_provenance","demographic_crosswalk","prior_run_reconciliation","rfs_semantics","expected_models","cohort_nodes","cohort_edges","exclusion_reasons","exclusion_overlaps","population_registry","timing_audit","observation_patterns","evidence_by_bmi","numerical_reconciliation")) {
  cat("\n### ",gsub("_"," ",t),"\n\n",sep="");bmi_report_table(a[[t]],t,keys=intersect(c("population_id","outcome_id"),names(a[[t]])))
 }
 ```

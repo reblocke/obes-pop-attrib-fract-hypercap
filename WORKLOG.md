@@ -302,3 +302,51 @@ The two-page public feasibility report and JPG/PDF/SVG/PNG unavailable S1 export
 were inspected and hashed. Old snapshot bytes and primary numerical outputs are
 unchanged. No raw or patient-level product is staged. The supplied clinical
 input remains schema 4; aggregate software identity is v3/schema 8.
+
+## 2026-10-20 — Same-day arterial co-occurrence implementation
+
+Owner authorized the recorded-day replacement, code release and conditional
+clinical execution. Branch: `codex/same-day-abg-cooccurrence`; baseline `199071c`.
+Failure scenarios/source fixtures were written first; the preimplementation test
+failed with the expected missing replacement module. Six raw-record boundary
+cases then passed. The full artificial baseline is saved privately under
+`artifacts/triangulation/same-day-abg-development/baseline.rds`.
+
+Replaced the inactive pairing runtime with a hash-bound recorded-day enrichment,
+two common-reference spline positions, reconciliation and updated scientific/audit
+presentation. No primary estimand changes or new PIFs. Source records are not
+samples; differing values on a day remain valid co-occurrence. Active schema 9 /
+analysis v4 rejects historical bundles rather than relabeling them.
+
+Verification, release, source qualification and clinical review are in progress;
+no clinical completion or investigator approval is asserted by these edits.
+
+Pre-release review: all 33 separate source-boundary checks pass in the existing
+Mini Python/R environment (`source-tests-20261020T165910-14582`). Pre-change
+artificial primary registry values (excluding runtime), coefficients, covariance,
+curves, PIFs and contributions agree within 1e-10. Review tightened the private
+policy binding to include exact codes and all threshold values; the final source
+suite was repeated after that change. No historical snapshot files changed.
+
+The new S1 export is 190 mm wide, grayscale, 300 dpi with a 9-point minimum text
+height; native export inspection and all 39 artificial scientific PDF pages were
+completed. S1 is pixel-identical between the inspected preview and full render.
+Both HTML outputs have complete local figure assets and alt text. Browser visual
+inspection was unavailable because IAB could not attach to the local page; it is
+not claimed. Complete-audit rendering and automated E2E are recorded separately.
+Receipts are in ignored `artifacts/triangulation/same-day-abg-development/`.
+
+All artificial E2E checks passed (`e2e-20261020T164859-4567`), including independent
+supplemental model/interval oracles, missing/constant states, aggregate-only full
+HTML/PDF rendering, complete-table accounting, printed numbers, privacy and
+source/bundle/schema corruption. A subsequent text-only methods correction calls
+the legacy calendar-day field recorded-result date, matching the export
+dictionary; the numerical policy and stored policy identifier are unchanged.
+The changed scientific report is rendered and checked separately.
+
+The final methods-label HTML/PDF rerender succeeded after a missing
+`BMI_REPO_ROOT` environment value was corrected (both attempts retained). Only
+scientific PDF page 2 changed; it was reinspected. The complete 3,489-page
+artificial audit passed automated bounds/glyph/collision checks; its S1 and new
+evidence-table pages were inspected manually. This is scoped visual review, not
+a manual-review claim for every audit page. All source tests and E2E checks pass.
