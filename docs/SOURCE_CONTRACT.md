@@ -136,3 +136,29 @@ clinical reports, selected figures and complete aggregate tables. Its manifest
 records original bundle/review identities without source-access paths or patient
 records. This packages existing results; it does not requalify inputs or rerun
 estimation. Private input and execution receipts remain outside Git.
+
+## Optional same-sample arterial supplement
+
+The [paired-ABG extension](PAIRED_ABG_SUPPLEMENT.md) uses the same accepted source
+and a fresh additive input. The versioned pairing evidence binds original input,
+manifest, canonical source and reviewed policy. Existing source acceptance does
+not establish same-sample linkage. Raw pair identifiers, dates and row-level
+evidence stay private; only counts, policy and feasibility findings are shared.
+The pinned upstream audit reports date-only records and absent specimen/panel
+links in its historical snapshot. Reconcile those receipts to the actual study
+source before claiming availability. A missing module does not invalidate the
+base analysis; a supplied corrupt module fails explicitly.
+
+
+### 2026-10-20 accepted-source feasibility
+
+The actual accepted-source query covered 223,514 study-input encounter keys and
+541,828 selected gas records: 192,909 ordinary arterial PCO₂ and 145,993 arterial
+pH records. All queried records had date-only precision. Specimen, panel,
+accession, collection-time and dedicated result_status/result_version fields had no
+populated values. Generic status/order_status columns exist but do not have
+authenticated correction semantics. Record counts are not distinct patient or draw counts.
+Same-sample linkage is therefore unavailable, not an assessed zero-pair result.
+No clinical supplemental models are fitted; no approximate pairing is adopted.
+The existing clinical snapshot and B/F2 remain unchanged. See the
+[separate feasibility report](../results/2026-10-20-paired-abg/README.md).

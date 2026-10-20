@@ -42,7 +42,7 @@ validate_analysis_bundle <- function(a) {
   }
   invisible(TRUE)
 }
-bmi_estimation_files <- function() c("R/analysis.R","R/input_contract.R","R/cohort_audit.R","R/bmi_models.R","R/standardization.R","R/rfs_analysis.R","config/bmi_hypercapnia_analysis.json","config/variable_dictionary.csv","config/common_index_source_policy.json","config/common_index_bmi_policy.json")
+bmi_estimation_files <- function() c("R/analysis.R","R/input_contract.R","R/cohort_audit.R","R/bmi_models.R","R/standardization.R","R/rfs_analysis.R","R/paired_abg.R","config/bmi_hypercapnia_analysis.json","config/variable_dictionary.csv","config/common_index_source_policy.json","config/common_index_bmi_policy.json")
 bmi_hash_files <- function(files) as.list(setNames(vapply(file.path(tri_repo_root(),files),tri_sha256,character(1)),files))
 bmi_write_bundle <- function(a,path,config,receipt,mode="fixture") {
   validate_analysis_bundle(a)
@@ -53,7 +53,7 @@ bmi_write_bundle <- function(a,path,config,receipt,mode="fixture") {
   jsonlite::write_json(receipt,file.path(path,"input_receipt.json"),auto_unbox=TRUE,pretty=TRUE,digits=NA)
   writeLines(capture.output(sessionInfo()),file.path(path,"session-info.txt"))
   files<-list.files(path,full.names=TRUE)
-  manifest<-list(schema_version=7L,analysis_id=config$analysis_id,run_id=basename(path),mode=mode,
+  manifest<-list(schema_version=8L,analysis_id=config$analysis_id,run_id=basename(path),mode=mode,
     created_utc=format(Sys.time(),tz="UTC",usetz=TRUE),estimation_sources=bmi_hash_files(bmi_estimation_files()),
     files=as.list(setNames(vapply(files,tri_sha256,character(1)),basename(files))),
     source_status=if(mode=="fixture")"artificial_only"else receipt$source_status,
@@ -67,7 +67,7 @@ bmi_write_bundle <- function(a,path,config,receipt,mode="fixture") {
 bmi_read_bundle <- function(path,check_sources=TRUE) {
   mf<-file.path(path,"bundle_manifest.json");if(!file.exists(mf))stop("Missing bundle manifest")
   m<-jsonlite::read_json(mf,simplifyVector=FALSE)
-  if(!identical(m$schema_version,7L)||!identical(m$analysis_id,"bmi_hypercapnia_rfs_curve_audit_v2"))stop("Superseded analysis; rerun under the current design")
+  if(!identical(m$schema_version,8L)||!identical(m$analysis_id,"bmi_hypercapnia_rfs_curve_audit_v3"))stop("Superseded analysis; rerun under the current design")
   for(name in names(m$files)) {
     if(basename(name)!=name||!file.exists(file.path(path,name))||!identical(tri_sha256(file.path(path,name)),m$files[[name]]))stop("Bundle hash mismatch: ",name)
   }
@@ -84,7 +84,7 @@ bmi_theme <- function() ggplot2::theme_classic(base_size=10,base_family="sans")+
     axis.line=ggplot2::element_line(linewidth=.3),axis.ticks=ggplot2::element_line(linewidth=.3),
     legend.text=ggplot2::element_text(size=9.5),legend.title=ggplot2::element_text(size=9.5),
     legend.key.width=grid::unit(6,"mm"),plot.margin=grid::unit(c(3,3,3,3),"mm"),legend.position="bottom")
-bmi_outcome_label <- function(o) unname(c(icd="Documented ICD composite",abg="Arterial PCO₂ ≥45 mm Hg",any_gas="Arterial ≥45 or venous ≥50 mm Hg")[o])
+bmi_outcome_label <- function(o) unname(c(hypercapnia_paired="Hypercapnia in evaluable ABG pairs",hypercapnia_acidemic="Hypercapnia with acidemia",icd="Documented ICD composite",abg="Arterial PCO₂ ≥45 mm Hg",any_gas="Arterial ≥45 or venous ≥50 mm Hg")[o])
 bmi_outcome_short <- function(o) unname(c(abg="ABG",any_gas="ABG or VBG",icd="ICD composite")[o])
 bmi_count_label <- function(model,reference) {
   fmt<-function(x)ifelse(is.na(x),"unavailable",format(x,big.mark=",",trim=TRUE,scientific=FALSE))

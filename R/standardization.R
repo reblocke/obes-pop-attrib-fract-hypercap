@@ -118,13 +118,15 @@ bmi_fixed_contrast <- function(model,reference,id,config) {
   if(any(b<bounds[1]|b>bounds[2]))return(cbind(base,status="unsupported_contrast",reason="BMI 40/45 outside training BMI support"))
   attempt<-tryCatch({p0<-bmi_mean_prediction(model,reference,config,bmi=b[1]);p1<-bmi_mean_prediction(model,reference,config,bmi=b[2]);v<-stats::vcov(model$fit)
     se<-sqrt(bmi_delta_variance(p1$gradient-p0$gradient,v));ratio<-p1$probability/p0$probability;s<-sqrt(bmi_delta_variance(p1$gradient/p1$probability-p0$gradient/p0$probability,v))
-    cbind(base,probability_low_bmi=p0$probability,probability_high_bmi=p1$probability,difference_per1000=1000*(p1$probability-p0$probability),
+    ci0<-bmi_probability_interval(p0$probability,p0$gradient,v);ci1<-bmi_probability_interval(p1$probability,p1$gradient,v)
+    cbind(base,probability_low_bmi=p0$probability,probability_high_bmi=p1$probability,probability_low_bmi_low=ci0[1],probability_low_bmi_high=ci0[2],probability_high_bmi_low=ci1[1],probability_high_bmi_high=ci1[2],difference_per1000=1000*(p1$probability-p0$probability),
       conf_low_per1000=1000*(p1$probability-p0$probability-stats::qnorm(.975)*se),conf_high_per1000=1000*(p1$probability-p0$probability+stats::qnorm(.975)*se),prevalence_ratio=ratio,ratio_low=ratio*exp(-stats::qnorm(.975)*s),ratio_high=ratio*exp(stats::qnorm(.975)*s),status="estimated",reason="")
   },error=function(e)e)
   if(inherits(attempt,"error"))return(cbind(base,status="prediction_unavailable",reason=conditionMessage(attempt)))
   attempt
 }
 bmi_run_population_analysis <- function(raw,config,source_status="artificial",audit_only=FALSE,companion=NULL) {
+  raw<-raw[,setdiff(names(raw),bmi_paired_fields),drop=FALSE]
   message("[analysis] Constructing cohort, stage profiles and evidence ledger")
   ctx<-construct_cohort_and_memberships(raw);dict<-bmi_dictionary(ctx$data,config)
   ledger<-bmi_ledger(ctx);profiles<-profile_stage_variables(ctx$members,dict,config);evidence<-derive_evidence_states(ctx,config)

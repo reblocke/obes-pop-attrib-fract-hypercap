@@ -1,0 +1,2 @@
+figure_id,width_mm,height_mm,dpi,data_label_pt,formats,source,status,clinical_estimates
+S1-paired-ABG,190,180,300,9,SVG;PDF;PNG;JPG,R/rfs_reporting.R,Native-size grayscale and assembled-page review completed; unavailable labels retained,0

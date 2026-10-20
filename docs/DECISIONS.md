@@ -56,3 +56,29 @@ includes unknown ethnicity. No causal-prevention/incidence claim is authorized.
 Actual source/run/render receipts bind hashes, code, scope and failures privately.
 The cleanup does not issue new source acceptance or scientific approval and does
 not rerun clinical estimation. `WORKLOG.md` records recent execution and links the preserved earlier log.
+
+## 2026-10-20 — Paired-ABG acidemia supplement
+
+Approved two nested same-sample arterial endpoints on identical primary patients:
+PCO₂ ≥45, and PCO₂ ≥45 with pH <7.35. Both use the existing index, primary
+numeric spline basis and adjustment. No new PIF or automatic timing/population
+duplicates. The [supplement specification](PAIRED_ABG_SUPPLEMENT.md) controls the
+source gate. Date-only co-occurrence is not pairing. If sample linkage is absent,
+retain unavailable secondary positions and report feasibility; do not force a
+clinical result. Authorized review/commit/push/PR/squash merge and clinical
+execution only after pairing qualifies. New scientific interpretation remains
+pending; original provisional approval and B/F2 selection are unchanged.
+
+
+### 2026-10-20 accepted-source feasibility
+
+The actual accepted-source query covered 223,514 study-input encounter keys and
+541,828 selected gas records: 192,909 ordinary arterial PCO₂ and 145,993 arterial
+pH records. All queried records had date-only precision. Specimen, panel,
+accession, collection-time and dedicated result_status/result_version fields had no
+populated values. Generic status/order_status columns exist but do not have
+authenticated correction semantics. Record counts are not distinct patient or draw counts.
+Same-sample linkage is therefore unavailable, not an assessed zero-pair result.
+No clinical supplemental models are fitted; no approximate pairing is adopted.
+The existing clinical snapshot and B/F2 remain unchanged. See the
+[separate feasibility report](../results/2026-10-20-paired-abg/README.md).

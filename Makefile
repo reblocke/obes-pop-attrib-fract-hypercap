@@ -17,15 +17,15 @@ preflight cohort-audit analyze:
 	Rscript --vanilla scripts/run_bmi_hypercapnia.R "$@" "$(INPUT)" "$(MANIFEST)" "$(CONFIG)"
 
 render:
-	@test -n "$(RUN)" || (echo 'Set RUN to an explicit saved version-7 aggregate run.'; exit 1)
+	@test -n "$(RUN)" || (echo 'Set RUN to an explicit saved version-8 aggregate run.'; exit 1)
 	Rscript --vanilla scripts/render_bmi_hypercapnia.R "$(RUN)" all
 
 render-html:
-	@test -n "$(RUN)" || (echo 'Set RUN to an explicit saved version-7 aggregate run.'; exit 1)
+	@test -n "$(RUN)" || (echo 'Set RUN to an explicit saved version-8 aggregate run.'; exit 1)
 	Rscript --vanilla scripts/render_bmi_hypercapnia.R "$(RUN)" html
 
 render-pdf:
-	@test -n "$(RUN)" || (echo 'Set RUN to an explicit saved version-7 aggregate run.'; exit 1)
+	@test -n "$(RUN)" || (echo 'Set RUN to an explicit saved version-8 aggregate run.'; exit 1)
 	Rscript --vanilla scripts/render_bmi_hypercapnia.R "$(RUN)" pdf
 
 # Rebuild prose/tables using source-matched figures from the same saved run.
@@ -45,3 +45,9 @@ qualify:
 enrich-rfs:
 	@test -n "$(SOURCE_CONFIG)" -a -n "$(INPUT)" -a -n "$(MANIFEST)" -a -n "$(RFS_EVIDENCE)" -a -n "$(OUTPUT)" -a -n "$(PRIOR_RUN)" || (echo 'Set SOURCE_CONFIG INPUT MANIFEST RFS_EVIDENCE OUTPUT PRIOR_RUN.'; exit 1)
 	"$(PREP_PYTHON)" scripts/enrich_rfs_input.py --source-config "$(SOURCE_CONFIG)" --input "$(INPUT)" --manifest "$(MANIFEST)" --rfs-evidence "$(RFS_EVIDENCE)" --output "$(OUTPUT)" --prior-run "$(PRIOR_RUN)"
+
+# Same-sample audit and additive enrichment; never fits clinical models.
+.PHONY: enrich-paired-abg
+enrich-paired-abg:
+	@test -n "$(SOURCE_CONFIG)" -a -n "$(INPUT)" -a -n "$(MANIFEST)" -a -n "$(OUTPUT)" || (echo 'Set SOURCE_CONFIG INPUT MANIFEST and fresh OUTPUT.'; exit 1)
+	"$(PREP_PYTHON)" scripts/enrich_paired_abg.py --source-config "$(SOURCE_CONFIG)" --input "$(INPUT)" --manifest "$(MANIFEST)" --output "$(OUTPUT)"

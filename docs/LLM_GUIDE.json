@@ -1,6 +1,6 @@
 {
   "document_type": "llm_collaborator_reading_guide",
-  "updated": "2026-10-18",
+  "updated": "2026-10-20",
   "purpose": "Read the current study and support later coauthor work with traceable evidence. This is documentation, not executable analysis configuration.",
   "repository_paths_relative_to": "repository root",
   "authority": {
@@ -164,8 +164,20 @@
     "saved_aggregate_render": "make render RUN=\"artifacts/triangulation/<exact-saved-run>\"",
     "source_boundary_checks": "make source-test PREP_PYTHON=\"/existing/environment/bin/python\"",
     "clinical_execution_authority": "docs/SOURCE_CONTRACT.md",
-    "latest_recorded_local_test_limits": "Artificial E2E passed; 18 source checks passed and 9 were unavailable without DuckDB. See WORKLOG.md for exact receipts. No tests or clinical models are rerun by reading this guide.",
+    "latest_recorded_local_test_limits": "See the paired-ABG release receipt and WORKLOG.md for current artificial E2E and source-boundary verification. Clinical pairing is unavailable; software tests do not supply clinical results.",
     "boundaries": "Reports, figures and aggregate result tables may be versioned for collaborator review. Do not include raw/patient-level data, identifiers, individual dates, model frames, individual predictions, credentials or source-access secrets. This guide does not authorize dependency installation, private-input access, refitting, changes to accepted evidence, unsolicited external messages or submission. Rendering uses saved aggregates only.",
     "package_integrity_check": "See results/2026-10-18/README.md for the dependency-free Python SHA-256 verification command."
+  },
+  "paired_abg_supplement": {
+    "specification": "docs/PAIRED_ABG_SUPPLEMENT.md",
+    "software_analysis_id": "bmi_hypercapnia_rfs_curve_audit_v3",
+    "bundle_schema": 8,
+    "clinical_status": "unavailable_no_same_sample_identifiers_in_accepted_source",
+    "new_models": 2,
+    "new_PIFs": 0,
+    "original_reading_snapshot": "unchanged; schema 7",
+    "scientific_review": "pending; original approval does not certify new results",
+    "feasibility_report": "results/2026-10-20-paired-abg/README.md",
+    "clinical_models_fitted": 0
   }
 }

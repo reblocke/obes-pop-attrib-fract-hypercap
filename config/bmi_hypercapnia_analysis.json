@@ -1,6 +1,6 @@
 {
-  "analysis_id": "bmi_hypercapnia_rfs_curve_audit_v2",
-  "bundle_schema": 7,
+  "analysis_id": "bmi_hypercapnia_rfs_curve_audit_v3",
+  "bundle_schema": 8,
   "population_scope_id": "original_selected_encounters_v1",
   "bmi_policy_id": "available_encounter_or_prior_bmi_v1",
   "source_policy_id": "unadjusted_pco2_v1",
@@ -57,5 +57,6 @@
   "diagnostic_bmi_range": [
     35,
     55
-  ]
+  ],
+  "paired_abg_enabled": true
 }

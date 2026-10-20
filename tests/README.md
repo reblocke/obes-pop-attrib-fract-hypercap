@@ -33,3 +33,20 @@ Historical Stata replay, predecessor projection/grid suites, fixed acceptance-ID
 checklists, prose assertions, source-text assertions and synthetic human-review
 gates have been removed. The complete reports and their aggregate tables are the
 repeatable end-to-end artifacts; visual and investigator review remain separate.
+
+## Paired-ABG supplement: failure scenarios (before implementation)
+
+An encounter/date join can invent acidemic hypercapnia; maximum CO2/minimum pH
+can combine different draws; max-CO2-only selection can miss a qualifying pair.
+Rounding near 7.35, mixing venous/adjusted records, conflicting corrections,
+duplicate records and reused identifiers can misclassify endpoints or double draws.
+Missing linkage must not become negative evidence. Partial pairing must preserve
+original positives. Enrichment can corrupt keys or silently alter first indexes.
+A generic model loop can add unwanted PIFs, recompute knots, change reference rows,
+or omit unavailable positions. Reports can show plausible but different denominators.
+
+Source-boundary fixtures below precede production code and independently specify
+expected outcomes. The typed-input E2E independently refits both models, checks
+identical rows/basis, all existing estimates, nesting and absence of new PIFs,
+then renders the complete reports and figure. These source checks are necessary
+because the existing typed-input E2E cannot detect invented specimen linkage.
