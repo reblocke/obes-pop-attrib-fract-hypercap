@@ -2,7 +2,7 @@
 
 ## Scope and change discipline
 
-The current analysis is schema 9 (`bmi_hypercapnia_rfs_curve_audit_v4`). Read
+The current analysis is schema 10 (`bmi_hypercapnia_rfs_curve_audit_v5`). Read
 `docs/BMI_HYPERCAPNIA_TRIANGULATION_PLAN.md` and `docs/SOURCE_CONTRACT.md` before
 substantive work. Configuration and the variable dictionary live in `config/`;
 the cohort ledger is the sole count authority.
@@ -20,7 +20,7 @@ with `docs/DECISIONS.md`; do not treat access to the repository as permission to
 draft, rerun, share or submit beyond the owner's current request.
 The versioned reading snapshot is `results/2026-10-18/`; verify its manifest and
 use its aggregate tables for current numerical claims. It is not a runnable bundle.
-For the two recorded-day supplemental endpoints, use the separate
+For the historical binary recorded-day supplemental endpoints, use the separate
 `results/2026-10-20-same-day-abg/` snapshot and its review state. Original B/F2
 selection and provisional approval do not approve S1 or its interpretation.
 
@@ -110,6 +110,6 @@ numerical review and investigator scientific approval are separate states.
 - Refactoring alone does not authorize clinical reruns, commit/push/merge,
   external communication or submission.
 
-The [same-day arterial supplement](docs/SAME_DAY_ABG_SUPPLEMENT.md) adds two
-recorded-day co-occurrence positions with a separate source gate. It does not
+The [same-day arterial supplement](docs/SAME_DAY_ABG_SUPPLEMENT.md) uses one joint three-category multinomial spline for
+recorded-day co-occurrence with a separate source gate. It does not
 establish same-sample pairing; original PIFs and primary analyses remain unchanged.

@@ -10,7 +10,7 @@ source("R/analysis.R")
 source("tests/fixtures/bmi_curve_fixture.R")
 source("tests/e2e_oracles.R")
 source("tests/same_day_e2e.R")
-require_tri_packages(c("jsonlite","digest","ggplot2","knitr","rmarkdown","lpSolve"))
+require_tri_packages(c("jsonlite","digest","ggplot2","knitr","rmarkdown","lpSolve","nnet"))
 for (command in c("quarto","pdftotext","pdfinfo"))
   if (!nzchar(Sys.which(command))) stop("Required installed command unavailable: ",command)
 
@@ -132,6 +132,16 @@ tryCatch({
       stopifnot(!grepl("usepackage{longtable",html,fixed=TRUE),grepl("bmi-audit-table",html,fixed=TRUE))
       pdf <- system2("pdftotext",c(shQuote(file.path(review,paste0(name,".pdf"))),"-"),stdout=TRUE)
       stopifnot(is.null(attr(pdf,"status")),length(pdf)>0,!any(grepl("\uFFFD",pdf,fixed=TRUE)))
+    }
+  })
+  check("complete S1 caption in assembled PDFs",{
+    captions <- utils::read.csv(file.path(review,"figures/captions.csv"),stringsAsFactors=FALSE)
+    normalize <- function(x)gsub("[^[:alnum:]]","",tolower(gsub("₂","2",paste(x,collapse=" "),fixed=TRUE)))
+    expected <- normalize(captions$caption[captions$figure_id=="S1-same-day-ABG"])
+    stopifnot(nzchar(expected))
+    for(name in c("bmi_hypercapnia","bmi_hypercapnia_audit")) {
+      text <- system2("pdftotext",c(shQuote(file.path(review,paste0(name,".pdf"))),"-"),stdout=TRUE)
+      if(!grepl(expected,normalize(text),fixed=TRUE))stop("S1 caption clipped or missing in ",name)
     }
   })
   check("every declared figure and required alternatives",{

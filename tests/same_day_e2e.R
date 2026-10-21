@@ -1,61 +1,111 @@
-# Independent supplemental regression oracle. Updated before production replacement.
+# Independent softmax likelihood and finite-difference oracle, written before
+# replacing the supplemental binary estimator. No production prediction helpers.
 e2e_same_day <- function(bundle,raw) {
-  a<-bundle$analysis
-  ids<-paste0("primary::same_day_abg/encounter/",c("hypercapnia","hypercapnia_acidemia_cooccurrence"),"/spline")
-  r<-a$model_registry[a$model_registry$model_id %in% ids,]
-  stopifnot(nrow(r)==2L, !any(a$policy_totals$model_id %in% ids))
-  q<-e2e_indexes(raw);q<-q[q$group=="primary" & complete.cases(q[triangulation_adjustment]),]
-  p<-q[q$same_day_abg_state=="coobserved_day",]
-  stopifnot(all(p$hypercapnia_acidemia_same_day<=p$hypercapnia_coobserved),all(r$n_model==nrow(p)),length(unique(r$basis_id))==1L)
-  knots<-as.numeric(quantile(q$bmi,c(.05,.35,.65,.95),type=7))
-  b<-splines::ns(p$bmi,knots=knots[2:3],Boundary.knots=knots[c(1,4)],intercept=FALSE)
-  p$b1<-b[,1];p$b2<-b[,2];p$b3<-b[,3]
-  for(v in c("sex","race_ethnicity","location"))p[[v]]<-factor(p[[v]],levels=c("0",setdiff(sort(unique(p[[v]])),"0")))
-  for(i in seq_along(ids)) {
-    p$y<-p[[c("hypercapnia_coobserved","hypercapnia_acidemia_same_day")[i]]]
-    fit<-glm(y~b1+b2+b3+age_at_encounter+sex+race_ethnicity+location,data=p,family=binomial())
-    saved<-a$coefficients[a$coefficients$model_id==ids[i] & a$coefficients$status=="estimated",]
-    e2e_near(saved$estimate,coef(fit))
-    curves<-a$probability_curves[a$probability_curves$model_id==ids[i],]
-    for(j in unique(c(round(seq(1,nrow(curves),length.out=5)),which(curves$bmi %in% c(40,45))))) {
-      new<-p;basis<-splines::ns(rep(curves$bmi[j],nrow(p)),knots=knots[2:3],Boundary.knots=knots[c(1,4)],intercept=FALSE)
-      new$b1<-basis[,1];new$b2<-basis[,2];new$b3<-basis[,3]
-      x<-model.matrix(~b1+b2+b3+age_at_encounter+sex+race_ethnicity+location,new)
-      pr<-plogis(drop(x%*%coef(fit)));mean_p<-mean(pr)
-      g<-colMeans(x*(pr*(1-pr)))/(mean_p*(1-mean_p))
-      ci<-plogis(qlogis(mean_p)+c(-1,1)*qnorm(.975)*sqrt(drop(t(g)%*%vcov(fit)%*%g)))
-      e2e_near(curves$probability[j],mean_p);e2e_near(c(curves$conf_low[j],curves$conf_high[j]),ci)
-      contrast<-a$fixed_bmi_contrasts[a$fixed_bmi_contrasts$model_id==ids[i],]
-      if(curves$bmi[j] %in% c(40,45) && contrast$status=="estimated") {
-        label<-if(curves$bmi[j]==40)"low"else"high"
-        e2e_near(unlist(contrast[paste0("probability_",label,"_bmi",c("","_low","_high"))]),c(mean_p,ci))
-      }
+  a <- bundle$analysis
+  id <- "primary::same_day_abg/encounter/multinomial_spline"
+  classes <- c("no_hypercapnia","without_acidemia","with_acidemia")
+  r <- a$model_registry[a$model_registry$model_id==id,,drop=FALSE]
+  stopifnot(nrow(r)==1L,r$status=="successful",!any(a$policy_totals$model_id==id))
+  q <- e2e_indexes(raw)
+  q <- q[q$group=="primary" & complete.cases(q[triangulation_adjustment]),]
+  p <- q[q$same_day_abg_state=="coobserved_day",]
+  y <- ifelse(p$hypercapnia_acidemia_same_day==1,3L,ifelse(p$hypercapnia_coobserved==1,2L,1L))
+  stopifnot(all(p$hypercapnia_acidemia_same_day<=p$hypercapnia_coobserved),r$n_model==nrow(p))
+  cats <- a$cooccurrence_categories
+  e2e_near(cats$n[match(classes,cats$category_id)],tabulate(y,3))
+  knots <- as.numeric(quantile(q$bmi,c(.05,.35,.65,.95),type=7))
+  for(v in c("sex","race_ethnicity","location"))
+    p[[v]] <- factor(p[[v]],levels=c("0",setdiff(sort(unique(p[[v]])),"0")))
+  design <- function(bmi) {
+    new <- p
+    b <- splines::ns(bmi,knots=knots[2:3],Boundary.knots=knots[c(1,4)],intercept=FALSE)
+    for(k in 1:3)new[[paste0("bmi_ns",k)]] <- b[,k]
+    model.matrix(~bmi_ns1+bmi_ns2+bmi_ns3+age_at_encounter+sex+race_ethnicity+location,new)
+  }
+  x <- design(p$bmi);scale <- apply(abs(x),2,max);z <- sweep(x,2,scale,"/")
+  softmax <- function(theta,x) {
+    eta <- cbind(0,x%*%matrix(theta,ncol=2))
+    eta <- eta-apply(eta,1,max);w <- exp(eta);w/rowSums(w)
+  }
+  target <- diag(3)[y,,drop=FALSE]
+  fn <- function(theta)-sum(log(softmax(theta,z)[cbind(seq_along(y),y)]))
+  gr <- function(theta)as.vector(crossprod(z,(softmax(theta,z)-target)[,2:3,drop=FALSE]))
+  fit <- optim(rep(0,2*ncol(x)),fn,gr,method="BFGS",control=list(maxit=3000,reltol=1e-12),hessian=TRUE)
+  stopifnot(fit$convergence==0L)
+  theta <- fit$par/rep(scale,2)
+  v <- solve(fit$hessian)/outer(rep(scale,2),rep(scale,2))
+  terms <- unlist(lapply(classes[-1],function(k)paste(k,colnames(x),sep="::")))
+  cf <- a$coefficients[a$coefficients$model_id==id & a$coefficients$status=="estimated",]
+  e2e_near(cf$estimate[match(terms,cf$term)],theta,tolerance=2e-4)
+  saved_cov <- a$coefficient_covariance[a$coefficient_covariance$model_id==id,]
+  vm <- matrix(NA_real_,length(terms),length(terms))
+  vm[cbind(match(saved_cov$term1,terms),match(saved_cov$term2,terms))] <- saved_cov$covariance
+  e2e_near(vm,v,tolerance=2e-4)
+  means <- function(beta,b) {
+    pr <- colMeans(softmax(beta,design(rep(b,nrow(p)))))
+    c(pr,sum(pr[2:3]))
+  }
+  derivative <- function(fun,beta) vapply(seq_along(beta),function(k) {
+    plus<-minus<-beta;plus[k]<-plus[k]+1e-5;minus[k]<-minus[k]-1e-5
+    (fun(plus)-fun(minus))/2e-5
+  },numeric(1))
+  curves <- a$probability_curves[a$probability_curves$model_id==id,]
+  for(b in unique(c(head(curves$bmi,1),40,45,tail(curves$bmi,1)))) {
+    means_b <- means(theta,b)
+    for(k in 1:4) {
+      key <- c(classes,"any_hypercapnia")[k]
+      row <- curves[curves$bmi==b & curves$outcome_id==key,]
+      if(!nrow(row))next
+      g <- derivative(function(beta)means(beta,b)[k],theta)
+      pp <- means_b[k];se <- sqrt(drop(t(g)%*%v%*%g))/(pp*(1-pp))
+      ci <- plogis(qlogis(pp)+c(-1,1)*qnorm(.975)*se)
+      e2e_near(c(row$probability,row$conf_low,row$conf_high),c(pp,ci),tolerance=2e-4)
     }
   }
-  bins<-a$distribution_bins[a$distribution_bins$population_id=="primary::C_same_day_abg" & a$distribution_bins$variable_id=="bmi",]
-  stopifnot(nrow(bins)>0,sum(bins$n)==nrow(p))
-  # Run the full unchanged input without the optional module. Original models,
-  # probabilities and PIFs must match; unavailable positions are not zero results.
-  base<-bmi_run_analysis(raw[setdiff(names(raw),bmi_same_day_fields)],bundle$config)
+  for(b in unique(curves$bmi)) {
+    at <- curves[curves$bmi==b,]; pp <- setNames(at$probability,at$outcome_id)
+    e2e_near(sum(pp[classes]),1);e2e_near(sum(pp[classes[-1]]),pp['any_hypercapnia'])
+    stopifnot(all(pp>=0 & pp<=1))
+  }
+  contrasts <- a$same_day_contrasts
+  zc <- contrasts[contrasts$bmi_low==40 & contrasts$bmi_high==45,]
+  for(k in 1:5) {
+    key <- c(classes,"any_hypercapnia","with_minus_without_change")[k]
+    fun <- function(beta) {
+      delta <- means(beta,45)-means(beta,40)
+      if(k<=4)delta[k]else delta[3]-delta[2]
+    }
+    d <- fun(theta);g <- derivative(fun,theta);variance <- drop(t(g)%*%v%*%g)
+    row <- zc[zc$outcome_id==key,]
+    stopifnot(nrow(row)==1)
+    e2e_near(c(row$difference_per1000,row$conf_low_per1000,row$conf_high_per1000),
+      1000*c(d,d-qnorm(.975)*sqrt(variance),d+qnorm(.975)*sqrt(variance)),tolerance=2e-4)
+  }
+  # Original analysis must be unchanged when the optional module is absent.
+  base <- bmi_run_analysis(raw[setdiff(names(raw),bmi_same_day_fields)],bundle$config)
   for(name in c("coefficients","coefficient_covariance","probability_curves","policy_totals","policy_contributions","policy_contribution_covariance")) {
     current<-a[[name]];original<-base[[name]]
-    current<-current[!current$model_id %in% ids,,drop=FALSE]
-    original<-original[!original$model_id %in% ids,,drop=FALSE]
+    current<-current[current$model_id!=id,,drop=FALSE];original<-original[original$model_id!=id,,drop=FALSE]
+    # Joint class labels add an all-NA metadata column to primary rows only.
+    for(field in setdiff(names(current),names(original))) {
+      stopifnot(all(is.na(current[[field]])));original[[field]]<-current[[field]][rep(NA_integer_,nrow(original))]
+    }
+    for(field in setdiff(names(original),names(current))) {
+      stopifnot(all(is.na(original[[field]])));current[[field]]<-original[[field]][rep(NA_integer_,nrow(current))]
+    }
+    original<-original[names(current)]
     rownames(current)<-rownames(original)<-NULL
     stopifnot(isTRUE(all.equal(current,original,tolerance=1e-10,check.attributes=FALSE)))
   }
-  pending<-base$model_registry[base$model_registry$model_id %in% ids,]
-  stopifnot(nrow(base$model_registry)==nrow(a$model_registry),all(pending$status=="pending_source"),
-    all(is.na(pending$n_model)),all(is.na(pending$n_events)))
-  missing<-base$cohort_nodes[base$cohort_nodes$population_id=="primary::C_same_day_abg",]
-  stopifnot(is.na(missing$n),!any(base$numerical_reconciliation$passed %in% FALSE))
-  disabled_config<-bundle$config;disabled_config$same_day_abg_enabled<-FALSE
-  disabled<-bmi_run_analysis(make_bmi_curve_fixture(12),disabled_config)
-  stopifnot(disabled$cooccurrence_status$status=="disabled",all(disabled$model_registry$status[disabled$model_registry$model_id %in% ids]=="pending_source"))
-  constant_raw<-make_bmi_curve_fixture(300,adverse=FALSE)
-  constant_raw$hypercapnia_acidemia_same_day[constant_raw$same_day_abg_state=="coobserved_day"]<-0
-  constant<-bmi_run_analysis(constant_raw,bundle$config)
-  stopifnot(constant$model_registry$status[constant$model_registry$model_id==ids[2]]=="constant_outcome",
-    all(is.na(constant$probability_curves$probability[constant$probability_curves$model_id==ids[2]])))
-  invisible(data.frame(model_id=ids,n=nrow(p),status="independent co-occurrence models/curves/intervals confirmed"))
+  pending <- base$model_registry[base$model_registry$model_id==id,]
+  stopifnot(nrow(pending)==1L,pending$status=="pending_source",is.na(pending$n_model))
+  bad <- raw;bad$hypercapnia_acidemia_same_day[bad$same_day_abg_state=="coobserved_day"]<-0L
+  constant <- bmi_run_analysis(bad,bundle$config)
+  stopifnot(constant$model_registry$status[constant$model_registry$model_id==id]=="absent_category",
+    all(is.na(constant$probability_curves$probability[constant$probability_curves$model_id==id])))
+  # Observable rank failure; do not silently pool a missing declared factor reference.
+  bad <- raw;bad$sex[!is.na(bad$sex)] <- "1"
+  deficient <- bmi_run_analysis(bad,bundle$config)
+  stopifnot(deficient$model_registry$status[deficient$model_registry$model_id==id]=="rank_deficiency")
+  invisible(data.frame(model_id=id,n=nrow(p),status="independent likelihood, joint covariance and signed contrasts confirmed"))
 }

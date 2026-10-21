@@ -50,3 +50,29 @@ expected outcomes. The typed-input E2E independently refits both models, checks
 identical rows/basis, all existing estimates, nesting and absence of new PIFs,
 then renders the complete reports and figure. Source checks independently catch
 cross-date joins, corruption and invalid evidence before the typed-input boundary.
+
+## Joint component supplement: failure scenarios (before implementation)
+
+The two nested outcomes can be mistaken for mutually exclusive components; mixed
+days must instead enter the with-acidemia category. Subtracting independent fitted
+probabilities can produce incoherent components and incorrect intervals if their
+cross-model covariance is ignored. Multinomial coefficient ordering, reference
+levels, Hessian scaling and softmax gradients can silently corrupt plausible
+curves. A missing class, separation, singular information or optimizer failure
+must not become a successful binary fallback. A stacked upper boundary can be
+mistaken for the upper component's probability, and tail sparsity can disappear
+when categories are combined.
+
+Before replacing production estimation, the same-day E2E oracle is changed to an
+independent softmax likelihood/optimizer, finite-difference probability/contrast
+gradients and category partition checks. It verifies joint covariance, all three
+probabilities and their sum, signed component contrasts, identical primary output,
+missing-source and absent-class failures. Full report rendering and saved numeric
+display tables verify the stack and component curves use the same aggregates.
+The source boundary remains unchanged: its existing mixed-day and threshold
+fixtures establish what the two authenticated flags mean.
+
+A complete caption can overflow a PDF float even when text bounds appear clean.
+The S1 E2E check compares its full saved caption with both assembled PDF texts;
+it catches clipping without freezing the caption's wording. This failure was
+reproduced in the initial joint-model report before shortening the caption.

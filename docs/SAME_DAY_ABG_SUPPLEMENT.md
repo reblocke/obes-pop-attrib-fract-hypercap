@@ -32,52 +32,53 @@ undated or single-analyte records remain in the audit. Without a usable day,
 endpoints remain unknown; distinguish no co-observed day, unresolved dates and
 unavailable source. Negative means no documented positive among eligible days.
 
-## Interface and models
+## Joint components and stacked curves
 
-`make enrich-same-day-abg SOURCE_CONFIG=... INPUT=... MANIFEST=... OUTPUT=...`
-reads the immutable original schema-4 input and writes a fresh private additive
-input, summary and hash-bound evidence. Use the [policy example](../config/same_day_abg_policy.example.json)
-with authenticated export/date/code/unit evidence; placeholders are rejected.
-The extension identity is `same_day_arterial_cooccurrence_v1` version 1. The
-aggregate contract is schema 9, `bmi_hypercapnia_rfs_curve_audit_v4`.
-Historical pairing bundles are not migrated or relabeled.
+The current runtime supersedes the historical two binary supplemental fits with one
+unpenalized three-category multinomial spline (`nnet::multinom`, no penalty,
+1,000 maximum iterations). The original source flags/enrichment are unchanged.
+Any documented hypercapnia–acidemia day takes priority. Categories are no
+hypercapnia on co-observed days, hypercapnia without documented same-day acidemia,
+and hypercapnia with same-day acidemia. No qualifying day remains unknown, not a
+fourth modeled negative category. The reference outcome is no hypercapnia.
 
-Exactly two secondary positions replace the unavailable pairing positions:
+Use the same primary knots, covariates, fixed indexes and supplemental population.
+Scale design columns internally for optimization, then report coefficients and
+full cross-category covariance in the original design units. Check complete/quasi
+multinomial separation before fitting and information rank/convergence afterward.
+An absent category or failed model stays unavailable; no binary fallback.
+All class probabilities are standardized over identical patients and sum to one;
+the two hypercapnia probabilities sum to total hypercapnia. Pointwise logit-scale
+probability intervals and signed contrast intervals use the full joint covariance,
+conditional on the fixed basis and empirical reference. No PIF is added.
 
-- `primary::same_day_abg/encounter/hypercapnia/spline`
-- `primary::same_day_abg/encounter/hypercapnia_acidemia_cooccurrence/spline`
+The full observed BMI range (0.25-unit grid plus observed endpoints) is the central
+result. Keep 40–45 as a prespecified descriptive summary, and report every
+supported five-unit interval anchored at multiples of five. Include both component
+changes, ratios and the signed with-minus-without difference in changes with
+intervals. Do not infer equal magnitudes from separate significance or interval
+overlap. No multiplicity-adjusted or simultaneous inference is claimed.
 
-Both use identical complete-adjustment primary patients with a co-observed day,
-the original primary numeric BMI basis, inherited covariates and a shared
-supplemental reference. Retain curves, pointwise intervals, BMI 45-versus-40
-contrasts with both probability intervals, complete coefficients/covariance,
-diagnostics and failed positions. Do not add PIFs, observation regressions,
-timing/linear duplicates or additional population models. Flag curve crossings;
-do not clip them. No verified same-sample analysis is inferred from this module.
+S1 has stacked component probabilities, common-baseline component curves with
+95% intervals, and an aligned BMI-frequency panel. With-acidemia is the lower
+band; without documented same-day acidemia is the upper band's thickness. The
+upper boundary is total hypercapnia, not the without-acidemia component. Faded
+regions/dotted lines flag existing local sparsity thresholds separately by class;
+the full observed range remains visible. Missing covariate levels remain in the
+support audit. Captions retain the same-recorded-day/not-same-sample statement.
 
-## Ledger and reports
-
-Reconcile original arterial-evaluable patients → co-observed patients with their
-original arterial outcome → the same patients restricted to co-observed dates
-→ the same patients with same-date hypercapnia and acidemia. Retain counts and
-Wilson intervals, stratified availability, usable/invalid/undated records,
-single-analyte days and multiplicity. Distinguish patients, days and source rows;
-reported source-row totals cover only assessed capture.
-
-The scientific report contains a focused subsection, reconciliation table and
-S1-same-day-ABG figure. Its two curves share axes and patients; BMI frequencies
-appear below. Display N, events, pointwise 95% intervals and support warnings.
-The complete audit retains all tables. Supplemental captions explicitly state
-“same recorded-day co-occurrence; not verified same-sample pairing.” Findings
-may span different samples or treatment periods and do not establish acute
-respiratory failure or compensation. No abstract drafting is authorized.
+Runtime identity: aggregate schema 10 / `bmi_hypercapnia_rfs_curve_audit_v5`.
+Input schema 4 and `same_day_arterial_cooccurrence_v1` remain unchanged. The
+schema-9 reading packet linked below is immutable historical evidence, not the current
+joint result. The new clinical run and figure approval remain pending until their
+separate receipts are recorded. Primary models/PIFs and B/F2 remain unchanged.
 
 ## Verification and release
 
 Record failure scenarios before production edits. Run `make test` and separate
 `make source-test PREP_PYTHON=...`; independent raw-record cases establish same-
 versus cross-date behavior, thresholds, missingness and record corruption. E2E
-refits both models independently, verifies identical references and unchanged
+fits the joint likelihood independently, verifies shared references and unchanged
 base estimates/PIFs, and renders all reports from aggregates. Inspect S1 at
 190 mm, in grayscale and assembled reports; export R/SVG/PDF/300-dpi PNG/JPG.
 
@@ -88,7 +89,7 @@ estimates with the authenticated prior run. Preserve all earlier artifacts.
 Source qualification, numerical review, visual review and investigator approval
 remain separate. Rendering does not provide scientific approval.
 
-## Execution evidence
+## Historical binary-model execution evidence
 
 Software released in PR #19 at `b89d485`; qualified clinical execution completed
 in `curve-analyze-20261020T174425-15236`. Both supplemental positions succeeded

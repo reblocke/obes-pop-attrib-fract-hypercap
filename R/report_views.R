@@ -216,3 +216,19 @@ bmi_scientific_results <- function(a,section) {
     cat("> **Example conclusion, pending investigator review:** ",direction," Gas-based estimates describe patients with usable blood-gas evidence in this selected acute-care cohort; diagnosis-based estimates describe patients with known diagnosis capture. The primary association remains subject to outcome-dependent entry and selective gas measurement. Secondary one-unit BMI-shift contrasts are descriptive model scenarios and do not establish effects of weight loss or cases prevented.\n\n",sep="")
   }
 }
+
+# Human-facing full contrast table; raw probabilities/covariance remain exported.
+bmi_same_day_contrast_view <- function(d) {
+  if(!nrow(d))return(d)
+  labels<-c(no_hypercapnia="No documented hypercapnia",without_acidemia="Hypercapnia without documented same-day acidemia",
+    with_acidemia="Hypercapnia with same-day acidemia",any_hypercapnia="Any hypercapnia",
+    with_minus_without_change="With minus without: difference in changes")
+  interval<-function(x,lo,hi,mult=1)ifelse(is.finite(x),sprintf("%.2f (%.2f to %.2f)",mult*x,mult*lo,mult*hi),"Not estimated")
+  for(name in c("probability_low_bmi","probability_low_bmi_low","probability_low_bmi_high","probability_high_bmi","probability_high_bmi_low","probability_high_bmi_high","difference_per1000","conf_low_per1000","conf_high_per1000","prevalence_ratio","ratio_low","ratio_high","locally_sparse"))if(!name %in% names(d))d[[name]]<-NA
+  data.frame(`BMI interval`=paste(d$bmi_low,d$bmi_high,sep=" to "),Outcome=unname(labels[d$outcome_id]),
+    `Lower BMI probability % (95% CI)`=interval(d$probability_low_bmi,d$probability_low_bmi_low,d$probability_low_bmi_high,100),
+    `Higher BMI probability % (95% CI)`=interval(d$probability_high_bmi,d$probability_high_bmi_low,d$probability_high_bmi_high,100),
+    `Change pp (95% CI)`=interval(d$difference_per1000,d$conf_low_per1000,d$conf_high_per1000,.1),
+    `Probability ratio (95% CI)`=interval(d$prevalence_ratio,d$ratio_low,d$ratio_high),
+    Status=ifelse(d$status!="estimated",d$status,ifelse(d$locally_sparse,"Estimated; sparse endpoint","Estimated")),check.names=FALSE)
+}

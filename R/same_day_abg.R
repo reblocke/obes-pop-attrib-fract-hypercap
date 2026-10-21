@@ -7,7 +7,8 @@ bmi_same_day_fields <- c("same_day_abg_state","same_day_abg_n_days","hypercapnia
   "same_day_abg_multiple_result_days")
 bmi_metadata_fields <- c(bmi_metadata_fields,bmi_same_day_fields)
 bmi_same_day_tables <- c("cooccurrence_status","cooccurrence_reconciliation","cooccurrence_availability",
-  "cooccurrence_measurements","same_day_curve_crossings")
+  "cooccurrence_measurements","cooccurrence_categories","same_day_contrasts",
+  "same_day_probability_covariance","same_day_curve_reconciliation")
 bmi_table_names <- c(bmi_table_names,bmi_same_day_tables)
 
 bmi_validate_cooccurrence <- function(d) {
@@ -113,6 +114,14 @@ bmi_append_same_day <- function(a,ctx,raw,config,audit_only=FALSE) {
   t$cooccurrence_reconciliation$proportion<-ifelse(rec$n>0,rec$events/rec$n,NA_real_)
   t$cooccurrence_reconciliation$conf_low<-ci[,1]
   t$cooccurrence_reconciliation$conf_high<-ci[,2]
+  category<-bmi_same_day_category(p)
+  t$cooccurrence_categories<-data.frame(category_id=bmi_same_day_classes,
+    n=if(qualified)as.integer(table(category))else rep(NA_integer_,3),
+    N=if(qualified)nrow(p)else NA_integer_,status=status,
+    definition=c("No documented hypercapnia on co-observed days",
+      "Hypercapnia without documented same-day acidemia on any eligible day",
+      "Any eligible day with hypercapnia and acidemia; takes priority over other days"))
+  if(qualified&&sum(t$cooccurrence_categories$n)!=nrow(p))stop("Joint categories do not partition the reference")
   availability<-list()
   for(v in c("bmi","age_at_encounter","sex","race_ethnicity","location","encounter_type")) {
     grp<-if(v=="bmi")as.character(config$bmi_bin_width*floor(c$bmi/config$bmi_bin_width))else if(v=="age_at_encounter")as.character(10*floor(c[[v]]/10))else as.character(c[[v]])
@@ -147,35 +156,16 @@ bmi_append_same_day <- function(a,ctx,raw,config,audit_only=FALSE) {
     saved_basis<-a$bmi_basis[a$bmi_basis$analysis_population_id=="primary",,drop=FALSE]
     if(nrow(saved_basis)!=4L)stop("Missing primary numeric basis for co-occurrence supplement")
     basis<-list(knots=saved_basis$knot,basis_id=saved_basis$basis_id[1],status=saved_basis$status[1],quantile_type=saved_basis$quantile_type[1])
-    models<-list();curves<-list()
-    for(i in 1:2) {
-      outcome<-c("hypercapnia","hypercapnia_acidemia_cooccurrence")[i]
-      id<-paste("same_day_abg","encounter",outcome,"spline",sep="/")
-      spec<-data.frame(model_id=id,family="same_day_abg",outcome_id=c("hypercapnia_coobserved","hypercapnia_acidemia_same_day")[i],window="encounter",
-        training_population_id="C_same_day_abg",field=c("hypercapnia_coobserved","hypercapnia_acidemia_same_day")[i],model_form="spline",source_status=if(qualified)"qualified"else"pending",source_reason=reason)
-      m<-fit_bmi_model(spec,p,basis,config,nrow(p));models[[id]]<-m
-      t$model_registry<-bmi_bind(list(t$model_registry,m$row))
-      for(name in c("coefficients","covariance","references")) {
-        dest<-c(coefficients="coefficients",covariance="coefficient_covariance",references="factor_references")[[name]]
-        t[[dest]]<-bmi_bind(list(t[[dest]],m[[name]]))
-      }
-      diagnostics<-bmi_model_diagnostics(m,config)
-      for(name in names(diagnostics))t[[name]]<-bmi_bind(list(t[[name]],diagnostics[[name]]))
-      curves[[id]]<-standardize_probability_curves(m,p,"C_same_day_abg",config)
-      t$fixed_bmi_contrasts<-bmi_bind(list(t$fixed_bmi_contrasts,bmi_fixed_contrast(m,p,"C_same_day_abg",config)))
-      if(!is.null(m$fit)) {
-        support<-bmi_support(m,p,curves[[id]]$bmi);support$reference_id<-"C_same_day_abg";support$policy_id<-"none; relationship";support$method<-"fixed_BMI_curve"
-        t$prediction_support<-bmi_bind(list(t$prediction_support,support))
-      }
+    model<-bmi_multinomial_fit(p,basis,config,qualified,reason)
+    t$model_registry<-model$row
+    for(name in c("coefficients","covariance","references")) {
+      dest<-c(coefficients="coefficients",covariance="coefficient_covariance",references="factor_references")[[name]]
+      t[[dest]]<-model[[name]]
     }
-    stopifnot(identical(tri_encounter_key(models[[1]]$data),tri_encounter_key(models[[2]]$data)))
+    for(name in c("model_fit_diagnostics","model_residual_bins","model_influence_summary","model_support"))t[[name]]<-model[[name]]
+    predicted<-bmi_multinomial_predictions(model,config)
+    for(name in names(predicted))t[[name]]<-predicted[[name]]
     t$model_sample_audit<-t$model_registry;t$expected_models<-t$model_registry["model_id"]
-    t$probability_curves<-bmi_bind(curves)
-    x<-curves[[1]];y<-curves[[2]]
-    good<-is.finite(x$probability)&is.finite(y$probability)&x$within_training_bmi_range&y$within_training_bmi_range
-    crossing<-which(good & y$probability>x$probability+1e-12)
-    t$same_day_curve_crossings<-if(length(crossing))data.frame(bmi=x$bmi[crossing],excess_probability=y$probability[crossing]-x$probability[crossing],
-      locally_sparse=x$locally_sparse[crossing]|y$locally_sparse[crossing],status="crossing_requires_scientific_review")else data.frame(bmi=NA_real_,excess_probability=NA_real_,locally_sparse=NA,status=if(any(good))"no_crossing_on_saved_supported_grid"else"not_assessed")
     t$coverage_index<-data.frame(kind="model",item_id=t$model_registry$model_id,table="model_registry",status=t$model_registry$status)
   }
   t$coverage_index<-bmi_bind(list(t$coverage_index,data.frame(kind="population",item_id=c("C_same_day_abg","no_coobserved_abg"),table="population_registry",status=status)))
