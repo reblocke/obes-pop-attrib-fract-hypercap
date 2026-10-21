@@ -460,3 +460,12 @@ then added an E2E check before repairing the layout. Shortened the caption and
 reduced the native figure to 190 x 210 mm; color/grayscale preview inspected.
 Extended the top-level render tripwire to include the joint fitter. These are
 render-only changes; reuse the same saved artificial aggregates for verification.
+
+Final saved-aggregate E2E passed: e2e-20261020T222425-5234, including complete
+S1 caption recovery in both PDFs, all table/figure coverage, independent numerical
+checks, privacy boundaries, old-schema/corruption rejection and stable hashes.
+The full audit HTML completed after memory pressure on the 8-GB review Mac; no
+checks were skipped and no estimation was repeated for the layout repair.
+The repaired scientific S1 page was visually inspected with its entire caption.
+Source review found no additional actionable defects. PR #21 is ready for merge;
+clinical execution remains pending that merge and the clean Mini preflight.
