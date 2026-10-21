@@ -20,6 +20,9 @@ with `docs/DECISIONS.md`; do not treat access to the repository as permission to
 draft, rerun, share or submit beyond the owner's current request.
 The versioned reading snapshot is `results/2026-10-18/`; verify its manifest and
 use its aggregate tables for current numerical claims. It is not a runnable bundle.
+For the two recorded-day supplemental endpoints, use the separate
+`results/2026-10-20-same-day-abg/` snapshot and its review state. Original B/F2
+selection and provisional approval do not approve S1 or its interpretation.
 
 ## Scientific invariants
 

@@ -350,3 +350,75 @@ scientific PDF page 2 changed; it was reinspected. The complete 3,489-page
 artificial audit passed automated bounds/glyph/collision checks; its S1 and new
 evidence-table pages were inspected manually. This is scoped visual review, not
 a manual-review claim for every audit page. All source tests and E2E checks pass.
+
+## 2026-10-20 — Qualified recorded-day clinical supplement
+
+PR #19 squash-merged at `b89d485`. Created an isolated, clean merged Mini checkout
+under the task's fresh private release directory; preserved the unrelated dirty
+research checkout and inspected active work before writes. Reused the existing
+R/Python libraries and pinned upstream readers. The first enrichment attempt
+stopped because R disallows spaces in TMPDIR; retained that attempt, used a fresh
+no-space private temporary directory, and completed `enriched-02` without changing
+original inputs or accepted products.
+
+Source qualification passed: accepted database/input/manifest identities, reviewed
+recorded-date/code/unit/threshold policies, unchanged source, exact original-field
+and fixed-index equality, and query count agreement with the prior source audit.
+Among 223,514 original indexes, 22,217 had a co-observed date; the primary complete
+population contains 22,195. All queried ordinary arterial PCO₂ and arterial pH
+records had parseable recorded dates and reviewed units. Source-row counts remain
+541,828 candidate records, including 192,909 ordinary arterial PCO₂ and 145,993
+arterial pH records; these are not patient or sample counts. No same-sample
+identifiers were recovered. Source acceptance is an automated evidence review
+under the owner-approved definition, not invented human scientific approval.
+
+`make preflight` saved `curve-preflight-20261020T173259-15090` with zero models
+fitted. One `make analyze` from clean merged `b89d485` saved
+`curve-analyze-20261020T174425-15236`; analysis elapsed time was 606.152 seconds,
+excluding input loading. All 28 estimable registered models succeeded, including
+exactly two new supplemental models. The retained constant observation position
+remains explicit. Both supplemental models have N=22,195 and the identical
+primary basis/reference; events are 11,669 and 8,809. No supplemental PIF exists.
+The supported saved grid has no fitted endpoint-curve crossings.
+
+The four-stage audit is 29,639/15,541 patients/events → 22,195/11,690 →
+22,195/11,669 → 22,195/8,809. An independent saved-bundle comparison verified
+all original model sample/registry values (except runtime), coefficients,
+covariance, curves, common fixed-contrast fields, PIF totals and signed
+contributions/covariance within 1e-10. The aggregate review command passed all
+134 checks. Source and review receipts are retained in ignored task storage;
+only sanitized aggregate evidence is included in the separate reading snapshot.
+
+The new S1 clinical preview was inspected at 190 mm in grayscale, with no bounds,
+symbol or collision issues and approximately 9-point minimum text height.
+PNG/JPG are 300 dpi; editable R and SVG/PDF masters are retained. The original
+October 18 and pairing-feasibility snapshot manifests still verify byte for byte.
+Regenerated F1-B PNG/JPG/SVG match the selected artifact. Regenerated F2 differs
+only in its top title/subtitle (the already configured policy wording); every
+pixel below that header is identical. The approved standalone B/F2 are preserved.
+Full aggregate-only report rendering and assembled-page review continue below.
+
+Final rendering completed in review `20261020T174538-23445`: 38 scientific pages,
+3,080 complete audit pages, 1,282 figure exports and no clinical input reads or
+model refits. All 92 independent full-table/covariance coverage checks passed in
+HTML and PDF. HTML has complete image assets/alt text (10 scientific; 1,276 audit).
+Browser visual inspection was blocked by the local-file URL policy; no workaround
+was attempted or browser inspection claimed. PDF/native inspection is recorded
+separately from HTML structure checks.
+
+Automated page bounds, replacement-glyph and collision checks found no issues
+across both complete PDFs and the captioned S1 page. Manual review covered all
+38 scientific pages, enlarged supplemental pages 35–37, audit page 63, pages
+137–143 and both complete supplemental model blocks 2993–3014. The separate
+captioned S1 PDF had a missing subscript glyph in its first draft; it was repaired
+and reinspected. Final S1 PNG matches the inspected preview byte for byte.
+The public QC manifest records real dimensions, source, uncertainty and review
+scope. No claim of manual review of every audit page or investigator approval.
+
+The separate `results/2026-10-20-same-day-abg/` reading snapshot contains integrated
+scientific HTML/PDF, complete audit PDF, captioned S1, vector/raster exports,
+gallery, 54 aggregate CSV tables, saved configuration and sanitized review
+receipts. Full audit HTML and execution bundles stay in ignored run storage.
+The original reading snapshots remain immutable. New investigator interpretation
+and S1 approval remain pending; no abstract was drafted. Documentation/results
+release is separate from the estimation-source commit.

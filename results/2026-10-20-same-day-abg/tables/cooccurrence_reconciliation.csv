@@ -1,0 +1,5 @@
+"stage","n","events","status","proportion","conf_low","conf_high","analysis_population_id"
+"Original arterial-evaluable",29639,15541,"assessed",0.524342926549479,0.518654608810487,0.53002493501815,"primary"
+"Co-observed patients: original arterial outcome",22195,11690,"qualified",0.526695201621987,0.520122581561799,0.533258582594817,"primary"
+"Same patients: hypercapnia on co-observed days",22195,11669,"qualified",0.525749042577157,0.51917593271405,0.532313240814231,"primary"
+"Same patients: same-day hypercapnia and acidemia",22195,8809,"qualified",0.396891191709845,0.390473002803106,0.403345066104209,"primary"

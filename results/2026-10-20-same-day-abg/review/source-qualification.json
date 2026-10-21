@@ -1,0 +1,46 @@
+{
+  "software_commit": "b89d485eb795b24a973e025bb546192901496b4d",
+  "source_acceptance": "passed",
+  "checks": {
+    "qualified_recorded_day_policy": true,
+    "original_input_identity": true,
+    "original_manifest_identity": true,
+    "accepted_database_identity": true,
+    "source_unchanged": true,
+    "all_original_fields_identical": true,
+    "all_original_indexes_identical": true,
+    "all_encounters_accounted": true,
+    "new_input_hash": true,
+    "source_summary_hash": true,
+    "source_row_counts_reconcile_to_prior_query": true,
+    "policy_sources_unchanged": true
+  },
+  "input_sha256": "013426c17805cf24e9d7a0c676aa14a91dbdf0f475c4cdb9840840920be9e50d",
+  "manifest_sha256": "d7af1d7e15cc77b0bcf0754d6041255e816997d21807f5ecad1b123ad58f8d99",
+  "evidence_sha256": "740279bbdecdc8cc0bb95596a657d7c92720594d6892382098db66ef44a3dec1",
+  "original_input_sha256": "240bea4c6c727394e01c10ab05af0a43079a7549512d11e2444a09f9def2e23c",
+  "policy_id": "same_day_arterial_cooccurrence_v1",
+  "aggregate_counts": {
+    "candidate_records": 541828,
+    "date_populated": 541828,
+    "specimen_populated": 0,
+    "source_record_id_populated": 541828,
+    "date_only_records": 541828,
+    "ordinary_arterial_pco2_records": 192909,
+    "arterial_ph_records": 145993,
+    "pco2_reviewed_unit_records": 192909,
+    "pco2_unreviewed_or_missing_unit_records": 0,
+    "pco2_parseable_recorded_date_records": 192909,
+    "ph_reviewed_unit_records": 145993,
+    "ph_unreviewed_or_missing_unit_records": 0,
+    "ph_parseable_recorded_date_records": 145993
+  },
+  "patient_states": {
+    "no_coobserved_day": 201297,
+    "coobserved_day": 22217
+  },
+  "qualification_type": "Automated identity, source coverage, policy and invariance checks under owner-approved definition",
+  "human_source_review": "not asserted",
+  "clinical_estimation": "not yet run",
+  "scientific_review": "pending"
+}

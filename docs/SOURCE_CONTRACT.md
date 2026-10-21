@@ -176,7 +176,18 @@ semantics, arterial codes, explicit units and owner-approved 6.5<pH<7.8 bounds.
 No upstream rebuild or replacement export is needed. The command is
 `make enrich-same-day-abg SOURCE_CONFIG=... INPUT=... MANIFEST=... OUTPUT=...`.
 Source values, dates and row identifiers stay private. Source qualification and
-clinical results remain pending until the new evidence and run are reconciled.
+clinical results require separate evidence and run reconciliation.
+
+The October 20 enrichment passed source qualification against the same accepted
+database and original input. All original fields and 223,514 fixed indexes were
+unchanged. All queried ordinary arterial PCO₂ and arterial pH records had reviewed
+units and parseable recorded dates. There were 22,217 co-observed indexes overall
+and 22,195 in the covariate-complete primary population. These are distinct
+denominators. The fresh clinical run from merged `b89d485` completed and its
+original estimates reconciled to the authenticated prior run within 1e-10.
+The [supplement snapshot](../results/2026-10-20-same-day-abg/README.md) records
+source, numerical and visual evidence separately; investigator approval remains
+pending. No same-sample linkage has been recovered or inferred.
 
 The legacy source-policy identifier uses the term `collection_date`; that stored
 identifier remains unchanged to preserve input/receipt identities. The source

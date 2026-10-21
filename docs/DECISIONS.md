@@ -27,9 +27,9 @@ and implementations are recoverable through the [archive index](../archive/READM
 | 2026-10-18 | Owner clarified that analysis outputs—reports, figures and aggregate result tables—may be included in Git. Raw and patient-level data remain excluded. This supersedes the earlier blanket instruction that all aggregates remain private; the current ignored-output location is a packaging issue. |
 | 2026-10-18 | Owner authorized versioning the clinical reports, B/F2 figures, gallery and aggregate tables, with README/LLM navigation and email-ready PDFs, followed by review and PR release. `results/2026-10-18/` is a reading snapshot of the existing run, not a new analysis. Raw/patient data stay excluded; abstract drafting remains deferred. |
 
-Current machine identities are input schema 4, aggregate schema 7 and
-`bmi_hypercapnia_rfs_curve_audit_v2`. Older results keep their original labels and
-are rejected by the current renderer. Numeric demographic categories remain
+Current machine identities are input schema 4, aggregate schema 9 and
+`bmi_hypercapnia_rfs_curve_audit_v4`. The original clinical snapshot retains
+schema 7 / v2; older bundles are rejected by the current renderer. Numeric demographic categories remain
 unchanged; retained Unknown categories are nonmissing, and the White reference
 includes unknown ethnicity. No causal-prevention/incidence claim is authorized.
 
@@ -95,3 +95,20 @@ spline basis. The new module is `same_day_arterial_cooccurrence_v1`, aggregate
 schema 9 / analysis v4. Historical pairing reports and the primary B/F2 snapshot
 remain immutable. Source qualification, estimation, numerical/visual review and
 investigator approval will be recorded separately after release.
+
+### Recorded-day clinical execution
+
+PR #19 merged the software at `b89d485`. Source qualification and preflight passed
+on the Mini; the fresh run `curve-analyze-20261020T174425-15236` completed once from
+that clean merged revision. Enrichment preserved every original field and index.
+Both new models succeeded on the same 22,195 primary patients, with 11,669
+co-observed-day hypercapnia events and 8,809 same-day hypercapnia–acidemia events.
+The supported saved BMI grid has no fitted curve crossings. No supplemental PIF
+was added. Original samples, coefficients, covariance, curves, fixed contrasts,
+PIFs and contribution quantities agree with the prior run within 1e-10.
+
+The [new snapshot](../results/2026-10-20-same-day-abg/README.md) is separate from the
+unchanged original and pairing-feasibility snapshots. Source acceptance and
+numerical reconciliation do not confer investigator interpretation or S1 approval;
+those remain pending. B/F2 remain the selected main figures, and abstract drafting
+remains deferred.

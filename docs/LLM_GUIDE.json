@@ -185,12 +185,35 @@
     "specification": "docs/SAME_DAY_ABG_SUPPLEMENT.md",
     "software_analysis_id": "bmi_hypercapnia_rfs_curve_audit_v4",
     "bundle_schema": 9,
-    "clinical_status": "pending_source_qualification",
+    "clinical_status": "completed_source_qualified_and_numerically_reconciled",
     "models": 2,
     "new_PIFs": 0,
     "interpretation": "same recorded-day co-occurrence; not verified same-sample pairing",
     "original_reading_snapshot": "unchanged; schema 7",
-    "scientific_review": "pending for new results",
-    "clinical_models_fitted": 0
+    "scientific_review": "pending for new results and S1; original provisional approval and B/F2 selection unchanged",
+    "clinical_models_fitted": 2,
+    "source_run_id": "curve-analyze-20261020T174425-15236",
+    "software_commit": "b89d485eb795b24a973e025bb546192901496b4d",
+    "package_directory": "results/2026-10-20-same-day-abg",
+    "package_manifest": "results/2026-10-20-same-day-abg/manifest.json",
+    "table_index": "results/2026-10-20-same-day-abg/table_index.csv",
+    "review_status": "results/2026-10-20-same-day-abg/review/clinical-visual-review.json",
+    "source_review": "automated identity, source coverage and policy checks passed; no investigator approval asserted",
+    "numerical_review": "passed: original fields/indexes identical, prior estimates agree within 1e-10, exactly two new models and no new PIFs",
+    "figure_id": "S1-same-day-ABG",
+    "shared_model_N": 22195,
+    "endpoint_event_counts": {
+      "hypercapnia_coobserved": 11669,
+      "hypercapnia_acidemia_same_day": 8809
+    },
+    "claim_sources": {
+      "counts": "tables/cooccurrence_reconciliation.csv",
+      "availability": "tables/cooccurrence_availability.csv",
+      "day_and_record_counts": "tables/cooccurrence_measurements.csv",
+      "curve_coordinates": "tables/probability_curves.csv",
+      "contrasts": "tables/fixed_bmi_contrasts.csv",
+      "curve_order_check": "tables/same_day_curve_crossings.csv"
+    },
+    "table_filter": "Select family same_day_abg in model_registry; use those exact model IDs in curve/contrast tables. Retain the shared reference population. Do not confuse observed raw proportions with adjusted probabilities."
   }
 }
