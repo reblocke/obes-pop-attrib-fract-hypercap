@@ -33,7 +33,7 @@ execute:
 root<-Sys.getenv("BMI_REPO_ROOT");run<-Sys.getenv("BMI_RUN_DIR");review<-Sys.getenv("BMI_REVIEW_DIR")
 if(!nzchar(root)||!dir.exists(run)||!dir.exists(review))stop("Use explicit saved-run rendering")
 source(file.path(root,"R","analysis.R"));Sys.setenv(BMI_REPORT_ID="scientific")
-load_common_input<-load_triangulation_input<-bmi_load_input<-fit_bmi_model<-fit_registered_models<-bmi_run_analysis<-function(...)stop("Render tripwire: clinical input/model fitting forbidden")
+load_common_input<-load_triangulation_input<-bmi_load_input<-fit_bmi_model<-fit_registered_models<-bmi_multinomial_fit<-bmi_run_analysis<-function(...)stop("Render tripwire: clinical input/model fitting forbidden")
 source(file.path(root,"reports","table_passthrough.R"))
 bmi_report_table<-bmi_raw_table_writer(bmi_report_table)
 bundle<-bmi_read_bundle(run);a<-bundle$analysis
@@ -149,7 +149,9 @@ for(group in grep("_current$",unlist(bundle$config$analysis_populations),value=T
 
 This secondary analysis uses any recorded calendar date within the existing index encounter with both usable ordinary arterial PCO~2~ and arterial pH. It is **same recorded-day co-occurrence; not verified same-sample pairing**. The export dates when results were recorded; it does not identify a shared blood sample, collection time or elapsed 24-hour interval. Validity screens are 5<PCO~2~<200 mm Hg and 6.5<pH<7.8, applied before display rounding.
 
-Both endpoints use the same patients with at least one co-observed day: any PaCO~2~ ≥45 on such a day, and any such day also containing pH <7.35. Results may come from different samples. Elevated PCO~2~ on one date and low pH on another cannot establish co-occurrence. Patients without a valid co-observed day have unknown supplemental outcomes. Additional unusable or single-analyte records remain audited without erasing usable days. A negative describes eligible recorded evidence only. The primary numeric BMI spline basis, inherited adjustment and common supplemental reference population are retained. No additional PIF is calculated.
+The source endpoints use the same patients with at least one co-observed day: any PaCO~2~ ≥45 on such a day, and any such day also containing pH <7.35. Results may come from different samples. Elevated PCO~2~ on one date and low pH on another cannot establish co-occurrence. Patients without a valid co-observed day have unknown supplemental outcomes. Additional unusable or single-analyte records remain audited without erasing usable days. A negative describes eligible recorded evidence only. The primary numeric BMI spline basis, inherited adjustment and common supplemental reference population are retained. A single unpenalized multinomial logistic spline assigns each patient to no documented hypercapnia, hypercapnia without documented same-day acidemia, or hypercapnia with same-day acidemia. Any eligible hypercapnia–acidemia day takes priority, including patients with other hypercapnic days without acidemia. The baseline outcome is no documented hypercapnia. All three probabilities are standardized over the same patients; full cross-category covariance supplies pointwise intervals and comparisons of component changes. No additional PIF is calculated.
+
+The full observed BMI range is the main relationship, with sparse regions flagged. BMI 40–45 is a prespecified numerical summary, not a biological cutoff or fitting restriction. Every supported five-unit interval is also reported. These are descriptive pointwise contrasts without multiplicity adjustment; separate significance counts do not establish differences in associations.
 
 ```{r}
 #| label: same-day-abg-supplement
@@ -160,11 +162,12 @@ shown<-data.frame(Stage=z$stage,Patients=z$n,Events=z$events,
   Observed=ifelse(is.na(z$proportion),"Unavailable",sprintf("%.2f%% (95%% CI %.2f–%.2f%%)",100*z$proportion,100*z$conf_low,100*z$conf_high)),Status=z$status)
 bmi_report_table(shown,"Four-stage patient/evidence reconciliation; raw proportions with Wilson 95% intervals",keys="Stage")
 figure("S1-same-day-ABG")
-bmi_report_table(a$fixed_bmi_contrasts[grepl("::same_day_abg/",a$fixed_bmi_contrasts$model_id),],"Co-occurrence BMI 45 versus 40 contrasts",keys="model_id")
-bmi_report_table(a$same_day_curve_crossings,"Supplemental endpoint curve-order check",keys="status")
+bmi_report_table(a$cooccurrence_categories,"Mutually exclusive patient categories; any acidemia co-occurrence takes priority",keys="category_id")
+bmi_report_table(bmi_same_day_contrast_view(a$same_day_contrasts),"Component magnitudes across BMI: absolute changes in percentage points and probability ratios, with 95% intervals",keys=c("BMI interval","Outcome"))
+bmi_report_table(a$same_day_curve_reconciliation,"Joint probability and stacked-component reconciliation",keys="status")
 ```
 
-Requiring both analytes on the same date introduces additional selection. The reconciliation separates patient restriction, restriction to co-observed days, and addition of low pH. Values can represent different samples or periods before and after treatment; co-occurrence does not establish simultaneous hypercapnic acidemia, acute respiratory failure or chronic compensation. Primary arterial findings on other dates remain unchanged. Separate logistic curves can cross despite nested observed outcomes; flagged crossings require scientific review, not clipping or a replacement model. The endpoints are correlated; interval overlap does not test differences between their BMI associations.
+Requiring both analytes on the same date introduces additional selection. The reconciliation separates patient restriction, restriction to co-observed days, and addition of low pH. Values can represent different samples or periods before and after treatment; co-occurrence does not establish simultaneous hypercapnic acidemia, acute respiratory failure or chronic compensation. Primary arterial findings on other dates remain unchanged. The joint model guarantees coherent category probabilities without clipping. In the stacked panel, band thickness is the component probability and the upper boundary is total hypercapnia. The common-baseline panel shows both components with their own intervals. The signed with-minus-without change contrasts use joint covariance; interval overlap is not the comparison test. Neither documented category establishes chronic compensation or the mechanism of acidemia.
 
 # Discussion and example conclusion
 

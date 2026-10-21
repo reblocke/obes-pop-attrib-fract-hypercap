@@ -4,7 +4,7 @@ This is the authority for the RFS curve/audit analysis. The retained filename
 reflects the earlier triangulation design; that design is retired. Machine
 configuration is [bmi_hypercapnia_analysis.json](../config/bmi_hypercapnia_analysis.json),
 with input fields in the [variable dictionary](../config/variable_dictionary.csv).
-The active identity is `bmi_hypercapnia_rfs_curve_audit_v4`, aggregate schema 9,
+The active identity is `bmi_hypercapnia_rfs_curve_audit_v5`, aggregate schema 10,
 metadata-qualified input schema 4. Prior schemas fail explicitly; no replay or
 migration layer is maintained. See [decisions](DECISIONS.md) for dated history.
 
@@ -163,13 +163,15 @@ require a fresh qualified run and preserved prior evidence.
 
 ## Same-day arterial co-occurrence supplement
 
-See [the approved supplement](SAME_DAY_ABG_SUPPLEMENT.md). Exactly two secondary
-positions reuse primary indexes, adjustment and knots on the same co-observed
-population. Any qualifying recorded date within the index encounter may contribute;
+See [the approved supplement](SAME_DAY_ABG_SUPPLEMENT.md). One joint multinomial spline partitions the same co-observed
+population into no hypercapnia, hypercapnia without documented same-day acidemia,
+and hypercapnia with same-day acidemia. Any acidemia co-occurrence takes priority.
+The model reuses primary indexes, adjustment and knots. Full-range stacked curves
+and component contrasts use full cross-category covariance. Any qualifying recorded date within the index encounter may contribute;
 threshold findings must share that date. This is not verified same-sample pairing.
 No new PIF is computed. The superseded pairing feasibility remains historical.
 
-Clinical execution from merged `b89d485` completed on October 20, 2026. The
+Historical binary-supplement clinical execution from merged `b89d485` completed on October 20, 2026. The
 [separate supplement snapshot](../results/2026-10-20-same-day-abg/README.md)
 contains the two successful models and reconciled evidence; original estimates
 agree with the authenticated prior run within 1e-10. Investigator approval for

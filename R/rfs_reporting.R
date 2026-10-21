@@ -114,49 +114,84 @@ bmi_export_figures <- function(bundle,output) {
 }
 
 bmi_same_day_figure <- function(bundle,output) {
-  a<-bundle$analysis;s<-a$cooccurrence_status
-  curves<-a$probability_curves[grepl("::same_day_abg/",a$probability_curves$model_id),]
-  ids<-paste0("primary::same_day_abg/encounter/",c("hypercapnia","hypercapnia_acidemia_cooccurrence"),"/spline")
-  upper<-curves$conf_high[is.finite(curves$conf_high)]
-  limit<-if(length(upper))min(1,max(.1,ceiling(max(upper)*10)/10))else 1
-  plots<-list()
-  for(i in seq_along(ids)) {
-    z<-curves[curves$model_id==ids[i],,drop=FALSE]
-    r<-a$model_registry[a$model_registry$model_id==ids[i],,drop=FALSE]
-    plots[[i]]<-bmi_curve_plot(z,c("Hypercapnia on co-observed days","Same-day hypercapnia and acidemia")[i])
-    if(nrow(z)&&any(is.finite(z$probability)))plots[[i]]<-plots[[i]]+
-      ggplot2::scale_y_continuous(labels=function(x)paste0(100*x,"%"),limits=c(0,limit),expand=ggplot2::expansion(mult=c(.02,.03)))+
-      ggplot2::labs(y="Modeled probability")
-    if(nrow(r)&&!is.na(r$n_model)) {
-      subtitle<-paste0("Shared model/ref N = ",format(r$n_model,big.mark=","),"\nEvents = ",format(r$n_events,big.mark=","))
-      contrast<-a$fixed_bmi_contrasts[a$fixed_bmi_contrasts$model_id==ids[i],]
-      if(nrow(contrast)&&contrast$status=="estimated")subtitle<-paste0(subtitle,
-        sprintf("\nBMI 40: %.1f%% (95%% CI %.1f–%.1f%%)",100*contrast$probability_low_bmi,100*contrast$probability_low_bmi_low,100*contrast$probability_low_bmi_high),
-        sprintf("\nBMI 45: %.1f%% (95%% CI %.1f–%.1f%%)",100*contrast$probability_high_bmi,100*contrast$probability_high_bmi_low,100*contrast$probability_high_bmi_high))
-      plots[[i]]<-plots[[i]]+ggplot2::labs(subtitle=subtitle)
+  a<-bundle$analysis;id<-"primary::same_day_abg/encounter/multinomial_spline"
+  r<-a$model_registry[a$model_registry$model_id==id,,drop=FALSE]
+  curves<-a$probability_curves[a$probability_curves$model_id==id,,drop=FALSE]
+  good<-curves[is.finite(curves$probability),,drop=FALSE]
+  label<-c(with_acidemia="With same-day acidemia",without_acidemia="Without documented same-day acidemia")
+  colours<-c(with_acidemia="#246477",without_acidemia="#995C28")
+  if(nrow(good)) {
+    total<-good[good$outcome_id=="any_hypercapnia",];with<-good[good$outcome_id=="with_acidemia",];without<-good[good$outcome_id=="without_acidemia",]
+    stopifnot(identical(total$bmi,with$bmi),identical(total$bmi,without$bmi),max(abs(total$probability-with$probability-without$probability))<1e-10)
+    stacked<-data.frame(bmi=total$bmi,with=with$probability,total=total$probability,
+      total_low=total$conf_low,total_high=total$conf_high,sparse=with$locally_sparse|without$locally_sparse|total$locally_sparse)
+    stacked$segment<-cumsum(c(TRUE,head(stacked$sparse,-1)!=tail(stacked$sparse,-1)))
+    components<-good[good$outcome_id %in% names(label),]
+    components$label<-factor(label[components$outcome_id],levels=label)
+    components$segment<-ave(seq_len(nrow(components)),components$outcome_id,FUN=function(ix)cumsum(c(TRUE,head(components$locally_sparse[ix],-1)!=tail(components$locally_sparse[ix],-1))))
+    bounds<-range(total$bmi);display_bounds<-c(5*floor(bounds[1]/5),5*ceiling(bounds[2]/5))
+    xscale<-function()ggplot2::scale_x_continuous(limits=display_bounds,breaks=seq(display_bounds[1],display_bounds[2],by=10),expand=ggplot2::expansion(mult=c(.01,.01)))
+    yscale<-function()ggplot2::scale_y_continuous(limits=c(0,1),breaks=c(0,.25,.5,.75,1),labels=function(x)paste0(100*x,"%"),expand=ggplot2::expansion(mult=c(0,.02)))
+    sparse<-stacked[stacked$sparse,,drop=FALSE]
+    top<-ggplot2::ggplot(stacked,ggplot2::aes(bmi))+
+      ggplot2::geom_ribbon(ggplot2::aes(ymin=0,ymax=with),fill="#8CB8C1")+
+      ggplot2::geom_ribbon(ggplot2::aes(ymin=with,ymax=total),fill="#E4BF96")+
+      ggplot2::geom_rect(data=sparse,ggplot2::aes(xmin=pmax(bounds[1],bmi-bundle$config$grid_step/2),xmax=pmin(bounds[2],bmi+bundle$config$grid_step/2),ymin=0,ymax=1),fill="white",alpha=.45,inherit.aes=FALSE)+
+      ggplot2::geom_ribbon(ggplot2::aes(ymin=total_low,ymax=total_high),fill="grey35",alpha=.20)+
+      ggplot2::geom_line(ggplot2::aes(y=total,linetype=sparse,group=segment),linewidth=.65)+
+      ggplot2::geom_line(ggplot2::aes(y=with,linetype=sparse,group=segment),colour=colours['with_acidemia'],linewidth=.55)+
+      ggplot2::scale_linetype_manual(values=c('FALSE'="solid",'TRUE'="dotted"),guide="none")+xscale()+yscale()+
+      ggplot2::labs(title="A  Total hypercapnia, divided into its two components",subtitle="Band thickness = component probability; top boundary = total (95% CI)",x=NULL,y="Modeled probability")+bmi_theme()
+    at<-which.min(abs(stacked$bmi-(bounds[1]+.59*diff(bounds))))
+    top<-top+ggplot2::annotate("text",x=stacked$bmi[at],y=stacked$with[at]/2,label="With same-day acidemia",size=3.3,colour="#153A45")+
+      ggplot2::annotate("label",x=stacked$bmi[at],y=(stacked$with[at]+stacked$total[at])/2,label="Without documented\nsame-day acidemia",size=3.3,lineheight=1.05,colour="#573315",fill="white",alpha=.9,linewidth=0)
+    comparison<-ggplot2::ggplot(components,ggplot2::aes(bmi,probability,colour=outcome_id,fill=outcome_id))+
+      ggplot2::geom_ribbon(ggplot2::aes(ymin=conf_low,ymax=conf_high),alpha=.17,colour=NA)+
+      ggplot2::geom_line(ggplot2::aes(linetype=locally_sparse,group=interaction(outcome_id,segment)),linewidth=.7)+
+      ggplot2::scale_colour_manual(values=colours,guide="none")+ggplot2::scale_fill_manual(values=colours,guide="none")+
+      ggplot2::scale_linetype_manual(values=c('FALSE'="solid",'TRUE'="dotted"),guide="none")+xscale()+yscale()+
+      ggplot2::labs(title="B  Component curves on a common baseline",subtitle="Pointwise 95% intervals; dotted segments mark sparse local evidence",x=NULL,y="Modeled probability")+bmi_theme()
+    # Direct labels at an interior BMI stay inside the full-range axis in grayscale.
+    for(o in names(label)) {
+      z<-components[components$outcome_id==o,];j<-which.min(abs(z$bmi-(bounds[1]+.57*diff(bounds))))
+      comparison<-comparison+ggplot2::annotate("text",x=z$bmi[j],y=if(o=="with_acidemia")min(.96,z$conf_high[j]+.045)else max(.03,z$probability[j]-.065),label=if(o=="with_acidemia")label[o]else"Without documented same-day acidemia",colour=colours[o],size=3.2)
     }
-  }
-  bins<-a$distribution_bins[a$distribution_bins$population_id=="primary::C_same_day_abg"&a$distribution_bins$variable_id=="bmi",]
-  if(nrow(bins)) {
+    bins<-a$distribution_bins[a$distribution_bins$population_id=="primary::C_same_day_abg"&a$distribution_bins$variable_id=="bmi",]
+    # Geometries may straddle the observed endpoints; coordinate clipping does not
+    # drop boundary bins or their patients as hard scale limits would.
     freq<-ggplot2::ggplot(bins,ggplot2::aes((lower+upper)/2,n))+
-      ggplot2::geom_col(ggplot2::aes(width=upper-lower),fill="grey45")+
-      ggplot2::labs(title="BMI distribution in the shared co-observed population",x="BMI (kg/m²)",y="Patients")+bmi_theme()
-  }else freq<-bmi_empty_plot("Co-observed population unavailable",if(nrow(s))s$reason[1]else"Source audit not supplied")
+      ggplot2::geom_col(ggplot2::aes(width=upper-lower),fill="grey50")+
+      ggplot2::scale_x_continuous(breaks=seq(display_bounds[1],display_bounds[2],by=10),expand=ggplot2::expansion(mult=c(.01,.01)))+
+      ggplot2::coord_cartesian(xlim=display_bounds)+
+      ggplot2::labs(title="C  Patients in the shared co-observed population",x="BMI (kg/m²)",y="Patients")+bmi_theme()
+    utils::write.csv(good,file.path(output,"same-day-component-display.csv"),row.names=FALSE)
+    plots<-list(top,comparison,freq)
+  }else {
+    why<-if(nrow(r))paste(r$status,r$failure_reason,sep=": ")else"No model registered"
+    plots<-list(bmi_empty_plot("Stacked components unavailable",why),bmi_empty_plot("Component intervals unavailable",why),bmi_empty_plot("No modeled comparison",why))
+  }
+  counts<-a$cooccurrence_categories
+  fmt<-function(x)ifelse(is.na(x),"unavailable",format(x,big.mark=",",trim=TRUE))
+  count<-function(k)fmt(counts$n[match(k,counts$category_id)])
+  subtitle<-paste0("Shared model/reference N = ",if(nrow(r))fmt(r$n_model)else"unavailable",
+    "; with acidemia: ",count("with_acidemia"),"; without: ",count("without_acidemia"))
   draw<-function() {
     grid::grid.newpage()
-    grid::grid.text("BMI and same-day arterial PCO₂/pH co-occurrence",x=.02,y=.98,just=c("left","top"),gp=grid::gpar(fontsize=11,fontface="bold"))
-    grid::grid.text(if(bundle$manifest$mode=="fixture")"ARTIFICIAL DATA ONLY | not verified same-sample pairing"else"Same recorded-day co-occurrence; not verified same-sample pairing",x=.02,y=.95,just=c("left","top"),gp=grid::gpar(fontsize=9))
-    grid::pushViewport(grid::viewport(y=.46,height=.88,layout=grid::grid.layout(2,2,heights=grid::unit(c(2.5,1),"null"))))
-    for(i in 1:2)print(plots[[i]],vp=grid::viewport(layout.pos.row=1,layout.pos.col=i))
-    print(freq,vp=grid::viewport(layout.pos.row=2,layout.pos.col=1:2));grid::popViewport()
+    grid::grid.text("BMI and hypercapnia with and without same-day acidemia",x=.02,y=.985,just=c("left","top"),gp=grid::gpar(fontsize=11,fontface="bold"))
+    grid::grid.text(if(bundle$manifest$mode=="fixture")"ARTIFICIAL DATA ONLY | not verified same-sample pairing"else"Same recorded-day co-occurrence; not verified same-sample pairing",x=.02,y=.962,just=c("left","top"),gp=grid::gpar(fontsize=9))
+    grid::grid.text(subtitle,x=.02,y=.94,just=c("left","top"),gp=grid::gpar(fontsize=9))
+    grobs<-lapply(plots,ggplot2::ggplotGrob)
+    widths<-do.call(grid::unit.pmax,lapply(grobs,`[[`,"widths"))
+    for(i in seq_along(grobs))grobs[[i]]$widths<-widths
+    grid::pushViewport(grid::viewport(y=.46,height=.89,layout=grid::grid.layout(3,1,heights=grid::unit(c(2.1,2.1,1),"null"))))
+    for(i in 1:3) {grid::pushViewport(grid::viewport(layout.pos.row=i));grid::grid.draw(grobs[[i]]);grid::popViewport()}
+    grid::popViewport()
   }
-  bmi_export(draw,file.path(output,"S1-same-day-ABG"),height_mm=200)
-  caption<-paste("Same recorded-day co-occurrence; not verified same-sample pairing. The primary source-entry population retains its fixed index encounters.",
-    "Both endpoints use identical patients with valid arterial PCO₂ and pH on at least one recorded date, inherited adjustment and primary numeric BMI spline basis.",
-    "Hypercapnia is PaCO₂ ≥45 mm Hg on a co-observed day; co-occurrence additionally requires pH <7.35 on that date, potentially from another sample. Different dates cannot be combined.",
-    "Curves standardize to the shared outcome-evaluable population. Shading and printed intervals are pointwise model-based 95% intervals; dotted segments indicate local sparsity and dashed segments extrapolation.",
-    "The lower panel counts patients by original BMI. Availability and unknown evidence are reported separately. No supplemental PIF is calculated; unavailable or failed estimates remain empty.",
-    "Requiring both analytes adds selection. Findings may span different treatment periods and do not establish simultaneous acidemia, acute respiratory failure or compensation. Crossing curves require scientific review.")
+  bmi_export(draw,file.path(output,"S1-same-day-ABG"),height_mm=210)
+  caption<-paste("Same recorded-day co-occurrence; not verified same-sample pairing. Primary fixed-index patients with both arterial analytes share inherited adjustment and the primary BMI spline.",
+    "Any eligible day with PaCO₂ ≥45 mm Hg and pH <7.35 assigns the with-acidemia category; remaining hypercapnic patients have no documented same-day acidemia. Different samples may contribute.",
+    "A: band thicknesses give component probabilities; the upper boundary is total hypercapnia. B: components share a baseline. Shading denotes pointwise 95% intervals using full joint covariance. C: shared-population BMI frequencies.",
+    "Fading/dotted lines mark local windows below 30 patients or five events/non-events; marginal checks do not establish joint support. These recorded outcomes do not establish simultaneous physiology, acute respiratory failure or compensation. Selection, treatment timing and confounding remain limitations.")
   if(bundle$manifest$mode=="fixture")caption<-paste("ARTIFICIAL DATA ONLY.",caption)
-  data.frame(figure_id="S1-same-day-ABG",caption=caption,alt_text=caption,source_tables="probability_curves;fixed_bmi_contrasts;model_registry;distribution_bins;cooccurrence_status")
+  data.frame(figure_id="S1-same-day-ABG",caption=caption,alt_text=caption,source_tables="probability_curves;same_day_contrasts;same_day_probability_covariance;cooccurrence_categories;model_registry;distribution_bins")
 }

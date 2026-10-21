@@ -29,7 +29,7 @@ bmi_bind <- function(x) {
 }
 bmi_config <- function(path = "config/bmi_hypercapnia_analysis.json") {
   x <- jsonlite::read_json(path, simplifyVector = FALSE)
-  if (!identical(x$analysis_id, "bmi_hypercapnia_rfs_curve_audit_v4") || x$bundle_schema != 9 ||
+  if (!identical(x$analysis_id, "bmi_hypercapnia_rfs_curve_audit_v5") || x$bundle_schema != 10 ||
       x$population_scope_id != "original_selected_encounters_v1" || x$source_policy_id != "unadjusted_pco2_v1" ||
       x$bmi_policy_id != "available_encounter_or_prior_bmi_v1") stop("Unreviewed analysis/source/population policy")
   if (!identical(x$standardization_policy,"outcome_observed_v1") || !identical(x$mnar_enabled,FALSE)) stop("Full-cohort MAR/MNAR projections are superseded")
@@ -37,7 +37,7 @@ bmi_config <- function(path = "config/bmi_hypercapnia_analysis.json") {
       !identical(unlist(x$full_model_populations,use.names=FALSE),"primary") ||
       !identical(unlist(x$descriptive_populations,use.names=FALSE),"obesity_only")) stop("Unreviewed population roles; obesity-only is descriptive")
   if (any(vapply(x$policies,function(p)!identical(p$target,"model_observed"),logical(1)))) stop("Policies must retain the model-observed population")
-  for (name in c("quantile_type", "grid_step", "bmi_bin_width", "chunk_size", "ecdf_grid_size", "kde_min_n", "kde_min_distinct", "sparse_n", "sparse_events")) {
+  for (name in c("quantile_type", "grid_step", "bmi_bin_width", "chunk_size", "ecdf_grid_size", "kde_min_n", "kde_min_distinct", "sparse_n", "sparse_events", "multinomial_maxit")) {
     if (length(x[[name]]) != 1 || !is.numeric(x[[name]]) || !is.finite(x[[name]]) || x[[name]] <= 0) stop("Invalid config: ", name)
   }
   if (x$quantile_type != 7 || !identical(as.numeric(unlist(x$knot_probabilities)), c(.05,.35,.65,.95))) stop("Unreviewed spline specification")

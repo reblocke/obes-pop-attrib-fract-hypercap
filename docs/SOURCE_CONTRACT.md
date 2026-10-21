@@ -193,3 +193,9 @@ The legacy source-policy identifier uses the term `collection_date`; that stored
 identifier remains unchanged to preserve input/receipt identities. The source
 field it actually checks is the recorded-result date. This wording correction
 does not change existing calendar-day selections or numerical results.
+
+The joint-component update reuses this same qualified enrichment unchanged. Its
+three mutually exclusive categories are derived from the authenticated nested
+flags, with any same-day hypercapnia–acidemia event taking priority. No source
+re-extraction or stronger temporal/specimen claim is introduced. The new model
+requires a fresh aggregate run and numerical reconciliation, not a new raw export.

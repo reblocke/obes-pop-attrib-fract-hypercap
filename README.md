@@ -17,7 +17,7 @@ You do not need to run the code to review the study. The
 reports, selected figures and complete aggregate tables in Git. A normal clone
 includes these results; raw and patient-level data remain excluded.
 
-The **[same-day arterial supplement](results/2026-10-20-same-day-abg/README.md)**
+The **[historical binary same-day arterial supplement](results/2026-10-20-same-day-abg/README.md)**
 adds two completed clinical models, an updated scientific report, a complete
 audit and figure S1. It uses **same recorded-day co-occurrence; not verified
 same-sample pairing**. The original analysis and B/F2 selection remain unchanged;
@@ -106,7 +106,7 @@ unmeasured confounding. The [source contract](docs/SOURCE_CONTRACT.md) and
 | [LLM reading guide](docs/LLM_GUIDE.json) / [agent instructions](AGENTS.md) | Structured evidence navigation and operating rules for assistants |
 | [Work log](WORKLOG.md) / [archive index](archive/README.md) | Execution evidence and recovery of superseded versions |
 
-The active analysis is `bmi_hypercapnia_rfs_curve_audit_v4` (aggregate schema 9).
+The active analysis is `bmi_hypercapnia_rfs_curve_audit_v5` (aggregate schema 10).
 `R/analysis.R` loads the current modules; `scripts/run_bmi_hypercapnia.R` audits
 and estimates; `scripts/render_bmi_hypercapnia.R` renders saved aggregates. The
 [scientific](reports/bmi_hypercapnia.qmd) and [audit](reports/bmi_hypercapnia_audit.qmd)
@@ -140,7 +140,7 @@ reported numbers; historical files are background only.
 
 Run from the repository root with existing **R ≥4.3**, Quarto,
 XeLaTeX/TinyTeX and Poppler (`pdftotext`, `pdfinfo`). Required R packages are
-`ggplot2`, `jsonlite`, `digest`, `lpSolve`, `knitr` and `rmarkdown`; clinical input
+`ggplot2`, `jsonlite`, `digest`, `lpSolve`, `nnet`, `knitr` and `rmarkdown`; clinical input
 reading also uses `haven`. Nothing is installed automatically. The full audit
 exports many figures and tables, so this is a complete integration run, not a
 quick preview. No portable runtime estimate is established.
@@ -156,7 +156,7 @@ fresh `artifacts/triangulation/e2e-.../receipt.json` with `status: passed`, alon
 does not reproduce clinical estimates or confer scientific approval. `make fixture`
 runs the artificial example without the E2E assertions.
 
-For presentation changes, use an explicitly selected saved schema-9 run:
+For presentation changes, use an explicitly selected saved schema-10 run:
 
 ```bash
 make render RUN="artifacts/triangulation/<exact-saved-run>"
@@ -208,16 +208,20 @@ traceable runs. Submission and external sharing are separate actions.
 
 ## Same-day arterial PCO₂/pH supplement
 
-The [supplement specification](docs/SAME_DAY_ABG_SUPPLEMENT.md) adds two models
-of same recorded-day co-occurrence, **not verified same-sample pairing**.
-Both use the same co-observed primary patients, inherited adjustment and primary
-BMI spline knots; no new PIF is computed. Current software uses aggregate schema 9.
-The primary clinical snapshot and selected B/F2 remain unchanged. Source
-qualification and clinical estimation completed from merged `b89d485` on October
+The [supplement specification](docs/SAME_DAY_ABG_SUPPLEMENT.md) now uses one
+joint multinomial spline to distinguish hypercapnia with and without documented
+same-day acidemia, with no documented hypercapnia as the reference. Any eligible
+hypercapnia–acidemia day takes priority. S1 stacks the two components across the
+full observed BMI range and shows their separate intervals on a common baseline.
+The input and primary models/PIFs are unchanged. Current software uses aggregate
+schema 10; the schema-9 snapshot is preserved as historical evidence. Joint
+clinical execution and S1 approval are pending separate receipts.
+The primary clinical snapshot and selected B/F2 remain unchanged. Historical binary
+supplement qualification and clinical estimation completed from merged `b89d485` on October
 20. Both supplemental models use 22,195 patients: 11,669 have hypercapnia on a
 co-observed day and 8,809 have same-day hypercapnia–acidemia co-occurrence.
 Original model samples, coefficients, curves and PIFs agree with the prior run
-within 1e-10. See the [new reading packet](results/2026-10-20-same-day-abg/README.md)
+within 1e-10. See the [historical binary reading packet](results/2026-10-20-same-day-abg/README.md)
 for the full count reconciliation, intervals, reports and separate review states.
 
 The [historical pairing-feasibility report](results/2026-10-20-paired-abg/README.md)

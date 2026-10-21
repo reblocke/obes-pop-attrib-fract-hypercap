@@ -17,6 +17,26 @@ validate_analysis_bundle <- function(a) {
     expected<-a$model_registry$training_population_id[match(a$policy_totals$model_id,a$model_registry$model_id)]
     if(anyNA(expected)||any(a$policy_totals$reference_id!=expected))stop("Scenario reference differs from model-observed population")
   }
+  # The joint supplemental decomposition is a probability partition, not two
+  # independently fitted binary curves. Validate saved rows without refitting.
+  if(nrow(a$cooccurrence_categories) && all(a$cooccurrence_categories$status=="qualified")) {
+    z<-a$cooccurrence_categories
+    if(anyNA(z$n)||sum(z$n)!=z$N[1]||any(z$N!=z$N[1])||!setequal(z$category_id,bmi_same_day_classes))stop("Joint category count mismatch")
+  }
+  joint<-a$model_registry[a$model_registry$family=="same_day_abg",,drop=FALSE]
+  if(nrow(joint)) {
+    if(nrow(joint)!=1L||joint$model_form!="multinomial_spline"||any(a$policy_totals$model_id==joint$model_id))stop("Invalid joint supplemental registry")
+    z<-a$probability_curves[a$probability_curves$model_id==joint$model_id & a$probability_curves$status=="estimated",]
+    for(ix in split(seq_len(nrow(z)),z$bmi)) {
+      row<-z[ix,];pp<-setNames(row$probability,row$outcome_id)
+      if(nrow(row)!=4L||anyDuplicated(row$outcome_id)||!setequal(row$outcome_id,c(bmi_same_day_classes,"any_hypercapnia"))||any(!is.finite(pp)|pp<0|pp>1)||abs(sum(pp[bmi_same_day_classes])-1)>1e-9||abs(sum(pp[bmi_same_day_classes[-1]])-pp["any_hypercapnia"])>1e-9)stop("Joint probability partition mismatch")
+      cv<-a$same_day_probability_covariance[a$same_day_probability_covariance$bmi==row$bmi[1],]
+      if(nrow(cv)!=16L||any(!is.finite(cv$covariance)))stop("Missing joint probability covariance")
+      component<-cv$outcome1 %in% bmi_same_day_classes[-1]&cv$outcome2 %in% bmi_same_day_classes[-1]
+      total<-cv$outcome1=="any_hypercapnia"&cv$outcome2=="any_hypercapnia"
+      if(sum(total)!=1L||abs(sum(cv$covariance[component])-cv$covariance[total])>1e-9)stop("Joint total covariance mismatch")
+    }
+  }
   bmi_validate_ledger(a)
   if(nrow(a$model_registry)) {
     if(nrow(a$expected_models) && !setequal(a$model_registry$model_id,a$expected_models$model_id))stop("Configured model registry mismatch")
@@ -42,7 +62,7 @@ validate_analysis_bundle <- function(a) {
   }
   invisible(TRUE)
 }
-bmi_estimation_files <- function() c("R/analysis.R","R/input_contract.R","R/cohort_audit.R","R/bmi_models.R","R/standardization.R","R/rfs_analysis.R","R/same_day_abg.R","config/bmi_hypercapnia_analysis.json","config/variable_dictionary.csv","config/common_index_source_policy.json","config/common_index_bmi_policy.json")
+bmi_estimation_files <- function() c("R/analysis.R","R/input_contract.R","R/cohort_audit.R","R/bmi_models.R","R/standardization.R","R/rfs_analysis.R","R/same_day_abg.R","R/same_day_multinomial.R","config/bmi_hypercapnia_analysis.json","config/variable_dictionary.csv","config/common_index_source_policy.json","config/common_index_bmi_policy.json")
 bmi_hash_files <- function(files) as.list(setNames(vapply(file.path(tri_repo_root(),files),tri_sha256,character(1)),files))
 bmi_write_bundle <- function(a,path,config,receipt,mode="fixture") {
   validate_analysis_bundle(a)
@@ -53,7 +73,7 @@ bmi_write_bundle <- function(a,path,config,receipt,mode="fixture") {
   jsonlite::write_json(receipt,file.path(path,"input_receipt.json"),auto_unbox=TRUE,pretty=TRUE,digits=NA)
   writeLines(capture.output(sessionInfo()),file.path(path,"session-info.txt"))
   files<-list.files(path,full.names=TRUE)
-  manifest<-list(schema_version=9L,analysis_id=config$analysis_id,run_id=basename(path),mode=mode,
+  manifest<-list(schema_version=10L,analysis_id=config$analysis_id,run_id=basename(path),mode=mode,
     created_utc=format(Sys.time(),tz="UTC",usetz=TRUE),estimation_sources=bmi_hash_files(bmi_estimation_files()),
     files=as.list(setNames(vapply(files,tri_sha256,character(1)),basename(files))),
     source_status=if(mode=="fixture")"artificial_only"else receipt$source_status,
@@ -67,7 +87,7 @@ bmi_write_bundle <- function(a,path,config,receipt,mode="fixture") {
 bmi_read_bundle <- function(path,check_sources=TRUE) {
   mf<-file.path(path,"bundle_manifest.json");if(!file.exists(mf))stop("Missing bundle manifest")
   m<-jsonlite::read_json(mf,simplifyVector=FALSE)
-  if(!identical(m$schema_version,9L)||!identical(m$analysis_id,"bmi_hypercapnia_rfs_curve_audit_v4"))stop("Superseded analysis; rerun under the current design")
+  if(!identical(m$schema_version,10L)||!identical(m$analysis_id,"bmi_hypercapnia_rfs_curve_audit_v5"))stop("Superseded analysis; rerun under the current design")
   for(name in names(m$files)) {
     if(basename(name)!=name||!file.exists(file.path(path,name))||!identical(tri_sha256(file.path(path,name)),m$files[[name]]))stop("Bundle hash mismatch: ",name)
   }
@@ -333,7 +353,14 @@ bmi_export_population_figures <- function(bundle,output) {
   if(nrow(a$model_registry))for(i in seq_len(nrow(a$model_registry))) {
     id<-a$model_registry$model_id[i];d<-a$model_residual_bins
     if(nrow(d))d<-d[d$model_id==id,,drop=FALSE]
-    if(nrow(d)) {
+    if(nrow(d) && a$model_registry$family[i]=="same_day_abg") {
+      z<-d[d$diagnostic=="bmi",,drop=FALSE];z$position<-as.numeric(z$group)
+      chart<-ggplot2::ggplot(z,ggplot2::aes(position,observed))+ggplot2::geom_point(shape=1,size=2)+
+        ggplot2::geom_line(ggplot2::aes(y=fitted),linewidth=.6)+ggplot2::facet_wrap(~category_id,ncol=1)+
+        ggplot2::scale_y_continuous(labels=function(x)paste0(100*x,"%"),limits=c(0,1))+
+        ggplot2::labs(title="Joint multinomial model: apparent fit by category",subtitle=paste0("Shared training N = ",a$model_registry$n_model[i],"; open points observed, lines fitted"),x="Original BMI band (kg/m²)",y="Probability")+bmi_theme()
+      draw<-local({chart<-chart;function()print(chart)})
+    }else if(nrow(d)) {
       z<-d[d$diagnostic %in% c("BMI","fitted_probability"),,drop=FALSE]
       z$position<-suppressWarnings(as.numeric(z$group))
       chart<-ggplot2::ggplot(z,ggplot2::aes(position,observed))+ggplot2::geom_point(shape=1,size=2)+ggplot2::geom_line(ggplot2::aes(y=fitted),linewidth=.6)+

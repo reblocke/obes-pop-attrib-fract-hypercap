@@ -27,8 +27,8 @@ and implementations are recoverable through the [archive index](../archive/READM
 | 2026-10-18 | Owner clarified that analysis outputs—reports, figures and aggregate result tables—may be included in Git. Raw and patient-level data remain excluded. This supersedes the earlier blanket instruction that all aggregates remain private; the current ignored-output location is a packaging issue. |
 | 2026-10-18 | Owner authorized versioning the clinical reports, B/F2 figures, gallery and aggregate tables, with README/LLM navigation and email-ready PDFs, followed by review and PR release. `results/2026-10-18/` is a reading snapshot of the existing run, not a new analysis. Raw/patient data stay excluded; abstract drafting remains deferred. |
 
-Current machine identities are input schema 4, aggregate schema 9 and
-`bmi_hypercapnia_rfs_curve_audit_v4`. The original clinical snapshot retains
+Current machine identities are input schema 4, aggregate schema 10 and
+`bmi_hypercapnia_rfs_curve_audit_v5`. The original clinical snapshot retains
 schema 7 / v2; older bundles are rejected by the current renderer. Numeric demographic categories remain
 unchanged; retained Unknown categories are nonmissing, and the White reference
 includes unknown ethnicity. No causal-prevention/incidence claim is authorized.
@@ -112,3 +112,21 @@ unchanged original and pairing-feasibility snapshots. Source acceptance and
 numerical reconciliation do not confer investigator interpretation or S1 approval;
 those remain pending. B/F2 remain the selected main figures, and abstract drafting
 remains deferred.
+
+## 2026-10-20 — Joint same-day components replace nested binary comparison
+
+Owner approved a single three-category multinomial spline and stacked full-range
+S1. Any eligible hypercapnia–acidemia day takes priority over days without acidemia.
+The other hypercapnic category means without *documented same-day* acidemia, not
+physiological absence or chronic compensation. Same input, fixed indexes, primary
+basis/covariates and supplemental reference; no new extraction or PIF. Primary
+analyses and selected B/F2 remain unchanged.
+
+Schema 10 / `bmi_hypercapnia_rfs_curve_audit_v5` replaces schema 9's two binary
+supplemental models without relabeling historical bundles. Full joint covariance
+supports coherent probabilities and direct signed comparisons of component
+changes. BMI 40–45 remains only a descriptive summary; the full observed range
+and every supported five-unit interval are reported with local-sparsity flags.
+The stacked upper band is its thickness, not its boundary; common-baseline curves
+retain component intervals. Source, numerical, visual and scientific review are
+separate. Clinical execution and the new S1 approval remain pending.

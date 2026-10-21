@@ -1,5 +1,5 @@
 # Entirely artificial. Original keys are visibly synthetic and never exported.
-make_bmi_curve_fixture <- function(n_patients=1200L,seed=20261016L,with_index_day=TRUE,adverse=TRUE) {
+make_bmi_curve_fixture <- function(n_patients=6000L,seed=20261016L,with_index_day=TRUE,adverse=TRUE) {
   set.seed(seed);patient<-rep(seq_len(n_patients),each=2);visit<-rep(1:2,n_patients);n<-length(patient)
   bmi<-pmax(20,pmin(100,stats::rgamma(n_patients,shape=9,scale=2.3)+18))
   age<-pmin(90,pmax(18,32+.65*bmi+stats::rnorm(n_patients,0,12)))
@@ -45,7 +45,7 @@ make_bmi_curve_fixture <- function(n_patients=1200L,seed=20261016L,with_index_da
   d$same_day_abg_state<-ifelse(valid,"coobserved_day","no_coobserved_day")
   d$same_day_abg_n_days<-as.integer(valid)
   d$hypercapnia_coobserved<-ifelse(valid,as.integer(d$abg_pco2>=45),NA_integer_)
-  d$hypercapnia_acidemia_same_day<-ifelse(valid,as.integer(d$abg_pco2>=45 & id%%5!=0),NA_integer_)
+  d$hypercapnia_acidemia_same_day<-ifelse(valid,as.integer(d$abg_pco2>=45 & id%%2!=0),NA_integer_)
   d$same_day_abg_noncoobserved_high<-as.integer(!valid & !is.na(d$abg_pco2) & d$abg_pco2>=45)
   d$same_day_abg_usable_pco2<-as.integer(!is.na(d$abg_pco2))
   d$same_day_abg_coobserved_pco2<-d$same_day_abg_usable_ph<-d$same_day_abg_coobserved_ph<-as.integer(valid)

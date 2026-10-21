@@ -3,7 +3,7 @@ args<-commandArgs(trailingOnly=TRUE)
 if(!length(args)||!args[1] %in% c("fixture","preflight","cohort-audit","analyze"))stop("Use fixture [CONFIG] | preflight/cohort-audit/analyze INPUT MANIFEST [CONFIG]")
 mode<-args[1];if(mode!="fixture"&&!length(args)%in%c(3,4))stop("Explicit INPUT MANIFEST required")
 Sys.setenv(BMI_REPO_ROOT=normalizePath("."));source("R/analysis.R")
-require_tri_packages(c("jsonlite","digest","ggplot2","knitr","rmarkdown","lpSolve"))
+require_tri_packages(c("jsonlite","digest","ggplot2","knitr","rmarkdown","lpSolve","nnet"))
 config_path<-if(mode=="fixture"){if(length(args)>1)args[2]else"config/bmi_hypercapnia_analysis.json"}else if(length(args)>3)args[4]else"config/bmi_hypercapnia_analysis.json"
 config<-bmi_config(config_path)
 git<-function(...) {x<-system2("git",c(...),stdout=TRUE,stderr=FALSE);if(!is.null(attr(x,"status")))stop("Git identity unavailable");x}

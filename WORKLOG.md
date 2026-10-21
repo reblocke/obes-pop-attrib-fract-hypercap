@@ -422,3 +422,50 @@ receipts. Full audit HTML and execution bundles stay in ignored run storage.
 The original reading snapshots remain immutable. New investigator interpretation
 and S1 approval remain pending; no abstract was drafted. Documentation/results
 release is separate from the estimation-source commit.
+# 2026-10-20 — Joint same-day components: pre-edit plan
+
+Owner approved a joint three-category spline supplement and full-range stacked S1.
+Any eligible hypercapnia/acidemia day takes priority; the other hypercapnia category
+requires no documented same-day co-occurrence. Preserve fixed indexes, primary
+models/PIFs and historical snapshots. Reuse the accepted enrichment; no extraction.
+
+Implementation: replace only supplemental estimation with an unpenalized
+multinomial model and full joint-covariance standardization; update aggregate
+schema/registry, reports and stacked/component/frequency figure. Record failure
+scenarios and independent E2E oracles first. Verify with `make test`,
+`make source-test`, source/hash guards, primary-value reconciliation and actual
+native/PDF inspection. Release through review/PR/squash merge before one clinical
+run on a clean Mini checkout. Scientific/figure approval remains separate.
+
+Joint-model development: independent softmax/BFGS likelihood, numerical gradients
+and Hessian checks agree with production coefficients, covariance, standardized
+probabilities and signed component-change intervals. Original primary coefficients,
+covariance, curves and PIF/contribution tables remain equal at 1e-10 (new all-NA
+class metadata is normalized only for this comparison). The original 1,200-patient
+artificial fixture correctly triggered multinomial separation; the public fixture
+now uses 6,000 artificial patients and both hypercapnic classes for a successful
+joint path, while absent-class/rank failure cases remain explicit.
+
+Mini `nnet` 7.3-20 is already installed. Source checks from the unchanged adapter
+files passed all 33 checks, no skips: source-tests-20261020T220705-18737. Earlier
+source-tests-20261020T220559-18694 retained a failed R roundtrip because the initial
+SSH shell lacked Rscript on PATH; rerun used the existing activation and safe TMPDIR.
+Native artificial stacked preview inspected; label/axis alignment corrections made.
+Full E2E report rendering and clinical execution are not yet claimed complete.
+
+Initial analysis/report E2E passed at e2e-20261020T220558-99054. Manual PDF
+inspection nevertheless found S1's long caption clipped at the page boundary;
+the generic geometry check missed it. Reproduced with full-caption text matching,
+then added an E2E check before repairing the layout. Shortened the caption and
+reduced the native figure to 190 x 210 mm; color/grayscale preview inspected.
+Extended the top-level render tripwire to include the joint fitter. These are
+render-only changes; reuse the same saved artificial aggregates for verification.
+
+Final saved-aggregate E2E passed: e2e-20261020T222425-5234, including complete
+S1 caption recovery in both PDFs, all table/figure coverage, independent numerical
+checks, privacy boundaries, old-schema/corruption rejection and stable hashes.
+The full audit HTML completed after memory pressure on the 8-GB review Mac; no
+checks were skipped and no estimation was repeated for the layout repair.
+The repaired scientific S1 page was visually inspected with its entire caption.
+Source review found no additional actionable defects. PR #21 is ready for merge;
+clinical execution remains pending that merge and the clean Mini preflight.

@@ -33,7 +33,7 @@ root<-Sys.getenv("BMI_REPO_ROOT");run<-Sys.getenv("BMI_RUN_DIR");review<-Sys.get
 if(!nzchar(root)||!dir.exists(run)||!dir.exists(review))stop("Use saved-run rendering")
 source(file.path(root,"R","analysis.R"))
 Sys.setenv(BMI_REPORT_ID="audit")
-load_common_input<-load_triangulation_input<-bmi_load_input<-fit_bmi_model<-fit_registered_models<-bmi_run_analysis<-function(...)stop("Render tripwire: clinical input/model fitting forbidden")
+load_common_input<-load_triangulation_input<-bmi_load_input<-fit_bmi_model<-fit_registered_models<-bmi_multinomial_fit<-bmi_run_analysis<-function(...)stop("Render tripwire: clinical input/model fitting forbidden")
 source(file.path(root,"reports","table_passthrough.R"))
 bmi_report_table<-bmi_raw_table_writer(bmi_report_table)
 bundle<-bmi_read_bundle(run);a<-bundle$analysis
@@ -81,7 +81,7 @@ Obesity-only is retained here solely for cohort reconciliation, source-quality c
 figure("RFS-flow");figure("RFS-entry");figure("RFS-evidence");figure("S1-same-day-ABG")
 ids<-tools::file_path_sans_ext(list.files(file.path(review,"figures"),pattern="^F0-detail-.*\\.png$",recursive=TRUE))
 for(id in ids){figure(id);page()}
-for(t in c("cooccurrence_status","cooccurrence_reconciliation","cooccurrence_availability","cooccurrence_measurements","same_day_curve_crossings","rfs_summary","rfs_outcomes","rfs_combinations","rfs_by_bmi","bmi_provenance","demographic_crosswalk","prior_run_reconciliation","rfs_semantics","expected_models","cohort_nodes","cohort_edges","exclusion_reasons","exclusion_overlaps","population_registry","timing_audit","observation_patterns","evidence_by_bmi","numerical_reconciliation")) {
+for(t in c("cooccurrence_status","cooccurrence_reconciliation","cooccurrence_availability","cooccurrence_measurements","cooccurrence_categories","same_day_contrasts","same_day_probability_covariance","same_day_curve_reconciliation","rfs_summary","rfs_outcomes","rfs_combinations","rfs_by_bmi","bmi_provenance","demographic_crosswalk","prior_run_reconciliation","rfs_semantics","expected_models","cohort_nodes","cohort_edges","exclusion_reasons","exclusion_overlaps","population_registry","timing_audit","observation_patterns","evidence_by_bmi","numerical_reconciliation")) {
  cat("\n### ",gsub("_"," ",t),"\n\n",sep="");bmi_report_table(a[[t]],t,keys=intersect(c("population_id","outcome_id"),names(a[[t]])))
 }
 ```

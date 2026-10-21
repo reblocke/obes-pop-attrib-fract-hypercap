@@ -214,6 +214,24 @@
       "contrasts": "tables/fixed_bmi_contrasts.csv",
       "curve_order_check": "tables/same_day_curve_crossings.csv"
     },
-    "table_filter": "Select family same_day_abg in model_registry; use those exact model IDs in curve/contrast tables. Retain the shared reference population. Do not confuse observed raw proportions with adjusted probabilities."
+    "table_filter": "Select family same_day_abg in model_registry; use those exact model IDs in curve/contrast tables. Retain the shared reference population. Do not confuse observed raw proportions with adjusted probabilities.",
+    "role": "historical binary model snapshot; superseded runtime, preserved results"
+  },
+  "same_day_joint_supplement": {
+    "specification": "docs/SAME_DAY_ABG_SUPPLEMENT.md",
+    "software_analysis_id": "bmi_hypercapnia_rfs_curve_audit_v5",
+    "bundle_schema": 10,
+    "clinical_status": "pending_merged_run",
+    "model": "one multinomial spline; shared co-observed primary population",
+    "categories": [
+      "no_hypercapnia",
+      "without_acidemia",
+      "with_acidemia"
+    ],
+    "precedence": "any qualifying hypercapnia-acidemia day takes priority",
+    "figure": "stacked components over full observed BMI range; common-baseline intervals and frequency panel",
+    "interpretation": "same recorded-day co-occurrence; not verified same-sample pairing",
+    "new_PIFs": 0,
+    "scientific_review": "pending; original B/F2 approval does not approve new supplement"
   }
 }
