@@ -1,0 +1,2 @@
+figure_id,comparison,width_mm,height_mm,raster_dpi,native_color,grayscale,assembled_pdf,numerical_agreement,caption,support,investigator_approval
+S1-same-day-ABG,Full-range BMI probability components; common-baseline magnitude and uncertainty,190,210,300,inspected: pass,inspected: pass,scientific page 37 and targeted audit page inspected,saved aggregates and joint covariance; passed,complete in both PDFs; same recorded-day not same-sample,sparse tail marked; shared BMI frequencies,pending

@@ -1,0 +1,702 @@
+{
+  "bmi_hypercapnia": {
+    "tables": 39,
+    "images": 10,
+    "missing_assets_or_alt": [],
+    "browser_visual_review": "not performed; HTML structure checked and PDF visual review recorded separately"
+  },
+  "bmi_hypercapnia_audit": {
+    "tables": 1041,
+    "images": 1275,
+    "missing_assets_or_alt": [],
+    "browser_visual_review": "not performed; HTML structure checked and PDF visual review recorded separately"
+  },
+  "full_table_coverage": [
+    {
+      "format": "html",
+      "table": "expected_models",
+      "rows": 28,
+      "displayed": 28,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "coefficients",
+      "rows": 488,
+      "displayed": 488,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "same_day_contrasts",
+      "rows": 55,
+      "displayed": 55,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "bmi_basis",
+      "rows": 12,
+      "displayed": 12,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "cooccurrence_availability",
+      "rows": 36,
+      "displayed": 36,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "model_registry",
+      "rows": 28,
+      "displayed": 28,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "cooccurrence_measurements",
+      "rows": 104,
+      "displayed": 104,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "demographic_crosswalk",
+      "rows": 126,
+      "displayed": 126,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "cooccurrence_categories",
+      "rows": 3,
+      "displayed": 3,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "cohort_edges",
+      "rows": 155,
+      "displayed": 155,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "cooccurrence_reconciliation",
+      "rows": 4,
+      "displayed": 4,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "factor_references",
+      "rows": 354,
+      "displayed": 354,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "cooccurrence_status",
+      "rows": 1,
+      "displayed": 1,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "category_counts",
+      "rows": 23300,
+      "displayed": 23300,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "population_registry",
+      "rows": 233,
+      "displayed": 233,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "linear_spline_comparison",
+      "rows": 5,
+      "displayed": 5,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "source_audit",
+      "rows": 58,
+      "displayed": 58,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "model_support",
+      "rows": 6170,
+      "displayed": 6170,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "comissingness",
+      "rows": 2925,
+      "displayed": 2925,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "policy_totals",
+      "rows": 15,
+      "displayed": 15,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "model_fit_diagnostics",
+      "rows": 294,
+      "displayed": 294,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "rfs_semantics",
+      "rows": 6,
+      "displayed": 6,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "fixed_bmi_contrasts",
+      "rows": 15,
+      "displayed": 15,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "prior_run_reconciliation",
+      "rows": 12,
+      "displayed": 12,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "policy_registry",
+      "rows": 1,
+      "displayed": 1,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "timing_audit",
+      "rows": 108,
+      "displayed": 108,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "variable_summary",
+      "rows": 11401,
+      "displayed": 11401,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "bmi_provenance",
+      "rows": 1420,
+      "displayed": 1420,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "prediction_support",
+      "rows": 41,
+      "displayed": 41,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "rfs_summary",
+      "rows": 3,
+      "displayed": 3,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "rfs_combinations",
+      "rows": 189,
+      "displayed": 189,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "cohort_nodes",
+      "rows": 206,
+      "displayed": 206,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "observation_patterns",
+      "rows": 288,
+      "displayed": 288,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "exclusion_overlaps",
+      "rows": 24,
+      "displayed": 24,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "same_day_probability_covariance",
+      "rows": 3600,
+      "displayed": 3600,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "numerical_reconciliation",
+      "rows": 2333,
+      "displayed": 2333,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "missingness_patterns",
+      "rows": 125,
+      "displayed": 125,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "exclusion_reasons",
+      "rows": 55,
+      "displayed": 55,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "evidence_by_bmi",
+      "rows": 2282,
+      "displayed": 2282,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "model_influence_summary",
+      "rows": 79,
+      "displayed": 79,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "variable_dictionary",
+      "rows": 93,
+      "displayed": 93,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "same_day_curve_reconciliation",
+      "rows": 1,
+      "displayed": 1,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "coverage_index",
+      "rows": 820,
+      "displayed": 820,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "rfs_by_bmi",
+      "rows": 192,
+      "displayed": 192,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "policy_contributions",
+      "rows": 177,
+      "displayed": 177,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "rfs_outcomes",
+      "rows": 30,
+      "displayed": 30,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "Complete coefficient covariance",
+      "rows": 6470,
+      "displayed": 6470,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "Complete coefficient correlation",
+      "rows": 6470,
+      "displayed": 6470,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "Complete original-band contribution covariance",
+      "rows": 2091,
+      "displayed": 2091,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "expected_models",
+      "rows": 28,
+      "displayed": 28,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "coefficients",
+      "rows": 488,
+      "displayed": 488,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "same_day_contrasts",
+      "rows": 55,
+      "displayed": 55,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "bmi_basis",
+      "rows": 12,
+      "displayed": 12,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "cooccurrence_availability",
+      "rows": 36,
+      "displayed": 36,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "model_registry",
+      "rows": 28,
+      "displayed": 28,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "cooccurrence_measurements",
+      "rows": 104,
+      "displayed": 104,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "demographic_crosswalk",
+      "rows": 126,
+      "displayed": 126,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "cooccurrence_categories",
+      "rows": 3,
+      "displayed": 3,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "cohort_edges",
+      "rows": 155,
+      "displayed": 155,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "cooccurrence_reconciliation",
+      "rows": 4,
+      "displayed": 4,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "factor_references",
+      "rows": 354,
+      "displayed": 354,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "cooccurrence_status",
+      "rows": 1,
+      "displayed": 1,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "category_counts",
+      "rows": 23300,
+      "displayed": 23300,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "population_registry",
+      "rows": 233,
+      "displayed": 233,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "linear_spline_comparison",
+      "rows": 5,
+      "displayed": 5,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "source_audit",
+      "rows": 58,
+      "displayed": 58,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "model_support",
+      "rows": 6170,
+      "displayed": 6170,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "comissingness",
+      "rows": 2925,
+      "displayed": 2925,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "policy_totals",
+      "rows": 15,
+      "displayed": 15,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "model_fit_diagnostics",
+      "rows": 294,
+      "displayed": 294,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "rfs_semantics",
+      "rows": 6,
+      "displayed": 6,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "fixed_bmi_contrasts",
+      "rows": 15,
+      "displayed": 15,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "prior_run_reconciliation",
+      "rows": 12,
+      "displayed": 12,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "policy_registry",
+      "rows": 1,
+      "displayed": 1,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "timing_audit",
+      "rows": 108,
+      "displayed": 108,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "variable_summary",
+      "rows": 11401,
+      "displayed": 11401,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "bmi_provenance",
+      "rows": 1420,
+      "displayed": 1420,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "prediction_support",
+      "rows": 41,
+      "displayed": 41,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "rfs_summary",
+      "rows": 3,
+      "displayed": 3,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "rfs_combinations",
+      "rows": 189,
+      "displayed": 189,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "cohort_nodes",
+      "rows": 206,
+      "displayed": 206,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "observation_patterns",
+      "rows": 288,
+      "displayed": 288,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "exclusion_overlaps",
+      "rows": 24,
+      "displayed": 24,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "same_day_probability_covariance",
+      "rows": 3600,
+      "displayed": 3600,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "numerical_reconciliation",
+      "rows": 2333,
+      "displayed": 2333,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "missingness_patterns",
+      "rows": 125,
+      "displayed": 125,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "exclusion_reasons",
+      "rows": 55,
+      "displayed": 55,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "evidence_by_bmi",
+      "rows": 2282,
+      "displayed": 2282,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "model_influence_summary",
+      "rows": 79,
+      "displayed": 79,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "variable_dictionary",
+      "rows": 93,
+      "displayed": 93,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "same_day_curve_reconciliation",
+      "rows": 1,
+      "displayed": 1,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "coverage_index",
+      "rows": 820,
+      "displayed": 820,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "rfs_by_bmi",
+      "rows": 192,
+      "displayed": 192,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "policy_contributions",
+      "rows": 177,
+      "displayed": 177,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "rfs_outcomes",
+      "rows": 30,
+      "displayed": 30,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "Complete coefficient covariance",
+      "rows": 6470,
+      "displayed": 6470,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "Complete coefficient correlation",
+      "rows": 6470,
+      "displayed": 6470,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "Complete original-band contribution covariance",
+      "rows": 2091,
+      "displayed": 2091,
+      "passed": true
+    }
+  ]
+}

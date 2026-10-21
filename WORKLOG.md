@@ -469,3 +469,39 @@ checks were skipped and no estimation was repeated for the layout repair.
 The repaired scientific S1 page was visually inspected with its entire caption.
 Source review found no additional actionable defects. PR #21 is ready for merge;
 clinical execution remains pending that merge and the clean Mini preflight.
+
+
+PR #21 squash-merged at `21b8bdf`. Local main and the clean dedicated Mini
+checkout were synchronized through a verified incremental Git bundle. No competing
+R/source jobs were present. Fresh preflight `curve-preflight-20261020T225510-19821`
+passed; one clinical run completed as `curve-analyze-20261020T230537-20006`.
+The exact accepted input and manifest hashes match the earlier binary run.
+The joint model succeeded on N=22,195: no hypercapnia 10,526, hypercapnia without
+documented same-day acidemia 2,860, and with co-occurrence 8,809. Optimizer code 0;
+maximum scaled score per patient 3.42e-9; information condition number 3,821.
+All eight primary comparison tables passed at tolerance 1e-10, with unchanged
+model samples, coefficients, covariance, curves, fixed contrasts and PIF/decomposition.
+One pre-existing constant diagnosis-capture position remains explicit.
+
+Clinical aggregate-only rendering is running. Native clinical S1 preview inspected;
+full-range stacked and common-baseline curves retain intervals and sparse tails.
+The new reading packet will be separate from every historical snapshot. No abstract
+has been drafted and investigator interpretation/S1 approval is not asserted.
+
+### Joint-component clinical reading packet and review
+
+- Saved-aggregate render `20261020T230613-20218` completed: scientific report
+  41 pages; complete audit 3,546 pages. No clinical reread or refit.
+- All 98 full-table coverage checks passed. Automated geometry checked every PDF
+  page with no clipping/collision/replacement-symbol flags; the complete saved S1
+  caption was recovered from both PDFs. An early coverage check during PDF
+  generation failed on incomplete output, then passed after rendering completed.
+- Visually inspected all scientific pages in contact sheets, enlarged S1/count
+  tables, native color/grayscale S1 and the standalone captioned PDF. Targeted
+  audit pages include S1 and joint coefficients/covariance/diagnostics. This is
+  not a claim of manual inspection of every audit page; HTML checks were structural.
+- New immutable reading packet `results/2026-10-20-same-day-components/` includes
+  reports, S1, 57 complete aggregate tables, gallery, manifests and separate
+  source/numerical/visual receipts. Historical manifests and selected B/F2 are
+  unchanged. Snapshot hashes, navigation links and aggregate-only boundaries passed.
+- Investigator interpretation and S1 approval remain pending. No abstract drafted.

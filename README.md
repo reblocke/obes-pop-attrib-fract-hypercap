@@ -17,23 +17,25 @@ You do not need to run the code to review the study. The
 reports, selected figures and complete aggregate tables in Git. A normal clone
 includes these results; raw and patient-level data remain excluded.
 
-The **[historical binary same-day arterial supplement](results/2026-10-20-same-day-abg/README.md)**
-adds two completed clinical models, an updated scientific report, a complete
-audit and figure S1. It uses **same recorded-day co-occurrence; not verified
-same-sample pairing**. The original analysis and B/F2 selection remain unchanged;
-investigator interpretation and figure approval for S1 are pending.
+The **[joint same-day component supplement](results/2026-10-20-same-day-components/README.md)**
+contains the latest integrated scientific/audit reports and stacked figure S1.
+It separates hypercapnia with and without documented same-day acidemia in one
+joint model, across the full observed BMI range. This is **same recorded-day
+co-occurrence; not verified same-sample pairing**. Primary estimates and selected
+B/F2 remain unchanged; investigator interpretation and S1 approval are pending.
+The [earlier binary supplement](results/2026-10-20-same-day-abg/README.md) is historical.
 
 | Read in this order | What to look for |
 |---|---|
-| [Scientific report — 34 pages](results/2026-10-18/bmi_hypercapnia.pdf) | Rationale, detailed methods, results, sensitivity analyses and interpretation limits |
+| [Current scientific report](results/2026-10-20-same-day-components/bmi_hypercapnia.pdf) | Rationale, detailed methods, results, sensitivity analyses and interpretation limits |
 | [B/F2 figure PDF — 2 pages](results/2026-10-18/selected_figures.pdf) | Selected relationship and secondary-scenario figures with full captions; convenient for email |
 | [B: relationship](results/2026-10-18/figures/F1-B.pdf) / [F2: secondary scenario](results/2026-10-18/figures/F2.pdf) | Individual vector masters; SVG, PNG and JPG versions are beside them |
 | [Offline gallery](results/2026-10-18/gallery.html) | B/F2 at full size, captions, format downloads and source-table links |
-| [Complete audit — 2,970 pages](results/2026-10-18/bmi_hypercapnia_audit.pdf) | Full cohort profiles, model samples, coefficients, covariance and diagnostics |
-| [Aggregate tables](results/2026-10-18/TABLES.md) | All 49 complete CSV exports, with a machine-readable field/row/hash index |
+| [Current complete audit](results/2026-10-20-same-day-components/bmi_hypercapnia_audit.pdf) | Full cohort profiles, model samples, coefficients, covariance and diagnostics |
+| [Current aggregate tables](results/2026-10-20-same-day-components/TABLES.md) | Complete CSV exports, with a machine-readable field/row/hash index |
 
-For email, start with the scientific and B/F2 PDFs; the audit is a separate 30.4-MB
-reference. Download PDFs with GitHub's **Download raw file** control when needed.
+For email, start with the scientific, B/F2 and captioned S1 PDFs; the complete
+audit is a separate reference. Download PDFs with GitHub's **Download raw file** control when needed.
 For the gallery, clone/download the folder and open `gallery.html` locally; GitHub
 shows its HTML source. All gallery assets are local.
 
@@ -214,15 +216,16 @@ same-day acidemia, with no documented hypercapnia as the reference. Any eligible
 hypercapnia–acidemia day takes priority. S1 stacks the two components across the
 full observed BMI range and shows their separate intervals on a common baseline.
 The input and primary models/PIFs are unchanged. Current software uses aggregate
-schema 10; the schema-9 snapshot is preserved as historical evidence. Joint
-clinical execution and S1 approval are pending separate receipts.
-The primary clinical snapshot and selected B/F2 remain unchanged. Historical binary
-supplement qualification and clinical estimation completed from merged `b89d485` on October
-20. Both supplemental models use 22,195 patients: 11,669 have hypercapnia on a
-co-observed day and 8,809 have same-day hypercapnia–acidemia co-occurrence.
-Original model samples, coefficients, curves and PIFs agree with the prior run
-within 1e-10. See the [historical binary reading packet](results/2026-10-20-same-day-abg/README.md)
-for the full count reconciliation, intervals, reports and separate review states.
+schema 10; the schema-9 snapshot is preserved as historical evidence.
+
+The joint clinical run completed from merged `21b8bdf` on October 20. Its shared
+model/reference population has 22,195 patients: 8,809 with co-occurrence, 2,860
+with hypercapnia without documented same-day acidemia, and 10,526 without
+documented hypercapnia on eligible days. All eight primary-result comparisons
+passed at 1e-10, using the identical accepted input and manifest. See the
+[new reading packet](results/2026-10-20-same-day-components/README.md) for full-range
+probabilities, five-unit component contrasts, reports and separate review states.
+S1 interpretation and investigator figure approval remain pending.
 
 The [historical pairing-feasibility report](results/2026-10-20-paired-abg/README.md)
 remains available. Its raw-export trace confirmed that sample identifiers were

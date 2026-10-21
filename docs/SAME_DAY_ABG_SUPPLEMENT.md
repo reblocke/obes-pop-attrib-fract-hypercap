@@ -70,8 +70,8 @@ support audit. Captions retain the same-recorded-day/not-same-sample statement.
 Runtime identity: aggregate schema 10 / `bmi_hypercapnia_rfs_curve_audit_v5`.
 Input schema 4 and `same_day_arterial_cooccurrence_v1` remain unchanged. The
 schema-9 reading packet linked below is immutable historical evidence, not the current
-joint result. The new clinical run and figure approval remain pending until their
-separate receipts are recorded. Primary models/PIFs and B/F2 remain unchanged.
+joint result. The joint clinical run completed from merged `21b8bdf`; numerical review passed.
+Investigator interpretation and figure approval remain pending. Primary models/PIFs and B/F2 remain unchanged.
 
 ## Verification and release
 
@@ -83,7 +83,7 @@ base estimates/PIFs, and renders all reports from aggregates. Inspect S1 at
 190 mm, in grayscale and assembled reports; export R/SVG/PDF/300-dpi PNG/JPG.
 
 Review, commit, push, PR and squash-merge before clinical estimation. On a clean
-merged Mini checkout, check concurrent work, qualify new enrichment and run once
+merged Mini checkout, check concurrent work, revalidate the existing qualified enrichment and run once
 only when evidence passes. Compare the original clinical fields/indexes and
 estimates with the authenticated prior run. Preserve all earlier artifacts.
 Source qualification, numerical review, visual review and investigator approval
@@ -99,3 +99,18 @@ are preserved, with the latter reconciled at tolerance 1e-10. The
 the integrated reports, S1 and complete aggregate tables. Its review receipts
 separate source qualification, estimation, numerical verification, visual review
 and pending investigator approval. The earlier snapshots remain immutable.
+
+## Joint-model clinical execution
+
+PR #21 released the joint model at `21b8bdf`. Fresh preflight
+`curve-preflight-20261020T225510-19821` passed on the Mini, followed by one clinical
+run, `curve-analyze-20261020T230537-20006`. The unchanged qualified input and
+manifest identities match the preceding binary run. The single joint position
+succeeded on 22,195 patients; counts partition into 10,526 no hypercapnia, 2,860
+without documented same-day acidemia and 8,809 with co-occurrence. All eight
+primary-result comparison tables agree within 1e-10. No supplemental PIF was added.
+
+The [separate reading snapshot](../results/2026-10-20-same-day-components/README.md)
+contains the integrated reports, full-range stacked S1, all component contrasts
+and explicit review receipts. Numerical/source acceptance does not grant
+investigator interpretation or S1 approval. Historical snapshots remain unchanged.

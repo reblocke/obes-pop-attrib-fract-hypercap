@@ -199,3 +199,9 @@ three mutually exclusive categories are derived from the authenticated nested
 flags, with any same-day hypercapnia–acidemia event taking priority. No source
 re-extraction or stronger temporal/specimen claim is introduced. The new model
 requires a fresh aggregate run and numerical reconciliation, not a new raw export.
+
+The joint-model release reused this exact qualified enrichment and manifest.
+Fresh Mini preflight `curve-preflight-20261020T225510-19821` passed from merged
+`21b8bdf`; no upstream extraction, BMI derivation, index selection or evidence
+mapping changed. The joint reading snapshot records the preflight/input/manifest
+hashes and the prior acceptance chain separately from numerical and visual review.

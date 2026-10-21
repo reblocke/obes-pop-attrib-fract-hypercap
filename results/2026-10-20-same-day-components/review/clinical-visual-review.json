@@ -1,0 +1,47 @@
+{
+  "status": "passed_with_recorded_scope",
+  "review_utc": "2026-10-21T05:20:04.673125+00:00",
+  "review_id": "20261020T230613-20218",
+  "source_commit": "21b8bdf411ed6313604fb36e10e565d4733efdf0",
+  "manual_visual_scope": [
+    "All 41 scientific PDF pages inspected in contact sheets; supplemental pages 37-38 enlarged",
+    "S1 native color and grayscale exports; captioned standalone PDF",
+    "Targeted audit pages recorded in audit-pages-inspected.json"
+  ],
+  "audit_pages_inspected": [
+    63,
+    64,
+    65,
+    3449,
+    3450,
+    3451,
+    3452,
+    3460,
+    3463,
+    3481
+  ],
+  "automated_geometry_pages": {
+    "bmi_hypercapnia": 41,
+    "bmi_hypercapnia_audit": 3546,
+    "S1": 1
+  },
+  "geometry_issues": [],
+  "html_review": "Structure, all image assets/alt text and complete table coverage; browser visual inspection not performed",
+  "uncertainty": "Pointwise intervals visible in common-baseline panel; total interval in stacked panel; sparse tails dotted/faded",
+  "numerical_agreement": "Exported S1 matches inspected preview; aggregate-only source with full joint covariance and partition checks",
+  "caption": "Complete saved S1 caption verified in both scientific and audit PDFs",
+  "dimensions": "190 x 210 mm; SVG/PDF and 300-dpi PNG/JPG",
+  "limitations": [
+    "Thousands of audit pages checked automatically; only targeted audit pages manually inspected",
+    "Investigator interpretation and S1 approval remain pending"
+  ],
+  "scientific_approval": false,
+  "files": {
+    "bmi_hypercapnia.pdf": "dc936752918f8c719168b9d36c3e7381adf4a5c701d60bdabfb409e256a56c62",
+    "bmi_hypercapnia_audit.pdf": "5891931465da73e35f057eb16203ef5eedbc2507ca94d064c825fdc05cd18f17",
+    "figures/S1-same-day-ABG.png": "9b2ed5f4005f3e1764ab53c6075f011497d10fa3dc8692efc34cabbd3f0df0d2",
+    "figures/S1-same-day-ABG.pdf": "be72fef9553a034cd4394fde96164e9dbfc833871e86ca471e93cbf21445a9cd",
+    "figures/S1-same-day-ABG.svg": "715df52d22a0307417fdcb917b8c308803d94f2ffc3defc4fc731f6cbe8799fb",
+    "figures/S1-same-day-ABG.jpg": "61c79d4c1475af41413b9edb4b9ab2a520b0e7ef9d9028885261ff7de2d603a8"
+  }
+}

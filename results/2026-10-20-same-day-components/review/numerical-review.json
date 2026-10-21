@@ -1,0 +1,32 @@
+{
+  "prior_bundle_sha256": "05627fa61fc1b2d9cebaf612ffa3043f21506d40c15b3c435e10ba274985f89f",
+  "current_bundle_sha256": "80695dba491748f203f779a78133f6ad2df1f75079e4d6a74f1692230b43f1eb",
+  "tolerance": 1e-10,
+  "primary_tables_unchanged": true,
+  "exactly_one_joint_supplemental_model": true,
+  "same_qualified_input_and_manifest": true,
+  "no_new_PIFs": true,
+  "four_stage_counts_reconcile": true,
+  "clinical_results_scientifically_reviewed": false,
+  "joint_category_counts": {
+    "no_hypercapnia": 10526,
+    "without_acidemia": 2860,
+    "with_acidemia": 8809
+  },
+  "probability_partition": {
+    "model_id": "primary::same_day_abg/encounter/multinomial_spline",
+    "n_grid": "225",
+    "maximum_probability_sum_error": "1.18793863634892e-14",
+    "maximum_component_sum_error": "1.11022302462516e-16",
+    "status": "assessed",
+    "analysis_population_id": "primary",
+    "population_id": "primary",
+    "outcome_id": "three_category",
+    "ascertainment_window": "encounter",
+    "model_form": "multinomial_spline"
+  },
+  "joint_model_status": "successful",
+  "optimizer_code": 0,
+  "clinical_estimation_completed": true,
+  "investigator_review": "pending"
+}
