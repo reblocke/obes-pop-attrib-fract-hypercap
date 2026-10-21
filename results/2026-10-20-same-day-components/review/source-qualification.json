@@ -1,0 +1,19 @@
+{
+  "status": "passed: existing accepted source reused; current preflight passed",
+  "preflight_run": "curve-preflight-20261020T225510-19821",
+  "preflight_manifest_sha256": "cb3e29f41828b9db23c49672fd752baaa5e6758adf5af3c824c5d9fc1d8bf8a7",
+  "input_sha256": "013426c17805cf24e9d7a0c676aa14a91dbdf0f475c4cdb9840840920be9e50d",
+  "manifest_sha256": "d7af1d7e15cc77b0bcf0754d6041255e816997d21807f5ecad1b123ad58f8d99",
+  "code_identity": {
+    "commit": "21b8bdf411ed6313604fb36e10e565d4733efdf0",
+    "tree": "12e5d3a9690c3040347bcde97bacd10fa8bc35a0",
+    "working_tree_clean": true
+  },
+  "source_policy": "same_day_arterial_cooccurrence_v1",
+  "prior_source_review_sha256": "ae310858d8485961aab15116776cb40d25397e22bc66fc873362bedbbbd24391",
+  "source_change": "none; no extraction or enrichment repeated",
+  "automated_review": "identity-bound input/evidence validation and cohort reconciliation completed",
+  "human_review": "existing source and policy approvals retained; no new investigator approval asserted",
+  "clinical_estimation": "not yet completed at this source receipt",
+  "limitations": "same recorded-day co-occurrence; not verified same-sample pairing; no causal or compensation claims"
+}

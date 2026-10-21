@@ -129,4 +129,7 @@ changes. BMI 40–45 remains only a descriptive summary; the full observed range
 and every supported five-unit interval are reported with local-sparsity flags.
 The stacked upper band is its thickness, not its boundary; common-baseline curves
 retain component intervals. Source, numerical, visual and scientific review are
-separate. Clinical execution and the new S1 approval remain pending.
+separate. Clinical execution completed from merged `21b8bdf` in
+`curve-analyze-20261020T230537-20006`, with unchanged input/manifest and primary
+estimates (1e-10 reconciliation). Investigator interpretation and new S1 approval
+remain pending; see the separate dated reading snapshot and review receipts.

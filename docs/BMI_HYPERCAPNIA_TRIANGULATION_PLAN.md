@@ -176,3 +176,11 @@ Historical binary-supplement clinical execution from merged `b89d485` completed 
 contains the two successful models and reconciled evidence; original estimates
 agree with the authenticated prior run within 1e-10. Investigator approval for
 the supplemental interpretation and S1 remains separate and pending.
+
+Joint-model execution completed from merged `21b8bdf` in
+`curve-analyze-20261020T230537-20006`, after fresh source preflight. The single
+joint model succeeded on the shared 22,195 patients. Eight primary-result
+comparisons passed at 1e-10; the identical qualified input/manifest was reused.
+See the [joint reading snapshot](../results/2026-10-20-same-day-components/README.md)
+for all component magnitudes and review states. Investigator interpretation and
+S1 approval remain pending; no abstract was drafted.
