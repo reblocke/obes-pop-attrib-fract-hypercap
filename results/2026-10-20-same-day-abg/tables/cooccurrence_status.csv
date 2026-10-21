@@ -1,0 +1,2 @@
+"module","status","reason","n_primary_complete","n_coobserved","analysis_population_id"
+"same_day_arterial_cooccurrence_v1","qualified","Recorded-day evidence assessed; zeros refer only to co-observed days",176922,22195,"primary"

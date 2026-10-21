@@ -168,3 +168,9 @@ positions reuse primary indexes, adjustment and knots on the same co-observed
 population. Any qualifying recorded date within the index encounter may contribute;
 threshold findings must share that date. This is not verified same-sample pairing.
 No new PIF is computed. The superseded pairing feasibility remains historical.
+
+Clinical execution from merged `b89d485` completed on October 20, 2026. The
+[separate supplement snapshot](../results/2026-10-20-same-day-abg/README.md)
+contains the two successful models and reconciled evidence; original estimates
+agree with the authenticated prior run within 1e-10. Investigator approval for
+the supplemental interpretation and S1 remains separate and pending.

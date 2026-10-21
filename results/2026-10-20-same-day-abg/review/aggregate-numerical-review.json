@@ -1,0 +1,547 @@
+{
+  "bundle_manifest_sha256": "05627fa61fc1b2d9cebaf612ffa3043f21506d40c15b3c435e10ba274985f89f",
+  "analysis_id": "bmi_hypercapnia_rfs_curve_audit_v4",
+  "reviewer_source_sha256": "8276433fab709ab20e15f99c6b6617a4d7a6ed6220e19b4aaaaa658efe78ce68",
+  "automated_numerical_review": "passed",
+  "checks": [
+    {
+      "check_id": "ledger",
+      "passed": true
+    },
+    {
+      "check_id": "observed_only",
+      "passed": true
+    },
+    {
+      "check_id": "events primary::abg/encounter/spline",
+      "passed": true
+    },
+    {
+      "check_id": "reference primary::abg/encounter/spline",
+      "passed": true
+    },
+    {
+      "check_id": "reference N primary::abg/encounter/spline",
+      "passed": true
+    },
+    {
+      "check_id": "events primary::abg/encounter/linear",
+      "passed": true
+    },
+    {
+      "check_id": "reference primary::abg/encounter/linear",
+      "passed": true
+    },
+    {
+      "check_id": "reference N primary::abg/encounter/linear",
+      "passed": true
+    },
+    {
+      "check_id": "events primary::any_gas/encounter/spline",
+      "passed": true
+    },
+    {
+      "check_id": "reference primary::any_gas/encounter/spline",
+      "passed": true
+    },
+    {
+      "check_id": "reference N primary::any_gas/encounter/spline",
+      "passed": true
+    },
+    {
+      "check_id": "events primary::any_gas/encounter/linear",
+      "passed": true
+    },
+    {
+      "check_id": "reference primary::any_gas/encounter/linear",
+      "passed": true
+    },
+    {
+      "check_id": "reference N primary::any_gas/encounter/linear",
+      "passed": true
+    },
+    {
+      "check_id": "events primary::icd/encounter/spline",
+      "passed": true
+    },
+    {
+      "check_id": "reference primary::icd/encounter/spline",
+      "passed": true
+    },
+    {
+      "check_id": "reference N primary::icd/encounter/spline",
+      "passed": true
+    },
+    {
+      "check_id": "events primary::icd/encounter/linear",
+      "passed": true
+    },
+    {
+      "check_id": "reference primary::icd/encounter/linear",
+      "passed": true
+    },
+    {
+      "check_id": "reference N primary::icd/encounter/linear",
+      "passed": true
+    },
+    {
+      "check_id": "events primary::abg/index_calendar_day/spline",
+      "passed": true
+    },
+    {
+      "check_id": "reference primary::abg/index_calendar_day/spline",
+      "passed": true
+    },
+    {
+      "check_id": "reference N primary::abg/index_calendar_day/spline",
+      "passed": true
+    },
+    {
+      "check_id": "events primary::abg/index_calendar_day/linear",
+      "passed": true
+    },
+    {
+      "check_id": "reference primary::abg/index_calendar_day/linear",
+      "passed": true
+    },
+    {
+      "check_id": "reference N primary::abg/index_calendar_day/linear",
+      "passed": true
+    },
+    {
+      "check_id": "events primary::any_gas/index_calendar_day/spline",
+      "passed": true
+    },
+    {
+      "check_id": "reference primary::any_gas/index_calendar_day/spline",
+      "passed": true
+    },
+    {
+      "check_id": "reference N primary::any_gas/index_calendar_day/spline",
+      "passed": true
+    },
+    {
+      "check_id": "events primary::any_gas/index_calendar_day/linear",
+      "passed": true
+    },
+    {
+      "check_id": "reference primary::any_gas/index_calendar_day/linear",
+      "passed": true
+    },
+    {
+      "check_id": "reference N primary::any_gas/index_calendar_day/linear",
+      "passed": true
+    },
+    {
+      "check_id": "events primary::observation/abg/encounter",
+      "passed": true
+    },
+    {
+      "check_id": "events primary::observation/vbg/encounter",
+      "passed": true
+    },
+    {
+      "check_id": "events primary::observation/any_gas/encounter",
+      "passed": true
+    },
+    {
+      "check_id": "events primary::observation/abg/index_calendar_day",
+      "passed": true
+    },
+    {
+      "check_id": "events primary::observation/vbg/index_calendar_day",
+      "passed": true
+    },
+    {
+      "check_id": "events primary::observation/any_gas/index_calendar_day",
+      "passed": true
+    },
+    {
+      "check_id": "events primary::matched/abg/icd",
+      "passed": true
+    },
+    {
+      "check_id": "reference primary::matched/abg/icd",
+      "passed": true
+    },
+    {
+      "check_id": "reference N primary::matched/abg/icd",
+      "passed": true
+    },
+    {
+      "check_id": "events primary::matched/abg/abg",
+      "passed": true
+    },
+    {
+      "check_id": "reference primary::matched/abg/abg",
+      "passed": true
+    },
+    {
+      "check_id": "reference N primary::matched/abg/abg",
+      "passed": true
+    },
+    {
+      "check_id": "events primary::matched/any_gas/icd",
+      "passed": true
+    },
+    {
+      "check_id": "reference primary::matched/any_gas/icd",
+      "passed": true
+    },
+    {
+      "check_id": "reference N primary::matched/any_gas/icd",
+      "passed": true
+    },
+    {
+      "check_id": "events primary::matched/any_gas/any_gas",
+      "passed": true
+    },
+    {
+      "check_id": "reference primary::matched/any_gas/any_gas",
+      "passed": true
+    },
+    {
+      "check_id": "reference N primary::matched/any_gas/any_gas",
+      "passed": true
+    },
+    {
+      "check_id": "events primary_current::abg/encounter/spline",
+      "passed": true
+    },
+    {
+      "check_id": "reference primary_current::abg/encounter/spline",
+      "passed": true
+    },
+    {
+      "check_id": "reference N primary_current::abg/encounter/spline",
+      "passed": true
+    },
+    {
+      "check_id": "events primary_current::any_gas/encounter/spline",
+      "passed": true
+    },
+    {
+      "check_id": "reference primary_current::any_gas/encounter/spline",
+      "passed": true
+    },
+    {
+      "check_id": "reference N primary_current::any_gas/encounter/spline",
+      "passed": true
+    },
+    {
+      "check_id": "events primary_current::icd/encounter/spline",
+      "passed": true
+    },
+    {
+      "check_id": "reference primary_current::icd/encounter/spline",
+      "passed": true
+    },
+    {
+      "check_id": "reference N primary_current::icd/encounter/spline",
+      "passed": true
+    },
+    {
+      "check_id": "events all_obesity::abg/encounter/spline",
+      "passed": true
+    },
+    {
+      "check_id": "reference all_obesity::abg/encounter/spline",
+      "passed": true
+    },
+    {
+      "check_id": "reference N all_obesity::abg/encounter/spline",
+      "passed": true
+    },
+    {
+      "check_id": "events all_obesity::any_gas/encounter/spline",
+      "passed": true
+    },
+    {
+      "check_id": "reference all_obesity::any_gas/encounter/spline",
+      "passed": true
+    },
+    {
+      "check_id": "reference N all_obesity::any_gas/encounter/spline",
+      "passed": true
+    },
+    {
+      "check_id": "events all_obesity::icd/encounter/spline",
+      "passed": true
+    },
+    {
+      "check_id": "reference all_obesity::icd/encounter/spline",
+      "passed": true
+    },
+    {
+      "check_id": "reference N all_obesity::icd/encounter/spline",
+      "passed": true
+    },
+    {
+      "check_id": "events primary::same_day_abg/encounter/hypercapnia/spline",
+      "passed": true
+    },
+    {
+      "check_id": "reference primary::same_day_abg/encounter/hypercapnia/spline",
+      "passed": true
+    },
+    {
+      "check_id": "reference N primary::same_day_abg/encounter/hypercapnia/spline",
+      "passed": true
+    },
+    {
+      "check_id": "events primary::same_day_abg/encounter/hypercapnia_acidemia_cooccurrence/spline",
+      "passed": true
+    },
+    {
+      "check_id": "reference primary::same_day_abg/encounter/hypercapnia_acidemia_cooccurrence/spline",
+      "passed": true
+    },
+    {
+      "check_id": "reference N primary::same_day_abg/encounter/hypercapnia_acidemia_cooccurrence/spline",
+      "passed": true
+    },
+    {
+      "check_id": "paired means primary::abg/encounter/spline",
+      "passed": true
+    },
+    {
+      "check_id": "difference and PIF primary::abg/encounter/spline",
+      "passed": true
+    },
+    {
+      "check_id": "contribution N/variance primary::abg/encounter/spline",
+      "passed": true
+    },
+    {
+      "check_id": "shift support primary::abg/encounter/spline",
+      "passed": true
+    },
+    {
+      "check_id": "paired means primary::any_gas/encounter/spline",
+      "passed": true
+    },
+    {
+      "check_id": "difference and PIF primary::any_gas/encounter/spline",
+      "passed": true
+    },
+    {
+      "check_id": "contribution N/variance primary::any_gas/encounter/spline",
+      "passed": true
+    },
+    {
+      "check_id": "shift support primary::any_gas/encounter/spline",
+      "passed": true
+    },
+    {
+      "check_id": "paired means primary::icd/encounter/spline",
+      "passed": true
+    },
+    {
+      "check_id": "difference and PIF primary::icd/encounter/spline",
+      "passed": true
+    },
+    {
+      "check_id": "contribution N/variance primary::icd/encounter/spline",
+      "passed": true
+    },
+    {
+      "check_id": "shift support primary::icd/encounter/spline",
+      "passed": true
+    },
+    {
+      "check_id": "paired means primary::abg/index_calendar_day/spline",
+      "passed": true
+    },
+    {
+      "check_id": "difference and PIF primary::abg/index_calendar_day/spline",
+      "passed": true
+    },
+    {
+      "check_id": "contribution N/variance primary::abg/index_calendar_day/spline",
+      "passed": true
+    },
+    {
+      "check_id": "shift support primary::abg/index_calendar_day/spline",
+      "passed": true
+    },
+    {
+      "check_id": "paired means primary::any_gas/index_calendar_day/spline",
+      "passed": true
+    },
+    {
+      "check_id": "difference and PIF primary::any_gas/index_calendar_day/spline",
+      "passed": true
+    },
+    {
+      "check_id": "contribution N/variance primary::any_gas/index_calendar_day/spline",
+      "passed": true
+    },
+    {
+      "check_id": "shift support primary::any_gas/index_calendar_day/spline",
+      "passed": true
+    },
+    {
+      "check_id": "paired means primary::matched/abg/icd",
+      "passed": true
+    },
+    {
+      "check_id": "difference and PIF primary::matched/abg/icd",
+      "passed": true
+    },
+    {
+      "check_id": "contribution N/variance primary::matched/abg/icd",
+      "passed": true
+    },
+    {
+      "check_id": "shift support primary::matched/abg/icd",
+      "passed": true
+    },
+    {
+      "check_id": "paired means primary::matched/abg/abg",
+      "passed": true
+    },
+    {
+      "check_id": "difference and PIF primary::matched/abg/abg",
+      "passed": true
+    },
+    {
+      "check_id": "contribution N/variance primary::matched/abg/abg",
+      "passed": true
+    },
+    {
+      "check_id": "shift support primary::matched/abg/abg",
+      "passed": true
+    },
+    {
+      "check_id": "paired means primary::matched/any_gas/icd",
+      "passed": true
+    },
+    {
+      "check_id": "difference and PIF primary::matched/any_gas/icd",
+      "passed": true
+    },
+    {
+      "check_id": "contribution N/variance primary::matched/any_gas/icd",
+      "passed": true
+    },
+    {
+      "check_id": "shift support primary::matched/any_gas/icd",
+      "passed": true
+    },
+    {
+      "check_id": "paired means primary::matched/any_gas/any_gas",
+      "passed": true
+    },
+    {
+      "check_id": "difference and PIF primary::matched/any_gas/any_gas",
+      "passed": true
+    },
+    {
+      "check_id": "contribution N/variance primary::matched/any_gas/any_gas",
+      "passed": true
+    },
+    {
+      "check_id": "shift support primary::matched/any_gas/any_gas",
+      "passed": true
+    },
+    {
+      "check_id": "paired means primary_current::abg/encounter/spline",
+      "passed": true
+    },
+    {
+      "check_id": "difference and PIF primary_current::abg/encounter/spline",
+      "passed": true
+    },
+    {
+      "check_id": "contribution N/variance primary_current::abg/encounter/spline",
+      "passed": true
+    },
+    {
+      "check_id": "shift support primary_current::abg/encounter/spline",
+      "passed": true
+    },
+    {
+      "check_id": "paired means primary_current::any_gas/encounter/spline",
+      "passed": true
+    },
+    {
+      "check_id": "difference and PIF primary_current::any_gas/encounter/spline",
+      "passed": true
+    },
+    {
+      "check_id": "contribution N/variance primary_current::any_gas/encounter/spline",
+      "passed": true
+    },
+    {
+      "check_id": "shift support primary_current::any_gas/encounter/spline",
+      "passed": true
+    },
+    {
+      "check_id": "paired means primary_current::icd/encounter/spline",
+      "passed": true
+    },
+    {
+      "check_id": "difference and PIF primary_current::icd/encounter/spline",
+      "passed": true
+    },
+    {
+      "check_id": "contribution N/variance primary_current::icd/encounter/spline",
+      "passed": true
+    },
+    {
+      "check_id": "shift support primary_current::icd/encounter/spline",
+      "passed": true
+    },
+    {
+      "check_id": "paired means all_obesity::abg/encounter/spline",
+      "passed": true
+    },
+    {
+      "check_id": "difference and PIF all_obesity::abg/encounter/spline",
+      "passed": true
+    },
+    {
+      "check_id": "contribution N/variance all_obesity::abg/encounter/spline",
+      "passed": true
+    },
+    {
+      "check_id": "shift support all_obesity::abg/encounter/spline",
+      "passed": true
+    },
+    {
+      "check_id": "paired means all_obesity::any_gas/encounter/spline",
+      "passed": true
+    },
+    {
+      "check_id": "difference and PIF all_obesity::any_gas/encounter/spline",
+      "passed": true
+    },
+    {
+      "check_id": "contribution N/variance all_obesity::any_gas/encounter/spline",
+      "passed": true
+    },
+    {
+      "check_id": "shift support all_obesity::any_gas/encounter/spline",
+      "passed": true
+    },
+    {
+      "check_id": "paired means all_obesity::icd/encounter/spline",
+      "passed": true
+    },
+    {
+      "check_id": "difference and PIF all_obesity::icd/encounter/spline",
+      "passed": true
+    },
+    {
+      "check_id": "contribution N/variance all_obesity::icd/encounter/spline",
+      "passed": true
+    },
+    {
+      "check_id": "shift support all_obesity::icd/encounter/spline",
+      "passed": true
+    }
+  ],
+  "clinical_input_reads": 0,
+  "model_refits": 0,
+  "investigator_scientific_review": "not asserted"
+}

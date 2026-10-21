@@ -87,3 +87,14 @@ only when evidence passes. Compare the original clinical fields/indexes and
 estimates with the authenticated prior run. Preserve all earlier artifacts.
 Source qualification, numerical review, visual review and investigator approval
 remain separate. Rendering does not provide scientific approval.
+
+## Execution evidence
+
+Software released in PR #19 at `b89d485`; qualified clinical execution completed
+in `curve-analyze-20261020T174425-15236`. Both supplemental positions succeeded
+with the shared N of 22,195. Original fields/indexes and primary numerical results
+are preserved, with the latter reconciled at tolerance 1e-10. The
+[separate reading packet](../results/2026-10-20-same-day-abg/README.md) contains
+the integrated reports, S1 and complete aggregate tables. Its review receipts
+separate source qualification, estimation, numerical verification, visual review
+and pending investigator approval. The earlier snapshots remain immutable.

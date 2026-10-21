@@ -17,6 +17,12 @@ You do not need to run the code to review the study. The
 reports, selected figures and complete aggregate tables in Git. A normal clone
 includes these results; raw and patient-level data remain excluded.
 
+The **[same-day arterial supplement](results/2026-10-20-same-day-abg/README.md)**
+adds two completed clinical models, an updated scientific report, a complete
+audit and figure S1. It uses **same recorded-day co-occurrence; not verified
+same-sample pairing**. The original analysis and B/F2 selection remain unchanged;
+investigator interpretation and figure approval for S1 are pending.
+
 | Read in this order | What to look for |
 |---|---|
 | [Scientific report — 34 pages](results/2026-10-18/bmi_hypercapnia.pdf) | Rationale, detailed methods, results, sensitivity analyses and interpretation limits |
@@ -110,6 +116,7 @@ not another analysis configuration.
 The repository is laid out as follows:
 
 ```text
+results/2026-10-20-same-day-abg/  Completed co-occurrence supplement: reports, S1 and tables
 results/2026-10-20-paired-abg/  Source-feasibility supplement; no new clinical models
 results/2026-10-18/  Clinical reading snapshot: PDFs, B/F2, gallery, 49 CSVs and hashes
 docs/                Scientific/source guides, decisions, figure QC and LLM navigation
@@ -149,7 +156,7 @@ fresh `artifacts/triangulation/e2e-.../receipt.json` with `status: passed`, alon
 does not reproduce clinical estimates or confer scientific approval. `make fixture`
 runs the artificial example without the E2E assertions.
 
-For presentation changes, use an explicitly selected saved schema-8 run:
+For presentation changes, use an explicitly selected saved schema-9 run:
 
 ```bash
 make render RUN="artifacts/triangulation/<exact-saved-run>"
@@ -174,10 +181,10 @@ make source-test PREP_PYTHON="/existing/environment/bin/python"
 ```
 
 Use the existing source-reader Python environment with pandas and DuckDB; source
-preparation also requires the pinned upstream readers. The latest local checks
-passed the artificial E2E and 18 source checks; nine source checks were unavailable
-without DuckDB. See [test scope](tests/README.md) and [dated receipts](WORKLOG.md).
-No analysis was rerun to package the collaborator outputs.
+preparation also requires the pinned upstream readers. The same-day release passed
+the artificial E2E and all 33 source checks using the existing Mini environment,
+without skips or dependency installation. See [test scope](tests/README.md) and
+[dated receipts](WORKLOG.md). Artificial checks do not establish clinical results.
 
 ## Data access and full clinical reproduction
 
@@ -205,8 +212,13 @@ The [supplement specification](docs/SAME_DAY_ABG_SUPPLEMENT.md) adds two models
 of same recorded-day co-occurrence, **not verified same-sample pairing**.
 Both use the same co-observed primary patients, inherited adjustment and primary
 BMI spline knots; no new PIF is computed. Current software uses aggregate schema 9.
-The primary clinical snapshot and selected B/F2 remain unchanged. Clinical
-qualification and new estimates are pending completion of this release.
+The primary clinical snapshot and selected B/F2 remain unchanged. Source
+qualification and clinical estimation completed from merged `b89d485` on October
+20. Both supplemental models use 22,195 patients: 11,669 have hypercapnia on a
+co-observed day and 8,809 have same-day hypercapnia–acidemia co-occurrence.
+Original model samples, coefficients, curves and PIFs agree with the prior run
+within 1e-10. See the [new reading packet](results/2026-10-20-same-day-abg/README.md)
+for the full count reconciliation, intervals, reports and separate review states.
 
 The [historical pairing-feasibility report](results/2026-10-20-paired-abg/README.md)
 remains available. Its raw-export trace confirmed that sample identifiers were

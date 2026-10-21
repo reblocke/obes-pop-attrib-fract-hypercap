@@ -1,0 +1,10 @@
+{
+  "prior_bundle_sha256": "4ebe313e3098e6292eeec7aac53df739faffd16777faa3a5547e078cebcfc959",
+  "current_bundle_sha256": "05627fa61fc1b2d9cebaf612ffa3043f21506d40c15b3c435e10ba274985f89f",
+  "tolerance": 1e-10,
+  "primary_tables_unchanged": true,
+  "exactly_two_supplemental_models": true,
+  "no_new_PIFs": true,
+  "four_stage_counts_reconcile": true,
+  "clinical_results_scientifically_reviewed": false
+}
