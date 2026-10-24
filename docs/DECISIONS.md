@@ -224,3 +224,19 @@ the new curves are pending; historical snapshots remain immutable.
   Complete-table verification and scoped figure/report inspection passed;
   automated geometry covered every PDF page. The visual receipt lists the
   manually inspected pages separately from automated coverage.
+
+## 2026-10-24 — Public repository authorized; conference drafts remain private
+
+The owner authorized the final audit, commit/push, code review, PR, squash merge
+and public visibility change. The existing reports, figures, aggregate tables and
+historical material are retained under that authorization, including the local
+paths and historical Finder metadata identified in the release review. No Git
+history or accepted result snapshot is rewritten. No license, citation authorship
+or investigator interpretation/figure approval is inferred from publication.
+
+The conference drafting folder is `reports/ATS Abstract 2027/`. Keep it local and
+ignored. Its current files and paths are absent from the fetched GitHub branch
+and pull-request histories. Private local Codex recovery refs are outside the
+publication refs and must not be mirror-pushed. Push only the reviewed release
+branch. See the refreshed [release review](PUBLIC_RELEASE_REVIEW.md) for scope,
+verification evidence and remaining maintenance decisions.
