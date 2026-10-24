@@ -186,3 +186,21 @@ status. An adjusted ICD-acuity curve requires a further scientific modeling
 decision. S2 is currently a status display, not an estimated or approved figure.
 Primary approval and B/F2 selection are unchanged; supplemental interpretation
 and submission approval remain separate. No abstract was drafted.
+
+## 2026-10-24 — Explicit replacement of the separated ICD estimator
+
+Owner approved implementation and rerun of the recommended five-category
+mean-bias-reduced multinomial model, with an unpenalized four-category sensitivity
+excluding the final unspecified-only category and an observed BMI-band companion.
+The full model preserves the target population and category precedence. The
+sensitivity has a smaller denominator; co-coded unspecified flags assigned to
+a specified category remain included. Both reuse the primary numeric basis
+and inherited adjustment. Joint information covariance supplies first-order
+pointwise intervals conditional on the reference and basis. This explicit
+choice supersedes the unpenalized ICD-acuity fit only, not the primary analyses,
+S1 or PIFs. No automatic fallback, category pooling or demographic recoding.
+
+Source evidence remains qualified under the unchanged contract. Software,
+independent statistical verification, clinical execution, numerical review and
+visual review are separate gates. Clinical rerun and investigator approval of
+the new curves are pending; historical snapshots remain immutable.

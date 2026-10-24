@@ -35,6 +35,11 @@ See the [decision log](docs/DECISIONS.md) for dated decisions and publication
 planning, and the [public-release review](docs/PUBLIC_RELEASE_REVIEW.md) for checks
 and outstanding release tasks.
 
+The owner has now approved a bias-reduced five-category replacement, a
+four-category sensitivity excluding unspecified-only patients, and an observed
+BMI-band companion. Implementation and fresh clinical verification are in
+progress; the historical nonestimable snapshot below is not relabeled.
+
 ## Read the results
 
 You do not need to run the code to review the study. The
@@ -131,8 +136,8 @@ unmeasured confounding. The [source contract](docs/SOURCE_CONTRACT.md) and
 | [LLM reading guide](docs/LLM_GUIDE.json) / [agent instructions](AGENTS.md) | Structured evidence navigation and operating rules for assistants |
 | [Work log](WORKLOG.md) / [archive index](archive/README.md) | Execution evidence and recovery of superseded versions |
 
-The current implementation is `bmi_hypercapnia_rfs_curve_audit_v6` (aggregate
-schema 11). The latest integrated clinical snapshot is schema 11. The earlier
+The current implementation is `bmi_hypercapnia_rfs_curve_audit_v7` (aggregate
+schema 12). The latest integrated clinical snapshot is schema 11. The earlier
 joint same-day snapshot remains schema 10 and is preserved unchanged.
 `R/analysis.R` loads the current modules; `scripts/run_bmi_hypercapnia.R` audits
 and estimates; `scripts/render_bmi_hypercapnia.R` renders saved aggregates. The
@@ -187,7 +192,7 @@ does not reproduce clinical estimates or confer scientific approval. `make fixtu
 runs the artificial example without the E2E assertions.
 
 For presentation changes, use an explicitly selected saved run that matches the
-checked-out analysis version. Current execution bundles require schema 11; older
+checked-out analysis version. Current execution bundles require schema 12; older
 snapshots retain their original version and cannot be relabeled:
 
 ```bash
@@ -292,7 +297,8 @@ The [October 24 packet](results/2026-10-24-icd-acuity/README.md) contains the fu
 run and category counts. The planned unpenalized joint model is **nonestimable**:
 unspecified-acuity diagnoses are absent in three retained race/ethnicity strata,
 creating separation. S2 explicitly records unavailable adjusted curves; it is
-not an estimated relationship or a publication-ready curve. A new modeling
-decision is needed before adjusted ICD-acuity comparisons can be reported.
+not an estimated relationship or a publication-ready curve. The approved
+bias-reduced replacement and specified-category sensitivity are implemented;
+fresh clinical estimates remain pending release and verification.
 Original primary/S1 estimates, PIFs and selected B/F2 remain unchanged. No abstract
 was drafted. See the [source command](docs/SOURCE_CONTRACT.md#icd-acuity-enrichment).

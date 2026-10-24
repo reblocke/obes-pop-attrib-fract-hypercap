@@ -242,3 +242,11 @@ schema-11 Mini preflight passed. See the [source qualification receipt](../resul
 The subsequent ICD model separation is an estimability limitation of the planned
 category/adjustment combination, not failed source transport. No replacement
 export or upstream rebuild is indicated by these checks.
+
+### ICD estimator replacement (2026-10-24)
+
+Schema 12 changes estimation, not `icd_acuity_v1` source qualification. Reuse the
+accepted hash-bound input, complete-capture rule, original code flags and exact
+precedence. No fresh extraction or upstream rebuild is required. The four-class
+sensitivity filters final unspecified-only classifications after fixed-index
+selection; it never changes the original source fields or clinical episode.

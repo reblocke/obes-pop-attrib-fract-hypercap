@@ -1,6 +1,6 @@
 {
-  "analysis_id": "bmi_hypercapnia_rfs_curve_audit_v6",
-  "bundle_schema": 11,
+  "analysis_id": "bmi_hypercapnia_rfs_curve_audit_v7",
+  "bundle_schema": 12,
   "population_scope_id": "original_selected_encounters_v1",
   "bmi_policy_id": "available_encounter_or_prior_bmi_v1",
   "source_policy_id": "unadjusted_pco2_v1",
@@ -60,5 +60,7 @@
     55
   ],
   "same_day_abg_enabled": true,
-  "icd_acuity_enabled": true
+  "icd_acuity_enabled": true,
+  "icd_acuity_estimator": "firth_mean_bias_reduced_v1",
+  "icd_acuity_specified_sensitivity": true
 }
