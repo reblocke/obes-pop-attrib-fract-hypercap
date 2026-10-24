@@ -18,6 +18,15 @@ from prepare_common_index_input import (
 )
 
 
+def read_prepared_rows(path):
+    """Preserve exact decimal round trips when checking typed source transport."""
+    import pandas as pd
+    prepared=pd.read_csv(path,dtype={'patient_id':'string','encounter_id':'string'},
+        keep_default_na=False,na_values=[''],float_precision='round_trip')
+    prepared['encounter_date']=pd.to_datetime(prepared.encounter_date)
+    return prepared
+
+
 def check_indexes(c, product, prepared, census):
     quote = lambda x: "'"+str(x).replace("'", "''")+"'"
     c.register('prepared_rows', prepared)
@@ -176,7 +185,6 @@ def check_fields(c, prepared, capture_complete):
 
 
 def run(config, prepared_dir, output):
-    import pandas as pd
     os.umask(0o077); output.mkdir(mode=0o700,parents=True,exist_ok=False)
     prep=json.loads((prepared_dir/'preparation_receipt.json').read_text())
     if prep['source_config_sha256'] != config['_config_sha256']:
@@ -198,8 +206,7 @@ def run(config, prepared_dir, output):
     verify_file(mapping['original_encounter_list'])
     product=verify_file({'path':str(path.parent/'covariates.parquet'),'sha256':mapping['files']['covariates.parquet']})
     census=json.loads((prepared_dir/'selection-evidence.json').read_text())
-    prepared=pd.read_csv(prepared_dir/'study-input.csv',dtype={'patient_id':'string','encounter_id':'string'},keep_default_na=False,na_values=[''])
-    prepared['encounter_date']=pd.to_datetime(prepared.encounter_date)
+    prepared=read_prepared_rows(prepared_dir/'study-input.csv')
     (output/'spill').mkdir(mode=0o700)
     with readers['combined_preprocessing.cohort_source'].open_cohort_source(database,
         expected_catalog_sha256=config['canonical_source']['catalog_sha256'],spill_root=output/'spill',memory_limit_mib=2816) as source:

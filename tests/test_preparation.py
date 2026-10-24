@@ -129,10 +129,14 @@ class PreparationChecks(unittest.TestCase):
                 abg_pco2=44.9999999,vbg_pco2="",icd_hypercapnia=0)
             with source.open('w',newline='') as file:
                 writer=csv.DictWriter(file,fieldnames=prep.OUTPUT_COLUMNS);writer.writeheader();writer.writerow(data)
+                import struct
+                for i,value in enumerate((10.1,15.9),2):
+                    writer.writerow(dict(data,patient_id=f'{i:04}',encounter_id=f'{i:05}',bmi=struct.unpack('<f',struct.pack('<f',value))[0]))
+            expected=root/'expected.bin';expected.write_bytes(struct.pack('<3d',30.2,*[struct.unpack('<f',struct.pack('<f',v))[0] for v in (10.1,15.9)]))
             run=subprocess.run(['Rscript','--vanilla',str(ROOT/'scripts/write_common_index_input.R'),str(source),str(dest)],cwd=ROOT,check=True,capture_output=True,text=True)
             self.assertNotIn('0001',run.stdout);self.assertNotIn('44.999',run.stdout)
-            code='x<-readRDS(commandArgs(TRUE)[1]);stopifnot(x$patient_id=="0001",x$encounter_id=="00001",inherits(x$encounter_date,"Date"),is.na(x$sex),is.na(x$vbg_pco2),x$abg_pco2<45,x$bmi==30.2)'
-            subprocess.run(['Rscript','--vanilla','-e',code,str(dest)],check=True,capture_output=True)
+            code='x<-readRDS(commandArgs(TRUE)[1]);stopifnot(x$patient_id[1]=="0001",x$encounter_id[1]=="00001",inherits(x$encounter_date,"Date"),is.na(x$sex),is.na(x$vbg_pco2),x$abg_pco2<45,identical(x$bmi,readBin(commandArgs(TRUE)[2],"numeric",n=3,size=8,endian="little")))'
+            subprocess.run(['Rscript','--vanilla','-e',code,str(dest),str(expected)],check=True,capture_output=True)
 
 
     def test_full_source_hash_receipt_reuse_requires_exact_identity_and_digest(self):
