@@ -151,3 +151,7 @@ verify unchanged numerical kernels on identical data; changed cohorts are not
 expected to reproduce historical clinical estimates.
 
 Qualification regression scenario: prepared inputs now retain BMI provenance. Joining the full prepared shape to the mapper must not make shared `bmi_method` names ambiguous; the independent source check retains that field, unlike the earlier reduced fixture. This catches a clinical qualification execution failure before any model runs.
+
+The source boundary also exercises the actual prepared-CSV reader with an exactly promoted float32 BMI below 30. Pandas default parsing can change the last binary digit even when the typed RDS and mapper agree. The independent parquet oracle requires exact transport; a numerical tolerance is not a substitute.
+
+Typed transport failures also include base R decimal parsing at lower float32 BMI values. The existing Python-to-R boundary writes independent binary-double oracles for 10.1 and 15.9 as stored float32 values, then checks the actual RDS byte-level numeric values, keys, dates, missingness and gas-threshold precision. Both selection and final typing must use the same exact numeric reader.

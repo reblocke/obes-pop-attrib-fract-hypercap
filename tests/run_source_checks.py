@@ -38,7 +38,7 @@ class ReceiptResult(unittest.TextTestResult):
         self.records.append({"test": test.id(), "status": "error", "reason": str(error[1])})
 
 
-sources = sorted(list((ROOT / "tests").glob("*.py")) + list((ROOT / "scripts").glob("*.py")))
+sources = sorted(list((ROOT / "tests").glob("*.py")) + list((ROOT / "scripts").glob("*.py")) + list((ROOT / "scripts").glob("*.R")))
 def source_hashes():
     return {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest() for p in sources}
 
@@ -56,7 +56,7 @@ receipt = {
     "python": sys.executable,
     "tests": result.records,
     "sources_unchanged": stable,
-    "source_snapshot_scope": "Repository Python test/adapter files; not a claim that every file was imported",
+    "source_snapshot_scope": "Repository Python tests/adapters and R launchers/readers; not a claim that every file was imported",
     "sources": before,
 }
 (OUT / "receipt.json").write_text(json.dumps(receipt, indent=2) + "\n")

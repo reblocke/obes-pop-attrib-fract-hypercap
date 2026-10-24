@@ -5,6 +5,7 @@ import sys
 import tempfile
 import unittest
 import json
+import struct
 
 try:
     import duckdb
@@ -85,11 +86,13 @@ class IndependentSourceChecks(unittest.TestCase):
                   "('q','d','2022-01-02',40,'EMER',33,'valid','current','2022-01-02',NULL,NULL,33),"
                   "('r','e','2022-01-01',40,'EMER',31,'valid','current','2022-01-01',NULL,NULL,31),"
                   "('r','f','2022-01-01',40,'IMP',32,'valid','current','2022-01-01',NULL,NULL,32),"
-                  "('s','g','2022-01-01',40,'EMER',24,'valid','current','2022-01-01',NULL,NULL,24)")
+                  "('s','g','2022-01-01',40,'EMER',cast(10.1 AS FLOAT),'valid','current','2022-01-01',NULL,NULL,10.1)")
         with tempfile.TemporaryDirectory() as temp:
             file=Path(temp)/'ARTIFICIAL.parquet'
             c.execute('COPY mapping TO ? (FORMAT PARQUET)',[str(file)])
-            prepared=pd.DataFrame({'patient_id':['p','s'],'encounter_id':['b','g'],'bmi':[35,24],'bmi_method':['prior','current']})
+            prepared=pd.DataFrame({'patient_id':['p','s'],'encounter_id':['b','g'],'bmi':[35,struct.unpack('<f',struct.pack('<f',10.1))[0]],'bmi_method':['prior','current'],'encounter_date':pd.to_datetime(['2022-01-02','2022-01-01'])})
+            csv_path=Path(temp)/'study-input.csv';prepared.to_csv(csv_path,index=False)
+            prepared=qa.read_prepared_rows(csv_path)
             census={'counts':{'n_frame_patients':4,'n_index_unresolved':2,'n_earliest_ties':1,'n_earlier_uncertainty':1}}
             checks,_=qa.check_indexes(c,file,prepared,census)
             self.assertTrue(all(v==0 for v in checks.values()),checks)

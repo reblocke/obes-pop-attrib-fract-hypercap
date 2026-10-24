@@ -498,7 +498,7 @@ def prepare(config, output):
     shared=dict(schema_version=1,input_sha256=receipt["input_sha256"],selection_sha256=selection_hash,
         source_config_sha256=config["_config_sha256"],canonical_database_sha256=source["database"]["sha256"],
         source_unchanged=True,n_input_encounters=len(selected),clinical_models_fitted=0,
-        adapter_sources={name:sha256(ROOT/name) for name in ("scripts/source_components.py","scripts/prepare_common_index_input.py","scripts/write_common_index_input.R")},
+        adapter_sources={name:sha256(ROOT/name) for name in ("scripts/source_components.py","scripts/prepare_common_index_input.py","scripts/write_common_index_input.R","scripts/read_source_csv.R","scripts/select_common_index_mapping.R")},
         human_review="Automated extraction; no new investigator approval asserted")
     day_evidence=dict(shared,policy_id="same_day_arterial_cooccurrence_v1",status="qualified" if day_policy else "unavailable",
         reason="" if day_policy else "No authenticated recorded-day arterial policy supplied",policy=day_policy,
