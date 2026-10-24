@@ -1,0 +1,21 @@
+[
+  {
+    "current": "primary/F1-B.png",
+    "prior": "results/2026-10-18/figures/F1-B.png",
+    "current_exists": true,
+    "byte_identical": true
+  },
+  {
+    "current": "primary/F2.png",
+    "prior": "results/2026-10-18/figures/F2.png",
+    "current_exists": true,
+    "byte_identical": false,
+    "difference": "Later policy-label title/subtitle and corresponding spacing; printed numerical content unchanged; selected original file preserved"
+  },
+  {
+    "current": "S1-same-day-ABG.png",
+    "prior": "results/2026-10-20-same-day-components/figures/S1-same-day-ABG.png",
+    "current_exists": true,
+    "byte_identical": true
+  }
+]

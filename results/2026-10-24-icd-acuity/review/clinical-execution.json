@@ -1,0 +1,35 @@
+{
+  "mode": "analyze",
+  "source_status": "identity_bound_source_declarations_passed",
+  "input_sha256": "4bab2d09aa976bda54289198e6e5870056ab97dceebb95d3fafa73a0f2cae739",
+  "manifest_sha256": "ff2f423f59b6809c3689e2a0349b2115543678b1582d98152f05cb0bfcfb00e8",
+  "code_identity": {
+    "commit": "c0970484db8708845c023712d8e5204aad368d91",
+    "tree": "bff8e96523f439ae57b993a489a4cf2202513b01",
+    "working_tree_clean": true
+  },
+  "analysis_elapsed_seconds": 639.328,
+  "clinical_models_fitted": 27,
+  "source_evidence_sha256": {
+    "lineage": "e43af835292da4154d4996fb6b36c711631d45eac90c4bc3c36b94d8bc86f8db",
+    "fields": "00035f7018fda3afb3d891fecda7ff9bccd2e1ace6d7ae49b46de01454018b82",
+    "population": "38f450dcb306bb8f3f907adeff6ebfcf25e263c73bd6520d708d2b20947f0616",
+    "index_day": "00035f7018fda3afb3d891fecda7ff9bccd2e1ace6d7ae49b46de01454018b82",
+    "selection": "2a406cbfc5282e7a1bc93e8e1741967ebf0783ad2c178bb3d9fc7696b9d888cc",
+    "qualification": "c4ea1a9e8643142fa37415af39b9a00d10cebf3b1478b2296bfdbfbcba6cb937",
+    "cohort_audit": "73d1a24b0e605cd50c281574991cb50e7ac7901229f9dfd741af927e08d152e6",
+    "cohort_review": "2a224623aa377d68f53830002075c2e2c95340f581822a1f4c43d971b6c76b39",
+    "independent_fields": "87564a35359833e5cf99e8d96c9c04377a94a7f7c656617af393c95f8c0718c9",
+    "owner_acceptance": "8d9e599a0cb057c250202e7aa630030b5912274095e34d509d7332787834ba89",
+    "release_verification": "7dc17d66976c5028263c703035e3bad7e313e985479cade5cbea996c9f4c82f0",
+    "rfs": "d08bf9fe461ebfd6b509db29091dc894f451032da0cad4cd034b0f05492539ac",
+    "prior_comparison": "f9edf3d41b31a293879de5302d06f871ba01e42ac1af02360427bb0c4870a481",
+    "same_day_abg": "740279bbdecdc8cc0bb95596a657d7c92720594d6892382098db66ef44a3dec1",
+    "icd_acuity": "3a5b733ece078c7b61d2e3bf5d4e21ab95bd53a8d299c3667b0f546bab1758c6"
+  },
+  "source_qualification": "passed",
+  "clinical_estimation_runs": 1,
+  "ICD_acuity_model": "nonestimable: separation",
+  "original_primary_S1_comparison": "11 tables unchanged within 1e-10; empty reason text normalized, numeric values unchanged",
+  "investigator_interpretation": "pending"
+}

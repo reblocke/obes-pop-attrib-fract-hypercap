@@ -1,0 +1,13 @@
+"requirement","status","note","n"
+"keys","passed","Exact original-key/input field comparison; prior bundle 4a12a50220eb2a13efd958cba4784e8e9997b17fadd15d580d0886ad6be95df1; metadata additions only",
+"indexes","passed","Exact original-key/input field comparison; prior bundle 4a12a50220eb2a13efd958cba4784e8e9997b17fadd15d580d0886ad6be95df1; metadata additions only",
+"BMI","passed","Exact original-key/input field comparison; prior bundle 4a12a50220eb2a13efd958cba4784e8e9997b17fadd15d580d0886ad6be95df1; metadata additions only",
+"adjustment","passed","Exact original-key/input field comparison; prior bundle 4a12a50220eb2a13efd958cba4784e8e9997b17fadd15d580d0886ad6be95df1; metadata additions only",
+"outcomes","passed","Exact original-key/input field comparison; prior bundle 4a12a50220eb2a13efd958cba4784e8e9997b17fadd15d580d0886ad6be95df1; metadata additions only",
+"source_partition","passed","Exact original-key/input field comparison; prior bundle 4a12a50220eb2a13efd958cba4784e8e9997b17fadd15d580d0886ad6be95df1; metadata additions only",
+"alternative_index_same","assessed; count only, no alternative model","Original indexed patients; alternate first eligible non-OBESITY-supported candidate. Earlier RFS uncertainty not converted to absence.",176922
+"alternative_index_changed","assessed; count only, no alternative model","Original indexed patients; alternate first eligible non-OBESITY-supported candidate. Earlier RFS uncertainty not converted to absence.",3402
+"alternative_index_unavailable","assessed; count only, no alternative model","Original indexed patients; alternate first eligible non-OBESITY-supported candidate. Earlier RFS uncertainty not converted to absence.",43190
+"alternative_index_membership_unresolved","assessed; count only, no alternative model","Original indexed patients; alternate first eligible non-OBESITY-supported candidate. Earlier RFS uncertainty not converted to absence.",0
+"alternative_index_after_pathway_removal","not_assessed","Requires private authenticated candidate/input comparisons; no equality inferred from totals",
+"cross_project_decomposition","not_assessed","Requires private authenticated candidate/input comparisons; no equality inferred from totals",

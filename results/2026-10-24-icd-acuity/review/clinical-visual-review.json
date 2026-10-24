@@ -1,0 +1,94 @@
+{
+  "reviewed_at": "2026-10-24T09:09:31.878067+00:00",
+  "reviewer": "Codex agent visual inspection; not investigator approval",
+  "status": "passed for explicit unavailable-model display within recorded scope",
+  "publication_ready_adjusted_curve": false,
+  "scientific_blocker": "Planned unpenalized ICD-acuity model has separation; no adjusted S2 curves or intervals exist",
+  "run_id": "curve-analyze-20261024T022943-53435",
+  "bundle_manifest_sha256": "dade34346ed8f3d18a262c70e581c09a1aed2331670af3236bc2a9b894da6f68",
+  "render_receipt_sha256": "1e07fd238258a21452a503c633b2c1ad82c0cfc274efa90fc20f25e4e38fbccd",
+  "render_sources": {
+    "R/reporting.R": "184aa00be88e6ebac3795a169bec69ceb85417518e6cdf64ee013be6f292cad5",
+    "R/report_views.R": "40ad7a995db8aa196a3557b976bfb19bcf839ecefbc49881bcbce3567f583d98",
+    "R/rfs_reporting.R": "32fd0e6888bf710b9f1c0a044ebc653963f4b806dbb75cef26215cc36f5b4217",
+    "scripts/render_bmi_hypercapnia.R": "f8fadfb071153cce2597b1976ceca0bde14fc2da395868d4ab3e7b4d6f7b5fa3",
+    "reports/bmi_hypercapnia.qmd": "995ad4a7e1c1cdb692d0c5b0f18d9fd1dce5a8096d294e9f5f184f7b65328e88",
+    "reports/bmi_hypercapnia_audit.qmd": "2ee87520c70a8303af368a93e06fe644ad733f8950d9e36af204b314b867037e",
+    "reports/bmi_report.css": "8ba9c606c92efbde6ed3e866731818e533b90d5375b4ecf1d03d43a403e6c9ad",
+    "reports/table_passthrough.R": "1b0bdf8077836c942ef3dfeb3838bb4b2714059c5285aedebbea028d210186bb"
+  },
+  "scientific_pdf": {
+    "pages": 43,
+    "agent_visual_scope": "All 43 pages in contact sheets; supplemental pages 41 and 42 enlarged",
+    "sha256": "3678b85458ef42bf63e4db502d7a84bc03d21a29bc134238224341da0b2c53fe"
+  },
+  "audit_pdf": {
+    "pages": 3762,
+    "agent_visual_pages": [
+      10,
+      61,
+      67,
+      3695,
+      3696,
+      3697
+    ],
+    "other_pages": "Automated complete-table and geometry checks only; not individually visually inspected",
+    "sha256": "3bdffacb749401abf8727280025273f146b44d92975d0f97a101b1e60126bf88"
+  },
+  "figure_scope": [
+    "S2 native-size PNG",
+    "S2 native-size grayscale",
+    "native vector PDF raster",
+    "captioned standalone PDF",
+    "assembled scientific and audit S2 pages"
+  ],
+  "html_scope": "Complete table/caption and local asset/link checks; no browser visual inspection claimed",
+  "geometry": {
+    "review_width_mm": 190,
+    "raster_pixels": [
+      2244,
+      2480
+    ],
+    "dpi": 300,
+    "minimum_designed_data_label_points": 9,
+    "vector_masters": [
+      "SVG",
+      "PDF"
+    ]
+  },
+  "findings": {
+    "clipping": "none on inspected views",
+    "label_collisions": "none on inspected views",
+    "symbols": "legible on inspected views",
+    "grayscale": "status and category counts remain legible",
+    "uncertainty": "No unavailable ICD estimates or intervals drawn; failure explicit",
+    "numerical_agreement": "176922 eligible reference; events 1769,3443,3294,128 match category ledger",
+    "full_table_checks_passed": 114,
+    "automated_geometry_issues": 0
+  },
+  "inspection_artifact_hashes": {
+    "science-pages/overview/sheet-001.png": "7db2f15ce5dca6122e7145472a2f35bebb9b1a30721b0bfb5f179756e6c24ebe",
+    "science-pages/overview/sheet-002.png": "ca498a66f8b92278ad325d22d226e8ba302f5941d0e4dcc408127a6e04b837f6",
+    "science-pages/overview/sheet-003.png": "a642312b1ddf2aeed78aecba113f94c4923078ac999b229a792be45568a4ad58",
+    "science-pages/overview/sheet-004.png": "fbece7aa1b48fd2819cb513c8050970c78c36730371006aa272c2a373682d240",
+    "science-pages/overview/sheet-005.png": "2341bd8b19284083bbed9dc995c6ddbd982f3d2c4bc99f838565402b34b0de98",
+    "science-41.png": "7ec945dd1790323747b8501b79188d93b712538c2fee06eca184a747d10aa22d",
+    "science-42.png": "cbf3ec1eefe0f4b65cd1766600319973b5a4d902005fb31012a5bbcd46ce433f",
+    "audit-10.png": "e3f87f1fc53898a89949fd63eefc830d0feb7ded9849b6f3582763fe0b4c65bc",
+    "audit-61.png": "c0104dd2601244530698071f4dc350add98586993b4f424bf287c6908d5d0ff5",
+    "audit-67.png": "52748f66b0c1f59848da11af1e567b6da42cdb65e7b34558b9f978f5923b8b0c",
+    "audit-3695.png": "120101ec2031ea60e9b3bec259f5c57ce0bec2da7024761aaa307124f50c9f54",
+    "audit-3696.png": "8e0dd49e1d74284c3158b8fdffe034f8a875536e9bc955fb4f3ee74c4ced6a55",
+    "audit-3697.png": "368af3cd7e9ff64b20bfa296b5c7c02ef5fa8db15b6aca445845f7eb99ec2b4f",
+    "S2-native.png": "11aebea3345b6f2c3efa044053fccc684dc6b827792a10c1998198388f6d1732",
+    "S2-native-grayscale.png": "e033539970d6aac8d342740d8242bb5d434567884b632b3660dda5ab2e4f1292",
+    "S2-native-vector.png": "2ee17e2bb16fc83c6dcec0b93d907119abb6d8a3376cbda2956727df606b0922",
+    "captioned-S2.png": "5ae198158a80e82238fa97310d80b464f9c2931d3c1ce5d7450822d010b9c184"
+  },
+  "preserved_figures": "B and S1 native PNGs byte-identical to prior snapshots; F2 printed values unchanged with later label/spacing changes. Selected original B/F2 files untouched.",
+  "clinical_input_reads": 0,
+  "model_refits": 0,
+  "investigator_interpretation": "pending",
+  "investigator_figure_approval": "pending",
+  "submission_approval": "not asserted"
+}

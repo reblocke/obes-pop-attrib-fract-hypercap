@@ -80,3 +80,32 @@ On October 24, all 35 source-boundary checks passed without skips in the existin
 Mini runtime, including both new ICD checks. The tested source hashes match this
 implementation; later test-guide changes document the result only. Clinical
 transport reconciliation, estimation and investigator interpretation remain pending.
+
+## Clinical execution and estimability (2026-10-24)
+
+PR #23 merged the workflow at `c0970484`. Fresh enrichment and Mini preflight
+passed using the same accepted diagnosis source. All 223,514 original rows,
+fields and fixed indexes were preserved; all 18,030 target source diagnosis
+records reconciled, and the five-code union reproduced the original composite.
+There was no demonstrated upstream change or new code-transport discrepancy.
+
+Run `curve-analyze-20261024T022943-53435` completed once. Its primary diagnosis
+population contains 176,922 patients: no target 168,288, chronic/OHS 1,769,
+acute-on-chronic/concurrent 3,443, acute 3,294, and unspecified 128. The planned
+five-category unpenalized model is **nonestimable because of separation**.
+Unspecified diagnoses are absent in the retained Asian (995), American
+Indian/Alaska Native (1,475) and Native Hawaiian/Pacific Islander (339) strata.
+The full-rank planned design therefore does not guarantee a finite maximum-
+likelihood fit. These are observed sampling zeros, not physiological conclusions.
+
+All 11 original primary/S1 comparison tables agree within 1e-10; PIFs are
+unchanged. Source qualification and category counts passed; ICD probability and
+covariance reconciliation is **not assessed**, because there is no fitted ICD
+acuity model. S2 displays the unavailable status, not estimated curves. No
+category pooling, adjustment change or alternative estimator was substituted.
+
+The [dated snapshot](../results/2026-10-24-icd-acuity/README.md) contains the
+integrated reports, exact counts, model status and aggregate separation diagnostic.
+A new modeling decision is needed to obtain adjusted acuity curves. Keeping the
+current descriptive coding decomposition requires no such change. Investigator
+interpretation remains pending; primary B/F2 and S1 snapshots are preserved.

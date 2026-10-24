@@ -167,3 +167,22 @@ is not negative. Fit one joint five-category spline on fixed primary indexes
 with the existing basis/covariates; add S2 and full-range contrasts, no PIF.
 Clinical qualification, estimation and S2 approval are pending. Schema 11/v6
 distinguishes the new supplement from immutable earlier bundles.
+
+### 2026-10-24 — Qualified ICD run; adjusted acuity model nonestimable
+
+The source-check prerequisite completed (35 passed, no skips), then PR #23 merged
+at `c0970484`. Existing accepted diagnosis evidence was reused. Fresh enrichment
+preserved all original fields/indexes and reproduced the existing composite;
+there was no new source mismatch. One clean merged Mini run completed as
+`curve-analyze-20261024T022943-53435`. All 11 original primary/S1 comparison
+tables agree within 1e-10, including unchanged PIFs.
+
+The five-category model has separation: no unspecified-acuity diagnoses in three
+retained race/ethnicity strata. Following the approved failure policy, retain the
+nonestimable position and descriptive counts. Do not silently pool categories,
+drop adjustment terms, penalize the fit or treat an unavailable curve as zero.
+The [new reading snapshot](../results/2026-10-24-icd-acuity/README.md) exposes this
+status. An adjusted ICD-acuity curve requires a further scientific modeling
+decision. S2 is currently a status display, not an estimated or approved figure.
+Primary approval and B/F2 selection are unchanged; supplemental interpretation
+and submission approval remain separate. No abstract was drafted.

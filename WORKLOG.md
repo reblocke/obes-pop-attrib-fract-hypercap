@@ -724,3 +724,79 @@ installation, commit/push/merge, visibility change, abstract or submission occur
 - Existing source/code-level ICD data are being reused; transport verification is
   separate from requalifying unchanged clinical definitions. No upstream rebuild
   or replacement export is planned. Clinical run and investigator review are pending.
+
+- PR #23 squash-merged the reviewed implementation at
+  `c0970484db8708845c023712d8e5204aad368d91`. Local main and a fresh clean Mini
+  checkout matched that revision before execution. Existing dirty historical
+  checkouts and prior runs were preserved; no competing analysis job was active.
+- Reused the accepted canonical source, pinned readers and complete diagnosis
+  capture policy. A fresh `enrich-icd-acuity` product preserved all 223,514 original
+  input rows, fields and fixed indexes. All 18,030 target source diagnosis records
+  reconciled; the five-code union exactly reproduced the existing composite.
+  This exposed no upstream change or new ICD reliability discrepancy.
+- The first enrichment attempt stopped before input loading because R rejected a
+  temporary directory containing a space. Preserved that attempt; used a fresh
+  output and the existing external-volume temporary directory without spaces.
+  The second enrichment passed without source, estimator or dependency changes.
+- Fresh schema-11 preflight passed. The primary complete-capture population is
+  176,922; its 8,634 positive diagnoses partition into chronic/OHS 1,769,
+  acute-on-chronic/concurrent 3,443, acute 3,294 and unspecified 128. The unchanged
+  recorded-day reference contains 22,195 patients. These are cohort counts,
+  not evidence of a modeled BMI association.
+- The clinical run completed once; all 133 saved-result numerical checks passed.
+  The new ICD position is nonestimable (`separation`), with a full-rank 60-parameter
+  planned design. A protected, non-estimation diagnostic confirms no unspecified
+  diagnoses in inherited race/ethnicity strata 3/4/5 (Asian N=995, American
+  Indian/Alaska Native N=1,475, Native Hawaiian/Pacific Islander N=339). No category
+  pooling, adjustment change or penalized fallback was introduced.
+- The first original-result comparison stopped only because an all-empty CSV
+  `reason` field inferred logical versus character type after adding the failed
+  ICD position. Preserved that receipt; normalized only empty explanatory text
+  in a second aggregate-only comparison. All 11 original primary/S1 tables then
+  agreed within 1e-10, with no numerical columns relaxed or changed.
+- Presentation failure scenario recorded before repair: a source-qualified but
+  nonestimable ICD model must not receive a caption describing displayed curves
+  or appear to have successful adjusted results. The existing renderer has an
+  unavailable-panel path but an unconditional curve caption. Small repair scope:
+  `R/rfs_reporting.R` and the scientific QMD only. Verification will render the
+  saved clinical bundle with its separation state, inspect the caption/status and
+  assembled reports, and recheck aggregate hashes; no clinical refit is needed.
+- Mini estimation used the clean merged `c0970484` checkout and finished as
+  `curve-analyze-20261024T022943-53435`. Mini report rendering could not locate
+  Quarto in its runtime; that failed attempt is preserved. Transferred only the
+  saved aggregate bundle, verified all 68 bundle-file hashes, and rendered locally
+  from saved aggregates with zero clinical-input reads or model refits. The first
+  local launch used the wrong working directory and stopped before input reads;
+  its log is retained. The corrected fresh render completed.
+- Final clinical review is `20261024T024233-75942`: 43-page scientific PDF and
+  3,762-page complete audit PDF. All 114 HTML/PDF complete-table checks passed;
+  automated text geometry found no out-of-page text, replacement symbols or
+  overlapping text boxes. Agent visual review covered all scientific pages in
+  contact sheets, enlarged scientific pages 41–42, audit pages 10/61/67/3695–3697,
+  and native-size, grayscale, vector and captioned S2 exports. Remaining audit
+  pages received automated checks, not individual visual review. No HTML browser
+  visual review or investigator approval is claimed.
+- Fresh artificial E2E completed successfully at
+  `artifacts/triangulation/e2e-20261024T023649-75555/receipt.json`, including the
+  new caption/status presentation and complete report tables. Reused the exact
+  source-matched 35/35 Mini boundary receipt; no source-code changes occurred
+  after those checks. All clinical numerical quantities remain from the single
+  estimation run.
+- Published the separately hashed aggregate reading snapshot at
+  `results/2026-10-24-icd-acuity/`: scientific PDF/HTML, complete audit PDF, all 64
+  aggregate CSVs, S2 masters/review exports, gallery, captions and scoped review
+  receipts. S2 is explicitly nonestimable, not a publication-ready adjusted curve.
+  B and S1 native PNGs reproduce prior bytes. Current F2 has later title/spacing
+  changes but identical printed quantities; selected original B/F2 are untouched.
+- Final verification checked all 333 files across five snapshot manifests,
+  including the 238 unchanged historical files; exact aggregate copies, JSON,
+  169 local Markdown links, HTML assets/alt text and source/documentation diff
+  checks passed. The staged byte-bound output files retain renderer whitespace
+  and CSV line endings; these generated-file warnings are recorded separately
+  rather than altering authenticated export bytes.
+  No raw input, individual identifiers/predictions, local source-access paths or
+  credentials were added to the publication packet. Evidence and commands are in
+  `artifacts/triangulation/icd-acuity-release-20261024/`.
+- Remaining scientific choice: a revised model would be required to obtain
+  adjusted acuity curves despite the rare-category separation. No such change,
+  supplementary PIF, investigator interpretation or abstract draft was made.

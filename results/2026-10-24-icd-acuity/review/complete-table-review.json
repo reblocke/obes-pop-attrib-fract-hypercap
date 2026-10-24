@@ -1,0 +1,809 @@
+{
+  "status": "passed",
+  "method": "Existing E2E complete-table/caption checks applied to saved clinical aggregates",
+  "bundle_manifest_sha256": "dade34346ed8f3d18a262c70e581c09a1aed2331670af3236bc2a9b894da6f68",
+  "render_receipt_sha256": "1e07fd238258a21452a503c633b2c1ad82c0cfc274efa90fc20f25e4e38fbccd",
+  "checks": [
+    {
+      "format": "html",
+      "table": "cohort_nodes",
+      "expected": 207,
+      "observed": 207,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "cohort_edges",
+      "expected": 155,
+      "observed": 155,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "exclusion_reasons",
+      "expected": 55,
+      "observed": 55,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "exclusion_overlaps",
+      "expected": 24,
+      "observed": 24,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "variable_summary",
+      "expected": 12557,
+      "observed": 12557,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "category_counts",
+      "expected": 26867,
+      "observed": 26867,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "missingness_patterns",
+      "expected": 126,
+      "observed": 126,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "comissingness",
+      "expected": 2950,
+      "observed": 2950,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "evidence_by_bmi",
+      "expected": 2282,
+      "observed": 2282,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "observation_patterns",
+      "expected": 288,
+      "observed": 288,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "timing_audit",
+      "expected": 108,
+      "observed": 108,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "population_registry",
+      "expected": 234,
+      "observed": 234,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "policy_registry",
+      "expected": 1,
+      "observed": 1,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "model_registry",
+      "expected": 29,
+      "observed": 29,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "coefficients",
+      "expected": 488,
+      "observed": 488,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "factor_references",
+      "expected": 354,
+      "observed": 354,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "model_fit_diagnostics",
+      "expected": 295,
+      "observed": 295,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "model_influence_summary",
+      "expected": 80,
+      "observed": 80,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "model_support",
+      "expected": 6170,
+      "observed": 6170,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "prediction_support",
+      "expected": 41,
+      "observed": 41,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "fixed_bmi_contrasts",
+      "expected": 15,
+      "observed": 15,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "policy_totals",
+      "expected": 15,
+      "observed": 15,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "policy_contributions",
+      "expected": 177,
+      "observed": 177,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "numerical_reconciliation",
+      "expected": 2333,
+      "observed": 2333,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "rfs_summary",
+      "expected": 3,
+      "observed": 3,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "rfs_outcomes",
+      "expected": 30,
+      "observed": 30,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "rfs_combinations",
+      "expected": 189,
+      "observed": 189,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "rfs_by_bmi",
+      "expected": 192,
+      "observed": 192,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "bmi_provenance",
+      "expected": 1420,
+      "observed": 1420,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "demographic_crosswalk",
+      "expected": 126,
+      "observed": 126,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "prior_run_reconciliation",
+      "expected": 12,
+      "observed": 12,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "rfs_semantics",
+      "expected": 6,
+      "observed": 6,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "expected_models",
+      "expected": 29,
+      "observed": 29,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "cooccurrence_status",
+      "expected": 1,
+      "observed": 1,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "cooccurrence_reconciliation",
+      "expected": 4,
+      "observed": 4,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "cooccurrence_availability",
+      "expected": 36,
+      "observed": 36,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "cooccurrence_measurements",
+      "expected": 104,
+      "observed": 104,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "cooccurrence_categories",
+      "expected": 3,
+      "observed": 3,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "same_day_contrasts",
+      "expected": 55,
+      "observed": 55,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "same_day_probability_covariance",
+      "expected": 3600,
+      "observed": 3600,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "same_day_curve_reconciliation",
+      "expected": 1,
+      "observed": 1,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "icd_acuity_status",
+      "expected": 1,
+      "observed": 1,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "icd_acuity_categories",
+      "expected": 5,
+      "observed": 5,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "icd_acuity_patterns",
+      "expected": 343,
+      "observed": 343,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "icd_acuity_reconciliation",
+      "expected": 5,
+      "observed": 5,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "icd_acuity_contrasts",
+      "expected": 1,
+      "observed": 1,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "icd_acuity_probability_covariance",
+      "expected": 0,
+      "observed": 0,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "icd_acuity_curve_reconciliation",
+      "expected": 1,
+      "observed": 1,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "source_audit",
+      "expected": 58,
+      "observed": 58,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "coverage_index",
+      "expected": 858,
+      "observed": 858,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "variable_dictionary",
+      "expected": 99,
+      "observed": 99,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "bmi_basis",
+      "expected": 12,
+      "observed": 12,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "linear_spline_comparison",
+      "expected": 5,
+      "observed": 5,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "Complete coefficient covariance",
+      "expected": 6470,
+      "observed": 6470,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "Complete coefficient correlation",
+      "expected": 6470,
+      "observed": 6470,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "contribution covariance",
+      "expected": 2091,
+      "observed": 2091,
+      "passed": true
+    },
+    {
+      "format": "html",
+      "table": "residuals",
+      "expected": 1243,
+      "observed": 1243,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "cohort_nodes",
+      "expected": 207,
+      "observed": 207,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "cohort_edges",
+      "expected": 155,
+      "observed": 155,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "exclusion_reasons",
+      "expected": 55,
+      "observed": 55,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "exclusion_overlaps",
+      "expected": 24,
+      "observed": 24,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "variable_summary",
+      "expected": 12557,
+      "observed": 12557,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "category_counts",
+      "expected": 26867,
+      "observed": 26867,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "missingness_patterns",
+      "expected": 126,
+      "observed": 126,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "comissingness",
+      "expected": 2950,
+      "observed": 2950,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "evidence_by_bmi",
+      "expected": 2282,
+      "observed": 2282,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "observation_patterns",
+      "expected": 288,
+      "observed": 288,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "timing_audit",
+      "expected": 108,
+      "observed": 108,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "population_registry",
+      "expected": 234,
+      "observed": 234,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "policy_registry",
+      "expected": 1,
+      "observed": 1,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "model_registry",
+      "expected": 29,
+      "observed": 29,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "coefficients",
+      "expected": 488,
+      "observed": 488,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "factor_references",
+      "expected": 354,
+      "observed": 354,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "model_fit_diagnostics",
+      "expected": 295,
+      "observed": 295,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "model_influence_summary",
+      "expected": 80,
+      "observed": 80,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "model_support",
+      "expected": 6170,
+      "observed": 6170,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "prediction_support",
+      "expected": 41,
+      "observed": 41,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "fixed_bmi_contrasts",
+      "expected": 15,
+      "observed": 15,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "policy_totals",
+      "expected": 15,
+      "observed": 15,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "policy_contributions",
+      "expected": 177,
+      "observed": 177,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "numerical_reconciliation",
+      "expected": 2333,
+      "observed": 2333,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "rfs_summary",
+      "expected": 3,
+      "observed": 3,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "rfs_outcomes",
+      "expected": 30,
+      "observed": 30,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "rfs_combinations",
+      "expected": 189,
+      "observed": 189,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "rfs_by_bmi",
+      "expected": 192,
+      "observed": 192,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "bmi_provenance",
+      "expected": 1420,
+      "observed": 1420,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "demographic_crosswalk",
+      "expected": 126,
+      "observed": 126,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "prior_run_reconciliation",
+      "expected": 12,
+      "observed": 12,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "rfs_semantics",
+      "expected": 6,
+      "observed": 6,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "expected_models",
+      "expected": 29,
+      "observed": 29,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "cooccurrence_status",
+      "expected": 1,
+      "observed": 1,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "cooccurrence_reconciliation",
+      "expected": 4,
+      "observed": 4,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "cooccurrence_availability",
+      "expected": 36,
+      "observed": 36,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "cooccurrence_measurements",
+      "expected": 104,
+      "observed": 104,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "cooccurrence_categories",
+      "expected": 3,
+      "observed": 3,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "same_day_contrasts",
+      "expected": 55,
+      "observed": 55,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "same_day_probability_covariance",
+      "expected": 3600,
+      "observed": 3600,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "same_day_curve_reconciliation",
+      "expected": 1,
+      "observed": 1,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "icd_acuity_status",
+      "expected": 1,
+      "observed": 1,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "icd_acuity_categories",
+      "expected": 5,
+      "observed": 5,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "icd_acuity_patterns",
+      "expected": 343,
+      "observed": 343,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "icd_acuity_reconciliation",
+      "expected": 5,
+      "observed": 5,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "icd_acuity_contrasts",
+      "expected": 1,
+      "observed": 1,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "icd_acuity_probability_covariance",
+      "expected": 0,
+      "observed": 0,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "icd_acuity_curve_reconciliation",
+      "expected": 1,
+      "observed": 1,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "source_audit",
+      "expected": 58,
+      "observed": 58,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "coverage_index",
+      "expected": 858,
+      "observed": 858,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "variable_dictionary",
+      "expected": 99,
+      "observed": 99,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "bmi_basis",
+      "expected": 12,
+      "observed": 12,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "linear_spline_comparison",
+      "expected": 5,
+      "observed": 5,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "Complete coefficient covariance",
+      "expected": 6470,
+      "observed": 6470,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "Complete coefficient correlation",
+      "expected": 6470,
+      "observed": 6470,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "contribution covariance",
+      "expected": 2091,
+      "observed": 2091,
+      "passed": true
+    },
+    {
+      "format": "pdf",
+      "table": "residuals",
+      "expected": 1243,
+      "observed": 1243,
+      "passed": true
+    }
+  ],
+  "clinical_input_reads": 0,
+  "model_refits": 0,
+  "investigator_review": "pending"
+}

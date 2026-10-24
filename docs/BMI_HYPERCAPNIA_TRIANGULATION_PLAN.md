@@ -191,4 +191,9 @@ See [the approved ICD supplement](ICD_ACUITY_SUPPLEMENT.md). One additional join
 model partitions complete-capture primary patients into no target diagnosis,
 chronic/OHS, acute-on-chronic or concurrent coding, acute and unspecified acuity.
 Primary and recorded-day analyses are preserved; no supplemental PIF is added.
-Clinical code-level qualification and the new run remain pending.
+Clinical code-level qualification and the October 24 run completed. The planned
+five-category fit is nonestimable because of separation; no adjusted acuity
+curves or contrasts are available and no fallback was used. Original primary/S1
+results and PIFs agree with the prior run within 1e-10. See the
+[dated reading snapshot](../results/2026-10-24-icd-acuity/README.md) and
+[ICD estimability finding](ICD_ACUITY_SUPPLEMENT.md#clinical-execution-and-estimability-2026-10-24).
