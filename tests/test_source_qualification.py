@@ -55,6 +55,24 @@ class IndependentSourceChecks(unittest.TestCase):
         self.assertEqual(checks['icd_disagreements'],1)
         self.assertEqual(checks['has_abg_disagreements'],1)
 
+    def test_components_reconcile_independently_and_detect_corruption(self):
+        c=duckdb.connect();self.addCleanup(c.close)
+        c.execute("CREATE TABLE source_diagnosis(patient_id VARCHAR,encounter_id VARCHAR,code_system VARCHAR,code VARCHAR)")
+        c.execute("INSERT INTO source_diagnosis VALUES ('p','a','ICD10CM','E66.2')")
+        c.execute("CREATE TABLE source_lab_measurement(patient_id VARCHAR,encounter_id VARCHAR,code_system VARCHAR,code VARCHAR,numeric_value DOUBLE,units_of_measure_raw VARCHAR,units_of_measure VARCHAR,timestamp_precision VARCHAR,event_datetime TIMESTAMP)")
+        c.execute("INSERT INTO source_lab_measurement VALUES ('p','a','LOINC','2019-8',50,'mm[hg]','mm[hg]','date_only','2022-01-01'),('p','a','LOINC','2744-1',7.30,'[pH]','[pH]','date_only','2022-01-01'),('p','a','LOINC','2744-1',7.20,'[pH]','[pH]','date_only','2022-01-02')")
+        c.execute("ALTER TABLE source_lab_measurement ADD COLUMN lab_result_text_val VARCHAR")
+        c.execute("INSERT INTO source_lab_measurement VALUES ('p','a','LOINC','2019-8',50,'mm[hg]','mm[hg]','date_only','2022-01-02','>50')")
+        original=pd.DataFrame(dict(patient_id=['p'],encounter_id=['a'],race=[0],ethnicity=[1],**{name:[1 if name=='ABG_rfs' else 0] for name in qa.RFS_COLUMNS}))
+        prepared=original.drop(columns=['race','ethnicity']).assign(raw_race=0,raw_ethnicity=1,icd_capture_state='complete',same_day_abg_state='coobserved_day',same_day_abg_n_days=1,hypercapnia_coobserved=1,hypercapnia_acidemia_same_day=1)
+        for code in ('J9602','J9612','J9622','J9692','E662'):prepared['icd_'+code]=int(code=='E662')
+        self.assertTrue(all(n==0 for n in qa.check_components(c,prepared,original,True,True).values()))
+        prepared.loc[0,'ABG_rfs']=0;prepared.loc[0,'icd_E662']=0;prepared.loc[0,'hypercapnia_acidemia_same_day']=0
+        errors=qa.check_components(c,prepared,original,True,True)
+        self.assertEqual(errors['ABG_rfs_disagreements'],1)
+        self.assertEqual(errors['icd_E662_disagreements'],1)
+        self.assertEqual(errors['hypercapnia_acidemia_same_day_disagreements'],1)
+
     def test_known_missing_bmi_uncertain_setting_and_index_ties(self):
         c=duckdb.connect();self.addCleanup(c.close)
         c.execute("CREATE TABLE mapping(patient_id VARCHAR,encounter_id VARCHAR,encounter_date DATE,age_at_encounter INTEGER,"
@@ -67,11 +85,11 @@ class IndependentSourceChecks(unittest.TestCase):
                   "('q','d','2022-01-02',40,'EMER',33,'valid','current','2022-01-02',NULL,NULL,33),"
                   "('r','e','2022-01-01',40,'EMER',31,'valid','current','2022-01-01',NULL,NULL,31),"
                   "('r','f','2022-01-01',40,'IMP',32,'valid','current','2022-01-01',NULL,NULL,32),"
-                  "('s','g','2022-01-01',40,'EMER',32,'valid','current','2022-01-01',NULL,NULL,32)")
+                  "('s','g','2022-01-01',40,'EMER',24,'valid','current','2022-01-01',NULL,NULL,24)")
         with tempfile.TemporaryDirectory() as temp:
             file=Path(temp)/'ARTIFICIAL.parquet'
             c.execute('COPY mapping TO ? (FORMAT PARQUET)',[str(file)])
-            prepared=pd.DataFrame({'patient_id':['p','s'],'encounter_id':['b','g'],'bmi':[35,32]})
+            prepared=pd.DataFrame({'patient_id':['p','s'],'encounter_id':['b','g'],'bmi':[35,24]})
             census={'counts':{'n_frame_patients':4,'n_index_unresolved':2,'n_earliest_ties':1,'n_earlier_uncertainty':1}}
             checks,_=qa.check_indexes(c,file,prepared,census)
             self.assertTrue(all(v==0 for v in checks.values()),checks)

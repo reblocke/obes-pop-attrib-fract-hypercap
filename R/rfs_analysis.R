@@ -122,43 +122,39 @@ bmi_run_analysis <- function(raw,config,source_status="artificial",audit_only=FA
   if(!all(bmi_rfs_fields %in% names(raw)))stop("Missing authenticated historical RFS fields")
   ctx<-construct_cohort_and_memberships(raw)
   q<-bmi_classify_rfs(ctx$members$Q)
-  combined<-bmi_run_population_analysis(raw,config,source_status,audit_only=TRUE,companion=companion)
+  combined<-bmi_run_population_analysis(raw,config,source_status,audit_only=TRUE,companion=companion,ctx=ctx)
   combined<-bmi_namespace(combined,"combined")
   audits<-bmi_rfs_audits(ctx,config)
-  results<-list(combined);expected<-list()
+  results<-list(combined)
   for(group in unlist(config$descriptive_populations)) {
     d<-q[q$rfs_group==group,,drop=FALSE]
-    if(ctx$day_status=="pending")d[triangulation_index_day_columns]<-NULL
-    results[[group]]<-bmi_namespace(bmi_run_population_analysis(d,config,source_status,audit_only=TRUE),group)
+    results[[group]]<-bmi_namespace(bmi_run_population_analysis(d,config,source_status,audit_only=TRUE,ctx=bmi_fixed_population(ctx,d)),group)
   }
   parent_basis<-list()
   for(group in unlist(config$analysis_populations)) {
-    parent<-sub("_current$","",group)
+    parent<-if(group=="primary_bmi_ge30")"primary"else sub("_current$","",group)
     d<-q[if(group=="all_obesity")q$OBESITY_rfs %in% 1 else q$rfs_group==parent,,drop=FALSE]
+    if(group=="primary_bmi_ge30")d<-d[d$bmi>=30,,drop=FALSE]
     if(grepl("_current$",group))d<-d[d$current_bmi_verified %in% TRUE,,drop=FALSE]
-    if(ctx$day_status=="pending")d[triangulation_index_day_columns]<-NULL
     cfg<-config;cfg$fit_role<-if(group %in% unlist(config$full_model_populations))"full"else"supporting"
     c<-d[stats::complete.cases(d[triangulation_adjustment]),,drop=FALSE]
     basis<-if(grepl("_current$",group))parent_basis[[parent]]else resolve_bmi_basis(c,cfg)
     parent_basis[[group]]<-basis;cfg$basis_override<-basis
-    a<-bmi_run_population_analysis(d,cfg,source_status,audit_only=audit_only)
+    a<-bmi_run_population_analysis(d,cfg,source_status,audit_only=audit_only,ctx=bmi_fixed_population(ctx,d))
     a<-bmi_namespace(a,group)
     if(grepl("_current$",group) && nrow(a$bmi_basis)) {
       a$bmi_basis$reference_id<-paste0(parent,"::C")
       a$bmi_basis$reference_population_id<-a$bmi_basis$reference_id
     }
     results[[group]]<-a
-    registry<-bmi_model_registry(ctx$day_status,cfg$fit_role)
-    expected[[group]]<-data.frame(model_id=paste0(group,"::",registry$model_id),analysis_population_id=group)
   }
   unresolved<-q[q$rfs_group=="unresolved",,drop=FALSE]
-  if(ctx$day_status=="pending")unresolved[triangulation_index_day_columns]<-NULL
-  results[["unresolved"]]<-bmi_namespace(bmi_run_population_analysis(unresolved,config,source_status,audit_only=TRUE),"unresolved")
+  results[["unresolved"]]<-bmi_namespace(bmi_run_population_analysis(unresolved,config,source_status,audit_only=TRUE,ctx=bmi_fixed_population(ctx,unresolved)),"unresolved")
   result<-setNames(lapply(bmi_table_names,function(name)bmi_bind(lapply(results,`[[`,name))),bmi_table_names)
   result$variable_dictionary<-combined$variable_dictionary
   result$policy_registry<-combined$policy_registry
   for(name in names(audits))result[[name]]<-audits[[name]]
-  result$expected_models<-if(audit_only)data.frame()else bmi_bind(expected)
+  result$expected_models<-data.frame()
   for(name in names(result))if("model_id" %in% names(result[[name]]) && nrow(result[[name]])) {
     z<-result[[name]];r<-result$model_registry;ix<-match(z$model_id,r$model_id)
     if(!"population_id" %in% names(z))z$population_id<-z$analysis_population_id
@@ -176,8 +172,16 @@ bmi_run_analysis <- function(raw,config,source_status="artificial",audit_only=FA
   edges[[3]]<-data.frame(from="combined::Q",to="unresolved::Q",relation="partition",partition_id="rfs_index",denominator_id="combined::Q")
   result$cohort_edges<-bmi_bind(c(list(result$cohort_edges),edges));result$population_registry<-result$population_registry
   result$coverage_index<-bmi_bind(list(result$coverage_index,data.frame(kind="population",item_id="unresolved::Q",table="rfs_summary",status="assessed")))
-  result<-bmi_append_same_day(result,ctx,raw,config,audit_only)
-  result<-bmi_append_icd_acuity(result,ctx,raw,config,audit_only,source_status)
+  result$cohort_edges<-bmi_bind(list(result$cohort_edges,
+    data.frame(from="primary::Q",to="primary_bmi_ge30::Q",relation="subset",partition_id="",denominator_id="primary::Q")))
+  for(group in unlist(config$component_populations)) {
+    d<-q[q$rfs_group=="primary",,drop=FALSE]
+    if(group=="primary_bmi_ge30")d<-d[d$bmi>=30,,drop=FALSE]
+    pop<-bmi_fixed_population(ctx,d)
+    result<-bmi_integrate_same_day(result,pop,raw,config,audit_only,population=group)
+    result<-bmi_integrate_icd_acuity(result,pop,raw,config,audit_only,source_status,population=group)
+  }
+  result$expected_models<-if(audit_only)data.frame()else bmi_expected_models(config,ctx$day_status)
   result$numerical_reconciliation<-bmi_validate_ledger(result)
   result
 }

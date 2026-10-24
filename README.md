@@ -1,307 +1,135 @@
 # BMI and documented hypercapnia
 
-**Study question:** How does the probability of documented hypercapnia vary with
-BMI among adults with obesity receiving emergency or inpatient care, when the
-relevant outcome can be evaluated?
+**Study question:** How does documented hypercapnia probability vary across BMI,
+and how much modeled burden changes under a one-unit BMI reduction **only above 30**?
 
-This research repository contains a descriptive analysis of body mass index
-(BMI) and documented hypercapnia in a selected 2022 TriNetX-derived cohort. Its main
-result is an adjusted BMI–hypercapnia probability curve. A secondary analysis
-compares modeled probabilities before and after a one-unit BMI reduction among
-patients whose observed BMI is above 30. It includes analysis code, scientific
-reports, figures and complete aggregate audit/result tables for researchers
-reviewing the methods or findings.
+This is a descriptive analysis of a selected 2022 TriNetX-derived emergency and
+inpatient cohort. The current workflow includes **all valid available BMIs**,
+then retains patients represented through a non-OBESITY historical source-entry
+pathway. Lower-BMI patients contribute baseline burden even though the scenario
+does not change their BMI. Gas findings apply to patients with evaluable evidence,
+not to untested patients or the general population.
 
-Start with **[the saved results](#read-the-results)** to review the study without
-running code, or **[the synthetic workflow](#reproduce-the-software-workflow)** to
-exercise the software without clinical data.
+## Start here
 
-## Study and release status
+The all-BMI update is being verified. **Published snapshots below use the earlier
+first-BMI-≥30 design** and must not be relabeled as all-BMI results. Current-result
+links will advance only after a fresh qualified clinical run and review.
 
-The qualified primary analysis completed on October 17, 2026; the joint same-day
-component analysis completed on October 20. On October 24, the revised ICD
-supplement fitted successfully using five-category Firth bias reduction and an
-unpenalized four-category sensitivity. All 11 original primary/S1/PIF comparison
-tables remain unchanged within 1e-10. The earlier separated fit is preserved as
-historical evidence. Numerical and visual checks are separate from investigator review.
-Primary scientific approval is **provisional**. **F1-B and F2** remain the working
-main figures; investigator interpretation and approval of supplements are **pending**.
-
-On October 23, 2026, the owner confirmed that the existing reports, figures and
-aggregate tables are cleared for public release under the source-data agreement,
-including the existing small aggregate counts. Raw and patient-level data remain
-excluded. Disclosure clearance does not confer scientific or submission approval.
-See the [decision log](docs/DECISIONS.md) for dated decisions and publication
-planning, and the [public-release review](docs/PUBLIC_RELEASE_REVIEW.md) for checks
-and outstanding release tasks.
-
-## Read the results
-
-You do not need to run the code to review the study. The
-**[collaborator snapshot](results/2026-10-18/README.md)** contains the clinical
-reports, selected figures and complete aggregate tables in Git. A normal clone
-includes these results; raw and patient-level data remain excluded.
-
-The **[joint same-day component supplement](results/2026-10-20-same-day-components/README.md)**
-preserves the joint same-day results and stacked figure S1.
-It separates hypercapnia with and without documented same-day acidemia in one
-joint model, across the full observed BMI range. This is **same recorded-day
-co-occurrence; not verified same-sample pairing**. Primary estimates and selected
-B/F2 remain unchanged; investigator interpretation and S1 approval are pending.
-The [earlier binary supplement](results/2026-10-20-same-day-abg/README.md) is historical.
-
-The **[updated ICD-acuity snapshot](results/2026-10-24-icd-bias-reduced/README.md)** contains the
-latest integrated reports, complete aggregate tables and three ICD figure views.
-The full model retains all 176,922 diagnosis-evaluable primary patients; the
-sensitivity excludes 128 unspecified-only cases and uses its own denominator.
-The [earlier nonestimable snapshot](results/2026-10-24-icd-acuity/README.md) remains
-unchanged. Neither the source data nor the inherited demographic coding changed.
-
-| Read in this order | What to look for |
+| Read without running code | Contents |
 |---|---|
-| [Current scientific report](results/2026-10-24-icd-bias-reduced/bmi_hypercapnia.pdf) | Rationale, detailed methods, results, sensitivity analyses and interpretation limits |
-| [B/F2 figure PDF — 2 pages](results/2026-10-18/selected_figures.pdf) | Selected relationship and secondary-scenario figures with full captions |
-| [B: relationship](results/2026-10-18/figures/F1-B.pdf) / [F2: secondary scenario](results/2026-10-18/figures/F2.pdf) | Individual vector masters; SVG, PNG and JPG versions are beside them |
-| [Supplemental ICD figures](results/2026-10-24-icd-bias-reduced/supplement_figures.pdf) / [gallery](results/2026-10-24-icd-bias-reduced/gallery.html) | Full bias-reduced curves, specified-category sensitivity and observed BMI-band proportions |
-| [Supplemental S1](results/2026-10-20-same-day-components/supplement_figure.pdf) | Captioned joint same-day component figure; investigator interpretation and approval pending |
-| [Offline gallery](results/2026-10-18/gallery.html) | B/F2 at full size, captions, format downloads and source-table links |
-| [Current complete audit](results/2026-10-24-icd-bias-reduced/bmi_hypercapnia_audit.pdf) | Full cohort profiles, model samples, coefficients, covariance and diagnostics |
-| [Current aggregate tables](results/2026-10-24-icd-bias-reduced/TABLES.md) | Complete CSV exports, with a machine-readable field/row/hash index |
+| [Previous integrated scientific PDF](results/2026-10-24-icd-bias-reduced/bmi_hypercapnia.pdf) | Detailed methods/results for the earlier BMI-restricted cohort |
+| [Previous complete audit PDF](results/2026-10-24-icd-bias-reduced/bmi_hypercapnia_audit.pdf) | Cohort accounting, full model output and diagnostics |
+| [Previous aggregate table index](results/2026-10-24-icd-bias-reduced/TABLES.md) | Complete CSVs, definitions, row counts and hashes |
+| [Selected B/F2 figure PDF](results/2026-10-18/selected_figures.pdf) / [gallery](results/2026-10-18/gallery.html) | Historical selected relationship and burden layouts |
+| [Joint same-day components](results/2026-10-20-same-day-components/README.md) | With/without documented same-day acidemia and stacked S1 |
+| [ICD component figures](results/2026-10-24-icd-bias-reduced/supplement_figures.pdf) / [gallery](results/2026-10-24-icd-bias-reduced/gallery.html) | Firth joint curves, four-category sensitivity and observed proportions |
+| [Current scientific specification](docs/BMI_HYPERCAPNIA_TRIANGULATION_PLAN.md) | Exact all-BMI design, endpoints, models and estimand |
+| [LLM reading guide](docs/LLM_GUIDE.json) | Machine-readable navigation, evidence rules and dated approval state |
 
-Download PDFs with GitHub's **Download raw file** control when needed.
-For the gallery, clone/download the folder and open `gallery.html` locally; GitHub
-shows its HTML source. All gallery assets are local.
+Download PDFs using GitHub's **Download raw file** control. Galleries open locally
+after cloning/downloading their complete folder; GitHub otherwise shows HTML source.
+Verify each snapshot's manifest before quoting numbers. Snapshots are reading
+packages, not runnable analysis bundles. Existing small aggregate counts are
+owner-cleared for public disclosure; raw and patient-level data remain excluded.
 
-**Current working selection: F1-B and F2**, chosen by the owner on October 18,
-2026. F1-A/C remain alternatives. The saved scientific PDF still embeds layout A;
-use standalone **F1-B** for the selected presentation. A/B/C contain the same
-estimates. The compact gallery covers B/F2; supporting figures remain in the full
-audit. Keep the snapshot folder together for its local links to work.
+## What the current analysis does
 
-Trace each numerical claim to the supplied clinical report or saved aggregate
-table, retaining its population, outcome, timing window, denominator and interval
-type. Artificial-example outputs and historical analysis versions are not current
-clinical findings.
+1. **Select once:** first adult 2022 ED/inpatient encounter with any valid available
+   BMI in the authenticated original encounter list, before gas availability,
+   adjustment completeness or RFS membership. Unresolved earlier eligibility and
+   ties are not bypassed. BMI is current/prior reported or calculated from observed
+   height/weight under inherited rules; there is no statistical imputation.
+2. **Define populations at that index:** primary has any non-OBESITY source pathway,
+   including OBESITY overlaps. The BMI ≥30 secondary is nested at the same index.
+   Current-BMI and overlapping all-OBESITY-route checks are retained. Obesity-only,
+   unresolved membership and the combined cohort are audit-only.
+3. **Estimate three connected families:** binary arterial, combined-gas and ICD
+   outcomes; joint same-day hypercapnia with/without documented acidemia; and joint
+   ICD acuity/chronic-OHS categories. All three families repeat in the BMI ≥30
+   secondary. The integrated scientific report defines all methods before Results.
+4. **Model across BMI:** a three-degree-of-freedom natural spline plus inherited age,
+   sex, race/ethnicity and region adjustment. Each main population fixes its own
+   knots before fitting outcomes. Gas models use evaluable patients; diagnosis
+   models use complete capture. Joint model probabilities are coherent partitions.
+5. **Quantify a secondary scenario:** BMI>30 decreases exactly one; BMI≤30 stays
+   unchanged. PIF is the relative change in paired modeled probabilities over the
+   **entire model reference population**. Signed BMI-band contributions and full
+   covariance reconcile to the total. There are no subtype-specific PIFs.
 
-## What was analyzed
+Same-day co-occurrence is not verified same-sample pairing. ICD acuity is coding,
+not acidemia or compensation. Known capture is not a positive diagnosis. Missing
+or unusable evidence is not negative. Pointwise model intervals do not quantify
+selection, measurement or confounding bias. No MAR/MNAR, IPW, incident-disease or
+causal-prevention claim is part of this workflow.
 
-- **One index per patient:** the first qualifying adult 2022 emergency/inpatient
-  encounter with available BMI ≥30 within the original selected encounter list.
-  Selection occurs before checking gas availability or adjustment completeness.
-- **Source-entry restriction:** the primary population entered through at least
-  one historical non-OBESITY reason-for-suspicion pathway, including patients who
-  also entered through the OBESITY pathway. Obesity-only entry is retained in the
-  flow and audit, without adjusted models or a physiological comparison group.
-- **Three outcomes:** arterial PCO₂ ≥45 mm Hg; arterial ≥45 or venous ≥50 mm Hg;
-  and a documented five-code ICD composite including E66.2. Gas definitions use
-  ordinary specimen-authenticated measurements during the index encounter.
-- **Model:** logistic regression with a flexible three-degree-of-freedom natural
-  BMI spline, adjusted for age, sex, inherited race/ethnicity category and region.
-  Gas curves describe outcome-evaluable patients; ICD curves use known diagnosis
-  capture. Outcome-specific samples overlap and must not be summed.
-- **Secondary scenario:** subtract exactly one BMI unit when observed BMI >30;
-  BMI=30 is unchanged, with no floor or patient reselection. The potential impact
-  fraction (PIF) is the relative change in paired modeled probabilities, not a
-  constant effect attributable to each BMI unit.
+F1-B remains the preferred relationship **layout**; F2 now presents absolute
+burden and signed contributions. Component figures are integrated in the same
+scientific PDF, with secondary-population counterparts. Earlier scientific or
+figure approval does not automatically approve new estimates. **No abstract is
+being drafted.** ATS 2027/November 4 remains the owner's stated target.
 
-The [scientific guide](docs/BMI_HYPERCAPNIA_TRIANGULATION_PLAN.md) contains the exact
-definitions, adjustment, timing sensitivities and uncertainty calculations.
+## Repository map
 
-## How to interpret the results
-
-The curves describe documented hypercapnia in selected, evaluable populations.
-They do not establish incident disease, the causal effect of weight loss, or
-hypercapnia probability among untested patients. Historical entry pathways and
-selective gas measurement can affect the association itself. No MAR/MNAR
-projection or inverse-probability weighting is part of this analysis.
-
-Available BMI may be current, prior, or calculated from observed height/weight;
-there is no statistical BMI imputation. Known diagnosis capture is not ICD
-positivity. Missing/unusable evidence is not a negative outcome. Confidence
-intervals are model-based; they do not cover selection bias, measurement error or
-unmeasured confounding. The [source contract](docs/SOURCE_CONTRACT.md) and
-[decision log](docs/DECISIONS.md) retain the remaining evidence limitations.
-
-## Where to find methods, evidence and code
-
-| Resource | Purpose |
+| Path | Purpose |
 |---|---|
-| [Scientific guide](docs/BMI_HYPERCAPNIA_TRIANGULATION_PLAN.md) | Exact study design, estimands, outputs and execution interfaces |
-| [Source contract](docs/SOURCE_CONTRACT.md) | Provenance, preparation, qualification and restricted execution |
-| [Configuration](config/bmi_hypercapnia_analysis.json) / [variable dictionary](config/variable_dictionary.csv) | Executable settings and field definitions |
-| [Figure QC record](docs/PUBLICATION_FIGURE_QC_PLAN.md) | Existing inspection scope and current figure choice |
-| [LLM reading guide](docs/LLM_GUIDE.json) / [agent instructions](AGENTS.md) | Structured evidence navigation and operating rules for assistants |
-| [Work log](WORKLOG.md) / [archive index](archive/README.md) | Execution evidence and recovery of superseded versions |
+| `R/` | Typed input, one cohort ledger, population/model registry, fitting, standardization and presentation |
+| `scripts/` | Preparation, qualification, one estimation launcher, aggregate-only rendering and review |
+| `config/` | Executable scientific settings, variable dictionary and source examples |
+| `reports/` | Scientific mini-paper and complete audit Quarto sources |
+| `results/` | Immutable dated reports, figures and aggregate tables; no patient rows |
+| `docs/` | Scientific/source authorities, decisions, LLM navigation and QC |
+| `tests/` | Artificial end-to-end evidence and justified source/numerical boundaries |
+| `archive/`, `Code/`, `Documents/` | Recovery index and retained historical material, not current analysis |
+| `data/`, `artifacts/` | Ignored private inputs and local execution/review bundles |
 
-The current implementation is `bmi_hypercapnia_rfs_curve_audit_v7` (aggregate
-schema 12). The latest integrated clinical snapshot is also schema 12. The earlier
-joint same-day snapshot remains schema 10 and is preserved unchanged.
-`R/analysis.R` loads the current modules; `scripts/run_bmi_hypercapnia.R` audits
-and estimates; `scripts/render_bmi_hypercapnia.R` renders saved aggregates. The
-[scientific](reports/bmi_hypercapnia.qmd) and [audit](reports/bmi_hypercapnia_audit.qmd)
-Quarto documents are the report sources. The JSON reading guide is documentation,
-not another analysis configuration.
+[AGENTS.md](AGENTS.md) governs repository work. [The source contract](docs/SOURCE_CONTRACT.md)
+governs qualification and privacy. [The decision log](docs/DECISIONS.md) preserves
+scientific history; [WORKLOG.md](WORKLOG.md) records commands, artifacts and actual
+verification. The JSON guide is documentation, not a second analysis configuration.
 
-The repository is laid out as follows:
+## Run the software
 
-```text
-results/2026-10-24-icd-bias-reduced/    Current integrated reports, ICD curves and complete tables
-results/2026-10-24-icd-acuity/          Historical separated ICD fit and source evidence
-results/2026-10-20-same-day-components/  Preserved joint S1 snapshot and tables
-results/2026-10-18/                    Primary snapshot: B/F2, reports and tables
-results/2026-10-20-same-day-abg/        Historical binary co-occurrence supplement
-results/2026-10-20-paired-abg/          Historical pairing-feasibility report; no new models
-docs/                Scientific/source guides, decisions, figure QC and LLM navigation
-config/              Executable study settings, variable dictionary and source examples
-R/                   Cohort audit, models, standardization and reporting modules
-scripts/             Source mapping/qualification, estimation, rendering and review commands
-reports/             Editable Quarto scientific/audit reports and shared formatting
-tests/               Artificial end-to-end workflow and justified source-boundary checks
-archive/             Recovery index and retained historical source
-Code/, Documents/    Historical Stata code and older study documents; not current results
-data/, artifacts/    Local raw inputs and working runs; their contents stay out of Git
-```
-
-For LLM-assisted review, begin with [LLM_GUIDE.json](docs/LLM_GUIDE.json), then use
-the [current table index](results/2026-10-24-icd-bias-reduced/table_index.csv)
-or [original primary index](results/2026-10-18/table_index.csv) and the relevant
-CSVs. Each snapshot's manifest identifies its clinical run and file hashes. Use
-current guides for methods and the appropriate dated snapshot for reported numbers.
-
-## Reproduce the software workflow
-
-The recorded workflow uses macOS. Run from the repository root with Make,
-existing **R ≥4.3**, Quarto,
-XeLaTeX/TinyTeX and Poppler (`pdftotext`, `pdfinfo`). Required R packages are
-`ggplot2`, `jsonlite`, `digest`, `lpSolve`, `nnet`, `knitr` and `rmarkdown`; clinical input
-reading also uses `haven`. Nothing is installed automatically. The full audit
-exports many figures and tables, so this is a complete integration run, not a
-quick preview. No portable runtime estimate is established.
+Run from the repository root with existing R ≥4.3, Make, Quarto, XeLaTeX and Poppler.
+Required R packages: `ggplot2`, `jsonlite`, `digest`, `lpSolve`, `nnet`, `knitr`,
+`rmarkdown`; clinical reading also uses `haven`. Source preparation uses the pinned
+upstream Python environment with pandas/DuckDB. Nothing installs automatically.
 
 ```bash
 make test
+make source-test PREP_PYTHON="/existing/source-environment/bin/python"
 ```
 
-This creates artificial input, estimates once, renders both HTML/PDF reports, and
-checks numerical results and output completeness. Success prints the path to a
-fresh `artifacts/triangulation/e2e-.../receipt.json` with `status: passed`, alongside
-`checks.csv`, logs and `artifact-hashes.csv`. This verifies software behavior; it
-does not reproduce clinical estimates or confer scientific approval. `make fixture`
-runs the artificial example without the E2E assertions.
+`make test` creates artificial data, estimates once, renders both reports and
+checks independent calculations, source/hash rejection, completeness and figures.
+It leaves a fresh `artifacts/triangulation/e2e-.../receipt.json`, `checks.csv`, logs
+and repeatable artifact hashes. The source suite has a separate receipt. Skipped
+checks are unavailable, not passed; artificial success is not clinical qualification.
+The complete audit can take substantial time to render.
 
-For presentation changes, use an explicitly selected saved run that matches the
-checked-out analysis version. Current execution bundles require schema 12; older
-snapshots retain their original version and cannot be relabeled:
+Clinical workflow (exact private paths required):
 
 ```bash
+make prepare PREP_PYTHON="/existing/source-environment/bin/python" \
+  SOURCE_CONFIG="/private/reviewed-source.json" OUTPUT="/private/fresh-input"
+make qualify PREP_PYTHON="/existing/source-environment/bin/python" \
+  SOURCE_CONFIG="/private/reviewed-source.json" \
+  PREPARED="/private/fresh-input" OUTPUT="/private/fresh-qualification"
+# Complete the pending manifest only from verified qualification evidence.
+make preflight INPUT="/private/fresh-input/study-input.rds" MANIFEST="/private/reviewed-manifest.json"
+make analyze INPUT="/private/fresh-input/study-input.rds" MANIFEST="/private/reviewed-manifest.json"
 make render RUN="artifacts/triangulation/<exact-saved-run>"
-# Use render-html or render-pdf for one format of both reports.
 ```
 
-Replace the placeholder with the actual run directory. A successful render creates
-`reviews/<timestamp>-<pid>/` with scientific/audit reports, figures, captions and a
-completed `render-receipt.json`. Rendering reads aggregates only and does not refit
-models. Changed estimation sources require a new run; incompatible bundles fail
-instead of acquiring new labels.
+Preparation combines source metadata and all endpoint evidence in one transaction;
+there are no separate enrichment commands. It reuses the accepted candidate map.
+Clinical estimation requires a clean merged Mini checkout and qualified input.
+Use `make render-html`, `make render-pdf`, or `make render-reports RUN=... FIGURES_FROM=...`
+for presentation work from explicit saved aggregates, without clinical reads/refits.
+`make fixture` runs the artificial example; `make cohort-audit` fits no models.
 
-The versioned clinical `results/` folders are reading snapshots, not complete
-saved execution bundles. Their CSVs/PDFs can be inspected without data access;
-the binary analysis bundles and private receipts needed by `make render` are
-omitted. Each snapshot README provides a dependency-free Python hash-verification
-command. The historical pairing-feasibility README documents its separate
-aggregate-report command; it is not the current analysis renderer.
-
-Source-boundary checks are separate:
-
-```bash
-make source-test PREP_PYTHON="/existing/environment/bin/python"
-```
-
-Use the existing source-reader Python environment with pandas and DuckDB; source
-preparation also requires the pinned upstream readers. The ICD release passed
-the artificial E2E and all 35 source checks using the existing Mini environment,
-without skips or dependency installation. See [test scope](tests/README.md) and
-[dated receipts](WORKLOG.md). Artificial checks do not establish clinical results.
-The [public-release review](docs/PUBLIC_RELEASE_REVIEW.md) records verification
-of the documented release, installed versions and any unavailable dependencies.
-
-## Data access and full clinical reproduction
-
-Reports, figures and aggregate analysis tables are included in the repository;
-the owner confirmed public disclosure clearance for the existing outputs on
-October 23, 2026. Each reading snapshot includes its own provenance and integrity
-manifest. Temporary runs and private source-access receipts remain outside the
-reading packets. Public disclosure clearance and reuse licensing are separate;
-see [citation, reuse and support](#citation-reuse-and-support).
-
-Raw records, patient-level inputs/derivations, identifiers, exact individual dates,
-model frames and individual predictions stay in ignored/private storage. Do not
-copy credentials or local source-access details into the review outputs. Source
-access remains separate: obtain it from the project owner; no self-service
-data-access process is documented. Repository access does not grant raw-data access.
-
-Full clinical estimation requires the qualified input/manifest and pre-index audit
-companion on a clean, merged Mini checkout. Follow the [source contract](docs/SOURCE_CONTRACT.md).
-`data/raw/full_db.rds` is a historical comparator, never a fallback input. Preserve
-prior products and reports; source corrections and new models require fresh,
-traceable runs. Submission and external sharing are separate actions.
-
-## Same-day arterial PCO₂/pH supplement
-
-The [supplement specification](docs/SAME_DAY_ABG_SUPPLEMENT.md) now uses one
-joint multinomial spline to distinguish hypercapnia with and without documented
-same-day acidemia, with no documented hypercapnia as the reference. Any eligible
-hypercapnia–acidemia day takes priority. S1 stacks the two components across the
-full observed BMI range and shows their separate intervals on a common baseline.
-The input and primary models/PIFs are unchanged. The joint-component release uses aggregate
-schema 10; the schema-9 snapshot is preserved as historical evidence.
-
-See the [current reading packet](results/2026-10-20-same-day-components/README.md)
-for the shared model/reference denominator, category counts, full-range
-probabilities, five-unit component contrasts, numerical reconciliation and
-separate review states. S1 interpretation and investigator figure approval
-remain pending.
-
-The [historical pairing-feasibility report](results/2026-10-20-paired-abg/README.md)
-remains available. Its raw-export trace confirmed that sample identifiers were
-not supplied in the original laboratory export. The new definition requires a
-common recorded date, not a specimen identifier. See the source contract for
-private enrichment and qualification; ordinary report rendering reads saved
-aggregates only.
-
-## Citation, reuse and support
-
-A project license and preferred citation are not yet documented in this repository.
-Authorship and code/output reuse terms remain pending owner confirmation;
-no DOI or published-paper citation is asserted. For a traceable reference,
-identify the [repository](https://github.com/reblocke/obes-pop-attrib-fract-hypercap),
-the exact commit and the dated result snapshot used. Third-party assets retain
-their own notices. See the [release review](docs/PUBLIC_RELEASE_REVIEW.md).
-
-Use [repository issues](https://github.com/reblocke/obes-pop-attrib-fract-hypercap/issues)
-for code or documentation questions, including the command, software versions and
-sanitized error. Keep restricted records, credentials and private access paths
-out of issues. Clinical-data access requires a separate arrangement with the
-project owner; no public self-service access process is documented.
-
-## ICD acuity supplement
-
-The [ICD supplement specification](docs/ICD_ACUITY_SUPPLEMENT.md) partitions the
-existing composite into chronic/OHS, acute-on-chronic or concurrent coding,
-acute, unspecified acuity and no target diagnosis. The qualified source reproduces
-the original binary composite and preserves all fixed indexes.
-
-The [updated October 24 packet](results/2026-10-24-icd-bias-reduced/README.md) contains successful
-five-category Firth bias-reduced curves, a four-category maximum-likelihood
-sensitivity excluding unspecified-only patients, and observed BMI-band proportions.
-The full model uses 176,922 patients; the sensitivity uses 176,794. Both retain
-the primary spline basis and adjustment. Their denominators differ, so this is
-not a same-denominator estimator comparison. Full joint covariance supplies
-pointwise intervals and component-change contrasts. No supplemental PIF was added.
-
-The [original failed fit](results/2026-10-24-icd-acuity/README.md) is historical;
-separation arose from rare unspecified coding, with no demonstrated source change.
-Bias reduction addresses finite estimation, not coding validity, sparse support
-or selection bias. Original primary/S1 estimates, PIFs and selected B/F2 are
-unchanged. Investigator interpretation and figure approval remain pending.
-No abstract was drafted. See the [source command](docs/SOURCE_CONTRACT.md#icd-acuity-enrichment).
+Current runtime: input schema 5; aggregate schema 13;
+`bmi_hypercapnia_rfs_curve_audit_v8`. Historical bundles are rejected, not migrated
+or relabeled. Historical reading snapshots remain accessible under `results/`.
+Source acceptance, execution, numerical review, visual review, investigator
+interpretation and submission approval remain separate states.

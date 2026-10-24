@@ -12,7 +12,7 @@ except ImportError:
 @unittest.skipIf(pd is None,'pandas is required by the existing preparation environment')
 class RfsMetadataTests(unittest.TestCase):
     def setUp(self):
-        self.module=importlib.import_module('enrich_rfs_input')
+        self.module=importlib.import_module('source_components')
         self.keys=pd.DataFrame({'patient_id':['001','002'],'encounter_id':['a','b'],'bmi':[40.,45.]})
         self.original=self.keys[['patient_id','encounter_id']].copy()
         for f in self.module.RFS_COLUMNS:self.original[f]=[1.,0.]

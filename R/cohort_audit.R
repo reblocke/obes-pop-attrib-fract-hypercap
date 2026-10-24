@@ -1,4 +1,4 @@
-bmi_table_names <- c("cohort_nodes","cohort_edges","exclusion_reasons","exclusion_overlaps","variable_summary","category_counts","distribution_bins","distribution_curves","missingness_patterns","comissingness","evidence_by_bmi","observation_patterns","timing_audit","variable_dictionary","source_audit","population_registry","stage_summary","policy_registry","model_registry","model_sample_audit","coefficients","coefficient_covariance","factor_references","model_fit_diagnostics","model_residual_bins","model_influence_summary","model_support","bmi_basis","prediction_support","probability_curves","observation_curves","fixed_bmi_contrasts","policy_totals","policy_contributions","policy_contribution_covariance","sensitivity_results","implied_missing_probabilities","linear_spline_comparison","coverage_index","numerical_reconciliation")
+bmi_table_names <- c("cohort_nodes","cohort_edges","exclusion_reasons","exclusion_overlaps","variable_summary","category_counts","distribution_bins","distribution_curves","missingness_patterns","comissingness","evidence_by_bmi","observation_patterns","timing_audit","variable_dictionary","source_audit","population_registry","stage_summary","policy_registry","model_registry","model_sample_audit","coefficients","coefficient_covariance","factor_references","model_fit_diagnostics","model_residual_bins","model_influence_summary","model_support","bmi_basis","prediction_support","probability_curves","observation_curves","fixed_bmi_contrasts","policy_totals","policy_contributions","policy_contribution_covariance","linear_spline_comparison","coverage_index","numerical_reconciliation")
 bmi_validate_ledger <- function(a) {
   tests<-list();add<-function(id,ok,note="")tests[[length(tests)+1L]]<<-data.frame(check_id=id,passed=if(length(ok)==1L && is.na(ok))NA else isTRUE(ok),status=if(length(ok)==1L && is.na(ok))"not_assessed"else if(isTRUE(ok))"passed"else"failed",note=note)
   nodes<-a$cohort_nodes;edges<-a$cohort_edges
@@ -29,13 +29,14 @@ bmi_bind <- function(x) {
 }
 bmi_config <- function(path = "config/bmi_hypercapnia_analysis.json") {
   x <- jsonlite::read_json(path, simplifyVector = FALSE)
-  if (!identical(x$analysis_id, "bmi_hypercapnia_rfs_curve_audit_v7") || x$bundle_schema != 12 ||
+  if (!identical(x$analysis_id, "bmi_hypercapnia_rfs_curve_audit_v8") || x$bundle_schema != 13 ||
       x$population_scope_id != "original_selected_encounters_v1" || x$source_policy_id != "unadjusted_pco2_v1" ||
       x$bmi_policy_id != "available_encounter_or_prior_bmi_v1") stop("Unreviewed analysis/source/population policy")
-  if (!identical(x$standardization_policy,"outcome_observed_v1") || !identical(x$mnar_enabled,FALSE)) stop("Full-cohort MAR/MNAR projections are superseded")
-  if (!identical(unlist(x$analysis_populations,use.names=FALSE),c("primary","primary_current","all_obesity")) ||
+  if (!identical(x$standardization_policy,"outcome_observed_v1")) stop("Full-cohort MAR/MNAR projections are superseded")
+  if (!identical(unlist(x$analysis_populations,use.names=FALSE),c("primary","primary_bmi_ge30","primary_current","all_obesity")) ||
       !identical(unlist(x$full_model_populations,use.names=FALSE),"primary") ||
       !identical(unlist(x$descriptive_populations,use.names=FALSE),"obesity_only")) stop("Unreviewed population roles; obesity-only is descriptive")
+  if(!identical(unlist(x$component_populations,use.names=FALSE),c("primary","primary_bmi_ge30")))stop("Unreviewed component populations")
   if (any(vapply(x$policies,function(p)!identical(p$target,"model_observed"),logical(1)))) stop("Policies must retain the model-observed population")
   for (name in c("quantile_type", "grid_step", "bmi_bin_width", "chunk_size", "ecdf_grid_size", "kde_min_n", "kde_min_distinct", "sparse_n", "sparse_events", "multinomial_maxit")) {
     if (length(x[[name]]) != 1 || !is.numeric(x[[name]]) || !is.finite(x[[name]]) || x[[name]] <= 0) stop("Invalid config: ", name)
@@ -43,44 +44,55 @@ bmi_config <- function(path = "config/bmi_hypercapnia_analysis.json") {
   if (x$quantile_type != 7 || !identical(as.numeric(unlist(x$knot_probabilities)), c(.05,.35,.65,.95))) stop("Unreviewed spline specification")
   if (length(x$policies) < 1 || anyDuplicated(vapply(x$policies, `[[`, "", "policy_id"))) stop("Invalid policy registry")
   for (p in x$policies) if (!all(c("policy_id","enabled","threshold","transformation","target","label") %in% names(p)) ||
-      !p$transformation %in% c("minus_one","cap","identity") || !is.numeric(p$threshold) || !is.finite(p$threshold)) stop("Incomplete explicit policy")
+      !identical(p$transformation,"minus_one") || !identical(as.numeric(p$threshold),30)) stop("Incomplete explicit policy")
   x
 }
 bmi_eligibility <- function(d) {
   criteria <- data.frame(calendar = d$encounter_date >= as.Date("2022-01-01") & d$encounter_date < as.Date("2023-01-01"),
     setting = ifelse(is.na(d$encounter_type), NA, d$encounter_type %in% c("EMER","IMP")),
-    adult = d$age_at_encounter >= 18, bmi = d$bmi >= 30)
+    adult = d$age_at_encounter >= 18, bmi = ifelse(is.na(d$bmi), NA, is.finite(d$bmi)))
   if ("bmi_evidence_state" %in% names(d)) criteria$bmi[d$bmi_evidence_state == "missing"] <- FALSE
   list(criteria = criteria, state = Reduce(`&`, criteria))
 }
 construct_cohort_and_memberships <- function(raw) {
   d <- bmi_classify_rfs(derive_triangulation_variables(validate_triangulation_input(raw)))
-  e <- bmi_eligibility(d); d$common_obesity <- e$criteria$bmi
+  e <- bmi_eligibility(d); d$common_valid_bmi <- e$criteria$bmi
   # Resolve conflicting encounter versions before calling any row confirmed.
   for(ix in split(which(d$.key_conflict),tri_encounter_key(d)[d$.key_conflict])) {
     z<-e$state[ix];e$state[ix]<-if(all(z %in% TRUE))TRUE else if(all(z %in% FALSE))FALSE else NA
   }
   for(v in names(e$criteria))d[[paste0("eligibility_",v)]]<-e$criteria[[v]]
   d$eligibility_state<-e$state
-  selected <- select_frame_indexes(d, "common_obesity")
-  q <- selected$indexes; c <- q[stats::complete.cases(q[triangulation_adjustment]), , drop=FALSE]
-  members <- list(source_records=raw, encounter_versions=d,
+  selected <- select_frame_indexes(d, "common_valid_bmi")
+  q <- selected$indexes
+  members <- c(list(source_records=raw, encounter_versions=d,
     confirmed_eligible_encounters=d[e$state %in% TRUE,,drop=FALSE],
     excluded_encounters=d[e$state %in% FALSE,,drop=FALSE],
     uncertain_encounters=d[is.na(e$state),,drop=FALSE],
-    unresolved_candidate_encounters=d[d$patient_id %in% selected$audit$patient_id[selected$audit$status != "resolved"],,drop=FALSE],
-    Q=q, missing_adjustment=q[!stats::complete.cases(q[triangulation_adjustment]),,drop=FALSE], C=c,
-    C40=c[c$bmi >=40,,drop=FALSE], C_icd=c[!is.na(c$icd),,drop=FALSE],
-    M_abg=c[!is.na(c$icd)&!is.na(c$abg),,drop=FALSE], M_any_gas=c[!is.na(c$icd)&!is.na(c$any_gas),,drop=FALSE])
-  for (w in c("encounter","index_calendar_day")) for (o in c("abg","any_gas")) {
-    field <- if (w == "encounter") o else paste0(o,"_index_calendar_day")
-    members[[paste("C",o,w,sep="_")]] <- c[!is.na(c[[field]]),,drop=FALSE]
-    members[[paste("unknown",o,w,sep="_")]] <- c[is.na(c[[field]]),,drop=FALSE]
-  }
-  for (v in triangulation_adjustment) members[[paste0("missing_",v)]] <- q[is.na(q[[v]]),,drop=FALSE]
+    unresolved_candidate_encounters=d[d$patient_id %in% selected$audit$patient_id[selected$audit$status != "resolved"],,drop=FALSE]),
+    bmi_index_members(q))
   list(data=d, members=members, selection=selected, eligibility=e,
     day_status=attr(d,"index_day_source_status"), duplicates=attr(d,"exact_duplicates_removed"))
 }
+# Subgroups use these already selected rows; this function cannot select a visit.
+bmi_index_members <- function(q) {
+  c <- q[stats::complete.cases(q[triangulation_adjustment]),,drop=FALSE]
+  members <- list(Q=q, missing_adjustment=q[!stats::complete.cases(q[triangulation_adjustment]),,drop=FALSE], C=c,
+    C40=c[c$bmi>=40,,drop=FALSE], C_icd=c[!is.na(c$icd),,drop=FALSE],
+    M_abg=c[!is.na(c$icd)&!is.na(c$abg),,drop=FALSE], M_any_gas=c[!is.na(c$icd)&!is.na(c$any_gas),,drop=FALSE])
+  for(w in c("encounter","index_calendar_day"))for(o in c("abg","any_gas")) {
+    field<-if(w=="encounter")o else paste0(o,"_index_calendar_day")
+    members[[paste("C",o,w,sep="_")]]<-c[!is.na(c[[field]]),,drop=FALSE]
+    members[[paste("unknown",o,w,sep="_")]]<-c[is.na(c[[field]]),,drop=FALSE]
+  }
+  for(v in triangulation_adjustment)members[[paste0("missing_",v)]]<-q[is.na(q[[v]]),,drop=FALSE]
+  members
+}
+bmi_fixed_population <- function(ctx,q) {
+  if(anyDuplicated(q$patient_id)||!all(tri_encounter_key(q) %in% tri_encounter_key(ctx$members$Q)))stop("Subgroup changed the common index")
+  list(data=q,members=bmi_index_members(q),day_status=ctx$day_status,fixed_indexes=TRUE)
+}
+
 bmi_node <- function(id, d, grain="patient", status="assessed", label=id) data.frame(
   population_id=id, label=label, grain=grain, n_records=nrow(d),
   n_encounters=nrow(unique(d[c("patient_id","encounter_id")])), n_patients=length(unique(d$patient_id)),
@@ -88,6 +100,13 @@ bmi_node <- function(id, d, grain="patient", status="assessed", label=id) data.f
 bmi_ledger <- function(ctx) {
   nodes <- bmi_bind(lapply(names(ctx$members), function(id) bmi_node(id,ctx$members[[id]],
     if(id=="source_records")"record"else if (id %in% c("encounter_versions","confirmed_eligible_encounters","excluded_encounters","uncertain_encounters","unresolved_candidate_encounters")) "encounter_version" else "patient")))
+  if(isTRUE(ctx$fixed_indexes)) {
+    edges<-data.frame(from=c("Q","Q",rep("C",4)),to=c("C","missing_adjustment","C40","C_icd","M_abg","M_any_gas"),
+      relation=c("partition","partition",rep("subset",4)),partition_id=c("adjustment","adjustment",rep("",4)),denominator_id=c("Q","Q",rep("C",4)))
+    for(w in c("encounter","index_calendar_day"))for(o in c("abg","any_gas"))for(prefix in c("C","unknown"))
+      edges<-bmi_bind(list(edges,data.frame(from="C",to=paste(prefix,o,w,sep="_"),relation="partition",partition_id=paste(o,w),denominator_id="C")))
+    return(list(cohort_nodes=nodes,cohort_edges=edges,exclusion_reasons=data.frame(),exclusion_overlaps=data.frame()))
+  }
   counts <- ctx$selection$counts
   for (name in c("n_frame_patients","n_index_unresolved","n_membership_uncertain","n_earliest_ties","n_earlier_uncertainty","n_conflicting_indexes")) {
     nodes <- bmi_bind(list(nodes, data.frame(population_id=name,label=name,grain="patient",n_records=NA,n_encounters=NA,n_patients=counts[[name]],n=counts[[name]],status="assessed")))
@@ -168,7 +187,8 @@ bmi_profile <- function(d, population_id, dictionary, config, breaks_reference=d
   lapply(tables,bmi_bind)
 }
 profile_stage_variables <- function(members, dictionary, config) {
-  profiles<-lapply(names(members),function(id)bmi_profile(members[[id]],id,dictionary,config,members$encounter_versions))
+  reference<-if(!is.null(members$encounter_versions))members$encounter_versions else members$Q
+  profiles<-lapply(names(members),function(id)bmi_profile(members[[id]],id,dictionary,config,reference))
   names(profiles)<-names(members)
   setNames(lapply(names(profiles[[1]]),function(table)bmi_bind(lapply(profiles,`[[`,table))),names(profiles[[1]]))
 }
@@ -241,7 +261,7 @@ bmi_make_companion <- function(raw) {
   config<-bmi_config();ctx<-construct_cohort_and_memberships(raw);dictionary<-bmi_dictionary(ctx$data,config)
   q<-ctx$members$Q
   rfs_provenance<-bmi_rfs_audits(ctx,config)$bmi_provenance
-  allowed<-c(bmi_metadata_fields, paste0("eligibility_",c("calendar","setting","adult","bmi","state")),"patient_id","encounter_id","encounter_date","age_at_encounter","encounter_type","bmi","sex","race_ethnicity","location","bmi_evidence_state",".key_conflict",".index_day_conflict","in_scope","common_obesity","severe_obesity")
+  allowed<-c(bmi_metadata_fields, paste0("eligibility_",c("calendar","setting","adult","bmi","state")),"patient_id","encounter_id","encounter_date","age_at_encounter","encounter_type","bmi","sex","race_ethnicity","location","bmi_evidence_state",".key_conflict",".index_day_conflict","in_scope","common_valid_bmi","severe_obesity")
   profiles<-profile_stage_variables(lapply(ctx$members,function(d)d[intersect(allowed,names(d))]),dictionary,config)
   unavailable<-setdiff(names(ctx$data),allowed)
   for(id in names(ctx$members))for(v in unavailable)profiles$variable_summary<-bmi_bind(list(profiles$variable_summary,data.frame(population_id=id,variable_id=v,n=nrow(ctx$members[[id]]),n_observed=NA_real_,n_missing=NA_real_,n_distinct=NA_real_,status="source evidence not extracted at pre-index; unassessed")))
@@ -253,7 +273,7 @@ bmi_make_companion <- function(raw) {
 }
 bmi_load_input <- function(input,manifest,audit_only=FALSE) {
   loaded<-load_common_input(input,manifest)
-  if(!identical(loaded$manifest$schema_version,4L))stop("RFS analysis requires metadata-qualified input schema 4")
+  if(!identical(loaded$manifest$schema_version,5L))stop("RFS analysis requires metadata-qualified input schema 5")
   if(!identical(loaded$manifest$population_scope_id,"original_selected_encounters_v1")||!identical(loaded$manifest$bmi_policy_id,"available_encounter_or_prior_bmi_v1"))stop("Current input must bind original population and available-BMI policy")
   entry<-loaded$manifest$source_evidence_files$rfs
   path<-entry$path;if(!grepl("^(/|[A-Za-z]:)",path))path<-file.path(dirname(manifest),path)

@@ -2,7 +2,7 @@
 
 ## Scope and change discipline
 
-The current analysis is schema 12 (`bmi_hypercapnia_rfs_curve_audit_v7`). Read
+The current analysis is schema 13 (`bmi_hypercapnia_rfs_curve_audit_v8`; input schema 5). Read
 `docs/BMI_HYPERCAPNIA_TRIANGULATION_PLAN.md` and `docs/SOURCE_CONTRACT.md` before
 substantive work. Configuration and the variable dictionary live in `config/`;
 the cohort ledger is the sole count authority.
@@ -18,9 +18,9 @@ approval state, selected figure identities and result-table navigation. It is a
 documentation companion, not a second analysis configuration. Keep it aligned
 with `docs/DECISIONS.md`; do not treat access to the repository as permission to
 draft, rerun, share or submit beyond the owner's current request.
-The versioned reading snapshot is `results/2026-10-18/`; verify its manifest and
-use its aggregate tables for current numerical claims. It is not a runnable bundle.
-The latest integrated report and ICD curves are in
+The historical BMI-restricted reading snapshot is `results/2026-10-18/`; verify its manifest and
+use its aggregate tables only for that dated design’s numerical claims. It is not a runnable bundle.
+The latest historical BMI-restricted integrated report and ICD curves are in
 `results/2026-10-24-icd-bias-reduced/`; verify its manifest. The five-category
 Firth model and four-category unpenalized sensitivity both fitted successfully;
 their model/reference denominators differ. Numerical verification does not confer
@@ -36,11 +36,12 @@ selection and provisional approval do not approve S1 or its interpretation.
 
 - Use authenticated original FULL_DATA ED/inpatient encounter keys. History
   supplies prior measurements, not additional candidate encounters.
-- Select the first 2022 adult EMER/IMP encounter with valid BMI >=30 before gas
+- Select the first 2022 adult EMER/IMP encounter with any valid available BMI before gas
   availability, adjustment completeness or RFS classification. Do not promote a
   later encounter when earlier eligibility, chronology or ties are unresolved.
   Completed-missing BMI differs from unresolved evidence; reliable exclusions
   override unrelated missing fields.
+- Derive the BMI >=30 secondary at that same new index; do not promote a later obese encounter. Repeat all three endpoint families with the secondary population’s own fixed basis. Current-BMI models reuse primary knots; all-OBESITY models remain overlapping sensitivity.
 - Preserve the approved current/prior reported BMI then observed height/weight
   hierarchy, transport, rounding and masking screens. No statistical imputation.
 - Partition the fixed indexes by authenticated historical source membership:
@@ -118,11 +119,13 @@ numerical review and investigator scientific approval are separate states.
 - Refactoring alone does not authorize clinical reruns, commit/push/merge,
   external communication or submission.
 
-The [same-day arterial supplement](docs/SAME_DAY_ABG_SUPPLEMENT.md) uses one joint three-category multinomial spline for
-recorded-day co-occurrence with a separate source gate. It does not
-establish same-sample pairing; original PIFs and primary analyses remain unchanged.
+The same-day and ICD component models are integrated endpoint families in the
+main scientific report and repeat in the nested BMI >=30 secondary. Their source
+qualification statuses remain independent. See the scientific specification for
+exact definitions. Do not add component-specific PIFs. Same recorded-day evidence
+is co-occurrence, not verified sample pairing; ICD acuity is coding, not physiology.
 
-The optional [ICD acuity supplement](docs/ICD_ACUITY_SUPPLEMENT.md) uses a joint
-five-category model on complete diagnosis capture, independent of gas evidence.
-Preserve all code flags and the agreed mixed-code precedence; never infer acuity
-from the binary composite or count incomplete capture as negative.
+Use one `make prepare` for covariates/RFS/gases/recorded-day evidence/code flags.
+Authenticate new selection/source identities; old-run comparison is a separate
+reconciliation, not an input-acceptance prerequisite. Current results and approvals
+must remain marked pending until the new clinical run is verified.

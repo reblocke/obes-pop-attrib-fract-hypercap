@@ -1,263 +1,108 @@
 # Source contract and restricted execution
 
-This document covers the existing accepted source, not a request to recreate or
-replace it. Scientific rules are in the [current guide](BMI_HYPERCAPNIA_TRIANGULATION_PLAN.md).
-Raw inputs, accepted products and prior bundles are immutable. Examples below use
-placeholder paths and must not be mistaken for authenticated clinical inputs.
+Use the existing accepted source and mapped candidates; no replacement export,
+upstream rebuild or dependency installation is implied. Scientific definitions
+are in [the specification](BMI_HYPERCAPNIA_TRIANGULATION_PLAN.md). Historical inputs,
+source products, receipts and published snapshots remain immutable.
 
-## Authoritative interfaces
+## Evidence and identity
 
-| Contract | Authority |
+| Requirement | Evidence |
 |---|---|
-| Original candidate membership | [Original-list reader](../scripts/original_encounter_population.py), accepted FULL_DATA receipt and original string keys |
-| BMI hierarchy/transport | [BMI policy](../config/common_index_bmi_policy.json), reviewed mapped-candidate manifest |
-| Ordinary gases and ICD capture | [Source policy](../config/common_index_source_policy.json) and hashed field evidence |
-| Installed upstream reader identity | [Mapping profile](../config/common_index_mapping.example.json), exact revision/module hashes |
-| Preparation inputs | [Mapped-source profile](../config/common_index_mapping.example.json) and [adapter](../scripts/prepare_common_index_input.py) |
-| Historical RFS semantics | [RFS evidence example](../config/rfs_evidence.example.json), producer/acceptance receipts |
-| Analysis input | [Input contract](../R/input_contract.R), schema-4 manifest and pre-index companion |
+| Candidate membership | Authenticated original FULL_DATA ED/inpatient string keys, accepted receipt, original-list reader |
+| BMI/covariates | Existing accepted calendar-covariate parquet, manifest, policy and dictionaries; all original candidates, not just former obese indexes |
+| Original RFS | Six source-membership flags joined by original patient/encounter keys; hashed family semantics and producer evidence |
+| Gas outcomes | Exact-code ordinary arterial/venous records, reviewed units, strict validity and encounter attribution |
+| Recorded-day components | Arterial 2019-8 and pH 2744-1; authenticated result-date semantics and pH policy; independent unavailable status |
+| ICD components | Five original code flags and complete/incomplete/unavailable capture; negative only with complete capture |
+| Selected input | Schema 5, new all-valid-BMI selection and cohort companion, source/field/component hashes |
 
-The active mapper profile binds merged upstream `751d794` with its exact module
-hashes. Earlier accepted products retain their original `72c91a2` producer and
-runtime identities. An active profile update does not reissue their acceptance.
-Do not cross old/new revision/hash pairs or edit accepted manifests in place.
-Use existing qualified installed readers from
-[trinetx-preprocessing](https://github.com/reblocke/trinetx-preprocessing); do not
-rebuild upstream data merely to rerender or refit an unchanged accepted input.
+Pinned readers use the reviewed revision/module hashes in
+[the mapping profile](../config/common_index_mapping.example.json). Earlier products
+retain their producer identities; a newer reader does not reissue acceptance.
+Do not infer compatibility from matching column names.
 
-The recorded-BMI mask screen is inherited, not a demonstrated Python/Stata
-mismatch. Current/prior recorded BMI uses 10<BMI<50.1; height/weight-derived BMI
-has no corresponding 50.1 cap. Preserve the exact transport and rounding policy.
-No authenticated noncensored high-BMI rule has replaced it. Prior measurements
-have no recency cap; preserve dates privately and publish only aggregate lags.
-Completed absence after searching available records is missing BMI, not failed
-qualification; unavailable capture or conflicting relevant chronology is unresolved.
+Recorded current/prior BMI retains 10<BMI<50.1 masking screens; calculated BMI
+has no corresponding 50.1 cap. Preserve hierarchy, rounding, observed height/weight
+and transport. No statistical imputation, new BMI cap or recency threshold. Missing
+BMI after a complete search is an exclusion; unavailable evidence or unresolved
+chronology can block an index. History is evidence, not extra candidate encounters.
 
-## Qualification evidence
+Select the first adult 2022 ED/inpatient encounter with any valid BMI once.
+RFS and outcome fields cannot promote a later encounter. The nested BMI≥30
+secondary is filtered at this index. Authenticate new indexes against accepted
+source keys and evidence, not an identical prior clinical run.
 
-A passing schema check alone does not authenticate a dataset. Bind the actual
-input, source config, producer/variant/conversion, source receipt and policy hashes.
-The evidence ledger must cover:
+## One preparation transaction
 
-- Exact original encounter-key membership, duplicate/conflicting keys, captured
-  start/settings, chronology and first-index selection. History may supply prior
-  measurements but cannot add candidates. No later more complete index is promoted.
-- Candidate-level BMI/adjustment mappings and their missingness, units, dictionaries
-  and timing. The pre-index companion must reconcile candidate stages; a selected-
-  index input alone cannot supply those distributions.
-- Ordinary gas code/specimen/unit/window mappings and raw-source maxima, including
-  normal, threshold-boundary, positive, unusable, adjusted and unspecified records.
-  LOINC 11557-6 alone is unspecified blood. Use the explicit mm Hg/kPa mapping;
-  missing/incompatible units are unusable unless authenticated metadata supplies them.
-- Testing evidence distinct from usable results and no captured testing evidence;
-  unavailable capture remains separately identifiable where supported.
-- Complete available diagnosis capture for a negative five-code composite; no other
-  diagnosis is required. Incomplete/unavailable capture remains unknown.
-- Calendar-day recorded-result=start dates and maxima bounded by encounter maxima;
-  unavailable evidence leaves sensitivities pending without invalidating qualified
-  encounter-wide primary outcomes.
-- RFS metadata original-key joins, zero/missing semantics and exact preservation
-  of prior clinical fields/indexes. Never reconstruct flags from final BMI or
-  current gas/outcome evidence.
+`make prepare` uses [prepare_common_index_input.py](../scripts/prepare_common_index_input.py)
+and [source_components.py](../scripts/source_components.py), replacing the former
+three enrichment launchers. Existing classification functions retain their threshold,
+duplicate and missingness semantics. The input contains original metadata and BMI
+provenance; only aggregate lags and profiles may leave protected execution.
 
-Do not invent reviewer approval. Automated source comparison, owner acceptance,
-execution, numerical review, visual review and investigator scientific review
-are distinct states. A failed gate produces a specific unresolved item and blocks
-unsupported inference, rather than silently narrowing the cohort or substituting
-legacy proxies.
+The private source configuration binds canonical database/sidecar, mapped product,
+accepted FULL_DATA product, reader identities, reviewed code/unit/capture mappings,
+`rfs_evidence` (path/hash), and optional `same_day_abg_policy` (path/hash). Missing
+same-day policy produces explicit unavailable component evidence, never negatives.
+ICD code flags come from the same diagnosis stream as the binary composite.
 
-## Commands
+Preparation emits a new RDS, private CSV, full pre-index companion, selection and
+source receipts, component evidence files and a **pending** schema-5 manifest.
+Each component binds the resulting input SHA-256, selection-evidence SHA-256,
+canonical source, policy and adapter identities. Conflicting duplicate source IDs,
+uncovered keys, different-source evidence and corrupted hashes fail explicitly.
+No source eligibility or investigator approval is invented by successful preparation.
 
-Clinical estimation requires a clean merged Mini checkout matching `origin/main`.
-Before remote writes, check active jobs/worktrees and avoid overlapping changes.
-Use the existing isolated runtime through `PREP_PYTHON` and its documented R
-activation; local runtime paths are private and are not installed by these commands.
+## Qualification and execution
 
-Only when preparing a new source product, use a reviewed source configuration and
-fresh destinations. Existing accepted products do not need regeneration:
+Before remote writes, inspect active jobs/leases and use a fresh private directory.
+Use existing isolated R/Python environments. Example paths below are placeholders:
 
 ```bash
-make map PREP_PYTHON="/existing/environment/bin/python" \
-  SOURCE_CONFIG="/private/reviewed-mapping.json" OUTPUT="/private/fresh-mapping"
 make prepare PREP_PYTHON="/existing/environment/bin/python" \
-  SOURCE_CONFIG="/private/reviewed-source.json" OUTPUT="/private/fresh-prepared"
+  SOURCE_CONFIG="/private/reviewed-source.json" OUTPUT="/private/fresh-input"
 make qualify PREP_PYTHON="/existing/environment/bin/python" \
   SOURCE_CONFIG="/private/reviewed-source.json" \
-  PREPARED="/private/fresh-prepared" OUTPUT="/private/fresh-qualification"
+  PREPARED="/private/fresh-input" OUTPUT="/private/fresh-qualification"
+make preflight INPUT="/private/fresh-input/study-input.rds" \
+  MANIFEST="/private/fresh-input/reviewed-manifest.json"
+make analyze INPUT="/private/fresh-input/study-input.rds" \
+  MANIFEST="/private/fresh-input/reviewed-manifest.json"
+make render RUN="artifacts/triangulation/<exact-saved-run>"
 ```
 
-The preparation stage does not itself approve its generated pending manifest.
-Complete it only from the reviewed qualification evidence. For the RFS analysis,
-enrich the qualified input using accepted original metadata and its prior run:
+The independent qualifier reconciles original membership, all-BMI chronology,
+BMI/covariates, RFS/raw-demographic joins, gas maxima/units/windows, code flags and
+recorded-day outcomes. Review normal, boundary, adjusted, unspecified and unusable
+source evidence. Ordinary PCO₂ is primary; 11557-6 alone is unspecified specimen.
+Capture completeness permits an ICD-negative without another diagnosis. The seven
+primary gates must pass before the pending manifest is accepted; retain automated
+results and human/scientific review as distinct records. A demonstrated discrepancy
+requires a specific correction or decision, not silent exclusion or legacy substitution.
 
-```bash
-make enrich-rfs PREP_PYTHON="/existing/environment/bin/python" \
-  SOURCE_CONFIG="/private/reviewed-source.json" \
-  INPUT="/private/prior-input.rds" MANIFEST="/private/prior-manifest.json" \
-  PRIOR_RUN="/private/prior-aggregate-run" \
-  RFS_EVIDENCE="/private/authenticated-rfs-evidence.json" \
-  OUTPUT="/private/fresh-rfs-input"
-make preflight INPUT="/private/study-input.rds" MANIFEST="/private/reviewed-manifest.json"
-make cohort-audit INPUT="/private/study-input.rds" MANIFEST="/private/reviewed-manifest.json"
-make analyze INPUT="/private/study-input.rds" MANIFEST="/private/reviewed-manifest.json"
-```
+Clinical estimation requires clean merged Mini code matching `origin/main` and a
+qualified manifest. Run once into a new saved directory. Render takes only that
+aggregate bundle; no source reads/refits. A render repair reuses the run; a source
+or estimator correction requires a new run. `make map` remains available only when
+an actual mapping gap is demonstrated; the approved update reuses the existing map.
 
-Preserve the printed run directory. Presentation revisions use `make render RUN=...`
-only. An estimation/source correction requires fresh qualification as applicable
-and a new run; retain all previous evidence.
+## Reconciliation, privacy and limits
 
-## Current evidence and limits
+Compare new and prior inputs by original keys separately from qualification:
+new patients, old-only patients, changed indexes, changed RFS assignments and
+unchanged-key field stability. Expected refit changes are not source discrepancies.
+Preserve completed-missing/unresolved counts, candidate profiles and sparse support.
+Do not hard-code a historical cohort size as a new invariant.
 
-The original-list mapping, first-index/field reconciliation and metadata-qualified
-schema-4 input have accepted evidence. The schema-7 clinical run completed from
-merged `043fea6` on 2026-10-17 with unchanged input/evidence identities and retained
-primary/supporting results. Exact private paths, hashes and review scopes live in
-ignored release storage and `WORKLOG.md`; no new export is indicated by this
-software cleanup. The original broader-history UNKNOWN-setting blocker is retired
-because those visits are outside the approved candidate list.
+Keep identifiers, dates, raw measurements, row-level derivations, model frames,
+individual predictions, credentials and exact source-access details private. The
+owner permits reports, figures and aggregate tables in Git and collaborator
+material. Local run bundles stay ignored; published reading snapshots are not
+runnable bundles. Verify their manifests before numerical claims.
 
-Historical exact RFS extraction thresholds/windows and individual obesity triggers
-are not fully authenticated from current defaults. Sparse residual gases in
-obesity-only membership remain visible and unadjudicated. Additional cross-project
-key decomposition and the previously noted historical diagram discrepancy remain
-unassessed. Prior-measurement age, selection/measurement mechanisms and causal
-interpretation remain scientific limitations after source acceptance.
-
-Keep patient identifiers, exact individual dates, raw records, row-level derivations,
-model frames and individual predictions in protected execution only. On 2026-10-18
-the owner clarified that reports, figures and aggregate result tables may be
-included in Git and shared as analysis outputs. Local source-access details,
-credentials and patient-level evidence remain excluded. The blanket ignore rule
-for local runs is not a restriction on versioning aggregate outputs. This permission
-does not authorize abstract submission or imply coauthor approval.
-
-On 2026-10-23 the owner additionally confirmed that public release of the exact
-existing reports, figures and aggregate tables, including existing small counts,
-is cleared under the source-data agreement. The [decision log](DECISIONS.md)
-records that confirmation. Reuse licensing and scientific review remain separate;
-private source records and source-access details remain excluded.
-
-The [versioned reading snapshot](../results/2026-10-18/README.md) contains the
-clinical reports, selected figures and complete aggregate tables. Its manifest
-records original bundle/review identities without source-access paths or patient
-records. This packages existing results; it does not requalify inputs or rerun
-estimation. Private input and execution receipts remain outside Git.
-
-## Optional same-sample arterial supplement
-
-The [paired-ABG extension](PAIRED_ABG_SUPPLEMENT.md) uses the same accepted source
-and a fresh additive input. The versioned pairing evidence binds original input,
-manifest, canonical source and reviewed policy. Existing source acceptance does
-not establish same-sample linkage. Raw pair identifiers, dates and row-level
-evidence stay private; only counts, policy and feasibility findings are shared.
-The pinned upstream audit reports date-only records and absent specimen/panel
-links in its historical snapshot. Reconcile those receipts to the actual study
-source before claiming availability. A missing module does not invalidate the
-base analysis; a supplied corrupt module fails explicitly.
-
-
-### 2026-10-20 accepted-source feasibility
-
-The actual accepted-source query covered 223,514 study-input encounter keys and
-541,828 selected gas records: 192,909 ordinary arterial PCO₂ and 145,993 arterial
-pH records. All queried records had date-only precision. Specimen, panel,
-accession, collection-time and dedicated result_status/result_version fields had no
-populated values. Generic status/order_status columns exist but do not have
-authenticated correction semantics. Record counts are not distinct patient or draw counts.
-Same-sample linkage is therefore unavailable, not an assessed zero-pair result.
-No clinical supplemental models are fitted; no approximate pairing is adopted.
-The existing clinical snapshot and B/F2 remain unchanged. See the
-[separate feasibility report](../results/2026-10-20-paired-abg/README.md).
-
-## Recorded-day arterial co-occurrence
-
-The [same-day supplement](SAME_DAY_ABG_SUPPLEMENT.md) supersedes the unavailable
-same-sample runtime. Direct inspection of the original laboratory CSV header,
-export manifest and dictionary confirmed no sample/panel/accession identifier;
-`source_id` denotes provenance, and laboratory `date` is a recorded-result date.
-This evidence supports recorded-day grouping, not a collection-time claim.
-Use a fresh `same_day_arterial_cooccurrence_v1` enrichment and retain the original
-input. Bind the exact accepted database, original input/manifest, recorded-date
-semantics, arterial codes, explicit units and owner-approved 6.5<pH<7.8 bounds.
-No upstream rebuild or replacement export is needed. The command is
-`make enrich-same-day-abg SOURCE_CONFIG=... INPUT=... MANIFEST=... OUTPUT=...`.
-Source values, dates and row identifiers stay private. Source qualification and
-clinical results require separate evidence and run reconciliation.
-
-The October 20 enrichment passed source qualification against the same accepted
-database and original input. All original fields and 223,514 fixed indexes were
-unchanged. All queried ordinary arterial PCO₂ and arterial pH records had reviewed
-units and parseable recorded dates. There were 22,217 co-observed indexes overall
-and 22,195 in the covariate-complete primary population. These are distinct
-denominators. The fresh clinical run from merged `b89d485` completed and its
-original estimates reconciled to the authenticated prior run within 1e-10.
-The [supplement snapshot](../results/2026-10-20-same-day-abg/README.md) records
-source, numerical and visual evidence separately; investigator approval remains
-pending. No same-sample linkage has been recovered or inferred.
-
-The legacy source-policy identifier uses the term `collection_date`; that stored
-identifier remains unchanged to preserve input/receipt identities. The source
-field it actually checks is the recorded-result date. This wording correction
-does not change existing calendar-day selections or numerical results.
-
-The joint-component update reuses this same qualified enrichment unchanged. Its
-three mutually exclusive categories are derived from the authenticated nested
-flags, with any same-day hypercapnia–acidemia event taking priority. No source
-re-extraction or stronger temporal/specimen claim is introduced. The new model
-requires a fresh aggregate run and numerical reconciliation, not a new raw export.
-
-The joint-model release reused this exact qualified enrichment and manifest.
-Fresh Mini preflight `curve-preflight-20261020T225510-19821` passed from merged
-`21b8bdf`; no upstream extraction, BMI derivation, index selection or evidence
-mapping changed. The joint reading snapshot records the preflight/input/manifest
-hashes and the prior acceptance chain separately from numerical and visual review.
-
-## ICD acuity enrichment
-
-Use the original accepted diagnosis source, pinned readers, reviewed code systems
-and capture-completeness policy, joined on both original keys. Preserve individual
-J96.02/J96.12/J96.22/J96.92/E66.2 flags and capture state. Complete capture permits
-zeros; incomplete/unavailable capture permits documented positives and unknowns
-only. The subtype union must equal the original composite wherever capture is complete.
-
-```bash
-make enrich-icd-acuity PREP_PYTHON="/existing/environment/bin/python" \
-  SOURCE_CONFIG="/private/reviewed-source.json" \
-  INPUT="/private/qualified-input.rds" MANIFEST="/private/qualified-manifest.json" \
-  OUTPUT="/private/fresh-icd-acuity"
-```
-
-This appends an optional `icd_acuity_v1` extension to schema-4 input, preserving
-all existing fields, attributes and fixed indexes. The new manifest/evidence binds
-base input, base manifest, canonical source, adapter and summary hashes. Partial
-columns, source mismatch, duplicate conflicting records, unreviewed code systems
-or a changed composite fail. Missing enrichment leaves the supplemental position
-unavailable. No same-day or blood-gas requirement applies to this diagnosis analysis.
-Use the enriched input only after source review; outputs do not assert human approval.
-
-The October 24 ICD enrichment passed against the unchanged accepted source.
-All 18,030 target diagnosis records and the five-code union reconciled; all
-223,514 original input rows, fields and fixed indexes were identical. Fresh
-schema-11 Mini preflight passed. See the [source qualification receipt](../results/2026-10-24-icd-acuity/review/source-qualification.json).
-The subsequent ICD model separation is an estimability limitation of the planned
-category/adjustment combination, not failed source transport. No replacement
-export or upstream rebuild is indicated by these checks.
-
-### ICD estimator replacement (2026-10-24)
-
-Schema 12 changes estimation, not `icd_acuity_v1` source qualification. Reuse the
-accepted hash-bound input, complete-capture rule, original code flags and exact
-precedence. No fresh extraction or upstream rebuild is required. The four-class
-sensitivity filters final unspecified-only classifications after fixed-index
-selection; it never changes the original source fields or clinical episode.
-
-### 2026-10-24 reuse for the ICD estimator revision
-
-Fresh preflight `curve-preflight-20261024T052216-54986` passed on clean merged
-Mini revision `29687c9`, with zero fitted models. The subsequent clinical run
-`curve-analyze-20261024T053607-55109` reused the exact qualified input and manifest
-from the earlier ICD run. The estimator change required no new source extraction,
-preprocessing revision or code reclassification. Input and evidence hashes remain
-bound in private run receipts; the aggregate reading snapshot carries sanitized
-execution and numerical-review evidence. Source qualification does not establish
-clinical validity of the code categories or investigator approval.
+Historical source thresholds/trigger details remain imperfectly authenticated;
+RFS zero is not complete clinical absence. Outcome-dependent entry, selective gas
+measurement, prior BMI, diagnostic incorporation and confounding remain limitations.
+Numerical/source/visual verification does not establish causal identification or
+investigator approval. Current clinical execution status is in [WORKLOG.md](../WORKLOG.md).

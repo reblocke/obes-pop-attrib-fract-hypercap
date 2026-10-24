@@ -10,22 +10,23 @@ counts <- scope <- NULL
 candidate_covariates <- list()
 seen <- character()
 fields <- c("patient_id", "encounter_id", "encounter_date", "age_at_encounter", "encounter_type",
-  "bmi", "sex", "race_ethnicity", "location", "bmi_evidence_state")
+  "bmi", "sex", "race_ethnicity", "location", "bmi_evidence_state",
+  setdiff(bmi_metadata_fields,c(bmi_same_day_fields,bmi_icd_fields)))
 for (i in seq_along(parts)) {
   header <- names(utils::read.csv(parts[i], nrows = 0, check.names = FALSE))
   if (!setequal(header, fields)) stop("Unexpected mapping partition columns.")
-  classes <- ifelse(header %in% c("bmi", "age_at_encounter"), "numeric", "character")
+  classes <- ifelse(header %in% c("bmi", "age_at_encounter",bmi_rfs_fields,"reported_bmi","height_inches","weight_pounds"), "numeric", "character")
   raw <- utils::read.csv(parts[i], colClasses = classes, na.strings = "", check.names = FALSE)
   patients <- unique(raw$patient_id)
   if (any(patients %in% seen)) stop("Patient split across source partitions.")
   seen <- c(seen, patients)
-  raw$encounter_date <- as.Date(raw$encounter_date, format = "%Y-%m-%d")
+  for(name in c("encounter_date","reported_date","height_date","weight_date"))raw[[name]]<-as.Date(raw[[name]],format="%Y-%m-%d")
   for (name in setdiff(triangulation_columns, names(raw))) raw[[name]] <- NA_real_
   candidate_covariates[[i]] <- raw
   data <- derive_triangulation_variables(validate_triangulation_input(raw))
-  data$common_obesity <- data$bmi >= 30
-  data$common_obesity[data$bmi_evidence_state == "missing"] <- FALSE
-  selected <- select_frame_indexes(data, "common_obesity")
+  data$common_valid_bmi <- ifelse(is.na(data$bmi), NA, is.finite(data$bmi))
+  data$common_valid_bmi[data$bmi_evidence_state == "missing"] <- FALSE
+  selected <- select_frame_indexes(data, "common_valid_bmi")
   current <- data.frame(input_encounters = nrow(raw), exact_duplicates_removed = attr(data, "exact_duplicates_removed"),
     distinct_encounter_versions = nrow(data), n_conflicting_keys = attr(data, "n_conflicting_keys"),
     in_scope = sum(data$in_scope %in% TRUE), out_of_scope = sum(data$in_scope %in% FALSE), uncertain_scope = sum(is.na(data$in_scope)))

@@ -49,11 +49,11 @@ bmi_icd_load <- function(loaded,manifest_path) {
   path<-entry$path
   if(!grepl("^(/|[A-Za-z]:)",path))path<-file.path(dirname(manifest_path),path)
   if(!identical(tri_sha256(path),entry$sha256))stop("ICD acuity evidence hash mismatch")
-  e<-jsonlite::read_json(path,simplifyVector=FALSE);ext<-loaded$manifest$icd_acuity_extension
+  e<-jsonlite::read_json(path,simplifyVector=FALSE)
   if(!has||!identical(e$schema_version,1L)||!identical(e$policy_id,"icd_acuity_v1")||
      !e$status %in% c("qualified","unavailable")||!isTRUE(e$source_unchanged)||
-     !identical(ext$schema_version,1L)||!identical(ext$policy_id,e$policy_id)||
-     !identical(ext$base_input_sha256,e$base_input_sha256)||!identical(ext$base_manifest_sha256,e$base_manifest_sha256))stop("Invalid ICD acuity identity/evidence")
+     !identical(e$input_sha256,loaded$manifest$input_sha256)||
+     !identical(e$selection_sha256,loaded$manifest$source_evidence_files$selection$sha256))stop("Invalid ICD acuity identity/evidence")
   lineage<-loaded$manifest$source_evidence_files$lineage$path
   if(!grepl("^(/|[A-Za-z]:)",lineage))lineage<-file.path(dirname(manifest_path),lineage)
   if(!identical(e$canonical_database_sha256,jsonlite::read_json(lineage)$canonical_database_sha256))stop("ICD acuity source lineage mismatch")
@@ -64,10 +64,10 @@ bmi_icd_load <- function(loaded,manifest_path) {
   attr(loaded$data,"icd_acuity_evidence")<-e;loaded$icd_acuity_evidence<-e;loaded
 }
 
-bmi_append_icd_acuity <- function(a,ctx,raw,config,audit_only=FALSE,source_status="artificial") {
+bmi_integrate_icd_acuity <- function(a,ctx,raw,config,audit_only=FALSE,source_status="artificial",population="primary") {
   if(!identical(config$icd_acuity_estimator,"firth_mean_bias_reduced_v1") ||
      !isTRUE(config$icd_acuity_specified_sensitivity))stop("Unsupported ICD estimator/registry configuration")
-  c<-ctx$members$C;c<-c[c$rfs_group=="primary",,drop=FALSE]
+  c<-ctx$members$C
   present<-all(bmi_icd_fields %in% names(c));e<-attr(raw,"icd_acuity_evidence")
   qualified<-isTRUE(config$icd_acuity_enabled)&&present&&(source_status %in% c("artificial","artificial_only")||identical(e$status,"qualified"))
   reason<-if(qualified)"Complete encounter diagnosis capture; inherited five-code composite"else"No qualified code-level diagnosis enrichment supplied (or module disabled)"
@@ -111,7 +111,7 @@ bmi_append_icd_acuity <- function(a,ctx,raw,config,audit_only=FALSE,source_statu
   }
   p$pattern<-p$band<-NULL
   if(!audit_only) {
-    b<-a$bmi_basis[a$bmi_basis$analysis_population_id=="primary",]
+    b<-a$bmi_basis[a$bmi_basis$analysis_population_id==population,]
     if(nrow(b)!=4)stop("Missing primary basis for ICD acuity")
     basis<-list(knots=b$knot,basis_id=b$basis_id[1],status=b$status[1],quantile_type=b$quantile_type[1])
     for(specified in c(FALSE,TRUE)) {
@@ -140,12 +140,12 @@ bmi_append_icd_acuity <- function(a,ctx,raw,config,audit_only=FALSE,source_statu
     t$coverage_index<-data.frame(kind="model",item_id=t$model_registry$model_id,table="model_registry",status=t$model_registry$status)
   }
   t$coverage_index<-bmi_bind(list(t$coverage_index,data.frame(kind="population",item_id=t$population_registry$population_id,table="population_registry",status=status)))
-  t<-bmi_namespace(t,"primary")
+  t<-bmi_namespace(t,population)
   for(name in names(t)) {
     z<-t[[name]]
     if("model_id" %in% names(z)&&nrow(z)) {
       ix<-match(z$model_id,t$model_registry$model_id)
-      if(!"population_id" %in% names(z))z$population_id<-"primary"
+      if(!"population_id" %in% names(z))z$population_id<-population
       if(!"outcome_id" %in% names(z))z$outcome_id<-t$model_registry$outcome_id[ix]
       if(!"ascertainment_window" %in% names(z))z$ascertainment_window<-"encounter"
       if(!"model_form" %in% names(z))z$model_form<-"multinomial_spline"
@@ -155,7 +155,7 @@ bmi_append_icd_acuity <- function(a,ctx,raw,config,audit_only=FALSE,source_statu
   a
 }
 
-bmi_validate_icd_bundle <- function(a) {
+bmi_validate_icd_population <- function(a) {
   z<-a$icd_acuity_categories
   if(nrow(z)&&all(z$status=="qualified")) {
     if(anyNA(z$n)||sum(z$n)!=z$N[1]||any(z$N!=z$N[1])||!identical(z$category_id,bmi_icd_classes))stop("ICD category partition mismatch")
@@ -188,5 +188,11 @@ bmi_validate_icd_bundle <- function(a) {
       if(sum(total)!=1L||abs(sum(cv$covariance[component])-cv$covariance[total])>1e-9)stop("ICD total covariance mismatch")
     }
   }
+  invisible(TRUE)
+}
+
+bmi_validate_icd_bundle <- function(a) {
+  for(population in unique(a$model_registry$analysis_population_id[a$model_registry$family %in% c("icd_acuity","icd_acuity_specified")]))
+    bmi_validate_icd_population(bmi_group_view(a,population))
   invisible(TRUE)
 }

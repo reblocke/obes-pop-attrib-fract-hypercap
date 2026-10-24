@@ -90,16 +90,6 @@ class PreparationChecks(unittest.TestCase):
         rows=[item(row=record(source_record_id="ARTIFICIAL-1"))]*2
         with self.assertRaises(prep.PreparationError):prep.summarize_gases(rows,POLICY,VOCAB,start_dates={})
 
-    def test_icd_captured_absence_and_incomplete_capture(self):
-        rows=[item(state="zero_matches"),item("002",dict(code="E662",source_record_id="ARTIFICIAL-D1")),
-              item("003",state="unavailable_domain")]
-        result,_=prep.summarize_icd(rows,POLICY,True)
-        self.assertEqual(result['001','0001'],0);self.assertEqual(result['002','0001'],1)
-        self.assertIsNone(result['003','0001'])
-        result,_=prep.summarize_icd(rows,POLICY,False)
-        self.assertIsNone(result['001','0001']);self.assertEqual(result['002','0001'],1)
-        with self.assertRaises(prep.PreparationError):prep.summarize_icd([item(row=dict(code="J96",source_record_id="ARTIFICIAL-D2"))],POLICY,True)
-
     def test_expanded_coverage_and_original_keys(self):
         prep.validate_key_coverage({("001","01")},{("001","01"),("002","01")})
         with self.assertRaises(prep.PreparationError):prep.validate_key_coverage({("001","01"),("003","01")},{("001","01")})

@@ -142,3 +142,15 @@ fit_registered_models <- function(ctx,basis,config) {
   }
   models
 }
+
+# This registry is independent of fit success; unavailable positions stay present.
+bmi_expected_models <- function(config,day_status) {
+  rows<-lapply(unlist(config$analysis_populations),function(population) {
+    role<-if(population %in% unlist(config$full_model_populations))"full"else"supporting"
+    ids<-bmi_model_registry(day_status,role)$model_id
+    if(population %in% unlist(config$component_populations))
+      ids<-c(ids,paste(c("same_day_abg","icd_acuity","icd_acuity_specified"),"encounter/multinomial_spline",sep="/"))
+    data.frame(model_id=paste0(population,"::",ids),analysis_population_id=population)
+  })
+  bmi_bind(rows)
+}

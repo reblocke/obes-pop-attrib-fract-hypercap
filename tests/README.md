@@ -126,3 +126,26 @@ coefficients/SEs are transcribed from the converged AS_mean example in
 https://stat.ethz.ch/CRAN/web/packages/brglm2/vignettes/multinomial.html .
 The separated numerical oracle is independent of that nonseparated reference.
 No brglm2 runtime dependency or live network access is needed for tests.
+
+## All-valid-BMI integration (2026-10-24; recorded before implementation)
+
+Observable failures: the preparation selector can retain BMI >=30 while the R
+cohort changes; a lower-BMI first encounter can be replaced by a later obese or
+more complete encounter; RFS metadata can be carried from the old index; and
+subgroup construction can silently reselect. Unshifted patients can disappear
+from the PIF denominator or contribute a nonzero difference. The BMI >=30
+secondary can borrow the wrong basis or reference. Joint-family tables can mix
+populations when keyed only by BMI, and an absent source family can suppress the
+base analysis. Consolidated preparation can lose code/capture evidence or accept
+an old policy under new labels. Rendering can omit secondary populations or use
+old labels while displaying plausible numbers.
+
+Before production edits, extend the existing artificial fixture and independent
+index/model/prediction oracles to cover lower BMI, 30 and 30.2, an earlier lower-BMI
+index, nested secondary membership, both joint families in both populations, and
+zero contributions below the shift threshold. Keep independent likelihood,
+finite-difference covariance and source-corruption checks. Require real HTML/PDF
+renders, complete table coverage, exact registry membership and aggregate-only
+rerender receipts. A small pre-change fixture snapshot is retained privately to
+verify unchanged numerical kernels on identical data; changed cohorts are not
+expected to reproduce historical clinical estimates.

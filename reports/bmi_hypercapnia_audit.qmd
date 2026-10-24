@@ -59,7 +59,7 @@ cat("Run: ",bundle$manifest$run_id,". Numerical review: ",bundle$manifest$numeri
 
 ## Coverage and provenance
 
-Every required population, variable and model is indexed below. Identical stage summaries are shared only after exact equality of all nonidentifier fields, with an explicit stage-to-display mapping; this does not assert identical patient membership. Missing, pending, failed, empty and not-applicable states are explicit. No patient identifiers, exact dates, individual predictions or model frames are exported. CSV/RDS tables retain full numerical precision. Distribution/prediction coordinates are exported in full; their complete plotted ranges are displayed here rather than printing every coordinate as a separate table row.
+Every required population, variable and model is indexed below. Identical stage summaries are shared only after exact equality of all nonidentifier fields, with an explicit stage-to-display mapping; this does not assert identical patient membership. Missing, pending, failed, empty and not-applicable states are explicit. No patient identifiers, exact dates, individual predictions or model frames are exported. CSV/RDS tables retain full numerical precision. Distribution/prediction coordinates are exported in full. The graphical stage atlas focuses on BMI, adjustment variables and measurement provenance; helper flags, source counters and basis values retain complete tables and coordinates without repeated charts. Every modeled outcome retains its diagnostics, coefficients and covariance.
 
 ```{r}
 #| label: coverage-index
@@ -71,14 +71,14 @@ bmi_report_table(a$variable_dictionary,"Complete variable dictionary",keys="vari
 
 ## Detailed observational cohort construction
 
-Source records, encounter versions and patients have distinct counting units. Global pre-index accounting belongs to the combined reference. Subgroup input/eligibility recheck nodes begin with already fixed indexes; they are not new upstream extraction counts or a new clinical selection. First-failure exclusions are exclusive at their declared grain; all-reason counts overlap. Gas and ICD samples are parallel overlapping analytic branches.
+Source records, encounter versions and patients have distinct counting units. Global pre-index accounting belongs to the combined reference. Subgroup ledgers begin with already fixed indexes and do not rerun eligibility or selection. First-failure exclusions are exclusive at their declared grain; all-reason counts overlap. Gas and ICD samples are parallel overlapping analytic branches.
 
 Obesity-only is retained here solely for cohort reconciliation, source-quality checks and descriptive profiles, not as a scientific comparator or selection-sensitivity analysis. No obesity-only adjusted curve, observation model, current-measurement model, PIF or weighting analysis is planned. Excluding gas-related entry pathways selects against the evidence needed to evaluate gas outcomes. Residual captured gases despite absent historical gas-family membership remain discrepancy counts; they are not recoded away or interpreted as a physiological comparison. The exact relationship to the historical extraction remains unresolved. Known diagnosis capture denotes source coverage, not ICD positivity; complete capture is not presented as an inferential availability curve.
 
 ```{r}
 #| label: detailed-flow
 #| results: asis
-figure("RFS-flow");figure("RFS-entry");figure("RFS-evidence");figure("S1-same-day-ABG");figure("S2-ICD-acuity");figure("S2-ICD-specified");figure("S2-ICD-observed")
+figure("RFS-flow");figure("RFS-entry");figure("RFS-evidence");for(group in unlist(bundle$config$component_populations))for(id in c("S1-same-day-ABG","S2-ICD-acuity","S2-ICD-specified","S2-ICD-observed"))figure(paste0(group,"/",id))
 ids<-tools::file_path_sans_ext(list.files(file.path(review,"figures"),pattern="^F0-detail-.*\\.png$",recursive=TRUE))
 for(id in ids){figure(id);page()}
 for(t in c(bmi_icd_tables,"cooccurrence_status","cooccurrence_reconciliation","cooccurrence_availability","cooccurrence_measurements","cooccurrence_categories","same_day_contrasts","same_day_probability_covariance","same_day_curve_reconciliation","rfs_summary","rfs_outcomes","rfs_combinations","rfs_by_bmi","bmi_provenance","demographic_crosswalk","prior_run_reconciliation","rfs_semantics","expected_models","cohort_nodes","cohort_edges","exclusion_reasons","exclusion_overlaps","population_registry","timing_audit","observation_patterns","evidence_by_bmi","numerical_reconciliation")) {
@@ -101,7 +101,7 @@ for(t in c("variable_summary","category_counts","missingness_patterns","comissin
 ```{r}
 #| label: full-stage-atlas-figures
 #| results: asis
-bmi_report_table(utils::read.csv(file.path(review,"figures","atlas-index.csv")),"Atlas index: every plotted stage maps to an identical-profile representative",keys="variable_id")
+bmi_report_table(utils::read.csv(file.path(review,"figures","atlas-index.csv")),"Atlas index: plotted representatives or complete-table/coordinate coverage",keys="variable_id")
 for(p in list.files(file.path(review,"figures"),pattern="^F3-.*\\.png$",recursive=TRUE)) {figure(tools::file_path_sans_ext(p));page()}
 ```
 
@@ -120,7 +120,6 @@ if(nrow(a$model_registry))for(id in a$model_registry$model_id) {
   if(t=="model_residual_bins")z<-z[!grepl("^(hist_|ecdf_)",z$diagnostic),,drop=FALSE]
   if(t=="coefficient_covariance"&&nrow(z)){
     bmi_covariance_report(z,"Complete coefficient covariance","term1","term2","covariance")
-    bmi_covariance_report(z,"Complete coefficient correlation","term1","term2","correlation")
   }else bmi_report_table(z,t,keys=intersect(c("term","metric","variable_id"),names(z))[1:min(1,length(intersect(c("term","metric","variable_id"),names(z))))])
  }
  group<-a$model_registry$analysis_population_id[a$model_registry$model_id==id];view<-bmi_group_view(a,group);fid<-paste0(group,"/F4-",match(sub(paste0("^",group,"::"),"",id),view$model_registry$model_id));figure(fid)
@@ -135,7 +134,7 @@ Curves are policy-independent. Gas curves and scenarios standardize to their out
 ```{r}
 #| label: audit-relationships
 #| results: asis
-for(group in unlist(bundle$config$analysis_populations))for(id in c("F1-A","F1-B","F1-C","F1-detail","F2","F2-bands")){figure(paste0(group,"/",id));page()}
+for(group in unlist(bundle$config$analysis_populations))for(id in c("F1-A","F1-B","F1-C","F2","F2-bands")){figure(paste0(group,"/",id));page()}
 for(t in c("fixed_bmi_contrasts","prediction_support","policy_registry","policy_totals","policy_contributions","policy_contribution_covariance")) {
  cat("\n### ",gsub("_"," ",t),"\n\n",sep="")
  if(t=="policy_contribution_covariance"&&nrow(a[[t]])){

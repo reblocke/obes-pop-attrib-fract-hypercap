@@ -16,7 +16,6 @@ triangulation_index_day_columns <- c(
 
 tri_encounter_key <- function(data) paste(nchar(data$patient_id), data$patient_id, data$encounter_id, sep = ":")
 
-shift_bmi_above30 <- function(bmi) ifelse(bmi > 30, bmi - 1, bmi)
 
 require_tri_packages <- function(packages) {
   missing <- packages[!vapply(packages, requireNamespace, logical(1), quietly = TRUE)]
@@ -201,7 +200,7 @@ detect_tri_separation <- function(x, y) {
   solution$objval > 1e-7
 }
 
-load_triangulation_input <- function(input_path, manifest_path, schema_version = 2L, study_design = NULL) {
+load_triangulation_input <- function(input_path, manifest_path, schema_version = 5L, study_design = NULL) {
   require_tri_packages(c("jsonlite", "digest", "haven"))
   if (!nzchar(input_path) || !nzchar(manifest_path)) stop("Clinical mode requires explicit input and reviewed manifest paths.")
   if (!file.exists(input_path) || !file.exists(manifest_path)) stop("Input or manifest does not exist.")
@@ -209,9 +208,9 @@ load_triangulation_input <- function(input_path, manifest_path, schema_version =
   manifest <- jsonlite::read_json(manifest_path, simplifyVector = TRUE)
   required <- c("schema_version", "input_sha256", "source_identity", "reviewed_by", "reviewed_on", "evidence_reference", "columns", "binary_codes", "encounter_type_codes", "category_values", "semantics", "source_qualification", "source_evidence_files", "index_day")
   if (length(setdiff(required, names(manifest))) || !identical(manifest$schema_version, schema_version)) stop("Invalid manifest schema; estimation requires version ", schema_version, ".")
-  if (schema_version %in% c(3L, 4L) && (!identical(manifest$study_design, study_design) ||
-      !identical(manifest$population_policy, "first_2022_adult_ED_inpatient_BMI_ge30_before_gas_and_completeness"))) {
-    stop("Manifest does not qualify the common-index BMI >=30 study population.")
+  if (schema_version == 5L && (!identical(manifest$study_design, study_design) ||
+      !identical(manifest$population_policy, "first_2022_adult_ED_inpatient_valid_BMI_before_gas_and_completeness"))) {
+    stop("Manifest does not qualify the common-index all-valid-BMI study population.")
   }
   for (name in c("source_identity", "reviewed_by", "reviewed_on", "evidence_reference")) {
     if (!is.character(manifest[[name]]) || length(manifest[[name]]) != 1 || !nzchar(trimws(manifest[[name]])) || grepl("pending", manifest[[name]], ignore.case = TRUE)) stop("Manifest review metadata incomplete: ", name)
@@ -251,7 +250,7 @@ load_triangulation_input <- function(input_path, manifest_path, schema_version =
   if (!setequal(names(mapping), triangulation_columns) || anyDuplicated(mapping) || !all(mapping %in% names(raw))) stop("Incomplete, duplicate, or unavailable source column mapping.")
   data <- as.data.frame(raw[unname(mapping[triangulation_columns])])
   names(data) <- triangulation_columns
-  if (schema_version == 4L) {
+  if (schema_version == 5L) {
     if (!identical(manifest$rfs_policy_id, "historical_source_membership_v1") ||
         !"rfs" %in% names(evidence)) stop("Missing authenticated RFS metadata evidence")
     mapped_metadata <- unlist(manifest$metadata_columns, use.names = TRUE)
@@ -310,7 +309,7 @@ load_triangulation_input <- function(input_path, manifest_path, schema_version =
   list(data = data, manifest = manifest, input_sha256 = hash, manifest_sha256 = manifest_hash)
 }
 
-common_design_id <- "common_index_bmi_ge30_v1"
+common_design_id <- "common_index_valid_bmi_v1"
 tri_sha256 <- function(path) digest::digest(file = path, algo = "sha256")
 tri_repo_root <- function() normalizePath(Sys.getenv("BMI_REPO_ROOT", unset = getwd()), mustWork = TRUE)
 
@@ -321,7 +320,7 @@ load_common_input <- function(input_path, manifest_path) {
   manifest <- jsonlite::read_json(manifest_path, simplifyVector = FALSE)
   policy <- common_source_policy()
   if (!identical(manifest$source_policy_id, policy$source_policy_id)) stop("New clinical input requires unadjusted_pco2_v1 source policy.")
-  loaded <- load_triangulation_input(input_path, manifest_path, schema_version = if (identical(manifest$schema_version, 4L)) 4L else 3L, study_design = common_design_id)
+  loaded <- load_triangulation_input(input_path, manifest_path, schema_version = 5L, study_design = common_design_id)
   entry <- loaded$manifest$source_evidence_files$fields
   field_path <- entry$path
   if (!grepl("^(/|[A-Za-z]:)", field_path)) field_path <- file.path(dirname(manifest_path), field_path)

@@ -1,22 +1,7 @@
-# Aggregate persistence, validation, code-generated figures and complete report tables.
-validate_analysis_bundle <- function(a) {
-  if(!setequal(names(a),bmi_table_names)||!all(vapply(a,is.data.frame,logical(1))))stop("Unexpected aggregate table contract")
-  for(name in names(a)) {
-    if("model_id" %in% names(a[[name]]) && nrow(a[[name]]) &&
-       any(grepl("^obesity_only(_current)?::",a[[name]]$model_id)))stop("Obesity-only models are superseded; retain descriptive evidence only")
-    if(any(grepl("^(patient_id|encounter_id|selected_row|index_date|encounter_date|individual_prediction)$",names(a[[name]]))))stop("Private row-level field in bundle: ",name)
-    if(any(vapply(a[[name]],function(v)inherits(v,"Date")||inherits(v,"POSIXt"),logical(1))))stop("Direct dates in aggregate bundle")
-  }
-  if(nrow(a$policy_totals) && any(a$policy_totals$method!="observed")) stop("Superseded projection in observed-population bundle")
-  if(nrow(a$sensitivity_results)||nrow(a$implied_missing_probabilities)) stop("Superseded missing-outcome scenarios")
-  if(nrow(a$probability_curves)) {
-    expected<-a$model_registry$training_population_id[match(a$probability_curves$model_id,a$model_registry$model_id)]
-    if(anyNA(expected)||any(a$probability_curves$reference_id!=expected))stop("Curve reference differs from model-observed population")
-  }
-  if(nrow(a$policy_totals)) {
-    expected<-a$model_registry$training_population_id[match(a$policy_totals$model_id,a$model_registry$model_id)]
-    if(anyNA(expected)||any(a$policy_totals$reference_id!=expected))stop("Scenario reference differs from model-observed population")
-  }
+# Validate each population independently: BMI coordinates are not global keys.
+bmi_validate_same_day_bundle <- function(all) {
+  for(population in unique(all$model_registry$analysis_population_id[all$model_registry$family=="same_day_abg"])) {
+    a<-bmi_group_view(all,population)
   # The joint supplemental decomposition is a probability partition, not two
   # independently fitted binary curves. Validate saved rows without refitting.
   if(nrow(a$cooccurrence_categories) && all(a$cooccurrence_categories$status=="qualified")) {
@@ -37,6 +22,28 @@ validate_analysis_bundle <- function(a) {
       if(sum(total)!=1L||abs(sum(cv$covariance[component])-cv$covariance[total])>1e-9)stop("Joint total covariance mismatch")
     }
   }
+  }
+  invisible(TRUE)
+}
+# Aggregate persistence, validation, code-generated figures and complete report tables.
+validate_analysis_bundle <- function(a) {
+  if(!setequal(names(a),bmi_table_names)||!all(vapply(a,is.data.frame,logical(1))))stop("Unexpected aggregate table contract")
+  for(name in names(a)) {
+    if("model_id" %in% names(a[[name]]) && nrow(a[[name]]) &&
+       any(grepl("^obesity_only(_current)?::",a[[name]]$model_id)))stop("Obesity-only models are superseded; retain descriptive evidence only")
+    if(any(grepl("^(patient_id|encounter_id|selected_row|index_date|encounter_date|individual_prediction)$",names(a[[name]]))))stop("Private row-level field in bundle: ",name)
+    if(any(vapply(a[[name]],function(v)inherits(v,"Date")||inherits(v,"POSIXt"),logical(1))))stop("Direct dates in aggregate bundle")
+  }
+  if(nrow(a$policy_totals) && any(a$policy_totals$method!="observed")) stop("Superseded projection in observed-population bundle")
+  if(nrow(a$probability_curves)) {
+    expected<-a$model_registry$training_population_id[match(a$probability_curves$model_id,a$model_registry$model_id)]
+    if(anyNA(expected)||any(a$probability_curves$reference_id!=expected))stop("Curve reference differs from model-observed population")
+  }
+  if(nrow(a$policy_totals)) {
+    expected<-a$model_registry$training_population_id[match(a$policy_totals$model_id,a$model_registry$model_id)]
+    if(anyNA(expected)||any(a$policy_totals$reference_id!=expected))stop("Scenario reference differs from model-observed population")
+  }
+  bmi_validate_same_day_bundle(a)
   bmi_validate_icd_bundle(a)
   bmi_validate_ledger(a)
   if(nrow(a$model_registry)) {
@@ -74,7 +81,7 @@ bmi_write_bundle <- function(a,path,config,receipt,mode="fixture") {
   jsonlite::write_json(receipt,file.path(path,"input_receipt.json"),auto_unbox=TRUE,pretty=TRUE,digits=NA)
   writeLines(capture.output(sessionInfo()),file.path(path,"session-info.txt"))
   files<-list.files(path,full.names=TRUE)
-  manifest<-list(schema_version=12L,analysis_id=config$analysis_id,run_id=basename(path),mode=mode,
+  manifest<-list(schema_version=13L,analysis_id=config$analysis_id,run_id=basename(path),mode=mode,
     created_utc=format(Sys.time(),tz="UTC",usetz=TRUE),estimation_sources=bmi_hash_files(bmi_estimation_files()),
     files=as.list(setNames(vapply(files,tri_sha256,character(1)),basename(files))),
     source_status=if(mode=="fixture")"artificial_only"else receipt$source_status,
@@ -88,7 +95,7 @@ bmi_write_bundle <- function(a,path,config,receipt,mode="fixture") {
 bmi_read_bundle <- function(path,check_sources=TRUE) {
   mf<-file.path(path,"bundle_manifest.json");if(!file.exists(mf))stop("Missing bundle manifest")
   m<-jsonlite::read_json(mf,simplifyVector=FALSE)
-  if(!identical(m$schema_version,12L)||!identical(m$analysis_id,"bmi_hypercapnia_rfs_curve_audit_v7"))stop("Superseded analysis; rerun under the current design")
+  if(!identical(m$schema_version,13L)||!identical(m$analysis_id,"bmi_hypercapnia_rfs_curve_audit_v8"))stop("Superseded analysis; rerun under the current design")
   for(name in names(m$files)) {
     if(basename(name)!=name||!file.exists(file.path(path,name))||!identical(tri_sha256(file.path(path,name)),m$files[[name]]))stop("Bundle hash mismatch: ",name)
   }
@@ -125,6 +132,7 @@ bmi_curve_plot <- function(d,title,observation=FALSE) {
   d$segment<-cumsum(c(TRUE,head(d$display_support,-1)!=tail(d$display_support,-1)))
   ggplot2::ggplot(d,ggplot2::aes(bmi,probability))+
     ggplot2::geom_ribbon(ggplot2::aes(ymin=conf_low,ymax=conf_high),fill="grey82")+
+    ggplot2::geom_vline(xintercept=30,linetype="dotdash",colour="grey45",linewidth=.3)+
     ggplot2::geom_line(ggplot2::aes(y=conf_low),colour="grey55",linewidth=.2)+
     ggplot2::geom_line(ggplot2::aes(y=conf_high),colour="grey55",linewidth=.2)+
     ggplot2::geom_line(ggplot2::aes(linetype=display_support,group=segment),linewidth=.6)+
@@ -225,7 +233,7 @@ bmi_export_population_figures <- function(bundle,output) {
   add<-function(id,draw,height,caption,kind="scientific figure") {
     if(id %in% c("F1-A","F1-B","F1-C","F2") && !is.null(bundle$manifest$source_group)) {
       source_draw<-draw;group<-bundle$manifest$source_group
-      group_label<-c(primary="Non-OBESITY-supported entry",primary_current="Non-OBESITY-supported; current BMI",all_obesity="Any OBESITY source entry (overlapping)")[[group]]
+      group_label<-bmi_analysis_label(group)
       draw<-local({source_draw<-source_draw;label<-paste(group_label,"| encounter-wide");y<-if(id=="F2").92 else .95
         function(){source_draw();grid::grid.text(label,x=.02,y=y,just=c("left","top"),gp=grid::gpar(fontsize=9.5))}})
     }
@@ -235,7 +243,7 @@ bmi_export_population_figures <- function(bundle,output) {
     }
     stem<-file.path(output,id);formats<-if(grepl("^F[34]|^F0-detail-",id))c("pdf","svg","png")else c("pdf","svg","png","jpg");bmi_export(draw,stem,height_mm=height,formats=formats)
     manifest[[id]]<<-data.frame(figure_id=id,panel_id="all",file_path=paste0(stem,".png"),export_paths=paste(paste0(stem,paste0(".",formats)),collapse=";"),source_path="R/reporting.R",source_paths="R/reporting.R;R/report_views.R;R/standardization.R",figure_type=kind,intended_use="private manuscript/audit review",target_requirements="190 mm; >=9 pt; grayscale; identical saved aggregates",width_px=round(190/25.4*300),height_px=round(height/25.4*300),dpi_x=300,dpi_y=300,color_mode="grayscale-safe",vector_status="SVG/PDF masters",legend_status="caption and alt text saved",qc_status="exported; visual inspection pending",blockers="",notes="No numerical quantity copied manually")
-    captions[[id]]<<-data.frame(figure_id=id,caption=caption,alt_text=caption,source_tables=if(grepl("F1",id))"probability_curves;observation_curves;distribution_bins"else if(grepl("F2",id))"policy_totals;policy_contributions"else if(grepl("F3",id))"variable_summary;category_counts;distribution_bins;distribution_curves"else if(grepl("F4",id))"model_registry;coefficients;coefficient_covariance;model_fit_diagnostics;model_residual_bins;model_influence_summary;model_support"else if(grepl("F5",id))"probability_curves;policy_totals;sensitivity_results;timing_audit"else"cohort_nodes;cohort_edges")
+    captions[[id]]<<-data.frame(figure_id=id,caption=caption,alt_text=caption,source_tables=if(grepl("F1",id))"probability_curves;observation_curves;distribution_bins"else if(grepl("F2",id))"policy_totals;policy_contributions"else if(grepl("F3",id))"variable_summary;category_counts;distribution_bins;distribution_curves"else if(grepl("F4",id))"model_registry;coefficients;coefficient_covariance;model_fit_diagnostics;model_residual_bins;model_influence_summary;model_support"else if(grepl("F5",id))"probability_curves;policy_totals;timing_audit"else"cohort_nodes;cohort_edges")
   }
   if(nrow(a$model_registry)) {
     outcomes<-c("abg","any_gas","icd");p<-obs<-freq<-list()
@@ -247,12 +255,11 @@ bmi_export_population_figures <- function(bundle,output) {
       limits<-range(a$distribution_bins$lower[a$distribution_bins$variable_id=="gas_pattern_bmi"],a$distribution_bins$upper[a$distribution_bins$variable_id=="gas_pattern_bmi"],na.rm=TRUE)
       for(name in c("p","obs","freq")) {obj<-get(name);if(is.data.frame(obj[[o]]$data)&&nrow(obj[[o]]$data))obj[[o]]<-obj[[o]]+ggplot2::coord_cartesian(xlim=limits);assign(name,obj)}
     }
-    caption<-paste("F1. BMI–hypercapnia relationships at the first eligible adult 2022 acute-care encounter. ABG denotes PaCO₂ ≥45 mm Hg; ABG or VBG denotes PaCO₂ ≥45 or PvCO₂ ≥50 mm Hg. ICD denotes the five-code composite, including E66.2. Gas curves standardize over outcome-evaluable patients; ICD uses known diagnosis capture. Model/ref N is the common model and reference count. Availability and BMI frequency use all adjustment-complete patients (C); the four frequency groups are mutually exclusive. Adjustment: age, sex, race/ethnicity and region with a fixed natural BMI spline. Shading and fine boundaries show pointwise model-based 95% CIs; dotted segments are locally sparse and dashed segments exceed training BMI support. Open availability points use Wilson intervals when no model is estimable. Known capture is distinct from ICD positivity. ABG/VBG: arterial/venous blood gas. Conditional model uncertainty excludes selection and measurement assumptions; no population transport or causal effect is inferred.")
+    caption<-paste("F1. BMI–hypercapnia relationships at the first eligible adult 2022 acute-care encounter. ABG denotes PaCO₂ ≥45 mm Hg; ABG or VBG denotes PaCO₂ ≥45 or PvCO₂ ≥50 mm Hg. ICD denotes the five-code composite, including E66.2. The vertical dot-dash line marks BMI 30, the scenario eligibility boundary, not the cohort boundary. Gas curves standardize over outcome-evaluable patients; ICD uses known diagnosis capture. Model/ref N is the common model and reference count. Availability and BMI frequency use all adjustment-complete patients (C); the four frequency groups are mutually exclusive. Adjustment: age, sex, race/ethnicity and region with a fixed natural BMI spline. Shading and fine boundaries show pointwise model-based 95% CIs; dotted segments are locally sparse and dashed segments exceed training BMI support. Open availability points use Wilson intervals when no model is estimable. Known capture is distinct from ICD positivity. ABG/VBG: arterial/venous blood gas. Conditional model uncertainty excludes selection and measurement assumptions; no population transport or causal effect is inferred.")
+    if(identical(bundle$manifest$source_group,"primary_bmi_ge30"))caption<-sub("the scenario eligibility boundary, not the cohort boundary","the scenario eligibility boundary and this secondary population’s BMI cutoff",caption,fixed=TRUE)
     add("F1-A",function()bmi_draw_relationship(p,obs,freq[[1]],"A"),190,caption)
     add("F1-B",function()bmi_draw_relationship(p,obs,freq[[1]],"B"),210,caption)
     add("F1-C",function()bmi_draw_relationship(p,obs,freq[[1]],"C"),190,caption)
-    zoom<-lapply(p,function(g)g+ggplot2::coord_cartesian(xlim=c(30,60)))
-    add("F1-detail",function()bmi_draw_grid(zoom,3,"BMI 30–60: relationship detail","Display zoom only; full ranges and all patients retained in F1"),105,paste(caption,"This labeled detail view limits the displayed BMI axis to 30–60; no observations were removed from estimation."))
     f2<-bands<-list()
     for(o in outcomes) {
       id<-paste(o,"encounter/spline",sep="/")
@@ -287,12 +294,12 @@ bmi_export_population_figures <- function(bundle,output) {
     }
     add("F2",function()bmi_draw_grid(f2,2,config$policies[[1]]$label,
       "Paired predictions; original reference and covariates retained"),195,
-      paste0("F2. Paired scenario: ",config$policies[[1]]$label,". ABG: arterial PCO₂ ≥45 mm Hg; ABG or VBG: arterial ≥45 or venous ≥50 mm Hg; ICD: five-code composite including E66.2. Left: observed and shifted standardized probabilities with model-based 95% CIs and printed limits. Left probability axes use different labeled inset scales; compare printed values across outcomes. N identifies the common model/reference population; shifted percentage is a descriptive cohort fraction. Right: signed original-BMI-band contributions per 1,000 reference patients, with 95% CIs. Total-difference/PIF limits are printed; contribution covariance reproduces total variance. Right axes vary by outcome and retain zero and all limits. Gas samples are outcome-evaluable; ICD uses known capture. Adjustment, source-entry membership and covariates are fixed. PIF is the model-standardized potential impact fraction. These conditional scenarios do not estimate a weight-loss treatment effect."))
+      paste0("F2. Paired scenario: ",config$policies[[1]]$label,". ABG: arterial PCO₂ ≥45 mm Hg; ABG or VBG: arterial ≥45 or venous ≥50 mm Hg; ICD: five-code composite including E66.2. Left: observed and shifted standardized probabilities with model-based 95% CIs and printed limits. Left axes share the full 0–1,000 reference-patient scale; printed probabilities and limits retain small differences. N identifies the common model/reference population; shifted percentage is a descriptive cohort fraction. Right: signed original-BMI-band contributions per 1,000 reference patients, with 95% CIs. Patients at BMI ≤30 remain in baseline burden and contribute exactly zero scenario difference; the eligible share is printed. Total-difference/PIF limits are printed; contribution covariance reproduces total variance. Right axes vary by outcome and retain zero and all limits. Gas samples are outcome-evaluable; ICD uses known capture. Adjustment, source-entry membership and covariates are fixed. PIF is the model-standardized potential impact fraction. These conditional scenarios do not estimate a weight-loss treatment effect."))
     add("F2-bands",function()bmi_draw_grid(bands,3,"Paired predictions within original BMI bands",
       "Audit companion to F2; full BMI range and original band membership"),120,
       "F2 bands. Mean observed and shifted predictions within each original BMI band; the displayed N is the model/reference population. These are paired conditional predictions, not fixed-BMI risk curves. Band-specific probability intervals are not persisted in the bundle and are not fabricated here; aggregate probability and signed contribution intervals appear in F2. All band means and contribution covariances remain available in the aggregate tables.","scenario audit")
   }
-  add("F0-main",function()print(bmi_flow_plot(a)),205,"F0. Observational cohort flow. Ledger counts identify grain; eligibility and adjustment branches are partitions at their declared grain. Matched outcome samples overlap. Unresolved earlier membership and ties never advance to a later visit.","observational flow")
+  add("F0-main",function()print(if("source_records" %in% a$cohort_nodes$population_id)bmi_flow_plot(a)else bmi_edge_plot(a,a$cohort_edges[a$cohort_edges$from=="Q",,drop=FALSE])),205,"F0. Observational cohort flow. Ledger counts identify grain; eligibility and adjustment branches are partitions at their declared grain. Matched outcome samples overlap. Unresolved earlier membership and ties never advance to a later visit.","observational flow")
   # One parent/edge group per diagram: partitions are never mixed with overlapping subsets.
   edge_groups<-split(seq_len(nrow(a$cohort_edges)),paste(a$cohort_edges$from,a$cohort_edges$relation,a$cohort_edges$partition_id))
   for(i in seq_along(edge_groups)) {
@@ -300,7 +307,11 @@ bmi_export_population_figures <- function(bundle,output) {
     add(paste0("F0-detail-",i),local({e<-e;function()print(bmi_edge_plot(a,e))}),max(90,45+20*nrow(e)),
       paste("Detailed cohort edges:",e$relation[1],". Counts and grain come from cohort_nodes. Subsets overlap; only named partitions sum to their parent."),"observational flow")
   }
-  # F3: all registered numeric/category variables at every profiled stage.
+  # F3: substantive measurement/adjustment profiles. Helper flags and transport
+  # counters retain complete tables/coordinates without thousands of repeated charts.
+  atlas_variables<-c("bmi","age_at_encounter","sex","race_ethnicity","location","encounter_type",
+    "bmi_method","bmi_evidence_state","reported_bmi","height_inches","weight_pounds",
+    "bmi_lag_days","height_lag_days","weight_lag_days","component_gap_days")
   histogram<-a$distribution_bins[a$distribution_bins$variable_id!="gas_pattern_bmi",,drop=FALSE]
   for(v in unique(c(histogram$variable_id,a$category_counts$variable_id))) {
     unit<-a$variable_dictionary$unit[match(v,a$variable_dictionary$variable_id)]
@@ -310,6 +321,13 @@ bmi_export_population_figures <- function(bundle,output) {
     hist<-histogram[histogram$variable_id==v,,drop=FALSE];catdata<-a$category_counts[a$category_counts$variable_id==v & !is.na(a$category_counts$n_reference) & a$category_counts$n_reference>0,,drop=FALSE]
     original<-if(nrow(hist))hist else catdata
     if(!nrow(original))next
+    if(!v %in% atlas_variables) {
+      populations<-unique(original$population_id)
+      atlas_index[[length(atlas_index)+1L]]<-data.frame(population_id=populations,
+        representative_id=populations,variable_id=v,kind="complete_tables_and_coordinates",
+        figure_id=NA_character_)
+      next
+    }
     shared<-bmi_unique_plot_profiles(original,setdiff(names(original),c("population_id","pattern")))
     index<-shared$index;index$variable_id<-v;index$kind<-if(nrow(hist))"histogram"else"categories"
     if(nrow(hist))hist<-shared$data else catdata<-shared$data
@@ -405,23 +423,20 @@ bmi_export_population_figures <- function(bundle,output) {
 # Paired standardized means: direct labels stay outside the interval glyphs.
 bmi_scenario_probability_plot <- function(total,outcome) {
   d<-data.frame(state=c("Observed","Shifted"),y=c(2,1),
-    probability=100*c(total$p_observed,total$p_shifted),
-    low=100*c(total$p_observed_low,total$p_shifted_low),
-    high=100*c(total$p_observed_high,total$p_shifted_high))
-  d$label<-bmi_percent_ci(d$probability,d$low,d$high)
-  limits<-range(c(d$low,d$high),finite=TRUE)
-  padding<-max(diff(limits)*.18,.001)
+    probability=1000*c(total$p_observed,total$p_shifted),
+    low=1000*c(total$p_observed_low,total$p_shifted_low),
+    high=1000*c(total$p_observed_high,total$p_shifted_high))
+  d$label<-bmi_percent_ci(d$probability/10,d$low/10,d$high/10)
   ggplot2::ggplot(d,ggplot2::aes(probability,y))+
-    ggplot2::geom_errorbar(ggplot2::aes(xmin=low,xmax=high),orientation="y",width=.12,linewidth=.5)+
-    ggplot2::geom_point(ggplot2::aes(shape=state),size=2.1)+
-    ggplot2::scale_shape_manual(values=c(Observed=16,Shifted=1),guide="none")+
-    ggplot2::geom_text(ggplot2::aes(label=label),x=mean(limits),nudge_y=-.32,size=3.4)+
+    ggplot2::geom_rect(ggplot2::aes(xmin=0,xmax=probability,ymin=y-.11,ymax=y+.11,fill=state),colour="grey25",linewidth=.3)+
+    ggplot2::scale_fill_manual(values=c(Observed="grey35",Shifted="grey80"),guide="none")+
+    ggplot2::geom_errorbar(ggplot2::aes(xmin=low,xmax=high),orientation="y",width=.3,linewidth=.6)+
+    ggplot2::geom_text(ggplot2::aes(label=label),x=500,nudge_y=-.32,size=3.4)+
     ggplot2::scale_y_continuous(limits=c(.35,2.35),breaks=c(1,2),labels=c("Shifted","Observed"))+
-    ggplot2::scale_x_continuous(labels=function(x)paste0(format(x,trim=TRUE,digits=4),"%"),breaks=pretty(limits,n=3))+
-    ggplot2::coord_cartesian(xlim=c(max(0,limits[1]-padding),min(100,limits[2]+padding)))+
+    ggplot2::scale_x_continuous(limits=c(0,1000),breaks=c(0,500,1000),expand=ggplot2::expansion(mult=c(0,.02)))+
     ggplot2::labs(title=bmi_outcome_short(outcome),subtitle=paste0(bmi_count_label(total$n_model,total$n_reference),
       "\nShifted: ",bmi_number(total$pct_shifted,4),"% of model patients"),
-      x="Probability (%) · inset scale",y=NULL)+bmi_theme()+
+      x="Expected hypercapnia /1,000 patients",y=NULL)+bmi_theme()+
     ggplot2::theme(panel.grid.major.y=ggplot2::element_blank())
 }
 bmi_observation_plot <- function(a,outcome) {
@@ -442,7 +457,7 @@ bmi_observation_plot <- function(a,outcome) {
   d$low<-pmax(0,intervals[,1]);d$high<-pmin(1,intervals[,2])
   ggplot2::ggplot(d,ggplot2::aes((bin_low+bin_high)/2,observation))+ggplot2::geom_errorbar(ggplot2::aes(ymin=low,ymax=high),width=.7)+ggplot2::geom_point(shape=1,size=1.8)+
     ggplot2::scale_y_continuous(limits=c(0,1),labels=function(x)paste0(100*x,"%"))+
-    ggplot2::labs(title="Evidence availability",subtitle=paste0("Model: ",if(nrow(z))z$status[1]else"unavailable","\nRaw M/N on C; Wilson 95% CI"),x="BMI (kg/m²)",y=if(outcome=="icd")"Known diagnosis capture"else"Usable gas evidence")+bmi_theme()
+    ggplot2::labs(title="Evidence availability",subtitle=paste0(if(nrow(z))paste0("Model: ",z$status[1])else"Descriptive availability","\nRaw M/N on C; Wilson 95% CI"),x="BMI (kg/m²)",y=if(outcome=="icd")"Known diagnosis capture"else"Usable gas evidence")+bmi_theme()
 }
 # View-only sharing of identical plots; complete stage tables remain unchanged.
 bmi_unique_plot_profiles <- function(d,fields) {

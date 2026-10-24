@@ -27,19 +27,20 @@
     "docs/BMI_HYPERCAPNIA_TRIANGULATION_PLAN.md",
     "config/bmi_hypercapnia_analysis.json"
   ],
-  "conflict_handling": "Treat this file as a dated navigation/status snapshot. Use current owner instructions and canonical documents; surface disagreements rather than silently changing definitions or relabeling old results.",
+  "conflict_handling": "Treat this file as a dated navigation/status snapshot. Use current owner instructions and canonical documents; surface disagreements rather than silently changing definitions or relabeling old results. All existing clinical snapshots currently use the superseded first-BMI>=30 design; never label them all-BMI results.",
   "owner_status_snapshot": {
     "date": "2026-10-18",
     "source": "docs/DECISIONS.md",
     "scientific_approval": "provisional",
-    "main_figure_selection": "F1-B and F2 selected for the working main figure set",
+    "main_figure_selection": "F1-B/F2 layouts retained; new results/figures require review",
     "final_submission_packaging": "pending",
     "submission_approval": "not granted",
     "abstract_drafting": "deferred until a new owner instruction authorizes it",
     "meeting": "ATS 2027",
     "deadline_date": "2026-11-04",
     "deadline_evidence": "owner reconfirmation; not new portal verification",
-    "analysis_output_sharing": "Reports, figures and aggregate result tables may be included in Git; raw/patient-level data and source-access secrets remain excluded. See public_release_status for the later public-disclosure confirmation."
+    "analysis_output_sharing": "Reports, figures and aggregate result tables may be included in Git; raw/patient-level data and source-access secrets remain excluded. See public_release_status for the later public-disclosure confirmation.",
+    "new_all_bmi_scientific_approval": "pending; old provisional approval applies only to dated results"
   },
   "public_release_status": {
     "confirmation_date": "2026-10-23",
@@ -166,22 +167,23 @@
     "main_result_selection_rule": "Apply the scalar main_result_filter AND restrict model_id to main_model_ids. The scalar filters alone also select matched-sample sensitivities, which are separate results."
   },
   "interpretation_guardrails": [
-    "One fixed first eligible patient index precedes gas availability and RFS partitioning; no later-index promotion.",
+    "Select the first valid-available-BMI index; derive secondary populations only afterward. New indexes may differ from historical obese indexes.",
     "Primary retains any non-OBESITY pathway including OBESITY overlap. Obesity-only is flow/audit only, without an adjusted comparison or weighting analysis.",
     "Gas curves apply to outcome-evaluable patients. Known diagnosis capture is not ICD positivity; missing or unusable evidence is not negative.",
-    "The secondary policy is observed BMI >30 minus exactly one, no floor/reselection; BMI=30 is unchanged. PIF is conditional on the population and model.",
+    "The secondary policy is observed BMI >30 minus exactly one, no floor/reselection; BMI<=30 is unchanged. PIF is conditional on the population and model.",
     "Do not infer incidence reduction, causal weight-loss effects, untested-patient risk, or absence of selection bias. No current MAR/MNAR or IPW analysis.",
     "Pointwise model-based intervals do not quantify selection or measurement bias; retain sparse/support warnings."
   ],
   "execution_navigation": {
     "working_directory": "repository root",
     "artificial_e2e": "make test",
-    "saved_aggregate_render": "make render RUN=\"artifacts/triangulation/<exact-saved-run>\"",
-    "source_boundary_checks": "make source-test PREP_PYTHON=\"/existing/environment/bin/python\"",
-    "clinical_execution_authority": "docs/SOURCE_CONTRACT.md",
-    "latest_recorded_local_test_limits": "Current same-day release checks and clinical qualification are recorded separately in WORKLOG.md; artificial results do not supply clinical estimates.",
-    "boundaries": "Reports, figures and aggregate result tables may be versioned; the owner confirmed public disclosure clearance for the exact existing outputs on 2026-10-23. Disclosure clearance is separate from reuse licensing, scientific review and submission approval. Do not include raw/patient-level data, identifiers, individual dates, model frames, model objects, individual predictions, credentials or source-access secrets. This guide does not authorize dependency installation, private-input access, refitting, changes to accepted evidence, unsolicited external messages or submission. Rendering uses saved aggregates only.",
-    "package_integrity_check": "See results/2026-10-18/README.md for the dependency-free Python SHA-256 verification command."
+    "source_checks": "make source-test PREP_PYTHON=...",
+    "prepare": "make prepare SOURCE_CONFIG=... OUTPUT=...",
+    "qualify": "make qualify SOURCE_CONFIG=... PREPARED=... OUTPUT=...",
+    "preflight": "make preflight INPUT=... MANIFEST=...",
+    "estimate": "make analyze INPUT=... MANIFEST=...",
+    "saved_aggregate_render": "make render RUN=...",
+    "clinical_boundary": "clean merged Mini checkout; qualified schema-5 input; no source reads/refits during rendering"
   },
   "paired_abg_supplement": {
     "specification": "docs/PAIRED_ABG_SUPPLEMENT.md",
@@ -346,5 +348,23 @@
       "status": "tables/model_registry.csv"
     },
     "guardrail": "Filter by exact model ID. Sensitivity has a different denominator. Firth finite estimates do not resolve sparse support, diagnostic incorporation or selection bias. Intervals are pointwise conditional information-based intervals. No abstract authorized."
+  },
+  "current_runtime": {
+    "analysis_id": "bmi_hypercapnia_rfs_curve_audit_v8",
+    "input_schema": 5,
+    "aggregate_schema": 13,
+    "clinical_status": "pending new all-BMI qualification and execution",
+    "index_rule": "First adult 2022 original ED/inpatient encounter with any valid available BMI before gases/adjustment/RFS",
+    "secondary": "BMI >=30 subset at the new primary index; no later substitution",
+    "endpoint_families": [
+      "binary outcomes",
+      "same-day joint components",
+      "ICD joint components"
+    ],
+    "component_populations": [
+      "primary",
+      "primary_bmi_ge30"
+    ],
+    "scenario": "Observed BMI >30 minus one; BMI <=30 unchanged; full model-reference denominator"
   }
 }

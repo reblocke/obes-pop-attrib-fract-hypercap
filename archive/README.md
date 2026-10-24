@@ -46,3 +46,13 @@ was removed. Existing `Code/`/`Documents/` rendered historical artifacts and ign
 private results retain their original labels. Uncommitted documentation preceding
 this cleanup was snapshotted under the ignored cleanup receipt directory before
 editing. Historical result identities do not transfer to the current specification.
+
+## All-valid-BMI integration (2026-10-24)
+
+The former three enrichment launchers (`enrich_rfs_input`, `enrich_same_day_abg`,
+`enrich_icd_acuity`, Python/R) are recovered at `1f6c0f8`. Current `make prepare`
+reuses their validated extraction in `scripts/source_components.py` within one
+transaction. Historical schemas and first-BMI≥30 result snapshots are immutable;
+there is no runtime compatibility or migration layer. Git retains superseded
+plan/source documentation. Current authorities are the scientific specification
+and source contract, with dated decisions retained in `docs/DECISIONS.md`.
