@@ -131,6 +131,12 @@ credentials and patient-level evidence remain excluded. The blanket ignore rule
 for local runs is not a restriction on versioning aggregate outputs. This permission
 does not authorize abstract submission or imply coauthor approval.
 
+On 2026-10-23 the owner additionally confirmed that public release of the exact
+existing reports, figures and aggregate tables, including existing small counts,
+is cleared under the source-data agreement. The [decision log](DECISIONS.md)
+records that confirmation. Reuse licensing and scientific review remain separate;
+private source records and source-access details remain excluded.
+
 The [versioned reading snapshot](../results/2026-10-18/README.md) contains the
 clinical reports, selected figures and complete aggregate tables. Its manifest
 records original bundle/review identities without source-access paths or patient
@@ -205,3 +211,26 @@ Fresh Mini preflight `curve-preflight-20261020T225510-19821` passed from merged
 `21b8bdf`; no upstream extraction, BMI derivation, index selection or evidence
 mapping changed. The joint reading snapshot records the preflight/input/manifest
 hashes and the prior acceptance chain separately from numerical and visual review.
+
+## ICD acuity enrichment
+
+Use the original accepted diagnosis source, pinned readers, reviewed code systems
+and capture-completeness policy, joined on both original keys. Preserve individual
+J96.02/J96.12/J96.22/J96.92/E66.2 flags and capture state. Complete capture permits
+zeros; incomplete/unavailable capture permits documented positives and unknowns
+only. The subtype union must equal the original composite wherever capture is complete.
+
+```bash
+make enrich-icd-acuity PREP_PYTHON="/existing/environment/bin/python" \
+  SOURCE_CONFIG="/private/reviewed-source.json" \
+  INPUT="/private/qualified-input.rds" MANIFEST="/private/qualified-manifest.json" \
+  OUTPUT="/private/fresh-icd-acuity"
+```
+
+This appends an optional `icd_acuity_v1` extension to schema-4 input, preserving
+all existing fields, attributes and fixed indexes. The new manifest/evidence binds
+base input, base manifest, canonical source, adapter and summary hashes. Partial
+columns, source mismatch, duplicate conflicting records, unreviewed code systems
+or a changed composite fail. Missing enrichment leaves the supplemental position
+unavailable. No same-day or blood-gas requirement applies to this diagnosis analysis.
+Use the enriched input only after source review; outputs do not assert human approval.

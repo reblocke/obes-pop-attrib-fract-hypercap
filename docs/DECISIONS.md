@@ -133,3 +133,37 @@ separate. Clinical execution completed from merged `21b8bdf` in
 `curve-analyze-20261020T230537-20006`, with unchanged input/manifest and primary
 estimates (1e-10 reconciliation). Investigator interpretation and new S1 approval
 remain pending; see the separate dated reading snapshot and review receipts.
+
+## 2026-10-23 — Preparation for public release
+
+The owner selected code plus the existing reports, figures and aggregate result
+tables for the planned public repository. After explicit discussion of counts
+of 1–9 in the saved aggregate tables, the owner confirmed that public release of
+these exact outputs is cleared under the source-data agreement. This records
+the owner's disclosure confirmation, not an independent legal determination or
+new scientific approval. Preserve the immutable snapshots; no new cell-count
+suppression rule or re-estimation is introduced by this documentation update.
+
+Raw/patient-level data, identifiers, exact individual dates, individual
+predictions, model frames, model objects and source-access secrets remain
+excluded. Primary scientific approval remains provisional; B/F2 remain the
+working main figures; investigator interpretation/S1 approval and final
+submission approval remain separate. Abstract drafting remains deferred.
+
+The owner authorized the public-facing README, aligned reading guidance,
+historical disclosure review, removal of tracked Finder metadata, GitHub
+description correction and synthetic verification. Licensing, preferred citation
+metadata and final release readiness are tracked in
+[PUBLIC_RELEASE_REVIEW.md](PUBLIC_RELEASE_REVIEW.md). This preparation does not
+itself change repository visibility or release the code under a selected license.
+
+## 2026-10-23 — ICD acuity decomposition
+
+Owner approved: E66.2 belongs to chronic/OHS. J96.22 or J96.02 with J96.12/E66.2
+forms “acute-on-chronic or concurrent acute/chronic coding”; retain explicit
+versus combined-code provenance. Remaining precedence is acute, chronic/OHS,
+unspecified J96.92, then no target code with complete capture. Unknown capture
+is not negative. Fit one joint five-category spline on fixed primary indexes
+with the existing basis/covariates; add S2 and full-range contrasts, no PIF.
+Clinical qualification, estimation and S2 approval are pending. Schema 11/v6
+distinguishes the new supplement from immutable earlier bundles.

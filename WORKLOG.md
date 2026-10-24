@@ -505,3 +505,222 @@ has been drafted and investigator interpretation/S1 approval is not asserted.
   source/numerical/visual receipts. Historical manifests and selected B/F2 are
   unchanged. Snapshot hashes, navigation links and aggregate-only boundaries passed.
 - Investigator interpretation and S1 approval remain pending. No abstract drafted.
+
+### 2026-10-23 — PIF visualization alternatives
+
+- Created ignored `artifacts/triangulation/pif-figure-alternatives-20261023/` with
+  five designs for arterial, combined-gas and ICD outcomes: 15 views, editable R,
+  SVG/PDF masters, 300-dpi PNG/JPG, captions, exact plotted values, HTML gallery
+  and a 15-page email-ready PDF booklet. Existing B/F2 and snapshots are unchanged.
+- Read only manifest-verified saved aggregates from the joint-component snapshot.
+  No clinical input, refit, new scenario estimation, abstract or release operation.
+  E is explicitly an incomplete preview with only identity/one-unit values.
+- Reconciled counts, weighted means, signed contributions and cumulative intervals
+  using full cross-band covariance. Separate band probability intervals remain
+  unavailable and explicitly labeled; no uncertainty was invented.
+- Commands: package `render.R SNAPSHOT OUTPUT`, `verify.py FRESH_DIRECTORY`, and
+  `check_exports.py REVIEW`. Final artificial pipeline passed negative, empty,
+  wide/zero-crossing and unavailable states plus rejection of a corrupted CSV.
+  Fixed R absolute-path space encoding and a Python checker name collision found
+  during verification; no dependencies installed.
+- Figure QC: 15 individual color/grayscale views, all assembled booklet pages,
+  190-mm dimensions, 300-dpi raster metadata, PDF bounds/symbols/collisions and
+  gallery links inspected. Full receipts under `review/qc/`; SVG supplied but
+  not independently browser-rasterized; no color-vision simulation/print proof.
+- Recommend A for the substantive decomposition, B for compact accumulation,
+  and D for absolute magnitude. Investigator selection remains pending.
+  All 80 source snapshot files verified unchanged; package remains Git-ignored.
+
+### 2026-10-23 — Public-release documentation and disclosure review
+
+Owner request: implement the public-release preparation plan. The owner selected
+code plus existing reports, figures and aggregate tables, and explicitly confirmed
+public disclosure clearance for these exact outputs, including existing small
+counts. Primary provisional approval, working B/F2 and pending S1 interpretation
+remain distinct from public disclosure and submission approval.
+
+Pre-edit plan: revise README reading/execution paths; align DECISIONS, SOURCE_CONTRACT
+and LLM_GUIDE; remove only tracked Finder metadata; review history/metadata; correct
+GitHub's description; verify links, JSON, immutable snapshots and the existing
+artificial/source E2E entry points. Silent-failure risks were overstated approval,
+stale snapshot navigation, treating unavailable tests as passes, and disclosures
+surviving in historical objects. No analysis-code change was planned.
+
+- Reworked README for external researchers and added `docs/PUBLIC_RELEASE_REVIEW.md`
+  with evidence, observed environment versions, disclosure-review scope and pending
+  release decisions. The prior uncommitted PIF-figure work-log entry is preserved.
+- Removed `.DS_Store` and `Code/.DS_Store` from the Git index; ignored local copies
+  remain. No historical result or commit was rewritten.
+- Updated GitHub's description to the current descriptive BMI–hypercapnia study;
+  read-back confirmed the exact description and unchanged private visibility.
+- Confirmed all six advertised remote heads are available locally and no remote
+  tags exist. Scanned all 40 locally reachable commits, 605 text blobs, 21 unique
+  PDF versions and 12 raster metadata records. PDF metadata/annotations/attachments
+  and complete native text were checked for bounded private-path/credential
+  indicators. Legacy HTML, five current legacy PDFs, older QMD/log versions and
+  historical Finder objects need a retention decision. No supported credential
+  signatures were found; this is not exhaustive privacy or secret clearance.
+- The installed runtime lacks pinned `pdf-inspector`; retained its failure receipt
+  and used whole-document Poppler fallback for all PDFs. No PDF parser/text-coverage
+  failures remained; embedded images and semantic disclosure judgments were not
+  independently cleared. No dependency was installed.
+- `make source-test PREP_PYTHON=<existing bundled Python>` completed **incomplete**:
+  24 passed, 9 unavailable because DuckDB is absent (runner exit 78; Make exit 2).
+  Receipt: `source-tests-20261023T214628-57018/receipt.json`. Adapter/test hashes
+  were stable. This is neither full source-test success nor clinical qualification.
+  The isolated merged-baseline rerun returned the same 24 passed / 9 unavailable
+  with stable source hashes; its complete receipt/log are copied to the public-
+  release evidence directory's `isolated-source-tests/`.
+- Fresh `make test` used artificial input only. E2E job:
+  `e2e-20261023T214313-54782`; saved fixture:
+  `curve-fixture-20261023T214456-55038`. The first attempt failed at rendering:
+  concurrent ICD-acuity edits changed the shared checkout from schema 10/v5 to
+  schema 11/v6 after fixture estimation. Quarto sessions correctly rejected the
+  schema-10 bundle, and the renderer recorded changed source hashes. All 1,689
+  exported figure PDFs and the failed receipt are retained. Preserve the concurrent
+  work; resume verification in an isolated checkout of merged `53ccfc8` using the
+  existing immutable artificial run and source-matched figure-reuse interface.
+- All four snapshot manifests (238 files) passed size/hash verification; all
+  saved result files match the pre-edit baseline. Before the concurrent edits,
+  analysis/configuration/report sources also matched; later drift is recorded in
+  `concurrent-source-drift.json` rather than attributed to this documentation task.
+  The LLM guide's clinical/numerical/scientific sections are unchanged by this task.
+  Initial post-edit link, JSON and staged/unstaged diff checks passed.
+
+Isolated recovery and terminal verification:
+
+- Created a clean managed verification checkout at merged `53ccfc8`, preserving
+  all concurrent schema-11 edits in the shared checkout. No study source was
+  reverted and no historical bundle/schema label was changed.
+- `make render-reports RUN=<fresh saved artificial run> FIGURES_FROM=<initial review>`
+  completed review `20261023T220020-59588`. All four scientific/audit HTML/PDFs
+  completed; PDFs have 40 and 3,910 pages. Source and bundle hashes were stable,
+  clinical input reads/model refits were zero, and existing figure exports were
+  reused through the supported source/hash guards.
+- `Rscript --vanilla tests/run_e2e.R <fresh saved artificial run>` then **passed**
+  all 11 E2E check groups at `e2e-20261023T221236-61628`: independent numerical
+  reconciliation, adverse cases, aggregate privacy, complete tables/figures,
+  captions/intervals and public stale/corrupt-input/figure rejection. These are
+  artificial software checks, not current schema-11 or clinical qualification.
+- Copied all 76 E2E evidence files to `isolated-e2e/` and verified every copied
+  file's hash. Original receipts/logs remain byte-identical; the saved artificial
+  run and full report review remain in the shared ignored artifact directory.
+  `isolated-checkout.json` binds the clean checkout to the exact merged commit.
+- Final documentation verification passed: 335 local Markdown link targets, valid
+  LLM-guide JSON, scoped/staged diff checks and all four clinical manifests / 238
+  size/hash identities. The prior PIF work-log entry remains byte-preserved, and
+  both Finder files are untracked while local copies remain. Concurrent ICD-acuity
+  source/documentation additions were retained; the README qualifies the tested
+  merged release and retains the new supplement's pending clinical state.
+- Archived the clean temporary verification worktree after preserving needed
+  ignored evidence. Final GitHub read-back confirms the corrected description,
+  private visibility, no release and no project license metadata. GitHub issue/PR
+  discussions, wiki and external attachments were outside the Git-object scan.
+
+Local commands, baseline hashes, scan script/receipts, runtime identities and logs
+are retained under ignored `artifacts/triangulation/public-release-20261023-0yy69ejb/`.
+Licensing/preferred authorship/citation, historical-path retention, complete source
+checks, recommended synthetic CI/branch protection and the final dated public
+release remain open. No clinical refit, upstream rebuild, raw-data access,
+installation, commit/push/merge, visibility change, abstract or submission occurred.
+
+## 2026-10-23 — ICD acuity supplement implementation
+
+- Added the owner-approved five-category coding decomposition, including OHS in
+  chronic coding and explicit/concurrent acute-chronic precedence. Preserved
+  individual flags, unknown capture and original-key enrichment invariance.
+- Recorded failure scenarios before code in `docs/ICD_ACUITY_SUPPLEMENT.md` and
+  added independent likelihood/finite-difference E2E evidence plus raw-record
+  source-boundary checks. Source tests do not substitute for clinical qualification.
+- Reused the existing multinomial computation for both S1 and the new ICD model;
+  added S2, full contrasts, code-pattern provenance and complete audit outputs.
+  New optional input extension is `icd_acuity_v1`; aggregate schema is 11/v6.
+- Saved pre-change artificial output in
+  `artifacts/triangulation/icd-acuity-development/before.rds`. Initial numerical
+  comparison found primary/S1 curves, full covariance and PIF tables unchanged;
+  restored the original S1 coefficient description after finding a text-only drift.
+- Existing documentation edits and staged `.DS_Store` deletions were present on
+  entry and are preserved. No clinical source opened, clinical estimation, abstract
+  drafting, commit, push or merge performed in this implementation phase.
+- Initial `make source-test` was incomplete due local dependency skips; repeated
+  using the existing bundled Python: 26 passed (including new ICD boundaries),
+  nine unavailable because DuckDB is absent. No packages installed.
+- Full `make test`, final visual QC and review receipts are recorded below when
+  complete. Clinical enrichment/source qualification and S2 investigator approval
+  remain pending; published clinical snapshots are unchanged.
+
+- Final analysis/report E2E passed all 12 groups at
+  `artifacts/triangulation/e2e-20261023T222313-62975/receipt.json`, resuming the
+  verified artificial saved run `curve-fixture-20261023T220637-60929`. The initial
+  launcher run exposed an artificial-only source-status gate mismatch; corrected
+  it and repeated the independent checks. A superseded render was stopped after
+  identifying PDF sparse-overlay seams; the fresh final render incorporates the fix.
+- Final HTML/PDF reports and S2 SVG/PDF/300-dpi PNG/JPG exports are in that E2E
+  directory's `aggregate-only/reviews/20261023T222815-63310/`. Rendering read no
+  clinical input and performed no model refits. All source/hash identities stayed
+  stable; corrupt/stale bundles and unrelated figures were rejected.
+- Figure QC receipt: `artifacts/triangulation/icd-acuity-development/figure-qc-final.json`.
+  Inspected native color/grayscale, vector export, scientific PDF pages 39–45 and
+  audit pages 63, 137, 141, 4740, 4741, 4743 and 4785. This is targeted inspection,
+  not visual review of every audit page; automated complete-table coverage passed.
+  Dense audit tables retain full coefficients/covariance and wrapped strings.
+- Pre-change invariance passed for coefficients, full covariance, probability
+  curves and PIF total/contribution/covariance tables. Historical snapshot hash
+  verification passed for all 68 original-reading and 80 joint-component files.
+- Source boundaries: 26 passed, nine unavailable without existing DuckDB runtime;
+  both new ICD source checks passed. Full source qualification remains pending.
+  No clinical results, investigator approval or release operations are claimed.
+
+## 2026-10-24 — Complete current-source boundary verification
+
+- Resolved the nine DuckDB-related unavailable checks without changing analysis,
+  adapter or test code. Read the current scientific/source contracts; inspected
+  Mini jobs/worktrees before creating a separate owner-only source directory.
+  Existing dirty historical checkouts and accepted source products were preserved.
+- Froze 51 current working-tree files from R, scripts, tests and configuration,
+  plus Makefile/Git ignore rules, including untracked ICD-acuity additions.
+  Base commit: `53ccfc87affe405fa48ec827e6b69fc18a31836a` with working changes;
+  this was not a test of the base commit alone. Retained file hashes, Git status,
+  tracked-source patch and the complete source archive (including untracked files).
+- Used existing Mini Python 3.12.11, DuckDB 1.5.4 and pandas 2.2.3. The default R
+  resolved to a different installation; the documented activation selected the
+  existing framework R 4.6.1 with haven 2.5.5, jsonlite 2.0.0 and digest 0.6.39.
+  Selected the same Python for `PREP_PYTHON` and subprocess `PATH`; used a fresh
+  writable `/tmp` directory without spaces. No dependencies installed.
+- `make source-test PREP_PYTHON=<verified existing Mini interpreter>` exited zero:
+  **35 passed, zero unavailable, zero failures, zero errors**, including all nine
+  previously unavailable checks and both ICD-acuity boundaries. Receipt:
+  `source-tests-20261024T015937-52794/receipt.json`. Python runner hashes and all
+  51 copied files matched before/after execution; local source matched at transfer
+  verification. Later edits in this task only document that result.
+- Evidence retained locally in
+  `artifacts/triangulation/source-resolution-20261024/`: `snapshot.json`,
+  `working-tree.patch`, `source.tar.gz`, `runtime.json`, `verification.json`,
+  `make-source-test.log`, runner receipt/log and `remote-sha256.txt`.
+  Six transferred evidence files were independently byte-verified against Mini
+  SHA-256 values. The separate Mini source copy/evidence is retained for replay.
+- Updated test runtime guidance and the public-release checklist. No clinical
+  input read, clinical qualification, estimation, upstream rebuild, commit, push
+  or publication performed. Full analysis/report E2E was not rerun for these
+  documentation-only changes; the separately recorded schema-11 E2E remains
+  distinct from this source-boundary result and from investigator approval.
+- Final checks passed: all four saved-result manifests / 238 file hashes,
+  335 local Markdown link targets, relevant JSON parsing, and staged/unstaged
+  `git diff --check`. The first ad hoc manifest verifier assumed uniform entry
+  structure; corrected it to support the existing paired-ABG digest-only manifest
+  and reran successfully without editing any manifest. Evidence:
+  `artifacts/triangulation/source-resolution-20261024/final-verification.json`.
+
+## 2026-10-24 — ICD release and clinical execution
+
+- README source-check task completed before this work. Reused its 35/35 passing
+  Mini receipt; all executable/configuration sources match. Only tests/README.md
+  changed afterward to document the runtime. The 12-group schema-11 E2E receipt
+  also matches all estimation/test sources. No duplicate source run was needed.
+- Reviewed staged, unstaged and untracked changes, including source joins, code
+  precedence, multinomial covariance, reports, privacy boundaries and docs. No
+  additional actionable code issue found. Corrected stale source-check/version
+  descriptions. Review evidence: artifacts/triangulation/icd-acuity-release-20261024/.
+- Existing source/code-level ICD data are being reused; transport verification is
+  separate from requalifying unchanged clinical definitions. No upstream rebuild
+  or replacement export is planned. Clinical run and investigator review are pending.

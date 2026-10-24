@@ -169,6 +169,33 @@ bmi_report_table(a$same_day_curve_reconciliation,"Joint probability and stacked-
 
 Requiring both analytes on the same date introduces additional selection. The reconciliation separates patient restriction, restriction to co-observed days, and addition of low pH. Values can represent different samples or periods before and after treatment; co-occurrence does not establish simultaneous hypercapnic acidemia, acute respiratory failure or chronic compensation. Primary arterial findings on other dates remain unchanged. The joint model guarantees coherent category probabilities without clipping. In the stacked panel, band thickness is the component probability and the upper boundary is total hypercapnia. The common-baseline panel shows both components with their own intervals. The signed with-minus-without change contrasts use joint covariance; interval overlap is not the comparison test. Neither documented category establishes chronic compensation or the mechanism of acidemia.
 
+## Documented respiratory-failure acuity and OHS
+
+This supplement partitions the inherited five-code ICD composite on the same fixed primary indexes. It requires complete encounter diagnosis capture and nonmissing inherited adjustment variables, including retained Unknown categories; it does not require blood gas evidence. J96.22 or J96.02 together with J96.12/E66.2 receives priority as **acute-on-chronic or concurrent acute/chronic coding**. Remaining J96.02 is acute; remaining J96.12/E66.2 is chronic coding/OHS; remaining J96.92 is unspecified acuity. No target code with complete capture is the reference category. Incomplete capture is unknown. OHS is grouped analytically with chronic coding and does not itself establish chronic respiratory failure.
+
+One unpenalized five-category multinomial spline reuses the primary numeric BMI basis, linear age and inherited sex, race/ethnicity and region adjustment. All class probabilities are standardized over the same diagnosis-evaluable patients. Full joint covariance supplies pointwise 95% intervals, supported five-unit changes and pairwise differences in those changes. These descriptive comparisons are not multiplicity adjusted. The fitted positive components sum to the joint composite; it need not equal the existing binary model's predictions. Primary estimates, S1 and PIFs remain unchanged; no supplemental PIF is calculated.
+
+```{r}
+#| label: icd-acuity-supplement
+#| results: asis
+bmi_report_table(a$icd_acuity_status,"ICD code-level source qualification",keys="module")
+z<-a$icd_acuity_categories
+shown<-data.frame(Category=z$label,Patients=z$n,N=z$N,
+  Observed=ifelse(is.na(z$proportion),"Unavailable",sprintf("%.2f%% (95%% CI %.2f–%.2f%%)",100*z$proportion,100*z$conf_low,100*z$conf_high)),Status=z$status)
+bmi_report_table(shown,"Mutually exclusive ICD categories; observed proportions with Wilson 95% intervals",keys="Category")
+figure("S2-ICD-acuity")
+labels<-c(bmi_icd_labels,any_target="Any target diagnosis")
+spec<-bmi_icd_spec()
+for(i in seq_along(spec$contrast_pairs)) {
+ pair<-spec$contrast_pairs[[i]]
+ labels[spec$contrast_names[i]]<-paste(bmi_icd_labels[pair[1]],"minus",bmi_icd_labels[pair[2]],": difference in changes")
+}
+bmi_report_table(bmi_same_day_contrast_view(a$icd_acuity_contrasts,labels),"ICD component magnitudes and differences in BMI-associated changes; 95% intervals",keys=c("BMI interval","Outcome"))
+bmi_report_table(a$icd_acuity_reconciliation,"Original composite and subtype reconciliation",keys="metric")
+```
+
+Diagnostic codes reflect documentation and historical source-entry selection. Acute coding is not acidemia, and chronic coding is not evidence of physiological compensation. OHS includes obesity in its definition; a BMI association in that component may partly reflect diagnostic incorporation. The audit retains the five-code patterns, explicit versus concurrent coding, and OHS versus chronic respiratory-failure composition by BMI and source-entry subgroup. This supplement does not establish incident disease or causal effects.
+
 # Discussion and example conclusion
 
 The primary analysis estimates BMI relationships among non-OBESITY-supported indexes while preserving the same clinical episode. Excluding an obesity-only entry route does not remove outcome-dependent entry or selective gas measurement from the retained population. No weighting or transport to excluded indexes is attempted: near-absent gas observation in the excluded entry route does not supply an independent physiological comparator. The overlapping supporting analyses remain in the audit and do not constitute between-group tests.

@@ -218,9 +218,9 @@ bmi_scientific_results <- function(a,section) {
 }
 
 # Human-facing full contrast table; raw probabilities/covariance remain exported.
-bmi_same_day_contrast_view <- function(d) {
+bmi_same_day_contrast_view <- function(d,labels=NULL) {
   if(!nrow(d))return(d)
-  labels<-c(no_hypercapnia="No documented hypercapnia",without_acidemia="Hypercapnia without documented same-day acidemia",
+  if(is.null(labels))labels<-c(no_hypercapnia="No documented hypercapnia",without_acidemia="Hypercapnia without documented same-day acidemia",
     with_acidemia="Hypercapnia with same-day acidemia",any_hypercapnia="Any hypercapnia",
     with_minus_without_change="With minus without: difference in changes")
   interval<-function(x,lo,hi,mult=1)ifelse(is.finite(x),sprintf("%.2f (%.2f to %.2f)",mult*x,mult*lo,mult*hi),"Not estimated")

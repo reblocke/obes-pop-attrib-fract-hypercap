@@ -50,5 +50,11 @@ make_bmi_curve_fixture <- function(n_patients=6000L,seed=20261016L,with_index_da
   d$same_day_abg_usable_pco2<-as.integer(!is.na(d$abg_pco2))
   d$same_day_abg_coobserved_pco2<-d$same_day_abg_usable_ph<-d$same_day_abg_coobserved_ph<-as.integer(valid)
   d$same_day_abg_co2_only_days<-as.integer(!valid & !is.na(d$abg_pco2))
+  d$icd_capture_state<-ifelse(is.na(d$icd_hypercapnia),"incomplete","complete")
+  for(v in bmi_icd_flags)d[[v]]<-ifelse(is.na(d$icd_hypercapnia),NA_integer_,0L)
+  # Deterministic synthetic patterns, independent of the existing random stream.
+  patterns<-rbind(c(1,0,0,0,0),c(0,1,0,0,0),c(0,0,1,0,0),c(0,0,0,1,0),c(0,0,0,0,1),c(1,0,0,0,1),c(0,1,0,0,1))
+  positive<-which(d$icd_hypercapnia %in% 1)
+  for(j in seq_along(bmi_icd_flags))d[[bmi_icd_flags[j]]][positive]<-patterns[1+(id[positive]%%7),j]
   d
 }

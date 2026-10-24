@@ -13,6 +13,7 @@ bmi_validate_metadata <- function(d) {
   for(name in intersect(c("reported_date","height_date","weight_date"),names(d)))
     if(!inherits(d[[name]],"Date"))stop("Metadata date must be Date: ",name)
   bmi_validate_cooccurrence(d)
+  bmi_validate_icd_acuity(d)
   invisible(TRUE)
 }
 bmi_classify_rfs <- function(d) {
@@ -176,6 +177,7 @@ bmi_run_analysis <- function(raw,config,source_status="artificial",audit_only=FA
   result$cohort_edges<-bmi_bind(c(list(result$cohort_edges),edges));result$population_registry<-result$population_registry
   result$coverage_index<-bmi_bind(list(result$coverage_index,data.frame(kind="population",item_id="unresolved::Q",table="rfs_summary",status="assessed")))
   result<-bmi_append_same_day(result,ctx,raw,config,audit_only)
+  result<-bmi_append_icd_acuity(result,ctx,raw,config,audit_only,source_status)
   result$numerical_reconciliation<-bmi_validate_ledger(result)
   result
 }
