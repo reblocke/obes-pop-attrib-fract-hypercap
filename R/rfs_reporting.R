@@ -265,6 +265,8 @@ bmi_icd_acuity_figure <- function(bundle,output) {
   caption<-paste("Primary fixed-index patients with complete diagnosis capture; encounter-wide coding, no gas requirement. Shared inherited adjustment and primary spline basis.",
     "Bands partition the target composite; its upper boundary and component panels show pointwise 95% intervals from joint covariance. Fading/dots mark local sparsity; histogram N equals model/reference N.",
     "Acute-on-chronic includes explicit J96.22 or concurrent acute/chronic codes. Chronic includes OHS (obesity hypoventilation syndrome); unspecified acuity remains separate. OHS grouping does not establish chronic respiratory failure. Coding/source-entry selection and obesity in the OHS definition limit physiological interpretation. The joint total can differ from the binary fit. See the accompanying classification table.")
+  if(!nrow(z))caption<-paste("Adjusted ICD-acuity curves and intervals are unavailable:",why,
+    "This is a model-status display, not an estimated relationship. The accompanying table reports observed category counts only when source evidence is qualified. Primary fixed indexes, adjustment and existing analyses are unchanged; no fallback estimator was used.")
   if(bundle$manifest$mode=="fixture")caption<-paste("ARTIFICIAL DATA ONLY.",caption)
   data.frame(figure_id="S2-ICD-acuity",caption=caption,alt_text=caption,source_tables="probability_curves;icd_acuity_categories;icd_acuity_probability_covariance;distribution_bins;model_registry")
 }

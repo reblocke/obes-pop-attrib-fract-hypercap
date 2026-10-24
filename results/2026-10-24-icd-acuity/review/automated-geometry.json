@@ -1,0 +1,37 @@
+{
+  "automated": {
+    "bmi_hypercapnia": {
+      "pages": 43,
+      "issues": [],
+      "sha256": "3678b85458ef42bf63e4db502d7a84bc03d21a29bc134238224341da0b2c53fe"
+    },
+    "bmi_hypercapnia_audit": {
+      "pages": 3762,
+      "issues": [],
+      "sha256": "3bdffacb749401abf8727280025273f146b44d92975d0f97a101b1e60126bf88"
+    }
+  },
+  "manual_review": "See clinical-visual-review.json; automated geometry alone is not visual approval",
+  "S2-native": {
+    "pixels": [
+      2244,
+      2480
+    ],
+    "dpi": [
+      299.9994,
+      299.9994
+    ],
+    "mode": "P",
+    "geometry": [
+      {
+        "page": 1,
+        "width_pt": 538.0,
+        "height_pt": 595.0,
+        "outside": [],
+        "replacement": [],
+        "text_collisions": [],
+        "min_text_height_pt": 8.991
+      }
+    ]
+  }
+}

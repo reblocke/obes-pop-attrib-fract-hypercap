@@ -20,7 +20,10 @@ with `docs/DECISIONS.md`; do not treat access to the repository as permission to
 draft, rerun, share or submit beyond the owner's current request.
 The versioned reading snapshot is `results/2026-10-18/`; verify its manifest and
 use its aggregate tables for current numerical claims. It is not a runnable bundle.
-The latest integrated report and joint same-day component results are in
+The latest integrated report and ICD counts/status are in
+`results/2026-10-24-icd-acuity/`; verify its manifest. The planned ICD-acuity fit is
+nonestimable due to separation; do not describe S2 as an estimated curve.
+Joint same-day component results remain in
 `results/2026-10-20-same-day-components/`; verify that separate manifest.
 For the historical binary recorded-day supplemental endpoints, use the separate
 `results/2026-10-20-same-day-abg/` snapshot and its review state. Original B/F2

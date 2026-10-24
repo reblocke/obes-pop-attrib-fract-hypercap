@@ -1,0 +1,36 @@
+{
+  "status": "passed",
+  "scope": "Artificial typed-input analysis/report end to end",
+  "source_boundary_checks": "separate: make source-test; not asserted by this receipt",
+  "clinical_input_reads": 0,
+  "human_visual_review": "not performed by automated test",
+  "scientific_review": "not asserted",
+  "test_sources": {
+    "tests/run_e2e.R": "19e474471be83e7eac381a31c676b9176d104df2a6ac68cccc8496212ecbe18d",
+    "tests/e2e_oracles.R": "de8233babc62a14ea38911eecff0e448d0b7c5a375d98efa33e0a4079e59c299",
+    "tests/same_day_e2e.R": "ab67b3e4b4c37e3ede1323688a6748da5d5eccfcbac96060081342285dfbb8ee",
+    "tests/icd_acuity_e2e.R": "fa99d51c30ab629cac4bab18641d8dc41c6fdeb98d3841905dcb3d663d776e07",
+    "tests/fixtures/bmi_curve_fixture.R": "465f43ccf1f9b7a67f84a3a31e364d14e2689a466a0dcc4a5524a5ca8a6e8110"
+  },
+  "bundle_manifest_sha256": "54a249ae168e0c5b8e119735806c619392f540c2203b5ffd3d0ede6532b643e0",
+  "estimation_sources": {
+    "R/analysis.R": "71f24f5e435260559272ef8a292c115b1758f91f5190329d26799861b483ebf5",
+    "R/input_contract.R": "3b49c78568c6f0ce1946ebf4543542f545bbc0daea5eb9034d8716c95c6750f4",
+    "R/cohort_audit.R": "01efa2318c3de4d24935ae33e28d97d811c6778dfcf87efbc070070a60f968f5",
+    "R/bmi_models.R": "1ebaf82ce941d626e60e5d66686fedd08da06a42bc4b48c210b9812ae434e321",
+    "R/standardization.R": "8fb670cce3a4c454e1f95985a161f54f0e6e70332aad6a746fdfd9ace79c3fdc",
+    "R/rfs_analysis.R": "ecaf14d560c818dffe25868d2b4046ce7ca8ee8907790485e9d49182b8defb45",
+    "R/same_day_abg.R": "f4b91c1b188386c6941ab71ebe794dc13b0b22b9f0a97814fb92c512e2c2ae4a",
+    "R/same_day_multinomial.R": "30b5647343f9aa313b6452d274f9c73db58c6a6ec50d1c85d30f90ef3be95122",
+    "R/icd_acuity.R": "af5921b5f7673fabd82ad0506654c0ee5a00eac3624b2d77b4a01601acc4469e",
+    "config/bmi_hypercapnia_analysis.json": "ac128f1c32efdba18e493402f1be26afe9bea2f7942ccbfd6ec56f8f0a59879a",
+    "config/variable_dictionary.csv": "dd942f2469c62f514478b0fcaa72ebb5171fa1e83988fc23e386ec2826458d34",
+    "config/common_index_source_policy.json": "bebad842c52f658b65215eeb44052afc8df32b85e02fe412f4eb713112b36763",
+    "config/common_index_bmi_policy.json": "988b2f7a2c1f968b30773502f76635520d37a4183ab64b182c1c813ae2f7ac59"
+  },
+  "artifact_index_sha256": "268e580bacd6c00acd0c0713f9b4684a7ae1b9c485d2a146686b1c970a338cb9",
+  "repeat_command": "Rscript --vanilla tests/run_e2e.R",
+  "finished_utc": "2026-10-24 09:05:23 UTC",
+  "source_receipt_sha256": "3bd9623c4d7d88d735c8addd12205d8c13d97defa1d8b07c7de514dba0003d45",
+  "receipt_id": "e2e-20261024T023649-75555"
+}

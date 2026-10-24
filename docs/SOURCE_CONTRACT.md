@@ -234,3 +234,11 @@ columns, source mismatch, duplicate conflicting records, unreviewed code systems
 or a changed composite fail. Missing enrichment leaves the supplemental position
 unavailable. No same-day or blood-gas requirement applies to this diagnosis analysis.
 Use the enriched input only after source review; outputs do not assert human approval.
+
+The October 24 ICD enrichment passed against the unchanged accepted source.
+All 18,030 target diagnosis records and the five-code union reconciled; all
+223,514 original input rows, fields and fixed indexes were identical. Fresh
+schema-11 Mini preflight passed. See the [source qualification receipt](../results/2026-10-24-icd-acuity/review/source-qualification.json).
+The subsequent ICD model separation is an estimability limitation of the planned
+category/adjustment combination, not failed source transport. No replacement
+export or upstream rebuild is indicated by these checks.

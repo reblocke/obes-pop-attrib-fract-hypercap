@@ -179,6 +179,9 @@ One unpenalized five-category multinomial spline reuses the primary numeric BMI 
 #| label: icd-acuity-supplement
 #| results: asis
 bmi_report_table(a$icd_acuity_status,"ICD code-level source qualification",keys="module")
+fit<-a$model_registry[a$model_registry$family=="icd_acuity",]
+bmi_report_table(fit[c("model_id","n_model","status","failure_reason")],"ICD model estimability; source qualification does not imply a successful fit",keys="model_id")
+if(nrow(fit) && !fit$status %in% c("successful","fitted_with_concerns"))cat("\n\n**Adjusted ICD-acuity curves and contrasts are unavailable.** The planned model was retained with its explicit failure status; no alternative estimator or recoding was substituted. The category table below is descriptive, not an adjusted BMI relationship.\n\n")
 z<-a$icd_acuity_categories
 shown<-data.frame(Category=z$label,Patients=z$n,N=z$N,
   Observed=ifelse(is.na(z$proportion),"Unavailable",sprintf("%.2f%% (95%% CI %.2f–%.2f%%)",100*z$proportion,100*z$conf_low,100*z$conf_high)),Status=z$status)

@@ -1,6 +1,6 @@
 {
   "document_type": "llm_collaborator_reading_guide",
-  "updated": "2026-10-23",
+  "updated": "2026-10-24",
   "purpose": "Read the current study with traceable evidence, including public researcher review and later coauthor work. This is documentation, not executable analysis configuration.",
   "repository_paths_relative_to": "repository root",
   "authority": {
@@ -15,12 +15,13 @@
     "execution_history": "WORKLOG.md",
     "retired_versions": "archive/README.md",
     "clinical_reading_snapshot": "results/2026-10-18/README.md",
-    "current_integrated_report": "results/2026-10-20-same-day-components/README.md"
+    "current_integrated_report": "results/2026-10-24-icd-acuity/README.md"
   },
   "reading_order": [
     "AGENTS.md",
     "README.md",
     "results/2026-10-18/README.md",
+    "results/2026-10-24-icd-acuity/README.md",
     "results/2026-10-20-same-day-components/README.md",
     "docs/DECISIONS.md",
     "docs/BMI_HYPERCAPNIA_TRIANGULATION_PLAN.md",
@@ -45,7 +46,7 @@
     "source": "docs/DECISIONS.md",
     "scope": "Code plus existing reports, figures and aggregate result tables",
     "aggregate_disclosure": "Owner confirmed that public release of the exact existing outputs, including counts of 1-9, is cleared under the source-data agreement; not an independent legal determination.",
-    "scientific_review": "Unchanged: primary provisional; investigator interpretation and S1 approval pending",
+    "scientific_review": "Unchanged: primary provisional; investigator interpretation/approval of S1 and ICD supplement pending",
     "reuse_terms_and_preferred_citation": "Pending owner confirmation; no project license file or CITATION.cff is present in the repository",
     "release_review": "docs/PUBLIC_RELEASE_REVIEW.md",
     "visibility_change": "Separate release action; this guide does not assert publication"
@@ -89,7 +90,7 @@
     "presentation_note": "The saved scientific PDF embeds F1-A; standalone F1-B has identical values. Use B/F2 for the working main set. Older reports and CSVs retain their original pending-review wording; review_status.json and current decisions record subsequent owner approval separately.",
     "execution_limit": "Reading snapshot only, not a complete renderable run; the binary aggregate object and private receipts are omitted. Do not pass this package to make render.",
     "if_unavailable": "Obtain the versioned snapshot from this repository. State any evidence gap; never fill numerical claims from fixtures, older analyses, remembered counts or plausible estimates.",
-    "role": "Immutable primary snapshot; selected B/F2. Current integrated reports are in same_day_joint_supplement."
+    "role": "Immutable primary snapshot; selected B/F2. Current integrated reports are in icd_acuity_supplement."
   },
   "numerical_evidence": {
     "paths_relative_to": "results/2026-10-18/tables",
@@ -271,8 +272,31 @@
     "runtime_schema": 11,
     "analysis_id": "bmi_hypercapnia_rfs_curve_audit_v6",
     "figure": "S2-ICD-acuity",
-    "clinical_results": "pending qualified enrichment and merged Mini run",
-    "approval": "design approved; new figure and interpretation pending",
-    "primary_results": "unchanged; existing reading snapshots remain historical authorities"
+    "clinical_results": "source qualified; run completed; planned model nonestimable due to separation",
+    "approval": "design approved; new interpretation pending; S2 is an unavailable-model display, not estimated curves",
+    "primary_results": "11 original primary/S1 comparison tables unchanged within 1e-10; PIFs unchanged",
+    "reading_snapshot": "results/2026-10-24-icd-acuity",
+    "package_manifest": "results/2026-10-24-icd-acuity/manifest.json",
+    "table_index": "results/2026-10-24-icd-acuity/table_index.csv",
+    "clinical_run": "curve-analyze-20261024T022943-53435",
+    "software_commit": "c0970484db8708845c023712d8e5204aad368d91",
+    "model_id": "primary::icd_acuity/encounter/multinomial_spline",
+    "model_status": "separation",
+    "shared_reference_N": 176922,
+    "category_counts": {
+      "no_target": 168288,
+      "chronic_ohs": 1769,
+      "acute_chronic": 3443,
+      "acute": 3294,
+      "unspecified": 128
+    },
+    "separation_evidence": "Zero unspecified outcomes in retained Asian (995), American Indian/Alaska Native (1475) and Native Hawaiian/Pacific Islander (339) strata; no adjustment change or fallback fit.",
+    "claim_sources": {
+      "counts": "tables/icd_acuity_categories.csv",
+      "patterns": "tables/icd_acuity_patterns.csv",
+      "status": "tables/model_registry.csv",
+      "diagnostic": "review/zero-category-adjustment-cells.csv"
+    },
+    "guardrail": "No adjusted ICD-acuity probabilities or contrasts exist for this run. Source acceptance does not imply model estimability or clinical validation of coding."
   }
 }

@@ -19,10 +19,12 @@ exercise the software without clinical data.
 ## Study and release status
 
 The qualified primary clinical analysis completed on October 17, 2026; the joint
-same-day component analysis completed on October 20. Numerical reconciliation and
-scoped figure/report review are recorded separately from investigator review.
+same-day component analysis completed on October 20. The ICD-acuity run completed
+on October 24 with qualified source evidence, but the planned five-category model
+was nonestimable because of separation. Original primary/S1 estimates and PIFs
+remain unchanged. Numerical and visual checks are separate from investigator review.
 Primary scientific approval is **provisional**. **F1-B and F2** are the working
-main figures; investigator interpretation and approval of supplemental S1 remain
+main figures; investigator interpretation and approval of supplements remain
 **pending**. The same-day update preserves the primary estimates and PIFs.
 
 On October 23, 2026, the owner confirmed that the existing reports, figures and
@@ -41,22 +43,28 @@ reports, selected figures and complete aggregate tables in Git. A normal clone
 includes these results; raw and patient-level data remain excluded.
 
 The **[joint same-day component supplement](results/2026-10-20-same-day-components/README.md)**
-contains the latest integrated scientific/audit reports and stacked figure S1.
+preserves the joint same-day results and stacked figure S1.
 It separates hypercapnia with and without documented same-day acidemia in one
 joint model, across the full observed BMI range. This is **same recorded-day
 co-occurrence; not verified same-sample pairing**. Primary estimates and selected
 B/F2 remain unchanged; investigator interpretation and S1 approval are pending.
 The [earlier binary supplement](results/2026-10-20-same-day-abg/README.md) is historical.
 
+The **[ICD-acuity snapshot](results/2026-10-24-icd-acuity/README.md)** contains the latest integrated
+reports, complete aggregate tables and S2 status display. Source checks passed;
+separation prevents adjusted ICD-acuity curves under the agreed model. Descriptive
+counts are available, and no fallback estimator or demographic recoding was used.
+
 | Read in this order | What to look for |
 |---|---|
-| [Current scientific report](results/2026-10-20-same-day-components/bmi_hypercapnia.pdf) | Rationale, detailed methods, results, sensitivity analyses and interpretation limits |
+| [Current scientific report](results/2026-10-24-icd-acuity/bmi_hypercapnia.pdf) | Rationale, detailed methods, results, sensitivity analyses and interpretation limits |
 | [B/F2 figure PDF — 2 pages](results/2026-10-18/selected_figures.pdf) | Selected relationship and secondary-scenario figures with full captions |
 | [B: relationship](results/2026-10-18/figures/F1-B.pdf) / [F2: secondary scenario](results/2026-10-18/figures/F2.pdf) | Individual vector masters; SVG, PNG and JPG versions are beside them |
+| [Supplemental S2](results/2026-10-24-icd-acuity/supplement_figure.pdf) | Explicit unavailable-curve status; category counts and separation details are in the report |
 | [Supplemental S1](results/2026-10-20-same-day-components/supplement_figure.pdf) | Captioned joint same-day component figure; investigator interpretation and approval pending |
 | [Offline gallery](results/2026-10-18/gallery.html) | B/F2 at full size, captions, format downloads and source-table links |
-| [Current complete audit](results/2026-10-20-same-day-components/bmi_hypercapnia_audit.pdf) | Full cohort profiles, model samples, coefficients, covariance and diagnostics |
-| [Current aggregate tables](results/2026-10-20-same-day-components/TABLES.md) | Complete CSV exports, with a machine-readable field/row/hash index |
+| [Current complete audit](results/2026-10-24-icd-acuity/bmi_hypercapnia_audit.pdf) | Full cohort profiles, model samples, coefficients, covariance and diagnostics |
+| [Current aggregate tables](results/2026-10-24-icd-acuity/TABLES.md) | Complete CSV exports, with a machine-readable field/row/hash index |
 
 Download PDFs with GitHub's **Download raw file** control when needed.
 For the gallery, clone/download the folder and open `gallery.html` locally; GitHub
@@ -124,8 +132,8 @@ unmeasured confounding. The [source contract](docs/SOURCE_CONTRACT.md) and
 | [Work log](WORKLOG.md) / [archive index](archive/README.md) | Execution evidence and recovery of superseded versions |
 
 The current implementation is `bmi_hypercapnia_rfs_curve_audit_v6` (aggregate
-schema 11). The published joint same-day clinical snapshot remains schema 10;
-the ICD-acuity clinical supplement is pending its fresh run and reconciliation.
+schema 11). The latest integrated clinical snapshot is schema 11. The earlier
+joint same-day snapshot remains schema 10 and is preserved unchanged.
 `R/analysis.R` loads the current modules; `scripts/run_bmi_hypercapnia.R` audits
 and estimates; `scripts/render_bmi_hypercapnia.R` renders saved aggregates. The
 [scientific](reports/bmi_hypercapnia.qmd) and [audit](reports/bmi_hypercapnia_audit.qmd)
@@ -135,7 +143,8 @@ not another analysis configuration.
 The repository is laid out as follows:
 
 ```text
-results/2026-10-20-same-day-components/  Current integrated reports, joint S1 and tables
+results/2026-10-24-icd-acuity/          Current integrated reports, ICD counts/status and tables
+results/2026-10-20-same-day-components/  Preserved joint S1 snapshot and tables
 results/2026-10-18/                    Primary snapshot: B/F2, reports and tables
 results/2026-10-20-same-day-abg/        Historical binary co-occurrence supplement
 results/2026-10-20-paired-abg/          Historical pairing-feasibility report; no new models
@@ -151,7 +160,7 @@ data/, artifacts/    Local raw inputs and working runs; their contents stay out 
 ```
 
 For LLM-assisted review, begin with [LLM_GUIDE.json](docs/LLM_GUIDE.json), then use
-the [current table index](results/2026-10-20-same-day-components/table_index.csv)
+the [current table index](results/2026-10-24-icd-acuity/table_index.csv)
 or [original primary index](results/2026-10-18/table_index.csv) and the relevant
 CSVs. Each snapshot's manifest identifies its clinical run and file hashes. Use
 current guides for methods and the appropriate dated snapshot for reported numbers.
@@ -178,8 +187,8 @@ does not reproduce clinical estimates or confer scientific approval. `make fixtu
 runs the artificial example without the E2E assertions.
 
 For presentation changes, use an explicitly selected saved run that matches the
-checked-out analysis version. The current ICD-supplement development requires
-schema 11; the published clinical reading packet remains schema 10:
+checked-out analysis version. Current execution bundles require schema 11; older
+snapshots retain their original version and cannot be relabeled:
 
 ```bash
 make render RUN="artifacts/triangulation/<exact-saved-run>"
@@ -206,8 +215,8 @@ make source-test PREP_PYTHON="/existing/environment/bin/python"
 ```
 
 Use the existing source-reader Python environment with pandas and DuckDB; source
-preparation also requires the pinned upstream readers. The same-day release passed
-the artificial E2E and all 33 source checks using the existing Mini environment,
+preparation also requires the pinned upstream readers. The ICD release passed
+the artificial E2E and all 35 source checks using the existing Mini environment,
 without skips or dependency installation. See [test scope](tests/README.md) and
 [dated receipts](WORKLOG.md). Artificial checks do not establish clinical results.
 The [public-release review](docs/PUBLIC_RELEASE_REVIEW.md) records verification
@@ -272,10 +281,18 @@ sanitized error. Keep restricted records, credentials and private access paths
 out of issues. Clinical-data access requires a separate arrangement with the
 project owner; no public self-service access process is documented.
 
-## ICD acuity supplement (implementation; clinical results pending)
+## ICD acuity supplement
 
-The [ICD supplement plan](docs/ICD_ACUITY_SUPPLEMENT.md) adds a stacked S2 figure
-for chronic/OHS, acute-on-chronic or concurrent coding, acute, and unspecified
-acuity. It preserves existing clinical results and S1. A fresh code-level
-enrichment is required; the historical reading snapshots do not contain these
-new results. See the [source command](docs/SOURCE_CONTRACT.md#icd-acuity-enrichment).
+The [ICD supplement specification](docs/ICD_ACUITY_SUPPLEMENT.md) partitions the
+existing composite into chronic/OHS, acute-on-chronic or concurrent coding,
+acute, unspecified acuity and no target diagnosis. The qualified source reproduces
+the original binary composite and preserves all fixed indexes.
+
+The [October 24 packet](results/2026-10-24-icd-acuity/README.md) contains the full
+run and category counts. The planned unpenalized joint model is **nonestimable**:
+unspecified-acuity diagnoses are absent in three retained race/ethnicity strata,
+creating separation. S2 explicitly records unavailable adjusted curves; it is
+not an estimated relationship or a publication-ready curve. A new modeling
+decision is needed before adjusted ICD-acuity comparisons can be reported.
+Original primary/S1 estimates, PIFs and selected B/F2 remain unchanged. No abstract
+was drafted. See the [source command](docs/SOURCE_CONTRACT.md#icd-acuity-enrichment).
