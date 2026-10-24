@@ -163,7 +163,7 @@ data/, artifacts/    Local raw inputs and working runs; their contents stay out 
 ```
 
 For LLM-assisted review, begin with [LLM_GUIDE.json](docs/LLM_GUIDE.json), then use
-the [current table index](results/2026-10-24-icd-acuity/table_index.csv)
+the [current table index](results/2026-10-24-icd-bias-reduced/table_index.csv)
 or [original primary index](results/2026-10-18/table_index.csv) and the relevant
 CSVs. Each snapshot's manifest identifies its clinical run and file hashes. Use
 current guides for methods and the appropriate dated snapshot for reported numbers.
@@ -272,7 +272,7 @@ aggregates only.
 ## Citation, reuse and support
 
 A project license and preferred citation are not yet documented in this repository.
-Authorship and code/output reuse terms await owner confirmation before release;
+Authorship and code/output reuse terms remain pending owner confirmation;
 no DOI or published-paper citation is asserted. For a traceable reference,
 identify the [repository](https://github.com/reblocke/obes-pop-attrib-fract-hypercap),
 the exact commit and the dated result snapshot used. Third-party assets retain

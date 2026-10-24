@@ -902,3 +902,50 @@ installation, commit/push/merge, visibility change, abstract or submission occur
   disclosure clearance or investigator review. The source data and 333 historical
   snapshot files are untouched; only the new aggregate packet and documentation
   are staged for the follow-up release.
+
+## 2026-10-24 — Final public-repository audit and release preparation
+
+- Owner authorized audit, commit/push, code review, PR, squash merge and public
+  visibility, with conference drafts kept private. Started from clean merged
+  `main` at `10cc285`; only the new conference drafting folder was untracked.
+  Added `/reports/ATS Abstract 2027/` to `.gitignore`; its Word document and
+  temporary lock file remain local and untouched. Fixed the README's stale
+  current-table link and refreshed release/decision/LLM documentation.
+- Fetched all advertised branches and 25 PR heads for the final history audit:
+  32 publication refs, 66 commits, 798 text blobs, 31 PDF versions and 20 raster
+  metadata records. No configured credential matches, PDF attachments, raster
+  GPS or recorded PDF extraction gaps/errors. Existing whole-document Poppler
+  fallback was used; no PDF backend installed and embedded images were not OCRed.
+  Known legacy local paths and historical Finder objects are retained under the
+  owner's instruction; no history or accepted result is rewritten.
+- Draft verification initially included local Codex recovery refs and found a
+  recovery copy of the untracked draft. Classified those separately, then checked
+  every fetched GitHub branch/PR head: neither draft blobs nor draft paths are
+  reachable from publication refs. Do not mirror-push local recovery refs. Only
+  the reviewed release branch is pushed. This distinction is retained explicitly
+  in the evidence; local recovery history was preserved.
+- Bounded GitHub discussion review covered 26 PR/issue bodies, one issue comment
+  and zero inline review comments, without configured credential/draft/upload
+  indicators. No release assets exist. Wiki capability is enabled, but the wiki
+  Git endpoint returned not found; no wiki-content verification is claimed.
+- Fresh isolated Mini `make source-test PREP_PYTHON=<existing interpreter>` passed
+  all 35 checks, zero skips/errors/failures: `source-tests-20261024T071956-55803`.
+  Inspected jobs/worktrees before remote writes; all 54 copied source/config files
+  stayed unchanged. Used existing Python 3.12.11 / DuckDB 1.5.4 / pandas 2.2.3 and
+  documented R 4.6.1 activation, matching subprocess PATH and a space-free TMPDIR.
+  Six transferred evidence files independently matched Mini SHA-256 values.
+- Existing schema-12 E2E receipt `e2e-20261024T044257-81340` remains passed for all
+  13 groups. Current estimation/test source hashes match, and all 6,053 indexed
+  artifact sizes/hashes verified. No full E2E/clinical rerun for documentation
+  and an ignore rule. All six saved-result manifests / 441 files, 289 aggregate
+  table headers, 515 local Markdown links and 59 tracked JSON documents passed;
+  staged/unstaged `git diff --check` passed. No analysis behavior changed.
+- Final evidence is retained under ignored
+  `artifacts/triangulation/final-public-release-20261024/`. Review and release
+  operations are tied to the PR's exact head; actual merge/visibility responses
+  are retained there and in the GitHub PR. No license, authorship, source
+  qualification or investigator scientific/figure approval is invented.
+- Implementing-agent review of all six staged files found no actionable issues.
+  Verified folder exclusion, publication-ref scope, current result navigation,
+  dated verification claims and preservation of scientific/reuse limitations.
+  This is not an independent-human or hosted-CI approval.

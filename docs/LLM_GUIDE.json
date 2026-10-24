@@ -49,7 +49,8 @@
     "scientific_review": "Unchanged: primary provisional; investigator interpretation/approval of S1 and ICD supplement pending",
     "reuse_terms_and_preferred_citation": "Pending owner confirmation; no project license file or CITATION.cff is present in the repository",
     "release_review": "docs/PUBLIC_RELEASE_REVIEW.md",
-    "visibility_change": "Separate release action; this guide does not assert publication"
+    "visibility_change": "Owner authorized public visibility on 2026-10-24 after final audit and squash-merged release PR; live visibility is recorded by GitHub",
+    "private_drafts": "reports/ATS Abstract 2027/ is local-only and ignored; do not add or publish its contents"
   },
   "clinical_evidence": {
     "availability": "Versioned collaborator snapshot is included in a normal clone; no raw data are required to read it.",

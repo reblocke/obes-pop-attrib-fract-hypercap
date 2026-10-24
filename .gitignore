@@ -9,6 +9,9 @@ full_db.rds
 /data/raw/*
 !/data/raw/.gitkeep
 
+# Private conference drafting material; retain locally outside public Git.
+/reports/ATS Abstract 2027/
+
 # Quarto render outputs generated for local review
 /reports/*.html
 /reports/*.pdf
