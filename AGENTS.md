@@ -20,12 +20,12 @@ with `docs/DECISIONS.md`; do not treat access to the repository as permission to
 draft, rerun, share or submit beyond the owner's current request.
 The versioned reading snapshot is `results/2026-10-18/`; verify its manifest and
 use its aggregate tables for current numerical claims. It is not a runnable bundle.
-The latest integrated report and ICD counts/status are in
-`results/2026-10-24-icd-acuity/`; verify its manifest. That historical unpenalized ICD-acuity fit is
-nonestimable due to separation; do not relabel its S2 as an estimated curve.
-The approved schema-12 replacement uses Firth mean bias reduction, with a
-four-category unpenalized sensitivity excluding unspecified-only patients.
-Clinical validation of the replacement remains pending until a new run is reviewed.
+The latest integrated report and ICD curves are in
+`results/2026-10-24-icd-bias-reduced/`; verify its manifest. The five-category
+Firth model and four-category unpenalized sensitivity both fitted successfully;
+their model/reference denominators differ. Numerical verification does not confer
+investigator interpretation or figure approval. The historical unpenalized fit in
+`results/2026-10-24-icd-acuity/` remains nonestimable; never relabel that snapshot.
 Joint same-day component results remain in
 `results/2026-10-20-same-day-components/`; verify that separate manifest.
 For the historical binary recorded-day supplemental endpoints, use the separate

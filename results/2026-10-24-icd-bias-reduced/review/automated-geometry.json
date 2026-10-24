@@ -1,0 +1,81 @@
+{
+  "automated": {
+    "bmi_hypercapnia": {
+      "pages": 56,
+      "issues": [],
+      "sha256": "a772637b0a836cc680aca69384819d700377182c26de8a639d673b06a07eeb85"
+    },
+    "bmi_hypercapnia_audit": {
+      "pages": 5654,
+      "issues": [],
+      "sha256": "22c3702877164978f4270a8ca5c8c8c6ac99615e6039b9cf1b6022e04c81873f"
+    }
+  },
+  "manual_review": "See clinical-visual-review.json for actual agent inspection; no investigator approval asserted",
+  "S2-ICD-acuity-native": {
+    "pixels": [
+      2244,
+      2362
+    ],
+    "dpi": [
+      299.9994,
+      299.9994
+    ],
+    "mode": "RGB",
+    "geometry": [
+      {
+        "page": 1,
+        "width_pt": 538.0,
+        "height_pt": 566.0,
+        "outside": [],
+        "replacement": [],
+        "text_collisions": [],
+        "min_text_height_pt": 8.990999999999996
+      }
+    ]
+  },
+  "S2-ICD-specified-native": {
+    "pixels": [
+      2244,
+      2362
+    ],
+    "dpi": [
+      299.9994,
+      299.9994
+    ],
+    "mode": "RGB",
+    "geometry": [
+      {
+        "page": 1,
+        "width_pt": 538.0,
+        "height_pt": 566.0,
+        "outside": [],
+        "replacement": [],
+        "text_collisions": [],
+        "min_text_height_pt": 8.990999999999996
+      }
+    ]
+  },
+  "S2-ICD-observed-native": {
+    "pixels": [
+      2244,
+      2244
+    ],
+    "dpi": [
+      299.9994,
+      299.9994
+    ],
+    "mode": "P",
+    "geometry": [
+      {
+        "page": 1,
+        "width_pt": 538.0,
+        "height_pt": 538.0,
+        "outside": [],
+        "replacement": [],
+        "text_collisions": [],
+        "min_text_height_pt": 9.49049999999994
+      }
+    ]
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "prior_bundle_manifest_sha256": "dade34346ed8f3d18a262c70e581c09a1aed2331670af3236bc2a9b894da6f68",
+  "current_bundle_manifest_sha256": "2546087c1c3690668c284a7d20c2feb2f9f1552ca3d95d8f3a8326302fbc1ffa",
+  "tolerance": 1e-10,
+  "all_original_tables_unchanged": true,
+  "clinical_input_reads": 0,
+  "model_refits": 0,
+  "investigator_review": "pending"
+}

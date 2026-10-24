@@ -1,0 +1,59 @@
+"requirement","status","note","analysis_population_id","n","grain","scope"
+"population","identity_bound_source_declarations_passed","Authenticated original selected encounters only; broader mapping gap historical","combined",,,
+"BMI","identity_bound_source_declarations_passed","Encounter/prior reported then observed height/weight; no imputation","combined",,,
+"gas/ICD","identity_bound_source_declarations_passed","Unadjusted, specimen-authenticated; unknown remains unknown","combined",,,
+"timing","qualified","Fixed selected index; calendar date not elapsed 24h","combined",,,
+"clinical_inference","pending_scientific_review","Observed-population associations do not establish population transport or causal interpretation","combined",,,
+"population","identity_bound_source_declarations_passed","Authenticated original selected encounters only; broader mapping gap historical","obesity_only",,,
+"BMI","identity_bound_source_declarations_passed","Encounter/prior reported then observed height/weight; no imputation","obesity_only",,,
+"gas/ICD","identity_bound_source_declarations_passed","Unadjusted, specimen-authenticated; unknown remains unknown","obesity_only",,,
+"timing","qualified","Fixed selected index; calendar date not elapsed 24h","obesity_only",,,
+"clinical_inference","pending_scientific_review","Observed-population associations do not establish population transport or causal interpretation","obesity_only",,,
+"population","identity_bound_source_declarations_passed","Authenticated original selected encounters only; broader mapping gap historical","primary",,,
+"BMI","identity_bound_source_declarations_passed","Encounter/prior reported then observed height/weight; no imputation","primary",,,
+"gas/ICD","identity_bound_source_declarations_passed","Unadjusted, specimen-authenticated; unknown remains unknown","primary",,,
+"timing","qualified","Fixed selected index; calendar date not elapsed 24h","primary",,,
+"clinical_inference","pending_scientific_review","Observed-population associations do not establish population transport or causal interpretation","primary",,,
+"population","identity_bound_source_declarations_passed","Authenticated original selected encounters only; broader mapping gap historical","primary_current",,,
+"BMI","identity_bound_source_declarations_passed","Encounter/prior reported then observed height/weight; no imputation","primary_current",,,
+"gas/ICD","identity_bound_source_declarations_passed","Unadjusted, specimen-authenticated; unknown remains unknown","primary_current",,,
+"timing","qualified","Fixed selected index; calendar date not elapsed 24h","primary_current",,,
+"clinical_inference","pending_scientific_review","Observed-population associations do not establish population transport or causal interpretation","primary_current",,,
+"population","identity_bound_source_declarations_passed","Authenticated original selected encounters only; broader mapping gap historical","all_obesity",,,
+"BMI","identity_bound_source_declarations_passed","Encounter/prior reported then observed height/weight; no imputation","all_obesity",,,
+"gas/ICD","identity_bound_source_declarations_passed","Unadjusted, specimen-authenticated; unknown remains unknown","all_obesity",,,
+"timing","qualified","Fixed selected index; calendar date not elapsed 24h","all_obesity",,,
+"clinical_inference","pending_scientific_review","Observed-population associations do not establish population transport or causal interpretation","all_obesity",,,
+"population","identity_bound_source_declarations_passed","Authenticated original selected encounters only; broader mapping gap historical","unresolved",,,
+"BMI","identity_bound_source_declarations_passed","Encounter/prior reported then observed height/weight; no imputation","unresolved",,,
+"gas/ICD","identity_bound_source_declarations_passed","Unadjusted, specimen-authenticated; unknown remains unknown","unresolved",,,
+"timing","qualified","Fixed selected index; calendar date not elapsed 24h","unresolved",,,
+"clinical_inference","pending_scientific_review","Observed-population associations do not establish population transport or causal interpretation","unresolved",,,
+"gas_audit/valid_unadjusted","identity-bound producer counter","Overlapping source diagnostics; do not add as a population partition",,245402,"source_record","selected-index source transport"
+"gas_audit/vbg_below_threshold_records","identity-bound producer counter","Overlapping source diagnostics; do not add as a population partition",,37921,"source_record","selected-index source transport"
+"gas_audit/abg_at_threshold_records","identity-bound producer counter","Overlapping source diagnostics; do not add as a population partition",,4606,"source_record","selected-index source transport"
+"gas_audit/abg_above_threshold_records","identity-bound producer counter","Overlapping source diagnostics; do not add as a population partition",,58769,"source_record","selected-index source transport"
+"gas_audit/abg_below_threshold_records","identity-bound producer counter","Overlapping source diagnostics; do not add as a population partition",,121728,"source_record","selected-index source transport"
+"gas_audit/vbg_above_threshold_records","identity-bound producer counter","Overlapping source diagnostics; do not add as a population partition",,20610,"source_record","selected-index source transport"
+"gas_audit/vbg_at_threshold_records","identity-bound producer counter","Overlapping source diagnostics; do not add as a population partition",,1768,"source_record","selected-index source transport"
+"gas_audit/unusable_numeric","identity-bound producer counter","Overlapping source diagnostics; do not add as a population partition",,9055,"source_record","selected-index source transport"
+"gas_audit/unspecified_specimen","identity-bound producer counter","Overlapping source diagnostics; do not add as a population partition",,65706,"source_record","selected-index source transport"
+"gas_audit/temperature_adjusted_source_records","identity-bound producer counter","Overlapping source diagnostics; do not add as a population partition",,30343,"source_record","selected-index source transport"
+"gas_audit/outside_validity_limits","identity-bound producer counter","Overlapping source diagnostics; do not add as a population partition",,564,"source_record","selected-index source transport"
+"gas_audit/temperature_adjusted_excluded","identity-bound producer counter","Overlapping source diagnostics; do not add as a population partition",,27031,"source_record","selected-index source transport"
+"gas_audit/encounters_with_temperature_adjusted_records","identity-bound producer counter","Overlapping source diagnostics; do not add as a population partition",,8176,"encounter","selected-index source transport"
+"icd_audit/target_records","identity-bound producer counter","Overlapping source diagnostics; do not add as a population partition",,18030,"source_record","selected-index source transport"
+"bmi_audit/valid","identity-bound producer counter","Overlapping source diagnostics; do not add as a population partition",,489292,"mapped_encounter","original candidate mapping"
+"bmi_audit/unresolved","identity-bound producer counter","Overlapping source diagnostics; do not add as a population partition",,43314,"mapped_encounter","original candidate mapping"
+"bmi_audit/missing","identity-bound producer counter","Overlapping source diagnostics; do not add as a population partition",,230963,"mapped_encounter","original candidate mapping"
+"bmi_methods/prior","identity-bound producer counter","Overlapping source diagnostics; do not add as a population partition",,86547,"mapped_encounter","original candidate mapping"
+"bmi_methods/current","identity-bound producer counter","Overlapping source diagnostics; do not add as a population partition",,243790,"mapped_encounter","original candidate mapping"
+"bmi_methods/none","identity-bound producer counter","Overlapping source diagnostics; do not add as a population partition",,274277,"mapped_encounter","original candidate mapping"
+"bmi_methods/calculated","identity-bound producer counter","Overlapping source diagnostics; do not add as a population partition",,158955,"mapped_encounter","original candidate mapping"
+"base_missingness/encounter_date","identity-bound producer counter","Overlapping source diagnostics; do not add as a population partition",,0,"selected_index","selected-index source transport"
+"base_missingness/age_at_encounter","identity-bound producer counter","Overlapping source diagnostics; do not add as a population partition",,0,"selected_index","selected-index source transport"
+"base_missingness/encounter_type","identity-bound producer counter","Overlapping source diagnostics; do not add as a population partition",,0,"selected_index","selected-index source transport"
+"base_missingness/bmi","identity-bound producer counter","Overlapping source diagnostics; do not add as a population partition",,0,"selected_index","selected-index source transport"
+"base_missingness/sex","identity-bound producer counter","Overlapping source diagnostics; do not add as a population partition",,0,"selected_index","selected-index source transport"
+"base_missingness/race_ethnicity","identity-bound producer counter","Overlapping source diagnostics; do not add as a population partition",,0,"selected_index","selected-index source transport"
+"base_missingness/location","identity-bound producer counter","Overlapping source diagnostics; do not add as a population partition",,0,"selected_index","selected-index source transport"

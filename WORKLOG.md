@@ -859,3 +859,46 @@ installation, commit/push/merge, visibility change, abstract or submission occur
   Historical snapshot hash checks passed (68, 80 and 95 files in the primary,
   joint same-day and earlier ICD packets respectively). Release precedes the
   single fresh Mini clinical estimation; the existing qualified input is reused.
+
+## 2026-10-24 — ICD clinical rerun and aggregate presentation
+
+- Implementing-agent review and all 13 E2E groups passed; 35/35 unchanged source
+  boundary checks passed. Final axis-only native exports matched the inspected
+  previews and had no text/geometry issues. PR #25 squash-merged at `29687c9`;
+  there were no configured GitHub check runs. Local and clean Mini main were
+  verified at that revision before clinical execution.
+- Checked Mini active jobs/leases, reused the isolated clean checkout and acquired
+  a fresh scoped execution lease. Existing input/manifest hashes matched the
+  earlier qualified source. Preflight `curve-preflight-20261024T052216-54986`
+  passed (zero fitted models). One clinical run then completed:
+  `curve-analyze-20261024T053607-55109`; analysis elapsed 806.078 seconds.
+- Both planned ICD models succeeded: full five-category Firth N=176,922, 12
+  iterations, adjusted score max 3.74e-8; specified-only maximum likelihood
+  N=176,794, without detected separation. Categories and source counts unchanged.
+- Transferred only the manifest-listed aggregate bundle to the ignored local
+  evidence directory and verified every hash. `compare-prior.R` reproduced all
+  11 original primary/S1/PIF tables within 1e-10. `scripts/review_bmi_run.R`
+  passed 137 checks. Rendering completed against that exact saved bundle, with
+  no clinical input reads or refits. Source and investigator approvals remain
+  distinct; no abstract was drafted.
+- Review `20261024T053735-83628` contains complete science HTML/PDF (56 PDF
+  pages) and audit HTML/PDF (5,654 PDF pages). All 116 complete-table checks and
+  all-page geometry checks passed. The three new S2 exports are 190 mm wide,
+  with SVG/PDF masters and 300-dpi PNG/JPG; native grayscale views, all scientific
+  contact-sheet pages, enlarged supplemental pages, eight selected audit pages
+  and all three captioned-booklet pages were visually inspected. Other audit
+  pages received automated checks only; the receipt states this boundary.
+- Published-reading packet prepared at `results/2026-10-24-icd-bias-reduced/`:
+  65 full aggregate tables, integrated science/audit PDFs, scientific HTML,
+  three ICD figure views, gallery, three-page booklet and separate numerical,
+  source, table and visual-review receipts. Its manifest covers 108 files.
+  B/F2/S1 PNGs match the immediate prior integrated exports; all 333 files in
+  the five historical snapshot manifests remain unchanged. Private inputs and
+  runnable bundles remain ignored. Investigator interpretation/figure approval
+  remains pending.
+- Final implementing-agent packet review passed 199 local links, all six snapshot
+  manifests, JSON parsing, aggregate table-header boundaries, and bounded private
+  path/credential-marker and PDF-attachment checks. These checks are not a new
+  disclosure clearance or investigator review. The source data and 333 historical
+  snapshot files are untouched; only the new aggregate packet and documentation
+  are staged for the follow-up release.

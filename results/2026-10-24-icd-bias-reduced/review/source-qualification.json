@@ -1,0 +1,17 @@
+{
+  "reviewed_at": "2026-10-24T02:13:40.023342-06:00",
+  "code_commit": "c0970484db8708845c023712d8e5204aad368d91",
+  "prior_source_acceptance": "reused unchanged accepted canonical source, readers and diagnosis capture policy",
+  "source_acceptance_for_supplement": "passed transport reconciliation",
+  "base_input_sha256": "013426c17805cf24e9d7a0c676aa14a91dbdf0f475c4cdb9840840920be9e50d",
+  "base_manifest_sha256": "d7af1d7e15cc77b0bcf0754d6041255e816997d21807f5ecad1b123ad58f8d99",
+  "canonical_database_sha256": "ccb844e15722abad995434a6187627f7d0b31a5b4c8ddf15480ab83e2bc551a5",
+  "enriched_input_sha256": "4bab2d09aa976bda54289198e6e5870056ab97dceebb95d3fafa73a0f2cae739",
+  "n_input_rows": 223514,
+  "n_source_target_records": 18030,
+  "original_fields_and_indexes_unchanged": true,
+  "complete_capture_union_matches_existing_composite": true,
+  "evidence_sha256": "3a5b733ece078c7b61d2e3bf5d4e21ab95bd53a8d299c3667b0f546bab1758c6",
+  "review_scope": "Agent inspection of automated evidence and reused accepted policies; no new investigator approval claimed",
+  "investigator_review": "pending"
+}

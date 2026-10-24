@@ -1,0 +1,52 @@
+{
+  "status": "passed",
+  "scope": "Final axis-only correction; native figure geometry and exact inspected-preview pixels",
+  "figures": {
+    "S2-ICD-observed": {
+      "geometry": [
+        {
+          "page": 1,
+          "width_pt": 538.0,
+          "height_pt": 538.0,
+          "outside": [],
+          "replacement": [],
+          "text_collisions": [],
+          "min_text_height_pt": 8.991
+        }
+      ],
+      "png_matches_visually_inspected_preview": true,
+      "sha256": "6a0a0be09d26ce2b2f0459c7db7e677a75e91155695cf3fbe65aeea9aa137588"
+    },
+    "S2-ICD-specified": {
+      "geometry": [
+        {
+          "page": 1,
+          "width_pt": 538.0,
+          "height_pt": 566.0,
+          "outside": [],
+          "replacement": [],
+          "text_collisions": [],
+          "min_text_height_pt": 8.990999999999996
+        }
+      ],
+      "png_matches_visually_inspected_preview": true,
+      "sha256": "7f103e7b20790adeb628a92e851468b217660f8c9058537df1ea0806537e3d20"
+    },
+    "S2-ICD-acuity": {
+      "geometry": [
+        {
+          "page": 1,
+          "width_pt": 538.0,
+          "height_pt": 566.0,
+          "outside": [],
+          "replacement": [],
+          "text_collisions": [],
+          "min_text_height_pt": 8.990999999999996
+        }
+      ],
+      "png_matches_visually_inspected_preview": true,
+      "sha256": "e64f3e503ccdc6107806ec3a1a31623d0540114ecf673fbbce5cdf9a3f81e2f7"
+    }
+  },
+  "scientific_approval": "pending"
+}

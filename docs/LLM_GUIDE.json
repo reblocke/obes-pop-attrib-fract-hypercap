@@ -15,13 +15,13 @@
     "execution_history": "WORKLOG.md",
     "retired_versions": "archive/README.md",
     "clinical_reading_snapshot": "results/2026-10-18/README.md",
-    "current_integrated_report": "results/2026-10-24-icd-acuity/README.md"
+    "current_integrated_report": "results/2026-10-24-icd-bias-reduced/README.md"
   },
   "reading_order": [
     "AGENTS.md",
     "README.md",
     "results/2026-10-18/README.md",
-    "results/2026-10-24-icd-acuity/README.md",
+    "results/2026-10-24-icd-bias-reduced/README.md",
     "results/2026-10-20-same-day-components/README.md",
     "docs/DECISIONS.md",
     "docs/BMI_HYPERCAPNIA_TRIANGULATION_PLAN.md",
@@ -90,7 +90,7 @@
     "presentation_note": "The saved scientific PDF embeds F1-A; standalone F1-B has identical values. Use B/F2 for the working main set. Older reports and CSVs retain their original pending-review wording; review_status.json and current decisions record subsequent owner approval separately.",
     "execution_limit": "Reading snapshot only, not a complete renderable run; the binary aggregate object and private receipts are omitted. Do not pass this package to make render.",
     "if_unavailable": "Obtain the versioned snapshot from this repository. State any evidence gap; never fill numerical claims from fixtures, older analyses, remembered counts or plausible estimates.",
-    "role": "Immutable primary snapshot; selected B/F2. Current integrated reports are in icd_acuity_supplement."
+    "role": "Immutable primary snapshot; selected B/F2. Current integrated reports are in icd_estimability_update."
   },
   "numerical_evidence": {
     "paths_relative_to": "results/2026-10-18/tables",
@@ -297,7 +297,8 @@
       "status": "tables/model_registry.csv",
       "diagnostic": "review/zero-category-adjustment-cells.csv"
     },
-    "guardrail": "No adjusted ICD-acuity probabilities or contrasts exist for this run. Source acceptance does not imply model estimability or clinical validation of coding."
+    "guardrail": "No adjusted ICD-acuity probabilities or contrasts exist for this run. Source acceptance does not imply model estimability or clinical validation of coding.",
+    "role": "Historical separated maximum-likelihood fit; preserved without relabeling."
   },
   "icd_estimability_update": {
     "date": "2026-10-24",
@@ -306,8 +307,43 @@
     "full_model": "Firth mean bias reduced five-category multinomial",
     "sensitivity": "unpenalized four-category multinomial excluding final unspecified-only category; separate reference denominator",
     "companion": "Observed five-unit BMI-band category proportions, Wilson intervals, frequency",
-    "state": "implementation; clinical rerun and investigator approval pending",
+    "state": "clinical estimation, numerical verification and scoped agent visual review completed; investigator interpretation and figure approval pending",
     "historical_snapshot": "results/2026-10-24-icd-acuity/",
-    "source_and_primary_S1_PIF": "preserve; unchanged source contract"
+    "source_and_primary_S1_PIF": "preserve; unchanged source contract",
+    "clinical_run": "curve-analyze-20261024T053607-55109",
+    "software_commit": "29687c9d6461a11aee9b19b622375d2860f3bd4e",
+    "reading_snapshot": "results/2026-10-24-icd-bias-reduced",
+    "package_manifest": "results/2026-10-24-icd-bias-reduced/manifest.json",
+    "table_index": "results/2026-10-24-icd-bias-reduced/table_index.csv",
+    "figure_ids": [
+      "S2-ICD-acuity",
+      "S2-ICD-specified",
+      "S2-ICD-observed"
+    ],
+    "models": {
+      "primary::icd_acuity/encounter/multinomial_spline": {
+        "status": "successful",
+        "estimator": "firth_mean_bias_reduced_v1",
+        "reference_N": 176922,
+        "underlying_ML_separation_detected": true
+      },
+      "primary::icd_acuity_specified/encounter/multinomial_spline": {
+        "status": "successful",
+        "estimator": "maximum_likelihood",
+        "reference_N": 176794,
+        "excluded_unspecified_only": 128
+      }
+    },
+    "numerical_review": "137 aggregate checks passed; all 11 original primary/S1/PIF tables unchanged within 1e-10",
+    "new_PIFs": 0,
+    "claim_sources": {
+      "curves": "tables/probability_curves.csv",
+      "component_changes": "tables/icd_acuity_contrasts.csv",
+      "joint_covariance": "tables/icd_acuity_probability_covariance.csv",
+      "observed_BMI_bands": "tables/icd_acuity_observed_bands.csv",
+      "counts": "tables/icd_acuity_categories.csv",
+      "status": "tables/model_registry.csv"
+    },
+    "guardrail": "Filter by exact model ID. Sensitivity has a different denominator. Firth finite estimates do not resolve sparse support, diagnostic incorporation or selection bias. Intervals are pointwise conditional information-based intervals. No abstract authorized."
   }
 }

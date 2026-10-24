@@ -18,14 +18,14 @@ exercise the software without clinical data.
 
 ## Study and release status
 
-The qualified primary clinical analysis completed on October 17, 2026; the joint
-same-day component analysis completed on October 20. The ICD-acuity run completed
-on October 24 with qualified source evidence, but the planned five-category model
-was nonestimable because of separation. Original primary/S1 estimates and PIFs
-remain unchanged. Numerical and visual checks are separate from investigator review.
-Primary scientific approval is **provisional**. **F1-B and F2** are the working
-main figures; investigator interpretation and approval of supplements remain
-**pending**. The same-day update preserves the primary estimates and PIFs.
+The qualified primary analysis completed on October 17, 2026; the joint same-day
+component analysis completed on October 20. On October 24, the revised ICD
+supplement fitted successfully using five-category Firth bias reduction and an
+unpenalized four-category sensitivity. All 11 original primary/S1/PIF comparison
+tables remain unchanged within 1e-10. The earlier separated fit is preserved as
+historical evidence. Numerical and visual checks are separate from investigator review.
+Primary scientific approval is **provisional**. **F1-B and F2** remain the working
+main figures; investigator interpretation and approval of supplements are **pending**.
 
 On October 23, 2026, the owner confirmed that the existing reports, figures and
 aggregate tables are cleared for public release under the source-data agreement,
@@ -34,11 +34,6 @@ excluded. Disclosure clearance does not confer scientific or submission approval
 See the [decision log](docs/DECISIONS.md) for dated decisions and publication
 planning, and the [public-release review](docs/PUBLIC_RELEASE_REVIEW.md) for checks
 and outstanding release tasks.
-
-The owner has now approved a bias-reduced five-category replacement, a
-four-category sensitivity excluding unspecified-only patients, and an observed
-BMI-band companion. Implementation and fresh clinical verification are in
-progress; the historical nonestimable snapshot below is not relabeled.
 
 ## Read the results
 
@@ -55,21 +50,23 @@ co-occurrence; not verified same-sample pairing**. Primary estimates and selecte
 B/F2 remain unchanged; investigator interpretation and S1 approval are pending.
 The [earlier binary supplement](results/2026-10-20-same-day-abg/README.md) is historical.
 
-The **[ICD-acuity snapshot](results/2026-10-24-icd-acuity/README.md)** contains the latest integrated
-reports, complete aggregate tables and S2 status display. Source checks passed;
-separation prevents adjusted ICD-acuity curves under the agreed model. Descriptive
-counts are available, and no fallback estimator or demographic recoding was used.
+The **[updated ICD-acuity snapshot](results/2026-10-24-icd-bias-reduced/README.md)** contains the
+latest integrated reports, complete aggregate tables and three ICD figure views.
+The full model retains all 176,922 diagnosis-evaluable primary patients; the
+sensitivity excludes 128 unspecified-only cases and uses its own denominator.
+The [earlier nonestimable snapshot](results/2026-10-24-icd-acuity/README.md) remains
+unchanged. Neither the source data nor the inherited demographic coding changed.
 
 | Read in this order | What to look for |
 |---|---|
-| [Current scientific report](results/2026-10-24-icd-acuity/bmi_hypercapnia.pdf) | Rationale, detailed methods, results, sensitivity analyses and interpretation limits |
+| [Current scientific report](results/2026-10-24-icd-bias-reduced/bmi_hypercapnia.pdf) | Rationale, detailed methods, results, sensitivity analyses and interpretation limits |
 | [B/F2 figure PDF — 2 pages](results/2026-10-18/selected_figures.pdf) | Selected relationship and secondary-scenario figures with full captions |
 | [B: relationship](results/2026-10-18/figures/F1-B.pdf) / [F2: secondary scenario](results/2026-10-18/figures/F2.pdf) | Individual vector masters; SVG, PNG and JPG versions are beside them |
-| [Supplemental S2](results/2026-10-24-icd-acuity/supplement_figure.pdf) | Explicit unavailable-curve status; category counts and separation details are in the report |
+| [Supplemental ICD figures](results/2026-10-24-icd-bias-reduced/supplement_figures.pdf) / [gallery](results/2026-10-24-icd-bias-reduced/gallery.html) | Full bias-reduced curves, specified-category sensitivity and observed BMI-band proportions |
 | [Supplemental S1](results/2026-10-20-same-day-components/supplement_figure.pdf) | Captioned joint same-day component figure; investigator interpretation and approval pending |
 | [Offline gallery](results/2026-10-18/gallery.html) | B/F2 at full size, captions, format downloads and source-table links |
-| [Current complete audit](results/2026-10-24-icd-acuity/bmi_hypercapnia_audit.pdf) | Full cohort profiles, model samples, coefficients, covariance and diagnostics |
-| [Current aggregate tables](results/2026-10-24-icd-acuity/TABLES.md) | Complete CSV exports, with a machine-readable field/row/hash index |
+| [Current complete audit](results/2026-10-24-icd-bias-reduced/bmi_hypercapnia_audit.pdf) | Full cohort profiles, model samples, coefficients, covariance and diagnostics |
+| [Current aggregate tables](results/2026-10-24-icd-bias-reduced/TABLES.md) | Complete CSV exports, with a machine-readable field/row/hash index |
 
 Download PDFs with GitHub's **Download raw file** control when needed.
 For the gallery, clone/download the folder and open `gallery.html` locally; GitHub
@@ -137,7 +134,7 @@ unmeasured confounding. The [source contract](docs/SOURCE_CONTRACT.md) and
 | [Work log](WORKLOG.md) / [archive index](archive/README.md) | Execution evidence and recovery of superseded versions |
 
 The current implementation is `bmi_hypercapnia_rfs_curve_audit_v7` (aggregate
-schema 12). The latest integrated clinical snapshot is schema 11. The earlier
+schema 12). The latest integrated clinical snapshot is also schema 12. The earlier
 joint same-day snapshot remains schema 10 and is preserved unchanged.
 `R/analysis.R` loads the current modules; `scripts/run_bmi_hypercapnia.R` audits
 and estimates; `scripts/render_bmi_hypercapnia.R` renders saved aggregates. The
@@ -148,7 +145,8 @@ not another analysis configuration.
 The repository is laid out as follows:
 
 ```text
-results/2026-10-24-icd-acuity/          Current integrated reports, ICD counts/status and tables
+results/2026-10-24-icd-bias-reduced/    Current integrated reports, ICD curves and complete tables
+results/2026-10-24-icd-acuity/          Historical separated ICD fit and source evidence
 results/2026-10-20-same-day-components/  Preserved joint S1 snapshot and tables
 results/2026-10-18/                    Primary snapshot: B/F2, reports and tables
 results/2026-10-20-same-day-abg/        Historical binary co-occurrence supplement
@@ -293,12 +291,17 @@ existing composite into chronic/OHS, acute-on-chronic or concurrent coding,
 acute, unspecified acuity and no target diagnosis. The qualified source reproduces
 the original binary composite and preserves all fixed indexes.
 
-The [October 24 packet](results/2026-10-24-icd-acuity/README.md) contains the full
-run and category counts. The planned unpenalized joint model is **nonestimable**:
-unspecified-acuity diagnoses are absent in three retained race/ethnicity strata,
-creating separation. S2 explicitly records unavailable adjusted curves; it is
-not an estimated relationship or a publication-ready curve. The approved
-bias-reduced replacement and specified-category sensitivity are implemented;
-fresh clinical estimates remain pending release and verification.
-Original primary/S1 estimates, PIFs and selected B/F2 remain unchanged. No abstract
-was drafted. See the [source command](docs/SOURCE_CONTRACT.md#icd-acuity-enrichment).
+The [updated October 24 packet](results/2026-10-24-icd-bias-reduced/README.md) contains successful
+five-category Firth bias-reduced curves, a four-category maximum-likelihood
+sensitivity excluding unspecified-only patients, and observed BMI-band proportions.
+The full model uses 176,922 patients; the sensitivity uses 176,794. Both retain
+the primary spline basis and adjustment. Their denominators differ, so this is
+not a same-denominator estimator comparison. Full joint covariance supplies
+pointwise intervals and component-change contrasts. No supplemental PIF was added.
+
+The [original failed fit](results/2026-10-24-icd-acuity/README.md) is historical;
+separation arose from rare unspecified coding, with no demonstrated source change.
+Bias reduction addresses finite estimation, not coding validity, sparse support
+or selection bias. Original primary/S1 estimates, PIFs and selected B/F2 are
+unchanged. Investigator interpretation and figure approval remain pending.
+No abstract was drafted. See the [source command](docs/SOURCE_CONTRACT.md#icd-acuity-enrichment).

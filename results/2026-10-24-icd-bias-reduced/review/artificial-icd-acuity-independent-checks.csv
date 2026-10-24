@@ -1,0 +1,2 @@
+"model_id","n","status"
+"primary::icd_acuity/encounter/multinomial_spline",3604,"independent likelihood, intervals, signed comparisons and base invariance verified"

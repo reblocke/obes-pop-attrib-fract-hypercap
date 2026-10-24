@@ -209,3 +209,15 @@ No supplemental PIF, primary/S1 refit change or unapproved fallback. The
 [ICD supplement](ICD_ACUITY_SUPPLEMENT.md) records equations, covariance,
 verification and the historical failed model. New clinical results require a
 new immutable schema-12 run; old bundles cannot acquire these labels.
+
+### 2026-10-24 execution update
+
+The approved ICD separation repair is implemented and clinically executed in
+`curve-analyze-20261024T053607-55109` from merged code `29687c9` (PR #25).
+Both the full five-category Firth fit (N=176,922) and the four-category
+maximum-likelihood sensitivity (N=176,794) succeeded. Existing input/source
+identities were reused after fresh preflight. All 11 original primary/S1/PIF
+tables agree with the prior clinical run within 1e-10; 137 aggregate checks passed.
+Use [the new reading snapshot](../results/2026-10-24-icd-bias-reduced/README.md)
+for these curves. Earlier failed-fit snapshots remain historical evidence.
+Investigator interpretation and figure approval remain pending; no abstract draft.

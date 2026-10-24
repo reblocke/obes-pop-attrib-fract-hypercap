@@ -250,3 +250,14 @@ accepted hash-bound input, complete-capture rule, original code flags and exact
 precedence. No fresh extraction or upstream rebuild is required. The four-class
 sensitivity filters final unspecified-only classifications after fixed-index
 selection; it never changes the original source fields or clinical episode.
+
+### 2026-10-24 reuse for the ICD estimator revision
+
+Fresh preflight `curve-preflight-20261024T052216-54986` passed on clean merged
+Mini revision `29687c9`, with zero fitted models. The subsequent clinical run
+`curve-analyze-20261024T053607-55109` reused the exact qualified input and manifest
+from the earlier ICD run. The estimator change required no new source extraction,
+preprocessing revision or code reclassification. Input and evidence hashes remain
+bound in private run receipts; the aggregate reading snapshot carries sanitized
+execution and numerical-review evidence. Source qualification does not establish
+clinical validity of the code categories or investigator approval.

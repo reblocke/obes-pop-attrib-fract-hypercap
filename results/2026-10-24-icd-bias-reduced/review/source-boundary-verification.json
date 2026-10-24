@@ -1,0 +1,166 @@
+{
+  "status": "passed",
+  "scope": "Artificial source boundaries; no clinical source qualification or human review",
+  "tests": [
+    {
+      "test": "test_icd_acuity.AcuitySourceBoundary.test_corrupt_records_fail",
+      "status": "passed"
+    },
+    {
+      "test": "test_icd_acuity.AcuitySourceBoundary.test_transport_to_flags",
+      "status": "passed"
+    },
+    {
+      "test": "test_original_population.OriginalPopulationChecks.test_captured_history_and_returns_cannot_expand_original_keys",
+      "status": "passed"
+    },
+    {
+      "test": "test_original_population.OriginalPopulationChecks.test_independent_qualification_rejects_added_history_key",
+      "status": "passed"
+    },
+    {
+      "test": "test_original_population.OriginalPopulationChecks.test_manifest_cannot_relabel_broader_mapping_as_original",
+      "status": "passed"
+    },
+    {
+      "test": "test_original_population.OriginalPopulationChecks.test_original_first_flag_is_verified_not_used_as_bmi_eligibility",
+      "status": "passed"
+    },
+    {
+      "test": "test_original_population.OriginalPopulationChecks.test_original_membership_requires_matching_captured_setting",
+      "status": "passed"
+    },
+    {
+      "test": "test_preparation.PreparationChecks.test_adjusted_and_total_co2_never_enter_primary",
+      "status": "passed"
+    },
+    {
+      "test": "test_preparation.PreparationChecks.test_expanded_coverage_and_original_keys",
+      "status": "passed"
+    },
+    {
+      "test": "test_preparation.PreparationChecks.test_explicit_units_and_numeric_missingness",
+      "status": "passed"
+    },
+    {
+      "test": "test_preparation.PreparationChecks.test_full_source_hash_receipt_reuse_requires_exact_identity_and_digest",
+      "status": "passed"
+    },
+    {
+      "test": "test_preparation.PreparationChecks.test_icd_captured_absence_and_incomplete_capture",
+      "status": "passed"
+    },
+    {
+      "test": "test_preparation.PreparationChecks.test_identity_and_failure_receipts",
+      "status": "passed"
+    },
+    {
+      "test": "test_preparation.PreparationChecks.test_incomplete_or_duplicate_stream_cannot_be_accepted",
+      "status": "passed"
+    },
+    {
+      "test": "test_preparation.PreparationChecks.test_mapped_csv_preserves_stored_float32_values",
+      "status": "passed"
+    },
+    {
+      "test": "test_preparation.PreparationChecks.test_maxima_testing_and_calendar_day_reconcile",
+      "status": "passed"
+    },
+    {
+      "test": "test_preparation.PreparationChecks.test_reader_pin_and_restricted_output_guard",
+      "status": "passed"
+    },
+    {
+      "test": "test_preparation.PreparationChecks.test_retired_population_schema_rejected_before_source_access",
+      "status": "passed"
+    },
+    {
+      "test": "test_preparation.PreparationChecks.test_strict_validity_bounds_and_inclusive_outcome_thresholds",
+      "status": "passed"
+    },
+    {
+      "test": "test_preparation.PreparationChecks.test_typed_R_roundtrip_preserves_keys_dates_missingness_and_precision",
+      "status": "passed"
+    },
+    {
+      "test": "test_preparation.PreparationChecks.test_unadjusted_specimens_and_conflicts",
+      "status": "passed"
+    },
+    {
+      "test": "test_rfs_enrichment.RfsMetadataTests.test_dictionary_rejected",
+      "status": "passed"
+    },
+    {
+      "test": "test_rfs_enrichment.RfsMetadataTests.test_duplicate_rejected",
+      "status": "passed"
+    },
+    {
+      "test": "test_rfs_enrichment.RfsMetadataTests.test_flags_follow_exact_encounter_not_patient",
+      "status": "passed"
+    },
+    {
+      "test": "test_rfs_enrichment.RfsMetadataTests.test_uncovered_rejected",
+      "status": "passed"
+    },
+    {
+      "test": "test_rfs_enrichment.RfsMetadataTests.test_unknown_not_zero",
+      "status": "passed"
+    },
+    {
+      "test": "test_same_day_abg.CooccurrenceBoundary.test_no_cross_date_or_cross_key_linkage",
+      "status": "passed"
+    },
+    {
+      "test": "test_same_day_abg.CooccurrenceBoundary.test_partial_dates_and_measurements",
+      "status": "passed"
+    },
+    {
+      "test": "test_same_day_abg.CooccurrenceBoundary.test_record_identity_duplicates_and_conflicts",
+      "status": "passed"
+    },
+    {
+      "test": "test_same_day_abg.CooccurrenceBoundary.test_specimen_units_and_validity",
+      "status": "passed"
+    },
+    {
+      "test": "test_same_day_abg.CooccurrenceBoundary.test_thresholds_and_multiple_values",
+      "status": "passed"
+    },
+    {
+      "test": "test_same_day_abg.CooccurrenceBoundary.test_unavailable_is_not_assessed_zero",
+      "status": "passed"
+    },
+    {
+      "test": "test_source_qualification.IndependentSourceChecks.test_gas_specimens_later_day_and_captured_absence",
+      "status": "passed"
+    },
+    {
+      "test": "test_source_qualification.IndependentSourceChecks.test_known_missing_bmi_uncertain_setting_and_index_ties",
+      "status": "passed"
+    },
+    {
+      "test": "test_source_qualification.IndependentSourceChecks.test_qualification_cannot_rebind_another_preparation_config",
+      "status": "passed"
+    }
+  ],
+  "sources_unchanged": true,
+  "source_snapshot_scope": "Repository Python test/adapter files; not a claim that every file was imported",
+  "sources": {
+    "scripts/check_report_exports.py": "d157be7c026fa7f2b627ed0ccadba6a7721d69fefbdf5387a825aee16d2ddaf5",
+    "scripts/enrich_icd_acuity.py": "551ea4092fe83132ba77f5430f0f3124926419c8485d4ce86a63e0b728bac832",
+    "scripts/enrich_rfs_input.py": "f42adc0f08feebf105cffa1eb75a90f2ac7ee06c5ee2d54ada801a90ef9b913f",
+    "scripts/enrich_same_day_abg.py": "d7cb9ae4bff95a6f6c1731d0c65785108eadbccc1c459591e8c3a3d2c053aedf",
+    "scripts/map_common_index_covariates.py": "48a7a6bcd058597194d4b27ab11aa93bb4de0a71aaf7200bc420f29f433b686b",
+    "scripts/original_encounter_population.py": "1edf7922d168b73d564f4ccb22eb1c08480012fbde35393c2a4d7a12bc7a69a9",
+    "scripts/prepare_common_index_input.py": "99916ae3872362b9e110d191c9d19b4237316c10f0cbad58aaba77df2da67fe9",
+    "scripts/qualify_common_index_source.py": "afc2453d724cab6229da702bd4866f88e950f03864c4fcae348d965e178bd513",
+    "tests/run_source_checks.py": "92a71c2991e91f866fb8f9c21ac0ec98ca30f0fa873bfd1698047d82c400dc43",
+    "tests/test_icd_acuity.py": "8cf1e30f52c32711694ce841ce64c74a5b1b27418e955d6b30441130a6b9401e",
+    "tests/test_original_population.py": "28d683a563a71ab1acf2fe1c35cf676d7f5d6b69aebcbd2902afbca8585319ed",
+    "tests/test_preparation.py": "0edd13432806e248846a39e991784c19bb7a0f3adc6908f343f5387d7dce231a",
+    "tests/test_rfs_enrichment.py": "2b57838ef44bd875a7fac1ac4c9ce41fe3f59060c1ab56aebe5a6ef76776f2e1",
+    "tests/test_same_day_abg.py": "5353b1694356a251d4c5a664e857c96a9c2d8c333af7716d21bd88f97753fa7f",
+    "tests/test_source_qualification.py": "86fbd3468ae12e884fb3090164aa35b262c2ccb58a0969caa9223a2f8aaf4c8d"
+  },
+  "source_receipt_sha256": "0e00bff37c6cc463fb7806a0adc4cb050db86d7de6384a7c26f15bfccfb51428"
+}
