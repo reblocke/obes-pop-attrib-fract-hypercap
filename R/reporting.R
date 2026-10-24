@@ -63,7 +63,7 @@ validate_analysis_bundle <- function(a) {
   }
   invisible(TRUE)
 }
-bmi_estimation_files <- function() c("R/analysis.R","R/input_contract.R","R/cohort_audit.R","R/bmi_models.R","R/standardization.R","R/rfs_analysis.R","R/same_day_abg.R","R/same_day_multinomial.R","R/icd_acuity.R","config/bmi_hypercapnia_analysis.json","config/variable_dictionary.csv","config/common_index_source_policy.json","config/common_index_bmi_policy.json")
+bmi_estimation_files <- function() c("R/analysis.R","R/input_contract.R","R/cohort_audit.R","R/bmi_models.R","R/standardization.R","R/rfs_analysis.R","R/same_day_abg.R","R/same_day_multinomial.R","R/icd_bias_reduction.R","R/icd_acuity.R","config/bmi_hypercapnia_analysis.json","config/variable_dictionary.csv","config/common_index_source_policy.json","config/common_index_bmi_policy.json")
 bmi_hash_files <- function(files) as.list(setNames(vapply(file.path(tri_repo_root(),files),tri_sha256,character(1)),files))
 bmi_write_bundle <- function(a,path,config,receipt,mode="fixture") {
   validate_analysis_bundle(a)
@@ -74,7 +74,7 @@ bmi_write_bundle <- function(a,path,config,receipt,mode="fixture") {
   jsonlite::write_json(receipt,file.path(path,"input_receipt.json"),auto_unbox=TRUE,pretty=TRUE,digits=NA)
   writeLines(capture.output(sessionInfo()),file.path(path,"session-info.txt"))
   files<-list.files(path,full.names=TRUE)
-  manifest<-list(schema_version=11L,analysis_id=config$analysis_id,run_id=basename(path),mode=mode,
+  manifest<-list(schema_version=12L,analysis_id=config$analysis_id,run_id=basename(path),mode=mode,
     created_utc=format(Sys.time(),tz="UTC",usetz=TRUE),estimation_sources=bmi_hash_files(bmi_estimation_files()),
     files=as.list(setNames(vapply(files,tri_sha256,character(1)),basename(files))),
     source_status=if(mode=="fixture")"artificial_only"else receipt$source_status,
@@ -88,7 +88,7 @@ bmi_write_bundle <- function(a,path,config,receipt,mode="fixture") {
 bmi_read_bundle <- function(path,check_sources=TRUE) {
   mf<-file.path(path,"bundle_manifest.json");if(!file.exists(mf))stop("Missing bundle manifest")
   m<-jsonlite::read_json(mf,simplifyVector=FALSE)
-  if(!identical(m$schema_version,11L)||!identical(m$analysis_id,"bmi_hypercapnia_rfs_curve_audit_v6"))stop("Superseded analysis; rerun under the current design")
+  if(!identical(m$schema_version,12L)||!identical(m$analysis_id,"bmi_hypercapnia_rfs_curve_audit_v7"))stop("Superseded analysis; rerun under the current design")
   for(name in names(m$files)) {
     if(basename(name)!=name||!file.exists(file.path(path,name))||!identical(tri_sha256(file.path(path,name)),m$files[[name]]))stop("Bundle hash mismatch: ",name)
   }
@@ -354,7 +354,7 @@ bmi_export_population_figures <- function(bundle,output) {
   if(nrow(a$model_registry))for(i in seq_len(nrow(a$model_registry))) {
     id<-a$model_registry$model_id[i];d<-a$model_residual_bins
     if(nrow(d))d<-d[d$model_id==id,,drop=FALSE]
-    if(nrow(d) && a$model_registry$family[i] %in% c("same_day_abg","icd_acuity")) {
+    if(nrow(d) && a$model_registry$family[i] %in% c("same_day_abg","icd_acuity","icd_acuity_specified")) {
       z<-d[d$diagnostic=="bmi",,drop=FALSE];z$position<-as.numeric(z$group)
       chart<-ggplot2::ggplot(z,ggplot2::aes(position,observed))+ggplot2::geom_point(shape=1,size=2)+
         ggplot2::geom_line(ggplot2::aes(y=fitted),linewidth=.6)+ggplot2::facet_wrap(~category_id,ncol=1)+

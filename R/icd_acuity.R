@@ -6,7 +6,7 @@ bmi_icd_labels <- c(no_target="No target diagnosis documented",chronic_ohs="Chro
   acute_chronic="Acute-on-chronic or concurrent coding",acute="Acute coding",unspecified="Unspecified acuity")
 bmi_metadata_fields <- c(bmi_metadata_fields,bmi_icd_fields)
 bmi_icd_tables <- c("icd_acuity_status","icd_acuity_categories","icd_acuity_patterns","icd_acuity_reconciliation",
-  "icd_acuity_contrasts","icd_acuity_probability_covariance","icd_acuity_curve_reconciliation")
+  "icd_acuity_contrasts","icd_acuity_probability_covariance","icd_acuity_curve_reconciliation","icd_acuity_observed_bands")
 bmi_table_names <- c(bmi_table_names,bmi_icd_tables)
 
 bmi_icd_category <- function(d) {
@@ -18,11 +18,15 @@ bmi_icd_category <- function(d) {
   x[ok & (d$icd_J9622 %in% 1 | (d$icd_J9602 %in% 1 & (d$icd_J9612 %in% 1 | d$icd_E662 %in% 1)))]<-"acute_chronic"
   factor(x,levels=bmi_icd_classes)
 }
-bmi_icd_spec <- function() {
-  pairs<-lapply(combn(2:5,2,simplify=FALSE),rev)
-  list(family="icd_acuity",classes=bmi_icd_classes,category=bmi_icd_category,total="any_target",
-    contrast_pairs=pairs,contrast_names=vapply(pairs,function(x)paste0(bmi_icd_classes[x[1]],"_minus_",bmi_icd_classes[x[2]],"_change"),character(1)),table_prefix="icd_acuity")
+bmi_icd_spec <- function(specified=FALSE) {
+  classes<-if(specified)bmi_icd_classes[1:4]else bmi_icd_classes
+  pairs<-lapply(combn(2:length(classes),2,simplify=FALSE),rev)
+  list(family=if(specified)"icd_acuity_specified"else"icd_acuity",classes=classes,
+    category=function(d)factor(bmi_icd_category(d),levels=classes),total="any_target",
+    estimator=if(specified)"maximum_likelihood"else"firth_mean_bias_reduced_v1",
+    contrast_pairs=pairs,contrast_names=vapply(pairs,function(x)paste0(classes[x[1]],"_minus_",classes[x[2]],"_change"),character(1)),table_prefix="icd_acuity")
 }
+
 bmi_validate_icd_acuity <- function(d) {
   present<-bmi_icd_fields %in% names(d)
   if(!any(present))return(invisible(TRUE))
@@ -61,6 +65,8 @@ bmi_icd_load <- function(loaded,manifest_path) {
 }
 
 bmi_append_icd_acuity <- function(a,ctx,raw,config,audit_only=FALSE,source_status="artificial") {
+  if(!identical(config$icd_acuity_estimator,"firth_mean_bias_reduced_v1") ||
+     !isTRUE(config$icd_acuity_specified_sensitivity))stop("Unsupported ICD estimator/registry configuration")
   c<-ctx$members$C;c<-c[c$rfs_group=="primary",,drop=FALSE]
   present<-all(bmi_icd_fields %in% names(c));e<-attr(raw,"icd_acuity_evidence")
   qualified<-isTRUE(config$icd_acuity_enabled)&&present&&(source_status %in% c("artificial","artificial_only")||identical(e$status,"qualified"))
@@ -94,19 +100,46 @@ bmi_append_icd_acuity <- function(a,ctx,raw,config,audit_only=FALSE,source_statu
         chronic_provenance=if(z$icd_J9612[1]==1&&z$icd_E662[1]==1)"J9612_and_E662"else if(z$icd_J9612[1]==1)"J9612_only"else if(z$icd_E662[1]==1)"E662_only"else"neither")
     })
     t$icd_acuity_patterns<-bmi_bind(pattern_rows)
+    t$icd_acuity_observed_bands<-bmi_bind(lapply(sort(unique(p$band)),function(lo) {
+      d<-p[p$band==lo,,drop=FALSE];n<-as.integer(table(bmi_icd_category(d)))
+      ci<-t(vapply(n,function(v)bmi_wilson(v,nrow(d)),numeric(2)))
+      data.frame(category_id=bmi_icd_classes,bin_low=lo,bin_high=lo+config$bmi_bin_width,
+        n=n,N=nrow(d),proportion=n/nrow(d),conf_low=ci[,1],conf_high=ci[,2],
+        sparse=nrow(d)<config$sparse_n | pmin(n,nrow(d)-n)<config$sparse_events,
+        status="observed",denominator="Primary covariate-complete known diagnosis capture")
+    }))
   }
+  p$pattern<-p$band<-NULL
   if(!audit_only) {
     b<-a$bmi_basis[a$bmi_basis$analysis_population_id=="primary",]
     if(nrow(b)!=4)stop("Missing primary basis for ICD acuity")
     basis<-list(knots=b$knot,basis_id=b$basis_id[1],status=b$status[1],quantile_type=b$quantile_type[1])
-    m<-bmi_multinomial_fit(p,basis,config,qualified,reason,bmi_icd_spec());t$model_registry<-m$row
-    for(name in c("coefficients","covariance","references"))t[[c(coefficients="coefficients",covariance="coefficient_covariance",references="factor_references")[[name]]]]<-m[[name]]
-    for(name in c("model_fit_diagnostics","model_residual_bins","model_influence_summary","model_support"))t[[name]]<-m[[name]]
-    predicted<-bmi_multinomial_predictions(m,config);for(name in names(predicted))t[[name]]<-predicted[[name]]
-    t$model_sample_audit<-m$row;t$expected_models<-m$row["model_id"]
-    t$coverage_index<-data.frame(kind="model",item_id=m$row$model_id,table="model_registry",status=m$row$status)
+    for(specified in c(FALSE,TRUE)) {
+      spec<-bmi_icd_spec(specified)
+      sample<-if(specified)p[bmi_icd_category(p)!="unspecified",,drop=FALSE]else p
+      if(specified) {
+        node<-bmi_node("C_icd_acuity_specified",sample,status=if(qualified)"assessed"else"unavailable",label="Diagnosis capture excluding unspecified-only category")
+        if(!qualified)node[c("n_records","n_encounters","n_patients","n")]<-NA_real_
+        t$cohort_nodes<-bmi_bind(list(t$cohort_nodes,node));t$population_registry<-bmi_bind(list(t$population_registry,node))
+        if(qualified) {
+          profiles<-bmi_profile(sample,"C_icd_acuity_specified",a$variable_dictionary,config,p)
+          for(name in names(profiles))t[[name]]<-bmi_bind(list(t[[name]],profiles[[name]]))
+        }
+      }
+      m<-bmi_multinomial_fit(sample,basis,config,qualified,reason,spec)
+      t$model_registry<-bmi_bind(list(t$model_registry,m$row))
+      for(name in c("coefficients","covariance","references")) {
+        target<-c(coefficients="coefficients",covariance="coefficient_covariance",references="factor_references")[[name]]
+        t[[target]]<-bmi_bind(list(t[[target]],m[[name]]))
+      }
+      for(name in c("model_fit_diagnostics","model_residual_bins","model_influence_summary","model_support"))t[[name]]<-bmi_bind(list(t[[name]],m[[name]]))
+      predicted<-bmi_multinomial_predictions(m,config)
+      for(name in names(predicted))t[[name]]<-bmi_bind(list(t[[name]],predicted[[name]]))
+    }
+    t$model_sample_audit<-t$model_registry;t$expected_models<-t$model_registry["model_id"]
+    t$coverage_index<-data.frame(kind="model",item_id=t$model_registry$model_id,table="model_registry",status=t$model_registry$status)
   }
-  t$coverage_index<-bmi_bind(list(t$coverage_index,data.frame(kind="population",item_id="C_icd_acuity",table="population_registry",status=status)))
+  t$coverage_index<-bmi_bind(list(t$coverage_index,data.frame(kind="population",item_id=t$population_registry$population_id,table="population_registry",status=status)))
   t<-bmi_namespace(t,"primary")
   for(name in names(t)) {
     z<-t[[name]]
@@ -129,20 +162,31 @@ bmi_validate_icd_bundle <- function(a) {
     rec<-a$icd_acuity_reconciliation
     if(rec$n[rec$metric=="original_composite_positive"]!=sum(z$n[-1])||sum(a$icd_acuity_patterns$n)!=z$N[1])stop("ICD composite/pattern reconciliation mismatch")
   }
-  joint<-a$model_registry[a$model_registry$family=="icd_acuity",,drop=FALSE]
+  joint<-a$model_registry[a$model_registry$family %in% c("icd_acuity","icd_acuity_specified"),,drop=FALSE]
   if(!nrow(joint))return(invisible(TRUE))
-  if(nrow(joint)!=1L||joint$model_form!="multinomial_spline"||any(a$policy_totals$model_id==joint$model_id))stop("Invalid ICD supplemental registry")
-  curves<-a$probability_curves[a$probability_curves$model_id==joint$model_id & a$probability_curves$status=="estimated",]
-  expected<-c(bmi_icd_classes,"any_target")
-  for(ix in split(seq_len(nrow(curves)),curves$bmi)) {
-    z<-curves[ix,];pp<-setNames(z$probability,z$outcome_id)
-    if(nrow(z)!=6L||anyDuplicated(z$outcome_id)||!setequal(z$outcome_id,expected)||any(!is.finite(pp)|pp<0|pp>1)||
-       abs(sum(pp[bmi_icd_classes])-1)>1e-9||abs(sum(pp[bmi_icd_classes[-1]])-pp['any_target'])>1e-9)stop("ICD curve partition mismatch")
-    cv<-a$icd_acuity_probability_covariance;cv<-cv[cv$bmi==z$bmi[1],]
-    if(nrow(cv)!=36L||anyDuplicated(paste(cv$outcome1,cv$outcome2))||any(!is.finite(cv$covariance)))stop("Missing ICD joint covariance")
-    component<-cv$outcome1 %in% bmi_icd_classes[-1]&cv$outcome2 %in% bmi_icd_classes[-1]
-    total<-cv$outcome1=='any_target'&cv$outcome2=='any_target'
-    if(sum(total)!=1L||abs(sum(cv$covariance[component])-cv$covariance[total])>1e-9)stop("ICD total covariance mismatch")
+  if(nrow(joint)!=2L||any(joint$model_form!="multinomial_spline")||any(a$policy_totals$model_id %in% joint$model_id))stop("Invalid ICD supplemental registry")
+  if(!setequal(joint$family,c("icd_acuity","icd_acuity_specified"))||
+     !identical(joint$estimator,c("firth_mean_bias_reduced_v1","maximum_likelihood")))stop("ICD estimator identity mismatch")
+  if(nrow(z)&&all(z$status=="qualified")) {
+    if(joint$n_model[1]!=z$N[1]||joint$n_model[2]!=z$N[1]-z$n[z$category_id=="unspecified"])stop("ICD sensitivity denominator mismatch")
+    band<-a$icd_acuity_observed_bands
+    if(sum(band$n)!=z$N[1])stop("ICD BMI-band counts do not reconcile")
+    for(category in bmi_icd_classes)if(sum(band$n[band$category_id==category])!=z$n[z$category_id==category])stop("ICD band category mismatch")
+  }
+  for(i in seq_len(nrow(joint))) {
+    classes<-bmi_icd_spec(joint$family[i]=="icd_acuity_specified")$classes
+    curves<-a$probability_curves[a$probability_curves$model_id==joint$model_id[i] & a$probability_curves$status=="estimated",]
+    expected<-c(classes,"any_target")
+    for(ix in split(seq_len(nrow(curves)),curves$bmi)) {
+      z<-curves[ix,];pp<-setNames(z$probability,z$outcome_id)
+      if(nrow(z)!=length(expected)||anyDuplicated(z$outcome_id)||!setequal(z$outcome_id,expected)||any(!is.finite(pp)|pp<0|pp>1)||
+         abs(sum(pp[classes])-1)>1e-9||abs(sum(pp[classes[-1]])-pp['any_target'])>1e-9)stop("ICD curve partition mismatch")
+      cv<-a$icd_acuity_probability_covariance;cv<-cv[cv$model_id==joint$model_id[i]&cv$bmi==z$bmi[1],]
+      if(nrow(cv)!=length(expected)^2||anyDuplicated(paste(cv$outcome1,cv$outcome2))||any(!is.finite(cv$covariance)))stop("Missing ICD joint covariance")
+      component<-cv$outcome1 %in% classes[-1]&cv$outcome2 %in% classes[-1]
+      total<-cv$outcome1=='any_target'&cv$outcome2=='any_target'
+      if(sum(total)!=1L||abs(sum(cv$covariance[component])-cv$covariance[total])>1e-9)stop("ICD total covariance mismatch")
+    }
   }
   invisible(TRUE)
 }

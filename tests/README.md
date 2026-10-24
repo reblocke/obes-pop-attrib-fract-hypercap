@@ -97,3 +97,32 @@ The E2E oracle independently fits the five-class likelihood and finite-differenc
 contrasts, verifies original outputs, and renders S2 and both complete reports.
 The isolated Python source boundary is justified because typed-input E2E cannot
 observe original-key/code-system transport corruption or record identity conflicts.
+
+## ICD separation repair (2026-10-24, before implementation)
+
+Observable failures: a separated class can be silently dropped, regularization
+can alter primary/S1 fitting, a four-category sensitivity can retain excluded
+patients in standardization, and a scaled Hessian or category ordering error can
+produce plausible but incorrect intervals. A Poisson expansion can exhaust memory
+at the clinical cohort size. Sparse regions must remain visible after finite
+estimates become available. Unsupported inputs and absent classes must retain
+explicit failure positions.
+
+The ICD E2E oracle will optimize the multinomial log likelihood plus one half of
+the log determinant of its information independently, with numerical derivatives;
+it will compare coefficients, information covariance, predictions and signed
+contrasts. A separated fixture is optimized independently; a published brglm2 AS_mean
+five-category example supplies externally recorded coefficients and SEs. A numerical derivative check
+of the penalized score and an intercept-only analytic solution independently
+cover optimizer errors the report render cannot detect. The four-category
+sensitivity is unpenalized, has its own filtered reference, and remains failed
+if separation persists. All original primary/S1/PIF numerical tables must remain
+unchanged. New tables and figure exports must match their shared aggregates.
+
+Reference fixture `fixtures/icd_firth_reference.csv` contains the public
+alligator example used by the package author, not study patients. Source data:
+https://github.com/ikosmidis/brglm2/blob/main/data/alligators.rda . Expected
+coefficients/SEs are transcribed from the converged AS_mean example in
+https://stat.ethz.ch/CRAN/web/packages/brglm2/vignettes/multinomial.html .
+The separated numerical oracle is independent of that nonseparated reference.
+No brglm2 runtime dependency or live network access is needed for tests.

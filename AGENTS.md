@@ -2,7 +2,7 @@
 
 ## Scope and change discipline
 
-The current analysis is schema 11 (`bmi_hypercapnia_rfs_curve_audit_v6`). Read
+The current analysis is schema 12 (`bmi_hypercapnia_rfs_curve_audit_v7`). Read
 `docs/BMI_HYPERCAPNIA_TRIANGULATION_PLAN.md` and `docs/SOURCE_CONTRACT.md` before
 substantive work. Configuration and the variable dictionary live in `config/`;
 the cohort ledger is the sole count authority.
@@ -21,8 +21,11 @@ draft, rerun, share or submit beyond the owner's current request.
 The versioned reading snapshot is `results/2026-10-18/`; verify its manifest and
 use its aggregate tables for current numerical claims. It is not a runnable bundle.
 The latest integrated report and ICD counts/status are in
-`results/2026-10-24-icd-acuity/`; verify its manifest. The planned ICD-acuity fit is
-nonestimable due to separation; do not describe S2 as an estimated curve.
+`results/2026-10-24-icd-acuity/`; verify its manifest. That historical unpenalized ICD-acuity fit is
+nonestimable due to separation; do not relabel its S2 as an estimated curve.
+The approved schema-12 replacement uses Firth mean bias reduction, with a
+four-category unpenalized sensitivity excluding unspecified-only patients.
+Clinical validation of the replacement remains pending until a new run is reviewed.
 Joint same-day component results remain in
 `results/2026-10-20-same-day-components/`; verify that separate manifest.
 For the historical binary recorded-day supplemental endpoints, use the separate

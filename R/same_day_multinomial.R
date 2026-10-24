@@ -28,11 +28,12 @@ bmi_same_day_spec <- function() list(family="same_day_abg", classes=bmi_same_day
 
 bmi_multinomial_fit <- function(p,basis,config,qualified,reason,spec=bmi_same_day_spec()) {
   classes<-spec$classes;K<-length(classes)
+  bias_reduced<-identical(spec$estimator,"firth_mean_bias_reduced_v1")
   started <- proc.time()[3]
   id <- paste0(spec$family,"/encounter/multinomial_spline")
   formula <- ~bmi_ns1+bmi_ns2+bmi_ns3+age_at_encounter+sex+race_ethnicity+location
   p$.category <- spec$category(p)
-  row <- data.frame(model_id=id,family=spec$family,outcome_id=if(K==3L)"three_category"else"five_category",
+  row <- data.frame(model_id=id,family=spec$family,outcome_id=c(`3`="three_category",`4`="four_category",`5`="five_category")[[as.character(K)]],
     window="encounter",training_population_id=paste0("C_",spec$family),field=".category",model_form="multinomial_spline",
     source_status=if(qualified)"qualified"else"pending",source_reason=reason,
     formula_text=paste("category",paste(deparse(formula),collapse=" ")),basis_id=basis$basis_id,
@@ -42,6 +43,7 @@ bmi_multinomial_fit <- function(p,basis,config,qualified,reason,spec=bmi_same_da
     n_events=if(qualified)sum(p$.category!=classes[1])else NA_integer_,
     n_nonevents=if(qualified)sum(p$.category==classes[1])else NA_integer_,
     n_parameters=NA_integer_,model_rank=NA_integer_,status="not_attempted",failure_reason="",warnings="",fit_runtime=0)
+  if(spec$family!="same_day_abg")row$estimator<-if(bias_reduced)spec$estimator else "maximum_likelihood"
   fail <- function(status,why) {
     row$status<-status;row$failure_reason<-why;row$fit_runtime<-unname(proc.time()[3]-started)
     list(row=row,data=p,basis=basis,spec=spec,beta=NULL,coefficients=data.frame(),covariance=data.frame(),references=data.frame(),
@@ -69,25 +71,41 @@ bmi_multinomial_fit <- function(p,basis,config,qualified,reason,spec=bmi_same_da
   z<-sweep(x,2,scale,"/");y<-as.integer(p$.category)
   separated<-tryCatch(bmi_multinomial_separation(z,y),error=function(e)e)
   if(inherits(separated,"error"))return(fail("diagnostic_failure",conditionMessage(separated)))
-  if(separated)return(fail("separation","Complete or quasi-complete multinomial separation"))
+  if(separated && !bias_reduced)return(fail("separation","Complete or quasi-complete multinomial separation"))
   warnings<-character()
-  fit<-tryCatch(withCallingHandlers(nnet::multinom(y~X-1,data=list(y=p$.category,X=z),Hess=TRUE,
-    trace=FALSE,decay=0,maxit=config$multinomial_maxit,reltol=1e-12,abstol=1e-10,na.action=na.fail),
-    warning=function(w){warnings<<-c(warnings,conditionMessage(w));invokeRestart("muffleWarning")}),error=function(e)e)
-  row$warnings<-paste(unique(warnings),collapse=" | ")
-  if(inherits(fit,"error"))return(fail("convergence_failure",conditionMessage(fit)))
-  if(fit$convergence!=0L)return(fail("convergence_failure","Multinomial optimizer did not converge"))
-  h<-fit$Hessian
-  eigenvalues<-eigen(h,symmetric=TRUE,only.values=TRUE)$values
-  if(any(!is.finite(h))||min(eigenvalues)<=max(eigenvalues)*1e-10)return(fail("rank_deficiency","Singular or ill-conditioned joint observed information"))
-  beta<-as.vector(t(coef(fit)))/rep(scale,K-1L)
-  terms<-unlist(lapply(classes[-1],function(k)paste(k,colnames(x),sep="::")))
-  names(beta)<-terms
-  v<-solve(h)/outer(rep(scale,K-1L),rep(scale,K-1L));dimnames(v)<-list(terms,terms)
-  if(any(!is.finite(c(beta,v))))return(fail("rank_deficiency","Nonfinite joint coefficients/covariance"))
-  pr<-as.matrix(fitted(fit));truth<-diag(K)[y,,drop=FALSE]
-  score<-as.vector(crossprod(z,(pr-truth)[,2:K,drop=FALSE]))
-  if(max(abs(score))/nrow(p)>1e-6)return(fail("convergence_failure","Optimizer score remains above tolerance"))
+  if(bias_reduced) {
+    row$covariance_method<-"inverse multinomial information at Firth estimate; empirical reference fixed"
+    fit<-tryCatch(bmi_firth_multinomial(z,y,K,config$multinomial_maxit),error=function(e)e)
+    if(inherits(fit,"error"))return(fail("convergence_failure",conditionMessage(fit)))
+    if(fit$convergence!=0L)return(fail("convergence_failure","Firth adjusted score did not converge"))
+    h<-fit$information
+    eigenvalues<-eigen(h,symmetric=TRUE,only.values=TRUE)$values
+    if(any(!is.finite(h))||min(eigenvalues)<=max(eigenvalues)*1e-10)return(fail("rank_deficiency","Singular or ill-conditioned joint information"))
+    beta<-fit$par/rep(scale,K-1L)
+    terms<-unlist(lapply(classes[-1],function(k)paste(k,colnames(x),sep="::")))
+    names(beta)<-terms
+    v<-solve(h)/outer(rep(scale,K-1L),rep(scale,K-1L));dimnames(v)<-list(terms,terms)
+    pr<-fit$probability;truth<-diag(K)[y,,drop=FALSE];score<-fit$score
+    if(any(!is.finite(c(beta,v))))return(fail("rank_deficiency","Nonfinite joint coefficients/covariance"))
+  } else {
+    fit<-tryCatch(withCallingHandlers(nnet::multinom(y~X-1,data=list(y=p$.category,X=z),Hess=TRUE,
+      trace=FALSE,decay=0,maxit=config$multinomial_maxit,reltol=1e-12,abstol=1e-10,na.action=na.fail),
+      warning=function(w){warnings<<-c(warnings,conditionMessage(w));invokeRestart("muffleWarning")}),error=function(e)e)
+    row$warnings<-paste(unique(warnings),collapse=" | ")
+    if(inherits(fit,"error"))return(fail("convergence_failure",conditionMessage(fit)))
+    if(fit$convergence!=0L)return(fail("convergence_failure","Multinomial optimizer did not converge"))
+    h<-fit$Hessian
+    eigenvalues<-eigen(h,symmetric=TRUE,only.values=TRUE)$values
+    if(any(!is.finite(h))||min(eigenvalues)<=max(eigenvalues)*1e-10)return(fail("rank_deficiency","Singular or ill-conditioned joint observed information"))
+    beta<-as.vector(t(coef(fit)))/rep(scale,K-1L)
+    terms<-unlist(lapply(classes[-1],function(k)paste(k,colnames(x),sep="::")))
+    names(beta)<-terms
+    v<-solve(h)/outer(rep(scale,K-1L),rep(scale,K-1L));dimnames(v)<-list(terms,terms)
+    if(any(!is.finite(c(beta,v))))return(fail("rank_deficiency","Nonfinite joint coefficients/covariance"))
+    pr<-as.matrix(fitted(fit));truth<-diag(K)[y,,drop=FALSE]
+    score<-as.vector(crossprod(z,(pr-truth)[,2:K,drop=FALSE]))
+    if(max(abs(score))/nrow(p)>1e-6)return(fail("convergence_failure","Optimizer score remains above tolerance"))
+  }
   se<-sqrt(diag(v));stat<-beta/se
   coefficients<-data.frame(model_id=id,term=terms,category_id=rep(classes[-1],each=ncol(x)),
     estimate=beta,std_error=se,conf_low=beta-qnorm(.975)*se,conf_high=beta+qnorm(.975)*se,
@@ -95,10 +113,18 @@ bmi_multinomial_fit <- function(p,basis,config,qualified,reason,spec=bmi_same_da
     clinical_or_interpretation=paste0("log category-probability ratio versus ",if(spec$family=="same_day_abg")"no hypercapnia"else"no target diagnosis documented","; spline terms have no standalone clinical interpretation"),row.names=NULL)
   covariance<-expand.grid(term1=terms,term2=terms,stringsAsFactors=FALSE)
   covariance$model_id<-id;covariance$covariance<-as.vector(v);covariance$correlation<-as.vector(cov2cor(v))
-  values<-c(log_likelihood=as.numeric(logLik(fit)),AIC=AIC(fit),multiclass_Brier=mean(rowSums((truth-pr)^2)),
+  values<-c(log_likelihood=if(bias_reduced)fit$log_likelihood else as.numeric(logLik(fit)),AIC=if(bias_reduced)NA_real_ else AIC(fit),multiclass_Brier=mean(rowSums((truth-pr)^2)),
     log_loss=-mean(log(pr[cbind(seq_len(nrow(p)),y)])),optimizer_code=fit$convergence,
     maximum_scaled_score_per_patient=max(abs(score))/nrow(p),information_condition_number=max(eigenvalues)/min(eigenvalues))
   diagnostics<-data.frame(model_id=id,metric=names(values),value=as.numeric(values),note="apparent in-sample diagnostic; not independent validation")
+  if(spec$family!="same_day_abg") {
+    row$estimator<-if(bias_reduced)spec$estimator else "maximum_likelihood"
+    row$separation_detected<-separated
+    if(bias_reduced)diagnostics<-rbind(diagnostics,data.frame(model_id=id,
+      metric=c("penalized_log_likelihood","adjusted_score_max_abs","iterations","ML_separation_detected"),
+      value=c(fit$penalized_log_likelihood,max(abs(score)),fit$iterations,as.numeric(separated)),
+      note="Firth mean bias reduction; AIC not used for model comparison"))
+  }
   residuals<-support<-list()
   for(k in seq_len(K))for(variable in c("bmi","age_at_encounter","sex","race_ethnicity","location")) {
     grp<-if(variable=="bmi")config$bmi_bin_width*floor(p$bmi/config$bmi_bin_width)else if(variable=="age_at_encounter")10*floor(p[[variable]]/10)else as.character(p[[variable]])
@@ -139,7 +165,7 @@ bmi_multinomial_predictions <- function(m,config) {
   base<-data.frame(model_id=m$row$model_id,reference_id=m$row$training_population_id,n_reference=m$row$n_model,n_model=m$row$n_model,
     window="encounter",family=m$spec$family,ascertainment_window="encounter",model_form="multinomial_spline")
   if(is.null(m$beta))return(wrap(list(probability_curves=bmi_bind(lapply(outcomes,function(o)cbind(base,outcome_id=o,bmi=NA_real_,probability=NA_real_,conf_low=NA_real_,conf_high=NA_real_,within_training_bmi_range=NA,status=m$row$status,reason=m$row$failure_reason))),
-    same_day_contrasts=cbind(base,outcome_id=contrast_names[1],bmi_low=NA_real_,bmi_high=NA_real_,difference_per1000=NA_real_,conf_low_per1000=NA_real_,conf_high_per1000=NA_real_,status=m$row$status,reason=m$row$failure_reason),same_day_probability_covariance=data.frame(),same_day_curve_reconciliation=data.frame(status="not_assessed",reason=m$row$failure_reason))))
+    same_day_contrasts=cbind(base,outcome_id=contrast_names[1],bmi_low=NA_real_,bmi_high=NA_real_,difference_per1000=NA_real_,conf_low_per1000=NA_real_,conf_high_per1000=NA_real_,status=m$row$status,reason=m$row$failure_reason),same_day_probability_covariance=data.frame(),same_day_curve_reconciliation=data.frame(model_id=m$row$model_id,status="not_assessed",reason=m$row$failure_reason))))
   bounds<-range(m$data$bmi);first<-ceiling(bounds[1]/config$grid_step)*config$grid_step
   grid<-sort(unique(c(bounds,if(first<=bounds[2])seq(first,bounds[2],by=config$grid_step)else numeric())))
   values<-lapply(grid,function(b)bmi_multinomial_mean(m,b,config));names(values)<-as.character(grid)

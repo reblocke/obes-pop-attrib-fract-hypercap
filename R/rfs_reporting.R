@@ -98,8 +98,8 @@ bmi_export_figures <- function(bundle,output) {
   }
   all_captions[["paired"]]<-bmi_same_day_figure(bundle,output)
   all_captions[["icd_acuity"]]<-bmi_icd_acuity_figure(bundle,output)
-  for(id in c("RFS-flow","RFS-entry","RFS-evidence","S1-same-day-ABG","S2-ICD-acuity"))if(file.exists(file.path(output,paste0(id,".png")))) {
-    all_manifests[[id]]<-data.frame(figure_id=id,panel_id="all",file_path=file.path(output,paste0(id,".png")),export_paths=paste(file.path(output,paste0(id,c(".svg",".pdf",".png",".jpg"))),collapse=";"),source_path="R/rfs_reporting.R",figure_type="source-entry audit",intended_use="private research review",width_px=round(190/25.4*300),dpi_x=300,dpi_y=300,color_mode=if(id=="S2-ICD-acuity")"RGB; grayscale review required"else"grayscale",vector_status="SVG/PDF",qc_status="exported; actual visual review pending")
+  for(id in c("RFS-flow","RFS-entry","RFS-evidence","S1-same-day-ABG","S2-ICD-acuity","S2-ICD-specified","S2-ICD-observed"))if(file.exists(file.path(output,paste0(id,".png")))) {
+    all_manifests[[id]]<-data.frame(figure_id=id,panel_id="all",file_path=file.path(output,paste0(id,".png")),export_paths=paste(file.path(output,paste0(id,c(".svg",".pdf",".png",".jpg"))),collapse=";"),source_path="R/rfs_reporting.R",figure_type=if(grepl("^S2-ICD",id))"ICD probabilities and sampling support"else"source-entry audit",intended_use="private research review",width_px=round(190/25.4*300),dpi_x=300,dpi_y=300,color_mode=if(id %in% c("S2-ICD-acuity","S2-ICD-specified"))"RGB; grayscale review required"else"grayscale",vector_status="SVG/PDF",qc_status="exported; actual visual review pending")
   }
   utils::write.csv(bmi_bind(all_captions),file.path(output,"captions.csv"),row.names=FALSE)
   utils::write.csv(bmi_bind(all_manifests),file.path(output,"figure-qc-manifest.csv"),row.names=FALSE)
@@ -197,12 +197,15 @@ bmi_same_day_figure <- function(bundle,output) {
   data.frame(figure_id="S1-same-day-ABG",caption=caption,alt_text=caption,source_tables="probability_curves;same_day_contrasts;same_day_probability_covariance;cooccurrence_categories;model_registry;distribution_bins")
 }
 
-bmi_icd_acuity_figure <- function(bundle,output) {
-  a<-bundle$analysis;id<-"primary::icd_acuity/encounter/multinomial_spline"
+bmi_icd_model_figure <- function(bundle,output,specified=FALSE) {
+  family<-if(specified)"icd_acuity_specified"else"icd_acuity"
+  figure_id<-if(specified)"S2-ICD-specified"else"S2-ICD-acuity"
+  a<-bundle$analysis;id<-paste0("primary::",family,"/encounter/multinomial_spline")
   r<-a$model_registry[a$model_registry$model_id==id,]
   z<-a$probability_curves[a$probability_curves$model_id==id & a$probability_curves$status=="estimated",]
   labels<-c(chronic_ohs="Chronic coding / OHS",acute_chronic="Acute-on-chronic or\nconcurrent coding",acute="Acute coding",unspecified="Unspecified acuity")
-  colours<-c(chronic_ohs="#346D80",acute_chronic="#B17836",acute="#75587F",unspecified="#BDBDBD")
+  if(specified)labels<-labels[names(labels)!="unspecified"]
+  colours<-c(chronic_ohs="#25475C",acute_chronic="#BD8F54",acute="#796E85",unspecified="#D8D8D8")
   if(nrow(z)) {
     total<-z[z$outcome_id=="any_target",];grid<-total$bmi
     components<-z[z$outcome_id %in% names(labels),]
@@ -237,13 +240,14 @@ bmi_icd_acuity_figure <- function(bundle,output) {
       ggplot2::facet_wrap(~label,ncol=2)+xs()+ys()+bmi_theme()+
       ggplot2::theme(panel.spacing.x=grid::unit(6,"mm"))+
       ggplot2::labs(title="B  Component magnitudes on common axes",subtitle="Pointwise 95% intervals; dotted segments indicate local sparsity",x=NULL,y="Modeled probability")
-    bins<-a$distribution_bins[a$distribution_bins$population_id=="primary::C_icd_acuity"&a$distribution_bins$variable_id=="bmi",]
+    bins<-a$distribution_bins[a$distribution_bins$population_id==paste0("primary::C_",family)&a$distribution_bins$variable_id=="bmi",]
     freq<-ggplot2::ggplot(bins,ggplot2::aes((lower+upper)/2,n))+
       ggplot2::geom_col(ggplot2::aes(width=upper-lower),fill="grey50")+
+      ggplot2::scale_y_continuous(breaks=function(x)pretty(x,n=2))+
       ggplot2::scale_x_continuous(breaks=seq(bounds[1],bounds[2],10),expand=ggplot2::expansion(mult=c(.01,.01)))+
       ggplot2::coord_cartesian(xlim=bounds)+bmi_theme()+ggplot2::labs(title="C  Patients in the shared diagnosis-capture population",x="BMI (kg/m²)",y="Patients")
     plots<-list(top,comparison,freq)
-    utils::write.csv(z,file.path(output,"icd-acuity-component-display.csv"),row.names=FALSE)
+    utils::write.csv(z,file.path(output,paste0(family,"-component-display.csv")),row.names=FALSE)
   }else {
     why<-if(nrow(r))paste(r$status,r$failure_reason,sep=": ")else"No model registered"
     plots<-list(bmi_empty_plot("ICD components unavailable",why),bmi_empty_plot("Component intervals unavailable",why),bmi_empty_plot("No modeled comparison",why))
@@ -254,19 +258,63 @@ bmi_icd_acuity_figure <- function(bundle,output) {
   count<-function(k)fmt(counts$n[match(k,counts$category_id)])
   draw<-function() {
     grid::grid.newpage()
-    grid::grid.text("BMI and documented respiratory-failure acuity / OHS",x=.02,y=.99,just=c("left","top"),gp=grid::gpar(fontsize=11,fontface="bold"))
-    grid::grid.text(paste0(if(bundle$manifest$mode=="fixture")"ARTIFICIAL DATA ONLY | "else"Primary population | ","Encounter-wide; shared model/reference N = ",n),x=.02,y=.969,just=c("left","top"),gp=grid::gpar(fontsize=9))
-    grid::grid.text(paste0("Events: chronic/OHS ",count("chronic_ohs"),"; acute/chronic ",count("acute_chronic"),"; acute ",count("acute"),"; unspecified ",count("unspecified")),x=.02,y=.95,just=c("left","top"),gp=grid::gpar(fontsize=9))
+    grid::grid.text(if(specified)"Sensitivity: exclude unspecified-only diagnosis category"else"BMI and documented respiratory-failure acuity / OHS",x=.02,y=.99,just=c("left","top"),gp=grid::gpar(fontsize=11,fontface="bold"))
+    grid::grid.text(paste0(if(bundle$manifest$mode=="fixture")"ARTIFICIAL DATA ONLY | "else"Primary population | ","Encounter-wide; model/reference N = ",n,if(specified)" | Maximum likelihood"else" | Firth bias reduction"),x=.02,y=.969,just=c("left","top"),gp=grid::gpar(fontsize=9))
+    grid::grid.text(paste0("Events: chronic/OHS ",count("chronic_ohs"),"; acute/chronic ",count("acute_chronic"),"; acute ",count("acute"),if(specified)paste0("; excluded ",count("unspecified"))else paste0("; unspecified ",count("unspecified"))),x=.02,y=.95,just=c("left","top"),gp=grid::gpar(fontsize=9))
     grid::pushViewport(grid::viewport(y=.465,height=.91,layout=grid::grid.layout(3,1,heights=grid::unit(c(2.5,3.3,1.2),"null"))))
     for(i in 1:3) {grid::pushViewport(grid::viewport(layout.pos.row=i));grid::grid.draw(ggplot2::ggplotGrob(plots[[i]]));grid::popViewport()}
     grid::popViewport()
   }
-  bmi_export(draw,file.path(output,"S2-ICD-acuity"),height_mm=210)
-  caption<-paste("Primary fixed-index patients with complete diagnosis capture; encounter-wide coding, no gas requirement. Shared inherited adjustment and primary spline basis.",
-    "Bands partition the target composite; its upper boundary and component panels show pointwise 95% intervals from joint covariance. Fading/dots mark local sparsity; histogram N equals model/reference N.",
-    "Acute-on-chronic includes explicit J96.22 or concurrent acute/chronic codes. Chronic includes OHS (obesity hypoventilation syndrome); unspecified acuity remains separate. OHS grouping does not establish chronic respiratory failure. Coding/source-entry selection and obesity in the OHS definition limit physiological interpretation. The joint total can differ from the binary fit. See the accompanying classification table.")
+  bmi_export(draw,file.path(output,figure_id),height_mm=200)
+  caption<-paste(if(specified)"Unpenalized four-category sensitivity excluding unspecified-only encounters and standardizing over the remaining patients."else"Mean-bias-reduced five-category multinomial spline; all diagnosis-evaluable primary patients retained.",
+    "Encounter-wide coding, no gas requirement; inherited adjustment and primary spline basis. Bands partition the composite; thickness gives component probability. Shading: pointwise 95% intervals from joint information covariance, conditional on the empirical reference and basis. Fading/dots: local sparsity; histogram N equals model/reference N.",
+    "Acute-on-chronic includes explicit or concurrent acute/chronic coding. OHS (obesity hypoventilation syndrome) is analytically chronic; this does not establish chronic respiratory failure. Source selection and diagnostic incorporation limit physiological interpretation.")
   if(!nrow(z))caption<-paste("Adjusted ICD-acuity curves and intervals are unavailable:",why,
     "This is a model-status display, not an estimated relationship. The accompanying table reports observed category counts only when source evidence is qualified. Primary fixed indexes, adjustment and existing analyses are unchanged; no fallback estimator was used.")
   if(bundle$manifest$mode=="fixture")caption<-paste("ARTIFICIAL DATA ONLY.",caption)
-  data.frame(figure_id="S2-ICD-acuity",caption=caption,alt_text=caption,source_tables="probability_curves;icd_acuity_categories;icd_acuity_probability_covariance;distribution_bins;model_registry")
+  data.frame(figure_id=figure_id,caption=caption,alt_text=caption,source_tables="probability_curves;icd_acuity_categories;icd_acuity_probability_covariance;distribution_bins;model_registry")
 }
+
+
+bmi_icd_observed_figure <- function(bundle,output) {
+  a<-bundle$analysis;z<-a$icd_acuity_observed_bands
+  caption<-paste("Observed encounter-wide diagnosis proportions within five-unit BMI bands of the covariate-complete primary population with known capture; no gas requirement.",
+    "These are unadjusted descriptions, not fitted curves. Error bars are Wilson 95% intervals; hollow points mark sparse patient/event/non-event counts. The histogram shows each band denominator, shared by every category. Empty bands have no estimate.",
+    "OHS is grouped with chronic coding analytically; codes do not establish physiology. Overall percentages and their Wilson intervals are printed in each panel; no-target coding is the complement of the four displayed categories.")
+  if(nrow(z)) {
+    labels<-bmi_icd_labels[-1];counts<-a$icd_acuity_categories
+    subtitles<-vapply(names(labels),function(k) {
+      v<-counts[counts$category_id==k,]
+      paste0(labels[k],"\n",bmi_percent_ci(100*v$proportion,100*v$conf_low,100*v$conf_high))
+    },character(1))
+    d<-z[z$category_id %in% names(labels),];d$label<-factor(subtitles[d$category_id],levels=subtitles)
+    bounds<-range(c(z$bin_low,z$bin_high));xs<-function()ggplot2::scale_x_continuous(breaks=seq(bounds[1],bounds[2],10),limits=bounds,expand=ggplot2::expansion(mult=c(.01,.01)))
+    p<-ggplot2::ggplot(d,ggplot2::aes((bin_low+bin_high)/2,proportion))+
+      ggplot2::geom_errorbar(ggplot2::aes(ymin=conf_low,ymax=conf_high),width=1,linewidth=.35)+
+      ggplot2::geom_point(ggplot2::aes(shape=sparse),size=1.5)+
+      ggplot2::scale_shape_manual(values=c('FALSE'=16,'TRUE'=1),guide="none")+
+      ggplot2::scale_y_continuous(labels=function(x)paste0(round(100*x,1),"%"))+
+      ggplot2::coord_cartesian(ylim=c(0,max(d$conf_high)*1.02))+
+      ggplot2::facet_wrap(~label,ncol=2)+xs()+bmi_theme()+
+      ggplot2::theme(panel.spacing.x=grid::unit(6,"mm"))+
+      ggplot2::labs(title="Observed diagnosis proportions across BMI",subtitle="Raw proportions and Wilson 95% intervals; hollow points = sparse bands",x=NULL,y="Within-band proportion")
+    bins<-z[z$category_id=="no_target",]
+    freq<-ggplot2::ggplot(bins,ggplot2::aes((bin_low+bin_high)/2,N))+
+      ggplot2::geom_col(ggplot2::aes(width=bin_high-bin_low),fill="grey50")+xs()+bmi_theme()+
+      ggplot2::labs(x="Original BMI band (kg/m²)",y="Patients",title=paste0("Known-capture primary population: N = ",format(sum(bins$N),big.mark=",",trim=TRUE)))
+    draw<-function() {
+      grid::grid.newpage();grid::pushViewport(grid::viewport(layout=grid::grid.layout(2,1,heights=grid::unit(c(4,1),"null"))))
+      for(i in 1:2) {grid::pushViewport(grid::viewport(layout.pos.row=i));grid::grid.draw(ggplot2::ggplotGrob(list(p,freq)[[i]]));grid::popViewport()}
+      grid::popViewport()
+      if(bundle$manifest$mode=="fixture")grid::grid.text("ARTIFICIAL DATA ONLY",x=.98,y=.995,just=c("right","top"),gp=grid::gpar(fontsize=9))
+    }
+  }else draw<-function()print(bmi_empty_plot("Observed ICD proportions unavailable","No qualified code-level source evidence"))
+  bmi_export(draw,file.path(output,"S2-ICD-observed"),height_mm=190)
+  utils::write.csv(z,file.path(output,"icd-observed-display.csv"),row.names=FALSE)
+  if(bundle$manifest$mode=="fixture")caption<-paste("ARTIFICIAL DATA ONLY.",caption)
+  data.frame(figure_id="S2-ICD-observed",caption=caption,alt_text=caption,source_tables="icd_acuity_observed_bands;icd_acuity_categories")
+}
+
+bmi_icd_acuity_figure <- function(bundle,output) bmi_bind(list(
+  bmi_icd_model_figure(bundle,output),bmi_icd_model_figure(bundle,output,TRUE),
+  bmi_icd_observed_figure(bundle,output)))

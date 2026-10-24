@@ -4,7 +4,7 @@ This is the authority for the RFS curve/audit analysis. The retained filename
 reflects the earlier triangulation design; that design is retired. Machine
 configuration is [bmi_hypercapnia_analysis.json](../config/bmi_hypercapnia_analysis.json),
 with input fields in the [variable dictionary](../config/variable_dictionary.csv).
-The active identity is `bmi_hypercapnia_rfs_curve_audit_v6`, aggregate schema 11,
+The active identity is `bmi_hypercapnia_rfs_curve_audit_v7`, aggregate schema 12,
 metadata-qualified input schema 4. Prior schemas fail explicitly; no replay or
 migration layer is maintained. See [decisions](DECISIONS.md) for dated history.
 
@@ -197,3 +197,15 @@ curves or contrasts are available and no fallback was used. Original primary/S1
 results and PIFs agree with the prior run within 1e-10. See the
 [dated reading snapshot](../results/2026-10-24-icd-acuity/README.md) and
 [ICD estimability finding](ICD_ACUITY_SUPPLEMENT.md#clinical-execution-and-estimability-2026-10-24).
+
+## Approved ICD estimability update (2026-10-24)
+
+Use the full five-category Firth mean-bias-reduced multinomial model, preserving
+all prior indexes, adjustment and numeric knots. A separately identified
+unpenalized four-category sensitivity excludes only final unspecified-only
+classifications and standardizes over its own remaining patients. Add raw
+five-unit BMI-band proportions with Wilson intervals and patient frequencies.
+No supplemental PIF, primary/S1 refit change or unapproved fallback. The
+[ICD supplement](ICD_ACUITY_SUPPLEMENT.md) records equations, covariance,
+verification and the historical failed model. New clinical results require a
+new immutable schema-12 run; old bundles cannot acquire these labels.

@@ -173,15 +173,15 @@ Requiring both analytes on the same date introduces additional selection. The re
 
 This supplement partitions the inherited five-code ICD composite on the same fixed primary indexes. It requires complete encounter diagnosis capture and nonmissing inherited adjustment variables, including retained Unknown categories; it does not require blood gas evidence. J96.22 or J96.02 together with J96.12/E66.2 receives priority as **acute-on-chronic or concurrent acute/chronic coding**. Remaining J96.02 is acute; remaining J96.12/E66.2 is chronic coding/OHS; remaining J96.92 is unspecified acuity. No target code with complete capture is the reference category. Incomplete capture is unknown. OHS is grouped analytically with chronic coding and does not itself establish chronic respiratory failure.
 
-One unpenalized five-category multinomial spline reuses the primary numeric BMI basis, linear age and inherited sex, race/ethnicity and region adjustment. All class probabilities are standardized over the same diagnosis-evaluable patients. Full joint covariance supplies pointwise 95% intervals, supported five-unit changes and pairwise differences in those changes. These descriptive comparisons are not multiplicity adjusted. The fitted positive components sum to the joint composite; it need not equal the existing binary model's predictions. Primary estimates, S1 and PIFs remain unchanged; no supplemental PIF is calculated.
+One Firth mean-bias-reduced five-category multinomial spline reuses the primary numeric BMI basis, linear age and inherited sex, race/ethnicity and region adjustment. All class probabilities are standardized over the same diagnosis-evaluable patients. The estimator maximizes the multinomial log likelihood plus one half of the log determinant of its Fisher information. It replaces a separated unpenalized fit without pooling demographic levels or changing categories. The inverse multinomial information at the bias-reduced estimate supplies first-order joint covariance, with the empirical reference and numeric spline held fixed. This finite-estimate method does not resolve sparse support, source selection or measurement bias. Full joint covariance supplies pointwise 95% intervals, supported five-unit changes and pairwise differences in those changes. These descriptive comparisons are not multiplicity adjusted. The fitted positive components sum to the joint composite; it need not equal the existing binary model's predictions. Primary estimates, S1 and PIFs remain unchanged; no supplemental PIF is calculated.
 
 ```{r}
 #| label: icd-acuity-supplement
 #| results: asis
 bmi_report_table(a$icd_acuity_status,"ICD code-level source qualification",keys="module")
-fit<-a$model_registry[a$model_registry$family=="icd_acuity",]
-bmi_report_table(fit[c("model_id","n_model","status","failure_reason")],"ICD model estimability; source qualification does not imply a successful fit",keys="model_id")
-if(nrow(fit) && !fit$status %in% c("successful","fitted_with_concerns"))cat("\n\n**Adjusted ICD-acuity curves and contrasts are unavailable.** The planned model was retained with its explicit failure status; no alternative estimator or recoding was substituted. The category table below is descriptive, not an adjusted BMI relationship.\n\n")
+fit<-a$model_registry[a$model_registry$family %in% c("icd_acuity","icd_acuity_specified"),]
+bmi_report_table(fit[c("model_id","estimator","n_model","status","failure_reason")],"ICD model estimability; source qualification does not imply a successful fit",keys="model_id")
+if(any(!fit$status %in% c("successful","fitted_with_concerns")))cat("\n\nOne or more planned ICD positions is nonestimable; its explicit status is retained. No additional fallback was substituted.\n\n")
 z<-a$icd_acuity_categories
 shown<-data.frame(Category=z$label,Patients=z$n,N=z$N,
   Observed=ifelse(is.na(z$proportion),"Unavailable",sprintf("%.2f%% (95%% CI %.2f–%.2f%%)",100*z$proportion,100*z$conf_low,100*z$conf_high)),Status=z$status)
@@ -193,7 +193,14 @@ for(i in seq_along(spec$contrast_pairs)) {
  pair<-spec$contrast_pairs[[i]]
  labels[spec$contrast_names[i]]<-paste(bmi_icd_labels[pair[1]],"minus",bmi_icd_labels[pair[2]],": difference in changes")
 }
-bmi_report_table(bmi_same_day_contrast_view(a$icd_acuity_contrasts,labels),"ICD component magnitudes and differences in BMI-associated changes; 95% intervals",keys=c("BMI interval","Outcome"))
+for(id in fit$model_id) {
+ cat("\n\n### ",if(grepl("icd_acuity_specified/",id))"Four-category sensitivity"else"Five-category bias-reduced model","\n\n",sep="")
+ z<-a$icd_acuity_contrasts[a$icd_acuity_contrasts$model_id==id,]
+ bmi_report_table(bmi_same_day_contrast_view(z,labels),"ICD component magnitudes and differences in BMI-associated changes; 95% intervals",keys=c("BMI interval","Outcome"))
+}
+cat("\n\nThe unpenalized four-category sensitivity excludes only the final unspecified-only category. Mixed codes assigned to specified categories remain included. It retains the primary basis and adjustment but uses its own reduced fitting and standardization population; this is not a same-denominator estimator comparison. Persistent separation is an explicit failure, not an invitation to substitute an estimator.\n\n")
+figure("S2-ICD-specified")
+figure("S2-ICD-observed")
 bmi_report_table(a$icd_acuity_reconciliation,"Original composite and subtype reconciliation",keys="metric")
 ```
 

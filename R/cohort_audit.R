@@ -29,7 +29,7 @@ bmi_bind <- function(x) {
 }
 bmi_config <- function(path = "config/bmi_hypercapnia_analysis.json") {
   x <- jsonlite::read_json(path, simplifyVector = FALSE)
-  if (!identical(x$analysis_id, "bmi_hypercapnia_rfs_curve_audit_v6") || x$bundle_schema != 11 ||
+  if (!identical(x$analysis_id, "bmi_hypercapnia_rfs_curve_audit_v7") || x$bundle_schema != 12 ||
       x$population_scope_id != "original_selected_encounters_v1" || x$source_policy_id != "unadjusted_pco2_v1" ||
       x$bmi_policy_id != "available_encounter_or_prior_bmi_v1") stop("Unreviewed analysis/source/population policy")
   if (!identical(x$standardization_policy,"outcome_observed_v1") || !identical(x$mnar_enabled,FALSE)) stop("Full-cohort MAR/MNAR projections are superseded")

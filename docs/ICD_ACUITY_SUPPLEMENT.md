@@ -1,5 +1,11 @@
 # ICD acuity supplement
 
+Current decision: the October 24 separation repair below supersedes the original
+five-category maximum-likelihood specification. It uses Firth mean bias reduction
+for all five categories, a separately fitted four-category maximum-likelihood
+sensitivity, and observed BMI-band proportions. Existing qualified source evidence
+is reused; the earlier design and failed run are retained here as dated history.
+
 ## Approved design (2026-10-23)
 
 At the existing primary index, classify complete encounter diagnosis capture in
@@ -109,3 +115,32 @@ integrated reports, exact counts, model status and aggregate separation diagnost
 A new modeling decision is needed to obtain adjusted acuity curves. Keeping the
 current descriptive coding decomposition requires no such change. Investigator
 interpretation remains pending; primary B/F2 and S1 snapshots are preserved.
+
+## Approved separation repair — implementation in progress (2026-10-24)
+
+The owner approved a mean-bias-reduced five-category multinomial spline, an
+unpenalized four-category sensitivity excluding unspecified-only encounters,
+and an observed BMI-band proportion companion. Source qualification, categories,
+fixed indexes, primary numeric spline, adjustment and original primary/S1/PIF
+analyses remain unchanged. The sensitivity retains co-coded unspecified flags
+when precedence assigns a specified category; it excludes only the final
+unspecified category and standardizes over that reduced sample.
+
+The full model targets the multinomial log likelihood plus one half of the log
+determinant of its Fisher information (Firth mean bias reduction). See
+[Kosmidis and Firth (2011)](https://doi.org/10.1093/biomet/asr026).
+A direct, small-information-matrix implementation avoids the observation-specific
+nuisance columns in the package's Poisson expansion. Acceptance requires an
+independent numerical likelihood oracle on separated data, the author-published
+five-category brglm2 coefficients/SEs,
+and a cohort-sized artificial benchmark. First-order model-based uncertainty
+uses the inverse joint multinomial information at the bias-reduced estimate;
+empirical references and the numeric spline basis remain fixed. This is not a
+penalized-Hessian posterior interval or a remedy for selection/measurement bias.
+
+Implement in the ICD and shared multinomial modules, report views and config;
+advance the saved aggregate identity so old failed runs cannot acquire new
+estimator labels. Verify with `make test` and `make source-test`, then release
+and perform one fresh qualified Mini estimation. Old inputs and snapshots remain
+immutable. No fallback estimator or demographic pooling is authorized. Finite
+estimates do not establish adequate local support or investigator approval.

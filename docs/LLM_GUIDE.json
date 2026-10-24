@@ -298,5 +298,16 @@
       "diagnostic": "review/zero-category-adjustment-cells.csv"
     },
     "guardrail": "No adjusted ICD-acuity probabilities or contrasts exist for this run. Source acceptance does not imply model estimability or clinical validation of coding."
+  },
+  "icd_estimability_update": {
+    "date": "2026-10-24",
+    "runtime_schema": 12,
+    "analysis_id": "bmi_hypercapnia_rfs_curve_audit_v7",
+    "full_model": "Firth mean bias reduced five-category multinomial",
+    "sensitivity": "unpenalized four-category multinomial excluding final unspecified-only category; separate reference denominator",
+    "companion": "Observed five-unit BMI-band category proportions, Wilson intervals, frequency",
+    "state": "implementation; clinical rerun and investigator approval pending",
+    "historical_snapshot": "results/2026-10-24-icd-acuity/",
+    "source_and_primary_S1_PIF": "preserve; unchanged source contract"
   }
 }

@@ -800,3 +800,62 @@ installation, commit/push/merge, visibility change, abstract or submission occur
 - Remaining scientific choice: a revised model would be required to obtain
   adjusted acuity curves despite the rare-category separation. No such change,
   supplementary PIF, investigator interpretation or abstract draft was made.
+
+## 2026-10-24 — Approved ICD separation repair, in progress
+
+- Owner approved implementation and rerun: full five-category Firth mean bias
+  reduction, unpenalized four-category sensitivity excluding unspecified-only,
+  and unadjusted BMI-band category proportions. Fixed indexes, code precedence,
+  source qualification, adjustment, knots and original primary/S1/PIF estimates
+  are protected. New schema 12/v7 rejects relabeling old bundles.
+- Before production edits, recorded observable failures and independent oracles
+  in `tests/README.md` and `tests/icd_bias_reduction_oracle.R`. Independent
+  numerical differentiation of the penalized objective, an independently
+  optimized separated example and the intercept analytic solution passed.
+  The standard `brglm2` reference is absent on both hosts; requested specific
+  approval for an isolated ignored library, per AGENTS.md. No installation yet.
+- Direct likelihood avoids the package's observation-specific Poisson nuisance
+  columns. Artificial benchmark: 176,922 rows / 60 parameters, 18 iterations,
+  39.392 seconds locally, finite coefficients, maximum adjusted score 1.83e-8.
+  This is computational/software evidence, not clinical verification.
+- Initial artificial integration exposed a new-profile dictionary error from
+  temporary pattern/bin columns; removed those temporary fields before model
+  sample profiling. A fresh artificial integration then fit both planned models.
+- Figure inspection found boundary-roundoff clipping of zero-event Wilson
+  intervals in the new observed-band figure and crowded adjacent facet ticks.
+  Replaced scale censorship with coordinate limits and increased facet spacing.
+  Original numerical interval values are retained. Further report/QC pending.
+- Current evidence directory: `artifacts/triangulation/icd-bias-reduction-20261024/`.
+  No clinical input/source modifications, clinical fitting, publication or
+  abstract drafting performed in this implementation stage.
+- Dependency decision resolved without installation: the package author's
+  published converged five-category example provides external coefficient/SE
+  references. The direct implementation matches the printed values within 5e-6;
+  the independent separated likelihood, derivative and intercept checks also
+  pass. The pending installation request is superseded; no package was installed.
+  Retained the small public reference dataset with attribution for offline E2E.
+- Fresh Mini source-boundary checks passed 35/35 at
+  `source-tests-20261024T043420-54712`; all 15 Python source/test hashes match the
+  local unchanged source boundary. The Mini checkout was clean and no active
+  clinical/source jobs or leases were found before this test write.
+- Independent full-fixture numerical checks passed for both ICD models, curves,
+  intervals, component-change comparisons, reduced sensitivity denominator,
+  all 32 code combinations, missing/invalid/absent evidence and base invariance.
+  A separate comparison against the authenticated prior artificial bundle also
+  reproduced all 11 original primary/S1/PIF tables within 1e-10.
+- Full `make test` passed all 13 E2E groups, including complete HTML/PDF reports,
+  independent ICD/S1 numerical oracles, category/denominator invariance,
+  aggregate privacy and explicit source/bundle/reused-figure rejection. Receipt:
+  `artifacts/triangulation/e2e-20261024T044257-81340/receipt.json`.
+  The artificial scientific report has 50 pages. All pages were inspected in
+  contact sheets, with supplemental pages enlarged during figure review.
+- A final presentation-only change reduces the histogram tick count in both new
+  ICD model figures. It follows the full E2E pass; affected native exports are
+  checked separately. Clinical assembled-page inspection remains pending.
+  No estimator, source, table or model values changed in this adjustment.
+- Implementing-agent review covered all changed/untracked code, tests and docs;
+  no independent-human or investigator approval is asserted. Published reference,
+  derivative/objective and denominator checks support the direct implementation.
+  Historical snapshot hash checks passed (68, 80 and 95 files in the primary,
+  joint same-day and earlier ICD packets respectively). Release precedes the
+  single fresh Mini clinical estimation; the existing qualified input is reused.
