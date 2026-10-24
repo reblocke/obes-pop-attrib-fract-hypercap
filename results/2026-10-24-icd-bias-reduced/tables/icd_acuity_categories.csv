@@ -1,0 +1,6 @@
+"category_id","label","n","N","status","proportion","conf_low","conf_high","analysis_population_id"
+"no_target","No target diagnosis documented",168288,176922,"qualified",0.951198833384203,0.950185059550901,0.952193014130096,"primary"
+"chronic_ohs","Chronic coding / OHS",1769,176922,"qualified",0.00999875651417009,0.0095456735973846,0.0104731174939386,"primary"
+"acute_chronic","Acute-on-chronic or concurrent coding",3443,176922,"qualified",0.0194605532381501,0.0188272332926546,0.0201147403727599,"primary"
+"acute","Acute coding",3294,176922,"qualified",0.0186183741987995,0.0179988818804821,0.0192587702774416,"primary"
+"unspecified","Unspecified acuity",128,176922,"qualified",0.000723482664677089,0.000608567012563018,0.000860079153978866,"primary"

@@ -116,7 +116,7 @@ A new modeling decision is needed to obtain adjusted acuity curves. Keeping the
 current descriptive coding decomposition requires no such change. Investigator
 interpretation remains pending; primary B/F2 and S1 snapshots are preserved.
 
-## Approved separation repair — implementation in progress (2026-10-24)
+## Approved separation repair (2026-10-24)
 
 The owner approved a mean-bias-reduced five-category multinomial spline, an
 unpenalized four-category sensitivity excluding unspecified-only encounters,
@@ -144,3 +144,24 @@ estimator labels. Verify with `make test` and `make source-test`, then release
 and perform one fresh qualified Mini estimation. Old inputs and snapshots remain
 immutable. No fallback estimator or demographic pooling is authorized. Finite
 estimates do not establish adequate local support or investigator approval.
+
+## Revised clinical execution (2026-10-24)
+
+PR #25 merged the revision at `29687c9`. Fresh preflight passed without a source
+change. Run `curve-analyze-20261024T053607-55109` fitted the five-category Firth
+model in 176,922 patients and the four-category maximum-likelihood sensitivity
+in 176,794 patients. The full design still has ordinary maximum-likelihood
+separation; the bias-reduced fit converged in 12 iterations with a maximum absolute
+adjusted score of 3.74e-8. The sensitivity had no detected separation.
+
+The five-category counts are unchanged: 168,288 no target, 1,769 chronic/OHS,
+3,443 acute-on-chronic/concurrent, 3,294 acute and 128 unspecified. The sensitivity
+excludes only those 128 final unspecified-only cases. All 11 original primary,
+S1 and PIF comparison tables reproduce the prior clinical run within 1e-10;
+137 aggregate numerical checks passed. No new PIF was generated.
+
+The [updated packet](../results/2026-10-24-icd-bias-reduced/README.md) contains the
+integrated reports, full model/sensitivity curves and observed BMI-band proportions.
+Filter curve and contrast tables by exact model ID. Pointwise intervals do not
+account for source selection or coding error. Numerical verification is complete;
+investigator interpretation and figure approval remain pending. No abstract draft.

@@ -1,0 +1,16 @@
+{
+  "mode": "analyze",
+  "source_status": "identity_bound_source_declarations_passed",
+  "input_sha256": "4bab2d09aa976bda54289198e6e5870056ab97dceebb95d3fafa73a0f2cae739",
+  "manifest_sha256": "ff2f423f59b6809c3689e2a0349b2115543678b1582d98152f05cb0bfcfb00e8",
+  "code_identity": {
+    "commit": "29687c9d6461a11aee9b19b622375d2860f3bd4e",
+    "tree": "92b8ca71aa976b04d5107d3a3871ca9181a83152",
+    "working_tree_clean": true
+  },
+  "analysis_elapsed_seconds": 806.078,
+  "clinical_models_fitted": 29,
+  "source_qualification": "existing qualified input reused; fresh preflight passed",
+  "clinical_estimation_runs": 1,
+  "investigator_review": "pending"
+}

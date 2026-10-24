@@ -1,0 +1,102 @@
+{
+  "reviewed_at": "2026-10-24T12:11:10.231403+00:00",
+  "reviewer": "Codex agent visual inspection; not investigator approval",
+  "status": "passed within recorded visual and automated scope",
+  "run_id": "curve-analyze-20261024T053607-55109",
+  "bundle_manifest_sha256": "2546087c1c3690668c284a7d20c2feb2f9f1552ca3d95d8f3a8326302fbc1ffa",
+  "render_receipt_sha256": "583923be2b14cc57cfd8c3d1eaba5666d59f2a77cc397776925421018789f2aa",
+  "render_sources": {
+    "R/reporting.R": "733ee1093213155984c8969c6d77ee9fa1e1c8849471100dfc50c2120cd6737a",
+    "R/report_views.R": "40ad7a995db8aa196a3557b976bfb19bcf839ecefbc49881bcbce3567f583d98",
+    "R/rfs_reporting.R": "2761a14223912b342b02e14662e00d498a708ee9c45e4b5a4b6fcdb98b33b95d",
+    "scripts/render_bmi_hypercapnia.R": "f8fadfb071153cce2597b1976ceca0bde14fc2da395868d4ab3e7b4d6f7b5fa3",
+    "reports/bmi_hypercapnia.qmd": "2b9a74d5f888cb0ebaa496fe48e03ee380bbcc6560b47a927b8c30f56e4fc03f",
+    "reports/bmi_hypercapnia_audit.qmd": "00a58894a76191870bfc5f3ad728dfee85dd9fecfb20ffaaa803c62c31f4e86c",
+    "reports/bmi_report.css": "8ba9c606c92efbde6ed3e866731818e533b90d5375b4ecf1d03d43a403e6c9ad",
+    "reports/table_passthrough.R": "1b0bdf8077836c942ef3dfeb3838bb4b2714059c5285aedebbea028d210186bb"
+  },
+  "scientific_pdf": {
+    "pages": 56,
+    "agent_visual_scope": "All 56 pages in seven grayscale contact sheets; supplemental pages 41, 42, 54 and 55 inspected enlarged",
+    "sha256": "a772637b0a836cc680aca69384819d700377182c26de8a639d673b06a07eeb85"
+  },
+  "audit_pdf": {
+    "pages": 5654,
+    "agent_visual_pages": [
+      67,
+      68,
+      69,
+      5485,
+      5486,
+      5520,
+      5547,
+      5548
+    ],
+    "other_pages": "Automated complete-table and geometry checks only; not individually visually inspected",
+    "sha256": "22c3702877164978f4270a8ca5c8c8c6ac99615e6039b9cf1b6022e04c81873f"
+  },
+  "figure_scope": [
+    "All three clinical figures at native review width in grayscale",
+    "All three vector figures in assembled audit pages",
+    "All three captioned booklet pages in color; observed proportions use grayscale",
+    "Scientific report figure pages and complete captions"
+  ],
+  "booklet": {
+    "pages": 3,
+    "all_pages_visually_inspected": true,
+    "sha256": "5c8cc4837cd5a3784f39515acebab3a32b355c635b4ba98ea7407d85135d2149"
+  },
+  "html_scope": "Complete table/caption and local asset/link checks; no browser visual inspection claimed",
+  "geometry": {
+    "review_width_mm": 190,
+    "dpi": 300,
+    "minimum_designed_data_label_points": 9,
+    "vector_masters": [
+      "SVG",
+      "PDF"
+    ]
+  },
+  "findings": {
+    "clipping": "none in inspected views; automated all-page bounds checks passed",
+    "label_collisions": "none in inspected views; automated checks passed",
+    "symbols": "legible on inspected views",
+    "uncertainty": "pointwise ribbons and Wilson whiskers retained; sparse segments/points and distinct denominators explicit",
+    "numerical_agreement": "all 137 aggregate checks and 116 complete-table checks passed; labels and figures use saved ledgers",
+    "dense_audit_tables": "Complete coefficients/covariance retained; some long values wrap. CSV tables retain original precision for retrieval.",
+    "automated_geometry_issues": 0
+  },
+  "full_table_checks_passed": 116,
+  "inspection_artifact_hashes": {
+    "science-overview/sheet-001.png": "b4773e3c5a441638c97e6be567f236165f9b11bf5bcde316cc8290d4f2c467be",
+    "science-overview/sheet-002.png": "e104bde0ced94db2a60ee3847efa40355982a1c6aad9ec031e8f44846cc641f8",
+    "science-overview/sheet-003.png": "4cddc5dcd5c054d795437a230d9e94c54dc9b2cea2f8de18a094d70319b1748b",
+    "science-overview/sheet-004.png": "54d397edab32d78ea56cd1d5fcbee8492286303a6f25a8e166e912455e68854b",
+    "science-overview/sheet-005.png": "73d8e45e44e565f346169fc525a364678f172c0cc49fac69581b0cc8bd5e7177",
+    "science-overview/sheet-006.png": "022872f01fc1d15b1a8f0aa4d5c8a0677594c620b4e03cdc2ae0d763f4320e80",
+    "science-overview/sheet-007.png": "d0e140ee75a398bc7815c48d07a97fdd10464421348a47c7b1485608426e560e",
+    "science-pages/page-41.png": "d8ec944b09ed5ea95b173a6f70f8d1cdc997a8da9a17f60f3bc09a94eb18a226",
+    "science-pages/page-42.png": "532d7693f7e349c24c74b28cd62d519e32ad33652ef7ce348c77337560ae714e",
+    "science-pages/page-54.png": "2f5f95c2a7096ca02621ccb63c2fc89ab68c1cdd3d3a8ae632448ef9781c7dfb",
+    "science-pages/page-55.png": "d9388f25b7173e407e950d88a12a3ff95576687c8c5e8fbec9372eb364093ca9",
+    "audit-67.png": "bf85a20997ecebe6f876a1e0b65e82ef17e9c308083add7475c518d9c9708541",
+    "audit-68.png": "cdc5562af66a83a466cf4db354a1ad0b0037de90b8d12ebf1f92e528e04d3590",
+    "audit-69.png": "2e6265f69dc0e23032d16c2ec787a19650bfbe3c52d730820fa6f770d097e87b",
+    "audit-5485.png": "b29532e41ac62dd212d38d73abb1b34172162c4bc8c1e25dc76abb177c6e116d",
+    "audit-5486.png": "26cee0e5ed462474f7afee137a3a9b042df1a42b0b70c31204f566396fdfdaea",
+    "audit-5520.png": "ade6c1b9b063900178126972c20431766eabc0b0919d084a75dd6da2dd27e1a4",
+    "audit-5547.png": "a829e7ce39df6051d46da2c59c2791e9da3981fd2ea780bf95b38915fc4c5c1a",
+    "audit-5548.png": "cb36a02ed05a3a1af00482d99cb34024e541ec04b191f9d541dbed1e52a1bc41",
+    "booklet-1.png": "3a2571f8fe6318045f36df14ffdfc0a3da56145ad440cf8b863b43f7337cca71",
+    "booklet-2.png": "1249b830be1c6f8613bc31c7dd30b57ec40792809302abab700be743d6d2ddf6",
+    "booklet-3.png": "9b24172f277f10addb052a08f3deb54fd4a365dc2f2fe201c99d392b66fe64ec",
+    "S2-ICD-acuity-native-grayscale.png": "9f528f9714e902de9f0f7713877a65e523b317dbc09904d0ec9f5f9aef081c80",
+    "S2-ICD-specified-native-grayscale.png": "585bd561b694fc2a0f5506fa04b13c11c118afd124ee4ed6ce8208641ea5cf69",
+    "S2-ICD-observed-native-grayscale.png": "bd68da8b252dab5621ab8bfbb0abcf688469ca6494b922d217033c1ca69a48b4"
+  },
+  "preserved_figures": "B/F2/S1 PNGs byte-identical to immediate prior integrated exports; historical selected snapshots unchanged",
+  "clinical_input_reads": 0,
+  "model_refits": 0,
+  "investigator_interpretation": "pending",
+  "investigator_figure_approval": "pending",
+  "submission_approval": "not asserted"
+}

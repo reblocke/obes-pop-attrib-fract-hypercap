@@ -204,3 +204,23 @@ Source evidence remains qualified under the unchanged contract. Software,
 independent statistical verification, clinical execution, numerical review and
 visual review are separate gates. Clinical rerun and investigator approval of
 the new curves are pending; historical snapshots remain immutable.
+
+## 2026-10-24 — ICD bias-reduced clinical execution
+
+- PR #25 merged the approved estimator revision at `29687c9`. Fresh Mini preflight
+  passed against the same qualified input and manifest; no replacement source,
+  code recoding, index change or dependency installation was required.
+- One fresh run, `curve-analyze-20261024T053607-55109`, fitted both planned models:
+  five-category Firth, N=176,922; four-category maximum likelihood, N=176,794.
+  The sensitivity excludes 128 final unspecified-only cases. Underlying ordinary
+  maximum-likelihood separation remains recorded for the full design; it is not
+  a failure of the successful bias-reduced fit.
+- All 11 original primary/S1/PIF comparison tables agree within 1e-10. Aggregate
+  numerical review passed 137 checks. Sources, fixed indexes and main figure
+  selection remain unchanged. New figures and integrated reports are generated
+  from that saved run; investigator interpretation and figure approval remain
+  separate. No abstract or submission is authorized by this numerical result.
+- The new reading packet retains complete reports and 65 aggregate tables.
+  Complete-table verification and scoped figure/report inspection passed;
+  automated geometry covered every PDF page. The visual receipt lists the
+  manually inspected pages separately from automated coverage.

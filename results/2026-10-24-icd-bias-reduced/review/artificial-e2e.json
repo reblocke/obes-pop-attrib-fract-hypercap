@@ -1,0 +1,40 @@
+{
+  "status": "passed",
+  "scope": "Artificial typed-input analysis/report end to end",
+  "source_boundary_checks": "separate: make source-test; not asserted by this receipt",
+  "clinical_input_reads": 0,
+  "human_visual_review": "not performed by automated test",
+  "scientific_review": "not asserted",
+  "test_sources": {
+    "tests/run_e2e.R": "52c41d65d4039ffd4a5d8ba1574518cd30746aacbda25bdd57f67ad668b07e80",
+    "tests/e2e_oracles.R": "11337fcad8fee02b46b7175c00ca287876e127fc550360db108012dae143ddd5",
+    "tests/same_day_e2e.R": "ab67b3e4b4c37e3ede1323688a6748da5d5eccfcbac96060081342285dfbb8ee",
+    "tests/icd_acuity_e2e.R": "4c0e1ec6f56d6a4e7e6e89b8d851f4795b84d736c965b99d260d520fa32ac3dd",
+    "tests/icd_bias_reduction_oracle.R": "0e87bb0eebc85953053303875f6716f33dfed1ed9e5142caa2d0f7d5d29a5223",
+    "tests/fixtures/bmi_curve_fixture.R": "465f43ccf1f9b7a67f84a3a31e364d14e2689a466a0dcc4a5524a5ca8a6e8110",
+    "tests/fixtures/icd_firth_reference.csv": "3b4ca820da271e74c61be80771f0e2b0b1d2599614a0f6831c02a8d075b67c86"
+  },
+  "bundle_manifest_sha256": "5d568635fa27e699bb7be660378ca7ac88daa064301d763679a5edeb787ab497",
+  "estimation_sources": {
+    "R/analysis.R": "00deaa64f902837a4cfb046ee4c92e502937447d1cbf3a870ccfceb6f354685d",
+    "R/input_contract.R": "3b49c78568c6f0ce1946ebf4543542f545bbc0daea5eb9034d8716c95c6750f4",
+    "R/cohort_audit.R": "56b20e7d441d286bf7c4da73dbe8a835ac515c05d279af4b1029dbd3579713ed",
+    "R/bmi_models.R": "1ebaf82ce941d626e60e5d66686fedd08da06a42bc4b48c210b9812ae434e321",
+    "R/standardization.R": "8fb670cce3a4c454e1f95985a161f54f0e6e70332aad6a746fdfd9ace79c3fdc",
+    "R/rfs_analysis.R": "ecaf14d560c818dffe25868d2b4046ce7ca8ee8907790485e9d49182b8defb45",
+    "R/same_day_abg.R": "f4b91c1b188386c6941ab71ebe794dc13b0b22b9f0a97814fb92c512e2c2ae4a",
+    "R/same_day_multinomial.R": "1c96475e707b873c7f468f2b07864c276475526f23a70b1167c59f3f10466506",
+    "R/icd_bias_reduction.R": "28da2059a68440ee7f1c163b773cac554458067ef6eac4fecc48039cda9f984d",
+    "R/icd_acuity.R": "3b9c238459430cf6c7a6a28e6381981d60628076e63eeb4d641d9a2f07b39627",
+    "config/bmi_hypercapnia_analysis.json": "942b63188290419e9c22af2b8f6210029334c345b7d7779d83e622b08aecf069",
+    "config/variable_dictionary.csv": "dd942f2469c62f514478b0fcaa72ebb5171fa1e83988fc23e386ec2826458d34",
+    "config/common_index_source_policy.json": "bebad842c52f658b65215eeb44052afc8df32b85e02fe412f4eb713112b36763",
+    "config/common_index_bmi_policy.json": "988b2f7a2c1f968b30773502f76635520d37a4183ab64b182c1c813ae2f7ac59"
+  },
+  "artifact_index_sha256": "ba00d72daa2248a077d05124975207e3b94a8588aa9bde3083dda75626779dcc",
+  "repeat_command": "Rscript --vanilla tests/run_e2e.R",
+  "finished_utc": "2026-10-24 11:14:33 UTC",
+  "source_receipt_sha256": "e033713c0873bf961015bc662502c1789e5539d2ab36efba2c2359a54a992b2c",
+  "receipt_id": "e2e-20261024T044257-81340",
+  "subsequent_change": "Axis-only histogram tick correction; separately verified artificial exports and final clinical report render. Estimation and test sources unchanged."
+}

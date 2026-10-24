@@ -1,0 +1,24 @@
+{
+  "original_snapshots": "unchanged; separately verified manifests",
+  "prior_integrated_figures": [
+    {
+      "figure": "primary/F1-B",
+      "prior_sha256": "fbadf0b2630ab787f915814b6fa9e7ccfa02cee84cbe97b92b10baeb234521b9",
+      "current_sha256": "fbadf0b2630ab787f915814b6fa9e7ccfa02cee84cbe97b92b10baeb234521b9",
+      "identical_to_prior_integrated_export": true
+    },
+    {
+      "figure": "primary/F2",
+      "prior_sha256": "53bee63f7883c721b317cdcaa1961fe854959170aec24e1045368eda437374ed",
+      "current_sha256": "53bee63f7883c721b317cdcaa1961fe854959170aec24e1045368eda437374ed",
+      "identical_to_prior_integrated_export": true
+    },
+    {
+      "figure": "S1-same-day-ABG",
+      "prior_sha256": "9b2ed5f4005f3e1764ab53c6075f011497d10fa3dc8692efc34cabbd3f0df0d2",
+      "current_sha256": "9b2ed5f4005f3e1764ab53c6075f011497d10fa3dc8692efc34cabbd3f0df0d2",
+      "identical_to_prior_integrated_export": true
+    }
+  ],
+  "new_S2_exports_match_inspected_preview": true
+}
