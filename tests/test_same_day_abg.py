@@ -4,7 +4,7 @@ import sys
 from pathlib import Path
 import unittest
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
-from enrich_same_day_abg import derive_days, CooccurrenceError
+from source_components import derive_days, CooccurrenceError
 
 POLICY = dict(policy_id="same_day_arterial_cooccurrence_v1",
     ph_lower_exclusive=6.5, ph_upper_exclusive=7.8,

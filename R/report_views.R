@@ -1,3 +1,10 @@
+bmi_analysis_label <- function(group) {
+  labels<-c(primary="All valid BMI: primary",primary_bmi_ge30="BMI ≥30: secondary",
+    primary_current="Current BMI: sensitivity",all_obesity="All OBESITY routes: overlapping sensitivity",
+    combined="All indexed patients: audit",obesity_only="Obesity-only entry: audit",unresolved="Unresolved RFS: audit")
+  label<-unname(labels[group]);if(length(label)!=1L||is.na(label))stop("Unknown analysis population")
+  label
+}
 # Aggregate-only presentation. No patient records, model fitting or scientific recoding.
 bmi_wrap <- function(x,width=28) vapply(x,function(z)paste(strwrap(z,width),collapse="\n"),character(1))
 bmi_variable_label <- function(variable,dictionary) {
@@ -13,7 +20,7 @@ bmi_population_label <- function(x) {
     n_no_eligible_or_uncertain="No eligible or uncertain encounter",Q="Resolved first indexes (Q)",C="Complete adjustment (C)",C40="BMI ≥40 within C",
     C_icd="Known diagnosis capture",missing_adjustment="Incomplete adjustment",M_abg="Matched ICD / ABG",M_any_gas="Matched ICD / combined gas",
     C_abg_encounter="ABG outcome observed",C_any_gas_encounter="Combined outcome observed",
-    "combined::Q"="All resolved common indexes", "primary::Q"="Non-OBESITY-supported entry",
+    "combined::Q"="All resolved common indexes", "primary::Q"="Non-OBESITY-supported entry", "primary_bmi_ge30::Q"="BMI ≥30 at the same index",
     "obesity_only::Q"="Obesity-only entry: descriptive audit", "unresolved::Q"="RFS membership unresolved")
   out<-unname(labels[x]);bad<-is.na(out);out[bad]<-gsub("_"," ",x[bad],fixed=TRUE);out
 }
@@ -80,7 +87,7 @@ bmi_edge_plot <- function(a,e) {
   ggplot2::ggplot(n,ggplot2::aes(x,y))+
     ggplot2::geom_segment(data=segments,ggplot2::aes(x=x,y=y,xend=xe,yend=ye),inherit.aes=FALSE,colour="grey35")+
     ggplot2::geom_segment(data=arrows,ggplot2::aes(x=x,y=y,xend=xe,yend=ye),inherit.aes=FALSE,arrow=grid::arrow(length=grid::unit(2,"mm")))+
-    ggplot2::geom_rect(ggplot2::aes(xmin=x-.65,xmax=x+.65,ymin=y-.35,ymax=y+.35),fill="white",colour="grey35")+
+    ggplot2::geom_rect(ggplot2::aes(xmin=x-.65,xmax=x+.65,ymin=y-.43,ymax=y+.43),fill="white",colour="grey35")+
     ggplot2::geom_text(ggplot2::aes(label=text),size=3.4,lineheight=.95)+
     ggplot2::scale_x_continuous(limits=c(-.8,2.8))+ggplot2::scale_y_continuous(limits=c(.45,nrow(e)+.55))+
     ggplot2::labs(title=if(e$partition_id[1]=="rfs_index")"Source-entry partition at the fixed index"else paste("Cohort accounting:",e$relation[1]),subtitle=if(e$partition_id[1]=="rfs_index")"Mutually exclusive patient groups; overlap remains in primary"else if(e$relation[1]=="partition")paste("Partition:",gsub("_"," ",e$partition_id[1]))else"Children are not an exclusive partition")+

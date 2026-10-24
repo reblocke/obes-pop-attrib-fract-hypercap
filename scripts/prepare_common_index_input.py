@@ -33,8 +33,9 @@ UPSTREAM_MODULES = ("encounters.reader", "combined_preprocessing.cohort_source",
                     "combined_preprocessing.cohort_source_calendar_transport")
 
 
-class PreparationError(ValueError):
-    """Safe aggregate-level explanation without record values or keys."""
+from source_components import (PreparationError, PROVENANCE, RFS_COLUMNS, SAME_DAY_FIELDS, ICD_FIELDS,
+    authenticate_rfs, authenticate_policy, derive_days, derive_codes, summarize_components, join_metadata)
+METADATA_COLUMNS = tuple(RFS_COLUMNS) + ('raw_race','raw_ethnicity','obesity_trigger') + tuple(PROVENANCE)
 
 
 def file_identity(path):
@@ -190,27 +191,6 @@ def summarize_gases(stream, policy, specimen_codes, *, start_dates, metadata_uni
     return summaries, dict(audit)
 
 
-def summarize_icd(stream, policy, capture_complete):
-    results = {}; audit = Counter(); seen_records = set()
-    targets = {x.replace(".", "") for x in policy["icd_codes"]}
-    for item in stream:
-        key = (item.patient_id, item.encounter_id)
-        results.setdefault(key, 0 if capture_complete else None)
-        if item.state in ("unavailable_domain", "unavailable_field"):
-            results[key] = None; audit[item.state] += 1
-        elif item.record is not None:
-            identity = item.record.get("source_record_id")
-            if not identity or identity in seen_records:
-                raise PreparationError("Missing or duplicate diagnosis source-record identity")
-            seen_records.add(identity)
-            code = str(item.record.get("code") or "").strip().upper().replace(".", "")
-            if code in targets:
-                results[key] = 1; audit["target_records"] += 1
-            else:
-                raise PreparationError("Diagnosis transport returned an unselected code")
-    return results, dict(audit)
-
-
 def require_original_keys(frame):
     for name in ("patient_id", "encounter_id"):
         if any(not isinstance(x, str) or not x.strip() for x in frame[name]):
@@ -240,7 +220,7 @@ def pinned_readers(config):
 
 def mapping_csv_fields(fields):
     """Promote stored floats before CSV serialization, preserving their exact value."""
-    return ["CAST("+name+" AS DOUBLE) AS "+name if name in ("bmi", "age_at_encounter") else name for name in fields]
+    return ["CAST("+name+" AS DOUBLE) AS "+name if name in ("bmi", "age_at_encounter", "reported_bmi", "height_inches", "weight_pounds") else name for name in fields]
 
 
 def load_mapped_indexes(config, mapper, output, readers):
@@ -251,7 +231,7 @@ def load_mapped_indexes(config, mapper, output, readers):
     manifest = json.loads(path.read_text())
     from original_encounter_population import read_original_list, require_original_population
     require_original_population(config, manifest)
-    original, _ = read_original_list(config, readers)
+    original, _ = read_original_list(config, readers, include_metadata=True)
     verify_file(manifest["original_encounter_list"])
     if manifest.get("product") != "calendar_encounter_covariates_v1" or manifest.get("policy") != mapper.POLICY:
         raise PreparationError("Unreviewed upstream covariate product/policy")
@@ -260,7 +240,7 @@ def load_mapped_indexes(config, mapper, output, readers):
     product = verify_file({"path":str(path.parent/"covariates.parquet"),"sha256":manifest["files"]["covariates.parquet"]})
     parts = output/"index-partitions"; parts.mkdir(mode=0o700)
     cache = output/"index-cache"
-    fields = list(BASE_COLUMNS) + ["bmi_evidence_state"]
+    fields = list(BASE_COLUMNS) + ["bmi_evidence_state"] + list(METADATA_COLUMNS)
     quote = lambda value: "'"+str(value).replace("'","''")+"'"
     with duckdb.connect() as c:
         c.execute("SET memory_limit='2816MiB'"); c.execute("SET threads=1")
@@ -270,7 +250,15 @@ def load_mapped_indexes(config, mapper, output, readers):
         missing = c.execute('SELECT count(*) FROM authenticated_original_keys o ANTI JOIN read_parquet(?) m USING(patient_id,encounter_id)', [str(product)]).fetchone()[0]
         if outside or missing:
             raise PreparationError('Mapped keys differ from authenticated original acute encounter list')
-        c.execute("COPY (SELECT "+','.join(fields)+",hash(patient_id)%64 AS part FROM read_parquet("+quote(product)+")) TO "+quote(cache)+" (FORMAT PARQUET,PARTITION_BY(part),COMPRESSION ZSTD)")
+        keys=c.execute('SELECT patient_id,encounter_id FROM read_parquet(?)',[str(product)]).fetchdf()
+        metadata=join_metadata(keys,original)
+        c.register('original_metadata',metadata)
+        select_base=','.join('p.'+name for name in list(BASE_COLUMNS)+['bmi_evidence_state']+PROVENANCE)
+        select_rfs=','.join('o.'+name for name in list(RFS_COLUMNS)+['raw_race','raw_ethnicity'])
+        joined='SELECT '+select_base+','+select_rfs+",'trigger_unresolved' AS obesity_trigger FROM read_parquet("+quote(product)+') p JOIN original_metadata o USING(patient_id,encounter_id)'
+        if c.execute('SELECT count(*) FROM ('+joined+')').fetchone()[0]!=manifest['rows']:
+            raise PreparationError('Metadata join changed candidate population')
+        c.execute("COPY (SELECT *,hash(patient_id)%64 AS part FROM ("+joined+")) TO "+quote(cache)+" (FORMAT PARQUET,PARTITION_BY(part),COMPRESSION ZSTD)")
         for part in range(64):
             files=list((cache/f'part={part}').glob('*.parquet'))
             if not files: continue
@@ -288,10 +276,11 @@ def load_mapped_indexes(config, mapper, output, readers):
     with duckdb.connect() as c:
         c.execute("SET memory_limit='2816MiB'"); c.execute("SET threads=1")
         c.register('selected_original_keys',selected_keys)
-        features=c.execute('SELECT '+','.join('p.'+n for n in fields)+' FROM read_parquet(?) p '
-            'JOIN selected_original_keys k USING(patient_id,encounter_id)',[str(product)]).fetchdf()
+        features=c.execute('SELECT '+','.join('p.'+n for n in fields)+' FROM read_parquet(?,hive_partitioning=false) p '
+            'JOIN selected_original_keys k USING(patient_id,encounter_id)',[str(cache/'part=*'/'*.parquet')]).fetchdf()
     # Promote stored Stata float32 exactly; avoid a shortened CSV representation.
-    features["bmi"]=features["bmi"].astype('float64')
+    for name in features.select_dtypes(include=["float32"]).columns:
+        features[name]=features[name].astype("float64")
     if len(features)!=selection["counts"]["n_index_resolved"] or features.patient_id.duplicated().any():
         raise PreparationError("Prepared common indexes do not reconcile")
     return features, manifest, selection
@@ -306,7 +295,9 @@ def prepare(config, output):
     encoding=config.get("base_field_encoding","typed_v1")
     if encoding != "typed_v1":
         raise PreparationError("New mapped covariates require explicit typed encoding")
-    source_columns = list(BASE_COLUMNS) + ["bmi_evidence_state"]
+    source_columns = list(BASE_COLUMNS) + ["bmi_evidence_state"] + list(METADATA_COLUMNS)
+    rfs_evidence = authenticate_rfs(config)
+    day_policy = authenticate_policy(config)
     if not config["specimen_codes"] or any(v not in ("abg", "vbg", "other", "unspecified") for v in config["specimen_codes"].values()):
         raise PreparationError("Explicit reviewed specimen vocabulary is required")
     if type(config["diagnosis_capture_complete"]) is not bool:
@@ -399,20 +390,20 @@ def prepare(config, output):
                 if source_type is not None and legacy_mapped!="NA" and legacy_mapped != source_type:
                     raise PreparationError("Legacy and captured encounter settings disagree")
             selected.at[i,"encounter_type"] = source_type
-        connection.register("bmi30_study_keys", candidates[["patient_id", "encounter_id"]])
+        connection.register("study_keys", candidates[["patient_id", "encounter_id"]])
         target_codes = [code.replace(".","") for code in policy["icd_codes"]]
         expected_icd_records = connection.execute(
-            "SELECT count(*) FROM source_diagnosis d JOIN bmi30_study_keys k USING(patient_id,encounter_id) "
+            "SELECT count(*) FROM source_diagnosis d JOIN study_keys k USING(patient_id,encounter_id) "
             "WHERE replace(upper(trim(d.code)),'.','')=ANY(?)", [target_codes]).fetchone()[0]
         source_systems = {row[0] for row in connection.execute(
-            "SELECT DISTINCT d.code_system FROM source_diagnosis d JOIN bmi30_study_keys k "
+            "SELECT DISTINCT d.code_system FROM source_diagnosis d JOIN study_keys k "
             "USING(patient_id,encounter_id) WHERE replace(upper(trim(d.code)),'.','')=ANY(?)", [target_codes]).fetchall()}
         if not source_systems <= set(systems):
             raise PreparationError("Target-like diagnosis records have unreviewed code systems")
         transport = readers["combined_preprocessing.cohort_source_calendar_transport"].iter_calendar_source_records
         codes = sum((policy[name] for name in ("arterial_codes","venous_codes","unspecified_codes","temperature_adjusted_codes")), [])
         print("Extracting exact-code gas evidence at fixed indexes", flush=True)
-        gas, gas_audit = summarize_gases(transport(connection,encounter_relation="bmi30_study_keys",domain="lab",
+        gas, gas_audit = summarize_gases(transport(connection,encounter_relation="study_keys",domain="lab",
             code_selectors=[("LOINC",c) for c in codes]), policy, config["specimen_codes"], start_dates=starts,
             metadata_units=config.get("source_metadata_pressure_unit"))
         print("Gas evidence complete; extracting diagnosis evidence", flush=True)
@@ -420,21 +411,30 @@ def prepare(config, output):
                      for target in policy["icd_codes"] for code in (target,target.replace(".",""))]
         if not selectors:
             raise PreparationError("Reviewed diagnosis code systems are required")
-        icd, icd_audit = summarize_icd(transport(connection,encounter_relation="bmi30_study_keys",domain="diagnosis",
-            code_selectors=selectors), policy, config["diagnosis_capture_complete"])
+        code_flags, code_audit = summarize_components(transport(connection,encounter_relation="study_keys",domain="diagnosis",
+            code_selectors=selectors), lambda key,rows,unavailable: derive_codes(rows,config["diagnosis_capture_complete"],systems,key,unavailable))
+        icd_audit={name:code_audit[name] for name in ("unavailable_domain","unavailable_field") if name in code_audit}
+        icd_audit["target_records"]=code_audit.get("candidate_records",0)
+        icd={key:1 if any(row[f]==1 for f in ICD_FIELDS[1:]) else 0 if row["icd_capture_state"]=="complete" else None for key,row in code_flags.items()}
+        days, day_audit = summarize_components(transport(connection,encounter_relation="study_keys",domain="lab",
+            code_selectors=[("LOINC",c) for c in ("2019-8","2744-1","32771-8","2021-4","2746-6","11558-4")]),
+            lambda key,rows,unavailable: derive_days(rows,None if unavailable else day_policy))
         print("Diagnosis evidence complete; validating typed output", flush=True)
         if icd_audit.get("target_records", 0) != expected_icd_records:
             raise PreparationError("Transported ICD target records disagree with independent captured-source count")
-        if set(gas) != candidate_keys or set(icd) != candidate_keys:
+        if set(gas) != candidate_keys or set(icd) != candidate_keys or set(days) != candidate_keys:
             raise PreparationError("Evidence streams do not reconcile to candidate keys")
-        row_columns = BASE_COLUMNS + ("bmi_evidence_state",)
-        columns = OUTPUT_COLUMNS + ("bmi_evidence_state",) + (DAY_COLUMNS if config["index_day_status"] == "qualified" else ())
+        row_columns = BASE_COLUMNS + ("bmi_evidence_state",) + METADATA_COLUMNS
+        columns = OUTPUT_COLUMNS + ("bmi_evidence_state",) + METADATA_COLUMNS + SAME_DAY_FIELDS + ICD_FIELDS + (DAY_COLUMNS if config["index_day_status"] == "qualified" else ())
         csv_path = output / "study-input.csv"
         with csv_path.open("x",newline="") as file:
             writer = csv.DictWriter(file, fieldnames=columns); writer.writeheader()
             for values in selected[list(row_columns)].itertuples(index=False,name=None):
                 row = dict(zip(row_columns,values)); key=(row["patient_id"],row["encounter_id"])
                 row.update({k:v for k,v in gas[key].items() if k in columns});row["icd_hypercapnia"]=icd[key]
+                row.update(days[key]);row.update(code_flags[key])
+                for name in ("encounter_date","reported_date","height_date","weight_date"):
+                    row[name]=None if pd.isna(row[name]) else parsed_date(row[name])
                 # pandas NaN/NA/NaT must remain true missing values, not categories.
                 row={k:(None if pd.isna(v) else v) for k,v in row.items()}
                 writer.writerow(row)
@@ -494,6 +494,20 @@ def prepare(config, output):
         "field_evidence_sha256":sha256(output/"field-evidence.json"),
         "population_evidence_sha256":sha256(output/"population-evidence.json"),
         "clinical_models_fitted":0,"human_review":"pending","clinical_results_qualified":False}
+    selection_hash=sha256(output/"selection-evidence.json")
+    shared=dict(schema_version=1,input_sha256=receipt["input_sha256"],selection_sha256=selection_hash,
+        source_config_sha256=config["_config_sha256"],canonical_database_sha256=source["database"]["sha256"],
+        source_unchanged=True,n_input_encounters=len(selected),clinical_models_fitted=0,
+        adapter_sources={name:sha256(ROOT/name) for name in ("scripts/source_components.py","scripts/prepare_common_index_input.py","scripts/write_common_index_input.R")},
+        human_review="Automated extraction; no new investigator approval asserted")
+    day_evidence=dict(shared,policy_id="same_day_arterial_cooccurrence_v1",status="qualified" if day_policy else "unavailable",
+        reason="" if day_policy else "No authenticated recorded-day arterial policy supplied",policy=day_policy,
+        aggregate_counts=day_audit,patient_states=dict(Counter(x['same_day_abg_state'] for x in days.values())))
+    icd_evidence=dict(shared,policy_id="icd_acuity_v1",status="qualified" if config["diagnosis_capture_complete"] else "unavailable",
+        diagnosis_capture_complete=config["diagnosis_capture_complete"],diagnosis_code_systems=systems,target_codes=target_codes,
+        source_target_records=expected_icd_records,transported_records=icd_audit["target_records"],aggregate_counts=code_audit)
+    for filename,evidence in (("cooccurrence-evidence.json",day_evidence),("icd-acuity-evidence.json",icd_evidence),("rfs-evidence.json",rfs_evidence)):
+        (output/filename).write_text(json.dumps(evidence,indent=2)+"\n")
     (output/"preparation_receipt.json").write_text(json.dumps(receipt,indent=2)+"\n")
     manifest=json.loads((ROOT/"config/triangulation_input.example.json").read_text())
     manifest.update(input_sha256=receipt["input_sha256"],source_policy_id=policy["source_policy_id"],
@@ -512,6 +526,12 @@ def prepare(config, output):
         manifest["source_evidence_files"]["index_day"]=manifest["source_evidence_files"]["fields"]
     manifest.update(population_scope_id=mapping_manifest["population_scope_id"], bmi_policy_id=mapping_manifest["policy"]["id"], bmi_evidence_column="bmi_evidence_state")
     manifest["source_evidence_files"]["selection"]={"path":"selection-evidence.json","sha256":sha256(output/"selection-evidence.json")}
+    manifest.update(schema_version=5,study_design="common_index_valid_bmi_v1",
+        population_policy="first_2022_adult_ED_inpatient_valid_BMI_before_gas_and_completeness",
+        rfs_policy_id="historical_source_membership_v1",
+        metadata_columns={name:name for name in METADATA_COLUMNS+SAME_DAY_FIELDS+ICD_FIELDS})
+    for name,filename in (("rfs","rfs-evidence.json"),("same_day_abg","cooccurrence-evidence.json"),("icd_acuity","icd-acuity-evidence.json")):
+        manifest["source_evidence_files"][name]={"path":filename,"sha256":sha256(output/filename)}
     manifest["index_preselected"]=True
     manifest["source_evidence_files"]["cohort_audit"]={"path":"cohort-audit-companion.rds","sha256":sha256(output/"cohort-audit-companion.rds")}
     (output/"triangulation_input.pending.json").write_text(json.dumps(manifest,indent=2)+"\n")

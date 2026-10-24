@@ -53,7 +53,7 @@ bmi_export_figures <- function(bundle,output) {
     writeLines(gsub("../../../","../../../../",readLines(gallery_path,warn=FALSE),fixed=TRUE),gallery_path)
     captions<-utils::read.csv(file.path(folder,"captions.csv"),stringsAsFactors=FALSE)
     captions$figure_id<-paste0(group,"/",captions$figure_id)
-    captions$caption<-paste0("Source-entry population: ",group,". ",
+    captions$caption<-paste0("Analysis population: ",bmi_analysis_label(group),". ",
       if(group!="combined")"Subgroup accounting begins with fixed indexes; source/input nodes in these subgroup views do not repeat upstream selection. "else"Global source and pre-index accounting. ",captions$caption)
     captions$alt_text<-captions$caption
     all_captions[[group]]<-captions
@@ -62,13 +62,17 @@ bmi_export_figures <- function(bundle,output) {
     all_manifests[[group]]<-manifest
     atlas_path<-file.path(folder,"atlas-index.csv")
     atlas<-if(identical(readLines(atlas_path,warn=FALSE),'""'))data.frame()else utils::read.csv(atlas_path,stringsAsFactors=FALSE)
-    if(nrow(atlas)){atlas$figure_id<-paste0(group,"/",atlas$figure_id);atlas$analysis_population_id<-group;all_atlas[[group]]<-atlas}
+    if(nrow(atlas)){plotted<-!is.na(atlas$figure_id);atlas$figure_id[plotted]<-paste0(group,"/",atlas$figure_id[plotted]);atlas$analysis_population_id<-group;all_atlas[[group]]<-atlas}
   }
   a<-bundle$analysis
   partition<-a$cohort_edges[a$cohort_edges$partition_id=="rfs_index",,drop=FALSE]
+  secondary<-a$cohort_edges[a$cohort_edges$from=="primary::Q" & a$cohort_edges$to=="primary_bmi_ge30::Q",,drop=FALSE]
   if(nrow(partition)) {
-    bmi_export(root_draw(function()print(bmi_edge_plot(a,partition))),file.path(output,"RFS-flow"),height_mm=150)
-    caption<-"Fixed common indexes partition into primary non-OBESITY-supported source entry, obesity-only source entry and unresolved RFS. Overlapping OBESITY/non-OBESITY membership remains primary. Counts and units derive from the ledger; all-OBESITY supporting models overlap and are not a fourth partition branch."
+    flow<-list(bmi_edge_plot(a,partition)+ggplot2::labs(title="A  Source-entry partition"),
+      bmi_edge_plot(a,secondary)+ggplot2::labs(title="B  Nested BMI-restricted secondary",subtitle="Same primary indexes; no later-encounter substitution"))
+    bmi_export(root_draw(function()bmi_draw_grid(flow,1,"Populations at the new all-BMI index",
+      "The source-entry partition and the nested BMI subset are separate steps")),file.path(output,"RFS-flow"),height_mm=210)
+    caption<-"Fixed common indexes partition into primary non-OBESITY-supported source entry, obesity-only source entry and unresolved RFS. Overlapping OBESITY/non-OBESITY membership remains primary. Counts and units derive from the ledger; BMI ≥30 secondary is nested within primary at the same indexes; all-OBESITY supporting models overlap and are not a fourth partition branch."
     if(bundle$manifest$mode=="fixture")caption<-paste("ARTIFICIAL DATA ONLY.",caption)
     all_captions[["flow"]]<-data.frame(figure_id="RFS-flow",caption=caption,alt_text=caption,source_tables="cohort_nodes;cohort_edges")
   }
@@ -96,16 +100,24 @@ bmi_export_figures <- function(bundle,output) {
     if(bundle$manifest$mode=="fixture")caption<-paste("ARTIFICIAL DATA ONLY.",caption)
     all_captions[["evidence"]]<-data.frame(figure_id="RFS-evidence",caption=caption,alt_text=caption,source_tables="rfs_outcomes;rfs_summary")
   }
-  all_captions[["paired"]]<-bmi_same_day_figure(bundle,output)
-  all_captions[["icd_acuity"]]<-bmi_icd_acuity_figure(bundle,output)
-  for(id in c("RFS-flow","RFS-entry","RFS-evidence","S1-same-day-ABG","S2-ICD-acuity","S2-ICD-specified","S2-ICD-observed"))if(file.exists(file.path(output,paste0(id,".png")))) {
-    all_manifests[[id]]<-data.frame(figure_id=id,panel_id="all",file_path=file.path(output,paste0(id,".png")),export_paths=paste(file.path(output,paste0(id,c(".svg",".pdf",".png",".jpg"))),collapse=";"),source_path="R/rfs_reporting.R",figure_type=if(grepl("^S2-ICD",id))"ICD probabilities and sampling support"else"source-entry audit",intended_use="private research review",width_px=round(190/25.4*300),dpi_x=300,dpi_y=300,color_mode=if(id %in% c("S2-ICD-acuity","S2-ICD-specified"))"RGB; grayscale review required"else"grayscale",vector_status="SVG/PDF",qc_status="exported; actual visual review pending")
+  component_ids<-character()
+  for(group in unlist(bundle$config$component_populations)) {
+    child<-bundle;child$analysis<-bmi_group_view(a,group);child$manifest$source_group<-group
+    folder<-file.path(output,group)
+    caps<-bmi_bind(list(bmi_same_day_figure(child,folder),bmi_icd_acuity_figure(child,folder)))
+    caps$figure_id<-paste0(group,"/",caps$figure_id)
+    caps$caption<-paste0(bmi_analysis_label(group),". ",caps$caption);caps$alt_text<-caps$caption
+    all_captions[[paste0(group,"-components")]]<-caps
+    component_ids<-c(component_ids,caps$figure_id)
+  }
+  for(id in c("RFS-flow","RFS-entry","RFS-evidence",component_ids))if(file.exists(file.path(output,paste0(id,".png")))) {
+    all_manifests[[id]]<-data.frame(figure_id=id,panel_id="all",file_path=file.path(output,paste0(id,".png")),export_paths=paste(file.path(output,paste0(id,c(".svg",".pdf",".png",".jpg"))),collapse=";"),source_path="R/rfs_reporting.R",figure_type=if(grepl("(^|/)S2-ICD",id))"ICD probabilities and sampling support"else"source-entry audit",intended_use="private research review",width_px=round(190/25.4*300),dpi_x=300,dpi_y=300,color_mode=if(grepl("(^|/)S[12]-",id))"RGB; grayscale review required"else"grayscale",vector_status="SVG/PDF",qc_status="exported; actual visual review pending")
   }
   utils::write.csv(bmi_bind(all_captions),file.path(output,"captions.csv"),row.names=FALSE)
   utils::write.csv(bmi_bind(all_manifests),file.path(output,"figure-qc-manifest.csv"),row.names=FALSE)
   utils::write.csv(bmi_bind(all_atlas),file.path(output,"atlas-index.csv"),row.names=FALSE)
   captions<-bmi_bind(all_captions)
-  html<-c("<!doctype html><meta charset='utf-8'><title>RFS figure comparison</title><style>body{font:16px sans-serif;max-width:1100px;margin:auto}img{width:100%}</style><h1>RFS figure alternatives</h1><p>F1-B and F2 are the investigator-selected main figures. S1 is a recorded-day co-occurrence supplement; S2 decomposes documented ICD acuity. Counts and all alternatives use the same saved aggregates.</p>")
+  html<-c("<!doctype html><meta charset='utf-8'><title>RFS figure comparison</title><style>body{font:16px sans-serif;max-width:1100px;margin:auto}img{width:100%}</style><h1>RFS figure alternatives</h1><p>F1-B and F2 retain the previously selected layouts; approval of new results is pending. S1 and S2 are integrated physiological and diagnosis components, with separate primary and BMI ≥30 views. Counts and all alternatives use the same saved aggregates.</p>")
   for(i in seq_len(nrow(captions))) {
     id<-captions$figure_id[i]
     html<-c(html,paste0("<article><h2>",id,"</h2><a href='",id,".png'><img loading='lazy' src='",id,".png' alt='",id,"'></a><p>",captions$caption[i],"</p></article>"))
@@ -115,7 +127,7 @@ bmi_export_figures <- function(bundle,output) {
 }
 
 bmi_same_day_figure <- function(bundle,output) {
-  a<-bundle$analysis;id<-"primary::same_day_abg/encounter/multinomial_spline"
+  a<-bundle$analysis;id<-"same_day_abg/encounter/multinomial_spline"
   r<-a$model_registry[a$model_registry$model_id==id,,drop=FALSE]
   curves<-a$probability_curves[a$probability_curves$model_id==id,,drop=FALSE]
   good<-curves[is.finite(curves$probability),,drop=FALSE]
@@ -139,6 +151,7 @@ bmi_same_day_figure <- function(bundle,output) {
       ggplot2::geom_ribbon(ggplot2::aes(ymin=with,ymax=total),fill="#E4BF96")+
       ggplot2::geom_rect(data=sparse,ggplot2::aes(xmin=pmax(bounds[1],bmi-bundle$config$grid_step/2),xmax=pmin(bounds[2],bmi+bundle$config$grid_step/2),ymin=0,ymax=1),fill="white",alpha=.45,inherit.aes=FALSE)+
       ggplot2::geom_ribbon(ggplot2::aes(ymin=total_low,ymax=total_high),fill="grey35",alpha=.20)+
+      ggplot2::geom_vline(xintercept=30,linetype="dashed",linewidth=.3,colour="grey40")+
       ggplot2::geom_line(ggplot2::aes(y=total,linetype=sparse,group=segment),linewidth=.65)+
       ggplot2::geom_line(ggplot2::aes(y=with,linetype=sparse,group=segment),colour=colours['with_acidemia'],linewidth=.55)+
       ggplot2::scale_linetype_manual(values=c('FALSE'="solid",'TRUE'="dotted"),guide="none")+xscale()+yscale()+
@@ -157,7 +170,7 @@ bmi_same_day_figure <- function(bundle,output) {
       z<-components[components$outcome_id==o,];j<-which.min(abs(z$bmi-(bounds[1]+.57*diff(bounds))))
       comparison<-comparison+ggplot2::annotate("text",x=z$bmi[j],y=if(o=="with_acidemia")min(.96,z$conf_high[j]+.045)else max(.03,z$probability[j]-.065),label=if(o=="with_acidemia")label[o]else"Without documented same-day acidemia",colour=colours[o],size=3.2)
     }
-    bins<-a$distribution_bins[a$distribution_bins$population_id=="primary::C_same_day_abg"&a$distribution_bins$variable_id=="bmi",]
+    bins<-a$distribution_bins[a$distribution_bins$population_id=="C_same_day_abg"&a$distribution_bins$variable_id=="bmi",]
     # Geometries may straddle the observed endpoints; coordinate clipping does not
     # drop boundary bins or their patients as hard scale limits would.
     freq<-ggplot2::ggplot(bins,ggplot2::aes((lower+upper)/2,n))+
@@ -174,7 +187,7 @@ bmi_same_day_figure <- function(bundle,output) {
   counts<-a$cooccurrence_categories
   fmt<-function(x)ifelse(is.na(x),"unavailable",format(x,big.mark=",",trim=TRUE))
   count<-function(k)fmt(counts$n[match(k,counts$category_id)])
-  subtitle<-paste0("Shared model/reference N = ",if(nrow(r))fmt(r$n_model)else"unavailable",
+  subtitle<-paste0(bmi_analysis_label(bundle$manifest$source_group),"; model/ref N = ",if(nrow(r))fmt(r$n_model)else"unavailable",
     "; with acidemia: ",count("with_acidemia"),"; without: ",count("without_acidemia"))
   draw<-function() {
     grid::grid.newpage()
@@ -189,7 +202,7 @@ bmi_same_day_figure <- function(bundle,output) {
     grid::popViewport()
   }
   bmi_export(draw,file.path(output,"S1-same-day-ABG"),height_mm=210)
-  caption<-paste("Same recorded-day co-occurrence; not verified same-sample pairing. Primary fixed-index patients with both arterial analytes share inherited adjustment and the primary BMI spline.",
+  caption<-paste("Same recorded-day co-occurrence; not verified same-sample pairing. Fixed-index patients with both arterial analytes share inherited adjustment and their analysis population’s fixed BMI spline.",
     "Any eligible day with PaCO₂ ≥45 mm Hg and pH <7.35 assigns the with-acidemia category; remaining hypercapnic patients have no documented same-day acidemia. Different samples may contribute.",
     "A: band thicknesses give component probabilities; the upper boundary is total hypercapnia. B: components share a baseline. Shading denotes pointwise 95% intervals using full joint covariance. C: shared-population BMI frequencies.",
     "Fading/dotted lines mark local windows below 30 patients or five events/non-events; marginal checks do not establish joint support. These recorded outcomes do not establish simultaneous physiology, acute respiratory failure or compensation. Selection, treatment timing and confounding remain limitations.")
@@ -200,7 +213,7 @@ bmi_same_day_figure <- function(bundle,output) {
 bmi_icd_model_figure <- function(bundle,output,specified=FALSE) {
   family<-if(specified)"icd_acuity_specified"else"icd_acuity"
   figure_id<-if(specified)"S2-ICD-specified"else"S2-ICD-acuity"
-  a<-bundle$analysis;id<-paste0("primary::",family,"/encounter/multinomial_spline")
+  a<-bundle$analysis;id<-paste0(family,"/encounter/multinomial_spline")
   r<-a$model_registry[a$model_registry$model_id==id,]
   z<-a$probability_curves[a$probability_curves$model_id==id & a$probability_curves$status=="estimated",]
   labels<-c(chronic_ohs="Chronic coding / OHS",acute_chronic="Acute-on-chronic or\nconcurrent coding",acute="Acute coding",unspecified="Unspecified acuity")
@@ -240,7 +253,7 @@ bmi_icd_model_figure <- function(bundle,output,specified=FALSE) {
       ggplot2::facet_wrap(~label,ncol=2)+xs()+ys()+bmi_theme()+
       ggplot2::theme(panel.spacing.x=grid::unit(6,"mm"))+
       ggplot2::labs(title="B  Component magnitudes on common axes",subtitle="Pointwise 95% intervals; dotted segments indicate local sparsity",x=NULL,y="Modeled probability")
-    bins<-a$distribution_bins[a$distribution_bins$population_id==paste0("primary::C_",family)&a$distribution_bins$variable_id=="bmi",]
+    bins<-a$distribution_bins[a$distribution_bins$population_id==paste0("C_",family)&a$distribution_bins$variable_id=="bmi",]
     freq<-ggplot2::ggplot(bins,ggplot2::aes((lower+upper)/2,n))+
       ggplot2::geom_col(ggplot2::aes(width=upper-lower),fill="grey50")+
       ggplot2::scale_y_continuous(breaks=function(x)pretty(x,n=2))+
@@ -259,18 +272,18 @@ bmi_icd_model_figure <- function(bundle,output,specified=FALSE) {
   draw<-function() {
     grid::grid.newpage()
     grid::grid.text(if(specified)"Sensitivity: exclude unspecified-only diagnosis category"else"BMI and documented respiratory-failure acuity / OHS",x=.02,y=.99,just=c("left","top"),gp=grid::gpar(fontsize=11,fontface="bold"))
-    grid::grid.text(paste0(if(bundle$manifest$mode=="fixture")"ARTIFICIAL DATA ONLY | "else"Primary population | ","Encounter-wide; model/reference N = ",n,if(specified)" | Maximum likelihood"else" | Firth bias reduction"),x=.02,y=.969,just=c("left","top"),gp=grid::gpar(fontsize=9))
+    grid::grid.text(paste0(if(bundle$manifest$mode=="fixture")"ARTIFICIAL DATA ONLY | "else paste0(bmi_analysis_label(bundle$manifest$source_group)," | "),"Encounter-wide; model/reference N = ",n,if(specified)" | Maximum likelihood"else" | Firth bias reduction"),x=.02,y=.969,just=c("left","top"),gp=grid::gpar(fontsize=9))
     grid::grid.text(paste0("Events: chronic/OHS ",count("chronic_ohs"),"; acute/chronic ",count("acute_chronic"),"; acute ",count("acute"),if(specified)paste0("; excluded ",count("unspecified"))else paste0("; unspecified ",count("unspecified"))),x=.02,y=.95,just=c("left","top"),gp=grid::gpar(fontsize=9))
     grid::pushViewport(grid::viewport(y=.465,height=.91,layout=grid::grid.layout(3,1,heights=grid::unit(c(2.5,3.3,1.2),"null"))))
     for(i in 1:3) {grid::pushViewport(grid::viewport(layout.pos.row=i));grid::grid.draw(ggplot2::ggplotGrob(plots[[i]]));grid::popViewport()}
     grid::popViewport()
   }
   bmi_export(draw,file.path(output,figure_id),height_mm=200)
-  caption<-paste(if(specified)"Unpenalized four-category sensitivity excluding unspecified-only encounters and standardizing over the remaining patients."else"Mean-bias-reduced five-category multinomial spline; all diagnosis-evaluable primary patients retained.",
-    "Encounter-wide coding, no gas requirement; inherited adjustment and primary spline basis. Bands partition the composite; thickness gives component probability. Shading: pointwise 95% intervals from joint information covariance, conditional on the empirical reference and basis. Fading/dots: local sparsity; histogram N equals model/reference N.",
+  caption<-paste(if(specified)"Unpenalized four-category sensitivity excluding unspecified-only encounters and standardizing over the remaining patients."else"Mean-bias-reduced five-category multinomial spline; all diagnosis-evaluable patients in the stated population retained.",
+    "Encounter-wide coding, no gas requirement; inherited adjustment and the population-specific spline basis. Bands partition the composite; thickness gives component probability. Shading: pointwise 95% intervals from joint information covariance, conditional on the empirical reference and basis. Fading/dots: local sparsity; histogram N equals model/reference N.",
     "Acute-on-chronic includes explicit or concurrent acute/chronic coding. OHS (obesity hypoventilation syndrome) is analytically chronic; this does not establish chronic respiratory failure. Source selection and diagnostic incorporation limit physiological interpretation.")
   if(!nrow(z))caption<-paste("Adjusted ICD-acuity curves and intervals are unavailable:",why,
-    "This is a model-status display, not an estimated relationship. The accompanying table reports observed category counts only when source evidence is qualified. Primary fixed indexes, adjustment and existing analyses are unchanged; no fallback estimator was used.")
+    "This is a model-status display, not an estimated relationship. The accompanying table reports observed category counts only when source evidence is qualified. Fixed indexes and inherited adjustment are retained; no fallback estimator was used.")
   if(bundle$manifest$mode=="fixture")caption<-paste("ARTIFICIAL DATA ONLY.",caption)
   data.frame(figure_id=figure_id,caption=caption,alt_text=caption,source_tables="probability_curves;icd_acuity_categories;icd_acuity_probability_covariance;distribution_bins;model_registry")
 }
@@ -278,7 +291,7 @@ bmi_icd_model_figure <- function(bundle,output,specified=FALSE) {
 
 bmi_icd_observed_figure <- function(bundle,output) {
   a<-bundle$analysis;z<-a$icd_acuity_observed_bands
-  caption<-paste("Observed encounter-wide diagnosis proportions within five-unit BMI bands of the covariate-complete primary population with known capture; no gas requirement.",
+  caption<-paste("Observed encounter-wide diagnosis proportions within five-unit BMI bands of the covariate-complete analysis population with known capture; no gas requirement.",
     "These are unadjusted descriptions, not fitted curves. Error bars are Wilson 95% intervals; hollow points mark sparse patient/event/non-event counts. The histogram shows each band denominator, shared by every category. Empty bands have no estimate.",
     "OHS is grouped with chronic coding analytically; codes do not establish physiology. Overall percentages and their Wilson intervals are printed in each panel; no-target coding is the complement of the four displayed categories.")
   if(nrow(z)) {
@@ -301,7 +314,7 @@ bmi_icd_observed_figure <- function(bundle,output) {
     bins<-z[z$category_id=="no_target",]
     freq<-ggplot2::ggplot(bins,ggplot2::aes((bin_low+bin_high)/2,N))+
       ggplot2::geom_col(ggplot2::aes(width=bin_high-bin_low),fill="grey50")+xs()+bmi_theme()+
-      ggplot2::labs(x="Original BMI band (kg/m²)",y="Patients",title=paste0("Known-capture primary population: N = ",format(sum(bins$N),big.mark=",",trim=TRUE)))
+      ggplot2::labs(x="Original BMI band (kg/m²)",y="Patients",title=paste0("Known-capture analysis population: N = ",format(sum(bins$N),big.mark=",",trim=TRUE)))
     draw<-function() {
       grid::grid.newpage();grid::pushViewport(grid::viewport(layout=grid::grid.layout(2,1,heights=grid::unit(c(4,1),"null"))))
       for(i in 1:2) {grid::pushViewport(grid::viewport(layout.pos.row=i));grid::grid.draw(ggplot2::ggplotGrob(list(p,freq)[[i]]));grid::popViewport()}

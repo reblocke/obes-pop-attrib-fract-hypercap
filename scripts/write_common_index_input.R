@@ -4,15 +4,20 @@ args <- commandArgs(trailingOnly = TRUE)
 if (length(args) != 2L || file.exists(args[2])) stop("Use private CSV and fresh RDS output paths.")
 source("R/analysis.R")
 header <- names(utils::read.csv(args[1], nrows = 0, check.names = FALSE))
-base <- c(triangulation_columns, if ("bmi_evidence_state" %in% header) "bmi_evidence_state")
-expected <- c(base, triangulation_index_day_columns)
-if (!setequal(header, base) && !setequal(header, expected)) stop("Unexpected prepared fields.")
-character_fields <- c("patient_id", "encounter_id", "encounter_date", "encounter_type", "sex", "race_ethnicity", "location", "bmi_evidence_state")
-classes <- ifelse(header %in% character_fields, "character", "numeric")
-data <- utils::read.csv(args[1], colClasses = classes, na.strings = "", check.names = FALSE)
-raw_date <- data$encounter_date
-data$encounter_date <- as.Date(raw_date, format = "%Y-%m-%d")
-if (any(!is.na(raw_date) & (is.na(data$encounter_date) | format(data$encounter_date, "%Y-%m-%d") != raw_date))) stop("Invalid prepared date.")
+required <- triangulation_columns
+allowed <- c(required, "bmi_evidence_state", triangulation_index_day_columns, bmi_metadata_fields)
+if (!all(required %in% header) || any(!header %in% allowed)) stop("Unexpected prepared fields.")
+character_fields <- c("patient_id","encounter_id","encounter_type","sex","race_ethnicity","location",
+  "bmi_evidence_state","bmi_method","bmi_reason","raw_race","raw_ethnicity","obesity_trigger",
+  "same_day_abg_state","icd_capture_state")
+date_fields <- c("encounter_date","reported_date","height_date","weight_date")
+classes <- ifelse(header %in% c(character_fields,date_fields), "character", "numeric")
+data <- utils::read.csv(args[1], colClasses=classes, na.strings="", check.names=FALSE)
+for (name in intersect(date_fields,header)) {
+  raw <- data[[name]]; data[[name]] <- as.Date(raw,format="%Y-%m-%d")
+  if(any(!is.na(raw) & (is.na(data[[name]]) | format(data[[name]],"%Y-%m-%d")!=raw)))stop("Invalid prepared date")
+}
+bmi_validate_metadata(data)
 invisible(validate_triangulation_input(data))
 saveRDS(data, args[2])
 Sys.chmod(args[2], mode = "0600")

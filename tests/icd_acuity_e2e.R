@@ -1,14 +1,15 @@
 # Independent classification/likelihood/gradient checks planned before production edits.
-e2e_icd_acuity <- function(bundle,raw) {
-  a<-bundle$analysis;id<-"primary::icd_acuity/encounter/multinomial_spline"
+e2e_icd_acuity <- function(bundle,raw,population="primary") {
+  a<-bundle$analysis;id<-paste0(population,"::icd_acuity/encounter/multinomial_spline")
   q<-e2e_indexes(raw);q<-q[q$group=="primary" & complete.cases(q[triangulation_adjustment]),]
+  if(population=="primary_bmi_ge30")q<-q[q$bmi>=30,,drop=FALSE]
   p<-q[q$icd_capture_state=="complete",]
   classes<-c("no_target","chronic_ohs","acute_chronic","acute","unspecified")
   category<-with(p,ifelse(icd_J9622==1 | (icd_J9602==1 & (icd_J9612==1|icd_E662==1)),"acute_chronic",
     ifelse(icd_J9602==1,"acute",ifelse(icd_J9612==1|icd_E662==1,"chronic_ohs",ifelse(icd_J9692==1,"unspecified","no_target")))))
   y<-match(category,classes);r<-a$model_registry[a$model_registry$model_id==id,]
   stopifnot(nrow(r)==1,r$status=="successful",r$n_model==nrow(p),!any(a$policy_totals$model_id==id))
-  e2e_near(a$icd_acuity_categories$n,tabulate(y,5))
+  e2e_near(a$icd_acuity_categories$n[a$icd_acuity_categories$analysis_population_id==population],tabulate(y,5))
   knots<-as.numeric(quantile(q$bmi,c(.05,.35,.65,.95),type=7))
   for(v in c("sex","race_ethnicity","location"))p[[v]]<-factor(p[[v]],levels=c("0",setdiff(sort(unique(p[[v]])),"0")))
   design<-function(bmi) {
@@ -44,7 +45,7 @@ e2e_icd_acuity <- function(bundle,raw) {
     d<-fun(theta);g<-derivative(fun);se<-sqrt(drop(t(g)%*%v%*%g))
     e2e_near(c(row$difference_per1000,row$conf_low_per1000,row$conf_high_per1000),1000*c(d,d-qnorm(.975)*se,d+qnorm(.975)*se),tolerance=3e-4)
   }
-  sid<-"primary::icd_acuity_specified/encounter/multinomial_spline"
+  sid<-paste0(population,"::icd_acuity_specified/encounter/multinomial_spline")
   sr<-a$model_registry[a$model_registry$model_id==sid,]
   keep<-y!=5;zz<-z[keep,,drop=FALSE];yy<-y[keep];truth4<-diag(4)[yy,,drop=FALSE]
   fn4<-function(b)-sum(log(e2e_icd_softmax(b,zz,4)[cbind(seq_along(yy),yy)]))
@@ -60,13 +61,14 @@ e2e_icd_acuity <- function(bundle,raw) {
     e2e_near(cv$probability,c(pp,sum(pp[-1])),tolerance=3e-4)
     stopifnot(all(cv$n_reference==sum(keep)))
   }
-  band<-a$icd_acuity_observed_bands
+  band<-a$icd_acuity_observed_bands[a$icd_acuity_observed_bands$analysis_population_id==population,]
   stopifnot(sum(band$n)==nrow(p),all(band$N>0))
   for(lo in unique(band$bin_low)) {
     ix<-p$bmi>=lo & p$bmi<lo+bundle$config$bmi_bin_width
     zband<-band[band$bin_low==lo,]
     e2e_near(zband$n,tabulate(y[ix],5));e2e_near(zband$N,rep(sum(ix),5))
   }
+  if(population=="primary") {
   # All 32 patterns, independently enumerated, including unspecified co-coding.
   patterns<-expand.grid(rep(list(0:1),5));names(patterns)<-c("icd_J9602","icd_J9612","icd_J9622","icd_J9692","icd_E662")
   expected<-with(patterns,ifelse(icd_J9622==1 | (icd_J9602==1&(icd_J9612==1|icd_E662==1)),"acute_chronic",ifelse(icd_J9602==1,"acute",ifelse(icd_J9612==1|icd_E662==1,"chronic_ohs",ifelse(icd_J9692==1,"unspecified","no_target")))))
@@ -87,5 +89,6 @@ e2e_icd_acuity <- function(bundle,raw) {
   constant$icd_J9602[raw$icd_J9692==1]<-1
   failed<-bmi_run_analysis(constant,bundle$config)
   stopifnot(failed$model_registry$status[failed$model_registry$model_id==id]=="absent_category")
+  }
   data.frame(model_id=id,n=nrow(p),status="independent likelihood, intervals, signed comparisons and base invariance verified")
 }

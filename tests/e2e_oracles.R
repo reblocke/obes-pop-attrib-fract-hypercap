@@ -11,7 +11,7 @@ e2e_indexes <- function(raw) {
   eligible <- d$encounter_date >= as.Date("2022-01-01") &
     d$encounter_date < as.Date("2023-01-01") & d$age_at_encounter >= 18 &
     ifelse(is.na(d$encounter_type), NA, d$encounter_type %in% c("EMER", "IMP")) &
-    ifelse(d$bmi_evidence_state == "missing", FALSE, d$bmi >= 30)
+    ifelse(d$bmi_evidence_state == "missing", FALSE, ifelse(is.na(d$bmi), NA, TRUE))
   selected <- integer()
   for (rows in split(seq_len(nrow(d)), d$patient_id)) {
     confirmed <- rows[eligible[rows] %in% TRUE]
@@ -90,6 +90,7 @@ e2e_saved_values <- function(bundle, raw) {
     window <- if(key[1]=="matched")"encounter"else if(key[1]=="observation")key[3]else key[2]
     stopifnot(row$model_form==form,row$outcome_id==outcome,row$window==window)
     d <- c[if (group == "all_obesity") c$OBESITY_rfs %in% 1 else c$group == "primary", , drop=FALSE]
+    if (group == "primary_bmi_ge30") d <- d[d$bmi >= 30, , drop=FALSE]
     if (group == "primary_current") d <- d[d$current %in% TRUE, , drop=FALSE]
     reference <- if (group == "primary_current") c[c$group == "primary", , drop=FALSE] else d
     knots <- as.numeric(quantile(reference$bmi, unlist(config$knot_probabilities), type=config$quantile_type))
@@ -201,6 +202,9 @@ e2e_saved_values <- function(bundle, raw) {
         interval <- 1000*(sum(observed[band]-counterfactual[band])/nrow(d)+c(-1,1)*qnorm(.975)*sqrt(variance(gradient_band)))
         e2e_near(c(contributions$conf_low_per1000[j],contributions$conf_high_per1000[j]),interval)
       }
+      unshifted <- d$bmi <=30
+      e2e_near(observed[unshifted],counterfactual[unshifted],0)
+      e2e_near(contributions$D[contributions$bin_high<=30],rep(0,sum(contributions$bin_high<=30)),0)
       cv_band <- a$policy_contribution_covariance[a$policy_contribution_covariance$model_id == row$model_id, ]
       stopifnot(nrow(cv_band)==length(bands)^2,!anyDuplicated(cv_band[c("bin1","bin2")]),
         setequal(cv_band$bin1,bands),setequal(cv_band$bin2,bands))
@@ -246,6 +250,11 @@ e2e_adverse_cases <- function() {
     q$rfs_group[q$encounter_id == d$encounter_id[9]] == "obesity_only",
     q$rfs_group[q$encounter_id == d$encounter_id[13]] == "primary",
     all(q$rfs_group[q$encounter_id %in% d$encounter_id[c(15,17)]] == "unresolved"))
+  lower <- d; lower$bmi[9:10] <- c(24,42)
+  lower$ABG_rfs[9:10] <- c(0,1)
+  selected <- construct_cohort_and_memberships(lower)$members$Q
+  stopifnot(d$encounter_id[9] %in% selected$encounter_id,
+    !d$encounter_id[10] %in% selected$encounter_id)
   changed <- d; changed[bmi_rfs_fields] <- NA_real_
   stopifnot(setequal(construct_cohort_and_memberships(changed)$members$Q$encounter_id, q$encounter_id))
   policy <- bmi_config()$policies[[1]]

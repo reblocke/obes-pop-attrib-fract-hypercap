@@ -66,11 +66,11 @@ tryCatch({
     utils::write.csv(numerical,file.path(out,"independent-model-checks.csv"),row.names=FALSE)
   })
   check("same-day ABG independent models",{
-    paired<-e2e_same_day(bundle,make_bmi_curve_fixture())
+    paired<-do.call(rbind,lapply(c("primary","primary_bmi_ge30"),function(p)e2e_same_day(bundle,make_bmi_curve_fixture(),p)))
     utils::write.csv(paired,file.path(out,"same-day-independent-model-checks.csv"),row.names=FALSE)
   })
   check("ICD acuity independent multinomial analysis", {
-    result<-e2e_icd_acuity(bundle,make_bmi_curve_fixture())
+    result<-do.call(rbind,lapply(c("primary","primary_bmi_ge30"),function(p)e2e_icd_acuity(bundle,make_bmi_curve_fixture(),p)))
     utils::write.csv(result,file.path(out,"icd-acuity-independent-checks.csv"),row.names=FALSE)
   })
   check("adverse eligibility, RFS, policy and failure states",e2e_adverse_cases())
@@ -81,6 +81,15 @@ tryCatch({
       text <- unlist(lapply(table,as.character),use.names=FALSE)
       stopifnot(!any(grepl("ARTIFICIAL-[PE][0-9]",text)),
         !any(names(table) %in% c("patient_id","encounter_id","encounter_date","individual_prediction","selected_row")))
+    }
+    # Fixed-index subgroups still require actual stage distributions, not only tables.
+    profiles <- a$variable_summary[a$variable_summary$variable_id=="bmi" &
+      !is.na(a$variable_summary$n_observed) & a$variable_summary$n_observed>0,]
+    for(i in seq_len(nrow(profiles))) {
+      bins <- a$distribution_bins[a$distribution_bins$variable_id=="bmi" &
+        a$distribution_bins$population_id==profiles$population_id[i],]
+      stopifnot(nrow(bins)>0)
+      e2e_near(sum(bins$n),profiles$n_observed[i])
     }
     stopifnot(all(a$model_registry$model_id %in% a$coverage_index$item_id),
       all(a$cohort_nodes$population_id %in% a$coverage_index$item_id),
@@ -120,14 +129,14 @@ tryCatch({
     # Coordinates are completely exported and represented by the required
     # figures; stage/model-sample summaries are exact aliases, not extra prints.
     special <- c(names(renamed),"distribution_bins","distribution_curves","probability_curves","observation_curves",
-      "stage_summary","model_sample_audit","sensitivity_results","implied_missing_probabilities",
+      "stage_summary","model_sample_audit",
       "coefficient_covariance","policy_contribution_covariance","model_residual_bins")
     for (format in c("html","pdf")) {
       rows <- coverage[coverage$format==format,]
       for (table in setdiff(names(a),special))
         e2e_near(sum(rows$rows[rows$caption==table]),nrow(a[[table]]))
       for (table in names(renamed))e2e_near(sum(rows$rows[rows$caption==renamed[[table]]]),nrow(a[[table]]))
-      for (caption in c("Complete coefficient covariance","Complete coefficient correlation")) {
+      for (caption in "Complete coefficient covariance") {
         covariance <- rows[rows$caption==caption,]
         e2e_near(sum(covariance$rows*(covariance$columns-1)),nrow(a$coefficient_covariance))
       }
@@ -146,7 +155,7 @@ tryCatch({
   check("complete supplemental captions in assembled PDFs",{
     captions <- utils::read.csv(file.path(review,"figures/captions.csv"),stringsAsFactors=FALSE)
     normalize <- function(x)gsub("[^[:alnum:]]","",tolower(gsub("₂","2",paste(x,collapse=" "),fixed=TRUE)))
-    expected <- vapply(c("S1-same-day-ABG","S2-ICD-acuity","S2-ICD-specified","S2-ICD-observed"),function(id)normalize(captions$caption[captions$figure_id==id]),character(1))
+    expected <- vapply(as.vector(outer(c("primary","primary_bmi_ge30"),c("S1-same-day-ABG","S2-ICD-acuity","S2-ICD-specified","S2-ICD-observed"),paste,sep="/")),function(id)normalize(captions$caption[captions$figure_id==id]),character(1))
     stopifnot(nzchar(expected))
     for(name in c("bmi_hypercapnia","bmi_hypercapnia_audit")) {
       text <- system2("pdftotext",c(shQuote(file.path(review,paste0(name,".pdf"))),"-"),stdout=TRUE)
@@ -160,7 +169,7 @@ tryCatch({
       path <- file.path(review,"figures",paste0(id,".",ext))
       stopifnot(file.exists(path),file.info(path)$size>0)
     }
-    required <- c("RFS-flow","RFS-evidence","S1-same-day-ABG","S2-ICD-acuity","S2-ICD-specified","S2-ICD-observed",paste0("primary/",c("F1-A","F1-B","F1-C","F2","F2-bands")))
+    required <- c("RFS-flow","RFS-evidence",as.vector(outer(c("primary","primary_bmi_ge30"),c("S1-same-day-ABG","S2-ICD-acuity","S2-ICD-specified","S2-ICD-observed","F1-A","F1-B","F1-C","F2","F2-bands"),paste,sep="/")))
     stopifnot(all(required %in% captions$figure_id),all(file.exists(file.path(review,"figures",paste0(required,".jpg")))))
     display <- utils::read.csv(file.path(review,"figures/rfs-evidence-display.csv"))
     displayed <- display[display$displayed,]

@@ -12,6 +12,7 @@ import json
 import os
 from pathlib import Path
 
+from original_encounter_population import RFS_COLUMNS
 from prepare_common_index_input import (
     PreparationError, file_identity, pinned_readers, sha256, verify_canonical_database, verify_file,
 )
@@ -24,7 +25,7 @@ def check_indexes(c, product, prepared, census):
     c.execute("CREATE TEMP VIEW membership AS SELECT patient_id,encounter_id,encounter_date,encounter_type,bmi_evidence_state,age_at_encounter,"
               "((age_at_encounter>=18 AND encounter_type IN ('EMER','IMP') "
               "AND encounter_date>='2022-01-01' AND encounter_date<'2023-01-01') "
-              "AND CASE WHEN bmi_evidence_state='missing' THEN false ELSE bmi>=30 END) AS eligible "
+              "AND CASE WHEN bmi_evidence_state='missing' THEN false ELSE isfinite(bmi) END) AS eligible "
               "FROM source_mapping")
     c.execute('CREATE TEMP TABLE first_known AS SELECT patient_id,min(encounter_date) AS first_date '
               'FROM membership WHERE eligible IS TRUE GROUP BY 1')
@@ -107,6 +108,26 @@ def check_original_population(c, product, original, prepared):
         prepared_indexes_outside_original_list=selected_outside), {'selected_indexes_by_historical_first_flag':dict(flags)}
 
 
+def check_components(c, prepared, original, capture_complete, day_qualified):
+    """Independent SQL checks; no production classifier or scientific model."""
+    c.register('component_rows',prepared);c.register('component_original',original)
+    failures={}
+    for name,source in [(x,x) for x in RFS_COLUMNS]+[('raw_race','race'),('raw_ethnicity','ethnicity')]:
+        failures[name+'_disagreements']=c.execute(f'SELECT count(*) FROM component_rows p JOIN component_original o USING(patient_id,encounter_id) WHERE try_cast(p.{name} AS DOUBLE) IS DISTINCT FROM try_cast(o.{source} AS DOUBLE)').fetchone()[0]
+    for code in ('J9602','J9612','J9622','J9692','E662'):
+        # Captured positives remain positive; absent flags require complete capture.
+        failures['icd_'+code+'_disagreements']=c.execute(f"SELECT count(*) FROM component_rows p WHERE p.icd_{code} IS DISTINCT FROM CASE WHEN EXISTS (SELECT 1 FROM source_diagnosis d WHERE d.patient_id=p.patient_id AND d.encounter_id=p.encounter_id AND replace(upper(trim(d.code)),'.','')='{code}') THEN 1 WHEN p.icd_capture_state='complete' THEN 0 ELSE NULL END").fetchone()[0]
+    if not capture_complete:
+        failures['unexpected_complete_diagnosis_capture']=int((prepared.icd_capture_state=='complete').sum())
+    if not day_qualified:
+        failures['unexpected_assessed_cooccurrence']=int((prepared.same_day_abg_state!='source_unavailable').sum())
+        return failures
+    c.execute("CREATE OR REPLACE TEMP TABLE component_days AS WITH values AS (SELECT l.patient_id,l.encounter_id,code,cast(event_datetime AS DATE) AS day,CASE WHEN lower(coalesce(nullif(trim(units_of_measure_raw),''),units_of_measure)) IN ('mmhg','mm hg','mm[hg]') THEN numeric_value WHEN lower(coalesce(nullif(trim(units_of_measure_raw),''),units_of_measure))='kpa' THEN numeric_value*7.50062 END AS pressure, CASE WHEN lower(coalesce(nullif(trim(units_of_measure_raw),''),units_of_measure)) IN ('ph','[ph]') THEN numeric_value END AS ph FROM source_lab_measurement l JOIN component_rows p USING(patient_id,encounter_id) WHERE code_system='LOINC' AND code IN ('2019-8','2744-1') AND NOT regexp_matches(coalesce(lab_result_text_val,''),'[<>≤≥]') AND timestamp_precision='date_only'), daily AS (SELECT patient_id,encounter_id,day,max(pressure) FILTER(WHERE code='2019-8' AND pressure>5 AND pressure<200) AS pco2,min(ph) FILTER(WHERE code='2744-1' AND ph>6.5 AND ph<7.8) AS ph FROM values WHERE day IS NOT NULL GROUP BY 1,2,3) SELECT patient_id,encounter_id,count(*) AS n_days,cast(bool_or(pco2>=45) AS INTEGER) AS hypercapnia,cast(bool_or(pco2>=45 AND ph<7.35) AS INTEGER) AS acidemia FROM daily WHERE pco2 IS NOT NULL AND ph IS NOT NULL GROUP BY 1,2")
+    for name,expected in [('same_day_abg_n_days','coalesce(d.n_days,0)'),('hypercapnia_coobserved','d.hypercapnia'),('hypercapnia_acidemia_same_day','d.acidemia')]:
+        failures[name+'_disagreements']=c.execute(f'SELECT count(*) FROM component_rows p LEFT JOIN component_days d USING(patient_id,encounter_id) WHERE p.same_day_abg_state<>\'source_unavailable\' AND p.{name} IS DISTINCT FROM {expected}').fetchone()[0]
+    return failures
+
+
 def check_fields(c, prepared, capture_complete):
     c.register('prepared_rows',prepared)
     c.execute("CREATE TEMP TABLE raw_gases AS SELECT l.*,cast(p.encounter_date AS DATE) AS index_date "
@@ -173,7 +194,7 @@ def run(config, prepared_dir, output):
     entry=config['covariate_mapping']['manifest'];path=verify_file(entry);mapping=json.loads(path.read_text())
     from original_encounter_population import read_original_list, require_original_population
     require_original_population(config, mapping)
-    original, original_audit = read_original_list(config, readers)
+    original, original_audit = read_original_list(config, readers, include_metadata=True)
     verify_file(mapping['original_encounter_list'])
     product=verify_file({'path':str(path.parent/'covariates.parquet'),'sha256':mapping['files']['covariates.parquet']})
     census=json.loads((prepared_dir/'selection-evidence.json').read_text())
@@ -191,6 +212,7 @@ def run(config, prepared_dir, output):
         (output/'index-checks.json').write_text(json.dumps(dict(failures=failures,details=details),indent=2)+'\n')
         print('Independent gas, diagnosis and calendar-day checks started',flush=True)
         fields,field_details=check_fields(c,prepared,config['diagnosis_capture_complete']);failures.update(fields);details.update(field_details)
+        failures.update(check_components(c,prepared,original,config['diagnosis_capture_complete'],bool(config.get('same_day_abg_policy'))))
     if before!=file_identity(database): raise ValueError('Source changed during qualification')
     result={'status':'automated_checks_passed' if not any(failures.values()) else 'discrepancies_require_resolution',
         'failures':failures,'details':details,'input_sha256':prep['input_sha256'],

@@ -240,3 +240,28 @@ and pull-request histories. Private local Codex recovery refs are outside the
 publication refs and must not be mirror-pushed. Push only the reviewed release
 branch. See the refreshed [release review](PUBLIC_RELEASE_REVIEW.md) for scope,
 verification evidence and remaining maintenance decisions.
+
+## 2026-10-24 — All valid BMI and integrated endpoint families (supersedes obese indexing)
+
+The owner approved first valid-available-BMI adult 2022 ED/inpatient selection,
+before gas/adjustment/RFS, retaining all inherited BMI rules. The former first
+BMI≥30 index is superseded. The new BMI≥30 secondary is nested at the new primary
+index; it is not a reconstruction of the historical cohort. Changed indexes and
+RFS membership are expected and must be reconciled separately from field changes.
+
+The one-unit policy is unchanged: BMI>30 minus exactly one, BMI≤30 unchanged, no
+floor/reselection. Unshifted patients remain in model reference denominators and
+baseline burden. PIF is population/model dependent, not an invariant per-unit effect.
+
+Overall binary, joint same-day physiological and joint ICD-acuity families become
+one integrated main analysis/report, repeated in the nested secondary. Component
+PIFs are not added. Primary timing/matched/linear, current-measurement and overlapping
+all-OBESITY checks remain; obesity-only/unresolved/combined remain audit-only.
+
+One preparation command replaces enrichment launchers. Input schema5/aggregate13/v8
+bind the new source and selection, without historical-runtime migration. Historical
+source/results stay unchanged. Code review, tests, commit/push/PR/squash merge and
+a fresh qualified Mini run are authorized. New numerical, visual and investigator
+review states remain separate; prior B/F2/S1/ICD approval does not transfer. No
+abstract drafting. Exact current definitions are centralized in the scientific
+specification and source contract; earlier dated decisions remain historical.

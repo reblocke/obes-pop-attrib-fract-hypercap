@@ -54,13 +54,10 @@ bmi_cooccurrence_load <- function(loaded,manifest_path) {
   if(!grepl("^(/|[A-Za-z]:)",path))path<-file.path(dirname(manifest_path),path)
   if(!identical(tri_sha256(path),entry$sha256))stop("Co-occurrence evidence hash mismatch")
   evidence<-jsonlite::read_json(path,simplifyVector=FALSE)
-  extension<-loaded$manifest$same_day_abg_extension
-  if(!identical(extension$schema_version,1L)||!identical(extension$policy_id,evidence$policy_id)||
-      !identical(extension$base_input_sha256,evidence$base_input_sha256)||
-      !identical(extension$base_manifest_sha256,evidence$base_manifest_sha256))stop("Co-occurrence extension/base identity mismatch")
   if(!identical(evidence$schema_version,1L)||!identical(evidence$policy_id,"same_day_arterial_cooccurrence_v1")||
-      !evidence$status %in% c("qualified","unavailable")||!isTRUE(evidence$source_unchanged)||
-      !grepl("^[a-f0-9]{64}$",evidence$base_input_sha256)||!has)stop("Invalid co-occurrence enrichment evidence")
+      !evidence$status %in% c("qualified","unavailable")||!isTRUE(evidence$source_unchanged)||!has||
+      !identical(evidence$input_sha256,loaded$manifest$input_sha256)||
+      !identical(evidence$selection_sha256,loaded$manifest$source_evidence_files$selection$sha256))stop("Co-occurrence input/selection identity mismatch")
   if(evidence$status=="qualified" && (is.null(evidence$policy)||
       !identical(evidence$policy$date_semantics,"recorded_result_calendar_date")))stop("Missing qualified recorded-date semantics")
   lineage<-loaded$manifest$source_evidence_files$lineage$path
@@ -76,8 +73,8 @@ bmi_cooccurrence_load <- function(loaded,manifest_path) {
   loaded
 }
 
-bmi_append_same_day <- function(a,ctx,raw,config,audit_only=FALSE) {
-  c<-ctx$members$C; c<-c[c$rfs_group=="primary",,drop=FALSE]
+bmi_integrate_same_day <- function(a,ctx,raw,config,audit_only=FALSE,population="primary") {
+  c<-ctx$members$C
   present<-all(bmi_same_day_fields %in% names(c))
   enabled<-isTRUE(config$same_day_abg_enabled)
   evidence<-attr(raw,"cooccurrence_evidence")
@@ -141,7 +138,7 @@ bmi_append_same_day <- function(a,ctx,raw,config,audit_only=FALSE) {
   if(qualified) {
     counts<-table(p$same_day_abg_n_days)
     t$cooccurrence_measurements<-bmi_bind(list(t$cooccurrence_measurements,
-      data.frame(metric="coobserved_days_per_patient",value=as.numeric(names(counts)),n=as.numeric(counts),scope="co-observed population")))
+      data.frame(metric=rep("coobserved_days_per_patient",length(counts)),value=as.numeric(names(counts)),n=as.numeric(counts),scope=rep("co-observed population",length(counts)))))
     for(group in c("primary_complete","coobserved_population")) {
       rows<-if(group=="primary_complete")c[c$same_day_abg_state!="source_unavailable",,drop=FALSE] else p
       fields<-setdiff(bmi_same_day_fields,c("same_day_abg_state","hypercapnia_coobserved","hypercapnia_acidemia_same_day"))
@@ -153,7 +150,7 @@ bmi_append_same_day <- function(a,ctx,raw,config,audit_only=FALSE) {
     for(name in names(profiles[[1]]))t[[name]]<-bmi_bind(lapply(profiles,`[[`,name))
   }
   if(!audit_only) {
-    saved_basis<-a$bmi_basis[a$bmi_basis$analysis_population_id=="primary",,drop=FALSE]
+    saved_basis<-a$bmi_basis[a$bmi_basis$analysis_population_id==population,,drop=FALSE]
     if(nrow(saved_basis)!=4L)stop("Missing primary numeric basis for co-occurrence supplement")
     basis<-list(knots=saved_basis$knot,basis_id=saved_basis$basis_id[1],status=saved_basis$status[1],quantile_type=saved_basis$quantile_type[1])
     model<-bmi_multinomial_fit(p,basis,config,qualified,reason)
@@ -169,12 +166,12 @@ bmi_append_same_day <- function(a,ctx,raw,config,audit_only=FALSE) {
     t$coverage_index<-data.frame(kind="model",item_id=t$model_registry$model_id,table="model_registry",status=t$model_registry$status)
   }
   t$coverage_index<-bmi_bind(list(t$coverage_index,data.frame(kind="population",item_id=c("C_same_day_abg","no_coobserved_abg"),table="population_registry",status=status)))
-  t<-bmi_namespace(t,"primary")
+  t<-bmi_namespace(t,population)
   for(name in names(t)) {
     z<-t[[name]]
     if("model_id" %in% names(z)&&nrow(z)) {
       r<-t$model_registry;ix<-match(z$model_id,r$model_id)
-      if(!"population_id" %in% names(z))z$population_id<-"primary"
+      if(!"population_id" %in% names(z))z$population_id<-population
       if(!"outcome_id" %in% names(z))z$outcome_id<-r$outcome_id[ix]
       if(!"ascertainment_window" %in% names(z))z$ascertainment_window<-r$window[ix]
       if(!"model_form" %in% names(z))z$model_form<-r$model_form[ix]

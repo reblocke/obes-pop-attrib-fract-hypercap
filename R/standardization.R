@@ -62,7 +62,8 @@ standardize_probability_curves <- function(model,reference,reference_id,config) 
   }))
 }
 bmi_policy_transform <- function(bmi,policy) {
-  switch(policy$transformation,minus_one=ifelse(bmi>policy$threshold,bmi-1,bmi),cap=pmin(bmi,policy$threshold),identity=bmi,stop("Unknown named policy"))
+  if(!identical(policy$transformation,"minus_one"))stop("Unknown named policy")
+  ifelse(bmi>policy$threshold,bmi-1,bmi)
 }
 bmi_pair_quantities <- function(p0,p1,v) {
   a<-p0$probability;b<-p1$probability;g<-p0$gradient-p1$gradient
@@ -125,10 +126,10 @@ bmi_fixed_contrast <- function(model,reference,id,config) {
   if(inherits(attempt,"error"))return(cbind(base,status="prediction_unavailable",reason=conditionMessage(attempt)))
   attempt
 }
-bmi_run_population_analysis <- function(raw,config,source_status="artificial",audit_only=FALSE,companion=NULL) {
-  raw<-raw[,setdiff(names(raw),bmi_same_day_fields),drop=FALSE]
+bmi_run_population_analysis <- function(raw,config,source_status="artificial",audit_only=FALSE,companion=NULL,ctx=NULL) {
   message("[analysis] Constructing cohort, stage profiles and evidence ledger")
-  ctx<-construct_cohort_and_memberships(raw);dict<-bmi_dictionary(ctx$data,config)
+  if(is.null(ctx))ctx<-construct_cohort_and_memberships(raw)
+  dict<-bmi_dictionary(ctx$data,config)
   ledger<-bmi_ledger(ctx);profiles<-profile_stage_variables(ctx$members,dict,config);evidence<-derive_evidence_states(ctx,config)
   tables<-c(ledger,profiles,evidence,list(variable_dictionary=dict,source_audit=data.frame(requirement=c("population","BMI","gas/ICD","timing","clinical_inference"),
     status=c(source_status,source_status,source_status,ctx$day_status,if(source_status=="artificial")"artificial_only"else"pending_scientific_review"),
@@ -138,7 +139,7 @@ bmi_run_population_analysis <- function(raw,config,source_status="artificial",au
   tables$population_registry<-tables$cohort_nodes
   tables$stage_summary<-tables$variable_summary
   tables$policy_registry<-bmi_bind(lapply(config$policies,as.data.frame))
-  for(name in c("model_registry","model_sample_audit","coefficients","coefficient_covariance","factor_references","model_fit_diagnostics","model_residual_bins","model_influence_summary","model_support","bmi_basis","prediction_support","probability_curves","observation_curves","fixed_bmi_contrasts","policy_totals","policy_contributions","policy_contribution_covariance","sensitivity_results","implied_missing_probabilities","linear_spline_comparison"))tables[[name]]<-data.frame()
+  for(name in c("model_registry","model_sample_audit","coefficients","coefficient_covariance","factor_references","model_fit_diagnostics","model_residual_bins","model_influence_summary","model_support","bmi_basis","prediction_support","probability_curves","observation_curves","fixed_bmi_contrasts","policy_totals","policy_contributions","policy_contribution_covariance","linear_spline_comparison"))tables[[name]]<-data.frame()
   if(!audit_only) {
     message("[analysis] Resolving the common spline basis and fitting registered models")
     basis<-if(is.null(config$basis_override))resolve_bmi_basis(ctx$members$C,config)else config$basis_override
@@ -155,7 +156,7 @@ bmi_run_population_analysis <- function(raw,config,source_status="artificial",au
       mp<-bmi_profile(model_members[[id]],id,dict,config,model_members[[id]])
       for(name in names(mp))tables[[name]]<-bmi_bind(list(tables[[name]],mp[[name]]))
     }
-    curves<-fixed<-policies<-implied<-curve_support<-list()
+    curves<-fixed<-policies<-curve_support<-list()
     for(id in names(models)) {
       message("[standardization] ",id)
       m<-models[[id]];spec<-m$row
@@ -172,10 +173,9 @@ bmi_run_population_analysis <- function(raw,config,source_status="artificial",au
       }
     }
     allcurves<-bmi_bind(curves);tables$probability_curves<-allcurves[allcurves$family!="observation",,drop=FALSE];tables$observation_curves<-allcurves[allcurves$family=="observation",,drop=FALSE]
-    tables$fixed_bmi_contrasts<-bmi_bind(fixed);tables$implied_missing_probabilities<-bmi_bind(implied)
+    tables$fixed_bmi_contrasts<-bmi_bind(fixed)
     for(name in c("policy_totals","policy_contributions","policy_contribution_covariance","prediction_support"))tables[[name]]<-bmi_bind(lapply(policies,`[[`,name))
     tables$prediction_support<-bmi_bind(c(list(tables$prediction_support),curve_support))
-    tables$sensitivity_results<-tables$policy_totals[tables$policy_totals$method %in% "mnar",,drop=FALSE]
     comparison<-list()
     for(w in c("encounter","index_calendar_day"))for(o in if(w=="encounter")c("abg","any_gas","icd")else c("abg","any_gas")) {
       if(!is.null(config$fit_role) && config$fit_role=="supporting") next

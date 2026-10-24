@@ -3,7 +3,7 @@ import sys
 from pathlib import Path
 import unittest
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'scripts'))
-from enrich_icd_acuity import derive_codes, CODES, PreparationError
+from source_components import derive_codes, CODES, PreparationError
 
 class AcuitySourceBoundary(unittest.TestCase):
     def record(self,code,identity='r1',patient='p'):

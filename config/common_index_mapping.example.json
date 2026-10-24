@@ -80,5 +80,13 @@
       "sha256": "PENDING_SHA256"
     }
   },
-  "population_scope_id": "original_selected_encounters_v1"
+  "population_scope_id": "original_selected_encounters_v1",
+  "rfs_evidence": {
+    "path": "PENDING_AUTHENTICATED_RFS_EVIDENCE",
+    "sha256": "PENDING_SHA256"
+  },
+  "same_day_abg_policy": {
+    "path": "PENDING_REVIEWED_RECORDED_DAY_POLICY",
+    "sha256": "PENDING_SHA256"
+  }
 }

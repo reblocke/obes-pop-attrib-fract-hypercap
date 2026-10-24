@@ -3,7 +3,9 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from prepare_common_index_input import PreparationError, require_original_keys
+class PreparationError(ValueError):
+    """Aggregate-safe source error; never include patient identifiers."""
+
 
 POPULATION_ID = "original_selected_encounters_v1"
 RFS_COLUMNS = tuple(f"{family}_rfs" for family in ("OBESITY", "ABG", "VBG", "RESPFAIL", "VENTSUPPORT", "PREDISPOSITION"))
@@ -12,6 +14,7 @@ ORIGINAL_COLUMNS = ("patient_id", "encounter_id", "pat_enc_hash", "encounter_dat
 
 
 def verify_original_list(frame):
+    from prepare_common_index_input import require_original_keys
     require_original_keys(frame)
     if frame.duplicated(["patient_id", "encounter_id"]).any():
         raise PreparationError("Original encounter list has duplicate keys")
@@ -32,7 +35,7 @@ def verify_original_list(frame):
             "original_acute_encounters": int(frame.encounter_type.isin([2, 3]).sum()),
             "first_flag_disagreements": bad,
             "first_flag_order": "patient_id, original encounter_date, pat_enc_hash; missing dates last",
-            "index_policy": "first eligible adult 2022 BMI>=30 ED/inpatient within original selected keys; before gases",
+            "index_policy": "first eligible adult 2022 valid-BMI ED/inpatient within original selected keys; before gases",
             "original_first_flag_is_prefilter": False}
 
 

@@ -1,223 +1,161 @@
-# Current scientific and interface guide
+# BMI–hypercapnia: integrated scientific specification
 
-This is the authority for the RFS curve/audit analysis. The retained filename
-reflects the earlier triangulation design; that design is retired. Machine
-configuration is [bmi_hypercapnia_analysis.json](../config/bmi_hypercapnia_analysis.json),
-with input fields in the [variable dictionary](../config/variable_dictionary.csv).
-The active identity is `bmi_hypercapnia_rfs_curve_audit_v7`, aggregate schema 12,
-metadata-qualified input schema 4. Prior schemas fail explicitly; no replay or
-migration layer is maintained. See [decisions](DECISIONS.md) for dated history.
+Current implementation: input schema 5, aggregate schema 13,
+`bmi_hypercapnia_rfs_curve_audit_v8`. The 2026-10-24 all-valid-BMI decision
+supersedes first-BMI-≥30 selection. Earlier outputs retain their original design;
+see [decisions](DECISIONS.md), [work log](../WORKLOG.md) and
+[archive recovery](../archive/README.md). New clinical estimates require fresh
+source qualification and execution; historical counts are not new-cohort counts.
 
-## Population and index
+## Cohort and populations
 
-Candidates are authenticated original FULL_DATA selected ED/inpatient encounters
-(`original_selected_encounters_v1`), not every visit in captured history. Select
-one index per patient before gas availability or adjustment completeness: the
-first 2022 EMER/IMP encounter at age ≥18 with valid available BMI ≥30. Age uses the
-approved birth-year proxy. Earlier unresolved eligibility, conflicting defining
-evidence and earliest-day ties remain unresolved; a later more complete encounter
-cannot replace them. A reliable exclusion overrides unrelated missing evidence.
+Use the authenticated original FULL_DATA ED/inpatient encounter list. History
+supplies measurements, never extra candidate visits. Select each adult's first
+2022 acute encounter with **any valid available BMI**, before gas availability,
+adjustment completeness and historical reason-for-suspicion (RFS) classification.
+Preserve completed-missing versus unresolved evidence, chronology, conflicting
+records and earliest ties. An unresolved earlier candidate does not permit a
+later convenient index. Age retains the inherited birth-year proxy.
 
-BMI follows `available_encounter_or_prior_bmi_v1`: valid current reported BMI,
-then prior reported BMI, then observed height/weight calculation, with inherited
-transport, rounding and plausibility screens. Completed missing BMI does not
-qualify; incomplete source or conflicting chronology remains unresolved. There
-is no statistical BMI/covariate imputation or measurement-recency cap. Available
-BMI is not necessarily contemporaneous or measured before the outcome.
+BMI retains current/prior reported values followed by observed height/weight
+calculation, original transport, rounding and masking/validity rules. No statistical
+imputation or new plausibility rule is introduced. Available BMI need not be
+contemporaneous. Report measurement methods, lags, component gaps and missingness.
 
-Classify RFS membership at that fixed index, using the six authenticated original
-family indicators, not current outcome/draw flags or numeric `rfsgroup` codes:
+| Population ID | Membership at the one newly selected index | Role |
+|---|---|---|
+| `primary` | Any confirmed non-OBESITY RFS flag, including OBESITY overlaps | All-valid-BMI primary |
+| `primary_bmi_ge30` | Primary and index BMI ≥30 | Nested secondary; all three endpoint families refitted |
+| `primary_current` | Primary and verified current BMI source | Binary sensitivity; primary spline basis |
+| `all_obesity` | Any confirmed OBESITY membership, including overlaps | Overlapping binary sensitivity; own basis |
+| `obesity_only` | OBESITY=1 and all five other flags known zero | Flow/descriptive audit only |
+| `unresolved` | Membership cannot be established, including all-zero discrepancy | Audit; discrepancy investigated |
+| `combined` | All resolved indexes before RFS partition | Reconciliation only |
 
-| Population | Definition and role |
-|---|---|
-| `primary` | Any confirmed ABG, VBG, RESPFAIL, VENTSUPPORT or PREDISPOSITION membership; retain OBESITY overlaps |
-| `obesity_only` | OBESITY=1 and all five other families authenticated zero; descriptive audit only |
-| RFS unresolved | Membership cannot be established; all-six-zero source discrepancies remain explicit |
-| `primary_current` | Primary patients with verified current-encounter BMI source; supporting models, unchanged index |
-| `all_obesity` | Any confirmed OBESITY membership; overlapping supporting models, not a disjoint comparator |
+The five non-OBESITY flags are ABG, VBG, RESPFAIL, VENTSUPPORT and PREDISPOSITION.
+One known positive establishes primary even if another flag is unknown. Missing
+flags never become zero. Flags describe selected historical source-file membership,
+not exhaustive clinical criterion ascertainment; never recode them from outcomes.
+No later encounter is substituted to enter the secondary or another RFS group.
+Broader eligibility can change old indexes and their RFS membership.
 
-Source flags denote historical extraction membership, not every criterion present
-clinically. Unknown is not zero. Obesity-only gas evaluability is depleted by the
-entry mechanism; residual captured gases stay in the audit without recoding flags.
-No obesity-only adjusted model, curve, PIF, scientific comparison or weighting
-analysis is registered. Combined indexes remain a reconciliation reference.
+## Three endpoint families
 
-## Outcomes and reference populations
+1. **Overall documented hypercapnia:** ordinary arterial PaCO₂ ≥45; ordinary
+   arterial ≥45 or venous PvCO₂ ≥50; the five-code ICD composite. Gas negativity
+   applies to available specimens; it does not establish an unmeasured specimen
+   normal. Strict validity is 5<arterial<200 and 10<venous<250 mm Hg.
+2. **Same-day physiological components:** one unpenalized three-category multinomial
+   model on patients with a usable arterial PCO₂ and pH on at least one recorded
+   date within the index encounter. Categories: no documented hypercapnia on
+   co-observed days; hypercapnia without documented same-day acidemia; hypercapnia
+   with same-day acidemia. Any day with PCO₂≥45 and pH<7.35 takes priority. Use
+   6.5<pH<7.8, unrounded values and no cross-date conjunction. This is **same
+   recorded-day co-occurrence; not verified same-sample pairing**. Different samples
+   and treatment periods may contribute. No co-observed day means unknown.
+3. **Diagnostic components:** five-category Firth mean-bias-reduced multinomial
+   model on complete diagnosis capture. J96.22 or concurrent J96.02 plus
+   J96.12/E66.2 takes acute-on-chronic/concurrent priority; remaining J96.02 is
+   acute; remaining J96.12/E66.2 is chronic/OHS; remaining J96.92 is unspecified;
+   no target code is reference. OHS grouping does not establish chronic respiratory
+   failure. A registered unpenalized four-category sensitivity excludes only final
+   unspecified-only cases and standardizes over that smaller sample.
 
-Primary ascertainment uses the selected encounter, with ordinary unadjusted PCO₂
-and authenticated specimen/units under `unadjusted_pco2_v1`:
+All three families repeat in `primary_bmi_ge30`. Binary models alone receive PIFs.
+The ICD code-level and same-day source gates remain independent; unavailable
+modules retain explicit positions. Complete diagnosis capture is not positivity.
 
-| Outcome | Definition |
-|---|---|
-| Arterial | Valid ABG PaCO₂ ≥45 mm Hg |
-| Combined gas | Valid ABG PaCO₂ ≥45 or VBG PvCO₂ ≥50 mm Hg; either usable specimen suffices |
-| Documented ICD | J96.02, J96.12, J96.22, J96.92 or E66.2 with known diagnosis capture |
+## Models and inference
 
-Strict gas validity is 5<arterial<200 and 10<venous<250 mm Hg. Missing/unusable gas
-results remain unknown. A combined negative describes available evidence, not
-normality of an unmeasured specimen. No target ICD code in a complete available
-extract is captured absence; unavailable/incomplete capture stays unknown. ICD
-capture is a source-coverage count, not ICD positivity or an informative constant
-availability curve. E66.2 is explicitly part of the outcome.
+Use three natural-spline BMI columns, linear age, and inherited sex, race/ethnicity
+and region categories/reference levels. Completeness means nonmissing inherited
+analysis values, including named Unknown categories. Do not silently recode raw
+race/ethnicity or drop Unknown categories. The inherited White category includes
+non-Hispanic or unknown ethnicity.
 
-Q is resolved indexes; C is Q complete for inherited BMI, age, sex, race/ethnicity
-and region. Retained named Unknown categories count as nonmissing; completeness
-does not establish knowledge of every underlying attribute. Numeric demographic
-coding is unchanged; the White reference includes unknown ethnicity.
+For each main population, resolve type-7 BMI quantiles .05/.35/.65/.95 on its
+covariate-complete reference: two boundaries and two interior knots. Reuse the
+fixed numeric basis across all endpoint families and predictions. Current-BMI
+models reuse primary knots; all-OBESITY models resolve their own. Raw spline
+coefficients across different bases are not comparable effects.
 
-Gas curves/scenarios standardize within each outcome-evaluable model population.
-ICD uses known-capture C_icd. Observation displays use C. Calendar-day gas
-sensitivities retain indexes and require recorded-result date = encounter-start date,
-not elapsed 24 hours. Unavailable sensitivity source is pending, distinct from
-individual missing outcomes. Matched ICD/gas comparisons use identical within-pair
-rows; they do not require both gas specimens. Linear-BMI sensitivity uses the same
-sample as its spline counterpart. BMI ≥40 remains descriptive only.
+Binary logistic and unpenalized multinomial estimates use their full coefficient
+covariance. Firth maximizes multinomial log likelihood plus half the log determinant
+of Fisher information; inverse information at the resulting estimate supplies
+first-order joint covariance. Preserve all coefficients, categorical references,
+full covariance, model N/events and diagnostic/failure states. No hidden estimator
+fallback, category pooling, penalization of other failed positions or model selection.
 
-## Estimation and interpretation
+Standardize each model over its own outcome-evaluable covariate-complete patients.
+Gas results are not projections to untested patients. Joint class probabilities
+sum to one; positive components sum to their joint total, which need not equal a
+separate binary fit. Pointwise 95% intervals condition on the empirical reference
+and fixed basis. They do not cover selection, measurement or confounding bias.
+Apparent calibration is in-sample, not independent validation.
 
-Use logistic regression with a three-column natural BMI spline, linear age and
-the inherited sex/race-ethnicity/region factors. Resolve numeric knots using C
-quantiles .05/.35/.65/.95 (type 7): middle knots interior, outer knots boundary.
-Primary models reuse the primary basis, including current-measurement supporting
-models; all-OBESITY uses its own basis. Persist numeric knots and factor references.
-Do not compare raw spline coefficients from different bases as the same contrast.
+Use the full observed BMI range with local patient/event/covariate support diagnostics.
+Flag sparse/extrapolated regions. Supported five-unit contrasts, including 40–45,
+are audit summaries rather than the main display; no multiplicity-adjusted or
+between-population test is implied.
 
-Registry positions come from saved configuration. Constant outcomes, duplicated
-knots, rank deficiency, separation, inadequate variation and convergence failures
-retain explicit statuses; no automatic simplification, penalization, pooled
-categories or hidden complete-case exclusions. Every model retains all coefficients,
-standard errors, intervals, reference levels and full covariance, plus sample/event
-counts, diagnostics and failures.
+## Secondary modeled burden
 
-Curves are model-standardized documented index-encounter probabilities. Intervals
-are pointwise and model-based, conditional on the empirical reference population
-and fixed basis. They exclude source-selection, measurement-error and unmeasured-
-confounding uncertainty. Local sample/event and covariate counts reveal sparsity;
-being within the global training BMI range does not prove joint support. Apparent
-calibration and mean fitted probability are in-sample diagnostics, not validation.
-The 45-versus-40 contrast is reported only where supported, with both probabilities,
-difference, ratio and uncertainty.
+Policy `bmi_gt30_minus1_v1`: observed BMI>30 becomes BMI−1; BMI≤30 stays unchanged.
+No floor, index/RFS/covariate change or reselection. Thus 30.2 becomes 29.2.
 
-The named secondary policy `bmi_gt30_minus1_v1` subtracts exactly one from observed
-BMI >30; BMI=30 stays unchanged, no floor/reselection/index/RFS/covariate change.
-Compute paired observed and shifted probabilities, their absolute difference and
-PIF = 1 − shifted/observed probability using full-covariance delta-method intervals.
-Signed contributions by original BMI band reconcile to the total difference and
-its variance. Changing display bins cannot change the patient-level PIF. Never
-multiply a marginal curve by marginal BMI density to obtain adjusted PIF.
-Report model/reference N, number shifted, actual decrement and transformed-support
-limits. Negative differences remain negative; undefined estimates are not zero.
+For every binary model, pair predictions on every reference row:
 
-No full-cohort MAR/MNAR projection, IPW, causal prevention or incident-disease claim
-is part of the analysis. Source-entry partitioning does not eliminate selection
-bias, selective gas measurement or residual confounding.
+`PIF = (sum(p_observed) - sum(p_shifted)) / sum(p_observed)`.
 
-## Outputs and interfaces
+Patients at BMI≤30 contribute baseline burden and exactly zero difference. Report
+both standardized probabilities, signed absolute difference, PIF and full-covariance
+delta-method intervals, model/reference N, eligible share, actual decrement and
+transformed-support diagnostics. Original BMI-band contributions and their covariance
+reproduce the total difference/variance. Never integrate a marginal adjusted curve
+against marginal BMI density. No component-specific PIFs, MAR/MNAR, IPW,
+incident-disease or causal-prevention claims.
 
-The cohort ledger is the count authority. Record grain (record/encounter/patient)
-and partition versus overlap. Q reconciles to primary + obesity-only + unresolved;
-each group splits into complete/incomplete adjustment, and each complete group
-into outcome-known/unknown. Do not add overlapping gas/model samples.
+## Sensitivities and audit
 
-A run contains immutable aggregate data, CSV exports, configuration, registry,
-source/input/evidence identities and hashes. No identifiers, exact dates, individual
-predictions/diagnostics, model frames or fitted model objects enter the bundle.
-Result keys include population, model, outcome, window, model form, reference
-population and scenario policy where applicable. Failed/unavailable positions
-remain present. Reports, figures and aggregate audit/result tables may be versioned
-and shared under the owner's 2026-10-18 clarification; raw and patient-level data
-remain excluded. The [collaborator snapshot](../results/2026-10-18/README.md)
-versions complete report PDFs, B/F2, a local gallery and all 49 CSVs with hashes.
-Local execution bundles remain ignored; the reading snapshot cannot be used as
-a `make render` run directory.
+Primary-only ancillary positions retain recorded-result-date=start-date gas
+sensitivities, matched ICD/gas samples and same-sample linear BMI checks. Calendar-day
+source pending does not block qualified encounter-wide analyses. Current-measurement
+and all-OBESITY-route binary checks remain distinct from the nested BMI secondary.
 
-| Command from repository root | Behavior |
-|---|---|
-| `make test` | Repeatable artificial E2E estimation, both report formats and artifact assertions; [test scope](../tests/README.md) |
-| `make fixture` | Artificial run and reports without the E2E assertions |
-| `make preflight INPUT=... MANIFEST=...` | Validate qualified source and ledger without models |
-| `make cohort-audit INPUT=... MANIFEST=...` | Save source/cohort audit without model fitting |
-| `make analyze INPUT=... MANIFEST=...` | Estimate once on clean merged Mini checkout |
-| `make render RUN=...` | Fresh HTML/PDF review from explicit saved aggregates only |
-| `make render-html RUN=...` / `make render-pdf RUN=...` | One output format for both reports |
-| `make render-reports RUN=... FIGURES_FROM=...` | Prose/table rebuild using hash-matched figures from the same saved run |
+The ledger is the count authority. Distinguish records, encounters and patients;
+RFS groups partition the common index cohort; adjustment complete/incomplete and
+outcome-known/unknown partitions reconcile within each group. Endpoint samples
+and all-OBESITY sensitivity overlap. Every variable and model has an audit entry,
+complete coefficient/covariance table, diagnostic or explicit unavailable status.
 
-`scripts/review_bmi_run.R RUN` independently reconciles saved numerical quantities.
-`scripts/check_report_exports.py REVIEW` checks exports and prepares visual-review
-sheets using existing Pillow/Poppler. Neither creates investigator approval.
+Historical reconciliation is separate from acceptance: count newly eligible
+patients, changed indexes/RFS, same-patient different-index, old-only patients,
+and unchanged-key BMI/covariate/outcome fields. Do not require old and new model
+coefficients to agree when their fitting populations or bases change. Same-input
+numerical kernel checks must still agree within established tolerances.
 
-The scientific mini-paper contains detailed Methods, primary relationships,
-observation/BMI displays, verification-oriented Results and example conclusions.
-The audit contains complete stage/variable profiles, all models/covariances,
-failures, provenance and supporting analyses; full coordinate exports accompany
-full-range plots. No preview may substitute for a complete table. The owner selected
-F1-B and F2 as the working main figures on 2026-10-18; A/C remain alternatives.
-The saved scientific PDF embeds A with identical values; use standalone B for
-the selected presentation. See [figure QC](PUBLICATION_FIGURE_QC_PLAN.md).
+## Execution and deliverables
 
-Preparation, mapping, qualification and RFS metadata enrichment are separate
-source operations described in [the source contract](SOURCE_CONTRACT.md).
-Estimation failures preserve evidence; rendering failures are rerendered from the
-same run without reading clinical input or refitting. Source or estimator changes
-require a fresh qualified run and preserved prior evidence.
+One `make prepare` builds typed BMI/covariates, RFS, ordinary gases, recorded-day
+components and code-level diagnoses from existing accepted mapping/readers. It
+binds independent evidence statuses to the new input and selection hashes. No
+historical clinical run is a prerequisite for source acceptance. See
+[SOURCE_CONTRACT.md](SOURCE_CONTRACT.md) for qualification and private boundaries.
 
-## Same-day arterial co-occurrence supplement
+Run preparation → qualification → preflight → estimate once → render saved aggregates.
+Current runtime bundles reject older schemas; historical published snapshots remain
+immutable. No compatibility/migration layer is maintained.
 
-See [the approved supplement](SAME_DAY_ABG_SUPPLEMENT.md). One joint multinomial spline partitions the same co-observed
-population into no hypercapnia, hypercapnia without documented same-day acidemia,
-and hypercapnia with same-day acidemia. Any acidemia co-occurrence takes priority.
-The model reuses primary indexes, adjustment and knots. Full-range stacked curves
-and component contrasts use full cross-category covariance. Any qualifying recorded date within the index encounter may contribute;
-threshold findings must share that date. This is not verified same-sample pairing.
-No new PIF is computed. The superseded pairing feasibility remains historical.
+The scientific mini-paper presents cohort, overall curves, physiological components,
+diagnostic components, burden, nested secondary and other sensitivities, then
+interpretation. The separate audit retains exhaustive tables and contrasts.
+F1-B is the preferred relationship layout; F2 shows absolute burden and signed
+contributions, including unshifted lower-BMI baseline burden. S1 and ICD displays
+are integrated with population-labeled counterparts. Retain A/C alternatives,
+editable sources, SVG/PDF and 300-dpi PNG/JPG, captions and gallery.
 
-Historical binary-supplement clinical execution from merged `b89d485` completed on October 20, 2026. The
-[separate supplement snapshot](../results/2026-10-20-same-day-abg/README.md)
-contains the two successful models and reconciled evidence; original estimates
-agree with the authenticated prior run within 1e-10. Investigator approval for
-the supplemental interpretation and S1 remains separate and pending.
-
-Joint-model execution completed from merged `21b8bdf` in
-`curve-analyze-20261020T230537-20006`, after fresh source preflight. The single
-joint model succeeded on the shared 22,195 patients. Eight primary-result
-comparisons passed at 1e-10; the identical qualified input/manifest was reused.
-See the [joint reading snapshot](../results/2026-10-20-same-day-components/README.md)
-for all component magnitudes and review states. Investigator interpretation and
-S1 approval remain pending; no abstract was drafted.
-
-## ICD acuity supplement
-
-See [the approved ICD supplement](ICD_ACUITY_SUPPLEMENT.md). One additional joint
-model partitions complete-capture primary patients into no target diagnosis,
-chronic/OHS, acute-on-chronic or concurrent coding, acute and unspecified acuity.
-Primary and recorded-day analyses are preserved; no supplemental PIF is added.
-Clinical code-level qualification and the October 24 run completed. The planned
-five-category fit is nonestimable because of separation; no adjusted acuity
-curves or contrasts are available and no fallback was used. Original primary/S1
-results and PIFs agree with the prior run within 1e-10. See the
-[dated reading snapshot](../results/2026-10-24-icd-acuity/README.md) and
-[ICD estimability finding](ICD_ACUITY_SUPPLEMENT.md#clinical-execution-and-estimability-2026-10-24).
-
-## Approved ICD estimability update (2026-10-24)
-
-Use the full five-category Firth mean-bias-reduced multinomial model, preserving
-all prior indexes, adjustment and numeric knots. A separately identified
-unpenalized four-category sensitivity excludes only final unspecified-only
-classifications and standardizes over its own remaining patients. Add raw
-five-unit BMI-band proportions with Wilson intervals and patient frequencies.
-No supplemental PIF, primary/S1 refit change or unapproved fallback. The
-[ICD supplement](ICD_ACUITY_SUPPLEMENT.md) records equations, covariance,
-verification and the historical failed model. New clinical results require a
-new immutable schema-12 run; old bundles cannot acquire these labels.
-
-### 2026-10-24 execution update
-
-The approved ICD separation repair is implemented and clinically executed in
-`curve-analyze-20261024T053607-55109` from merged code `29687c9` (PR #25).
-Both the full five-category Firth fit (N=176,922) and the four-category
-maximum-likelihood sensitivity (N=176,794) succeeded. Existing input/source
-identities were reused after fresh preflight. All 11 original primary/S1/PIF
-tables agree with the prior clinical run within 1e-10; 137 aggregate checks passed.
-Use [the new reading snapshot](../results/2026-10-24-icd-bias-reduced/README.md)
-for these curves. Earlier failed-fit snapshots remain historical evidence.
-Investigator interpretation and figure approval remain pending; no abstract draft.
+Verification: `make test`, `make source-test PREP_PYTHON=...`, aggregate-only numerical
+review, figure QC at 190 mm/≥9pt, native/grayscale/assembled-page inspection.
+Software, source acceptance, numerical review, visual review and investigator approval
+are separate. Release code by reviewed PR/squash merge before clinical execution on a
+clean merged Mini checkout. No abstract drafting is part of this change.

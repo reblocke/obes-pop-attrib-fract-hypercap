@@ -1,17 +1,18 @@
 # Independent softmax likelihood and finite-difference oracle, written before
 # replacing the supplemental binary estimator. No production prediction helpers.
-e2e_same_day <- function(bundle,raw) {
+e2e_same_day <- function(bundle,raw,population="primary") {
   a <- bundle$analysis
-  id <- "primary::same_day_abg/encounter/multinomial_spline"
+  id <- paste0(population,"::same_day_abg/encounter/multinomial_spline")
   classes <- c("no_hypercapnia","without_acidemia","with_acidemia")
   r <- a$model_registry[a$model_registry$model_id==id,,drop=FALSE]
   stopifnot(nrow(r)==1L,r$status=="successful",!any(a$policy_totals$model_id==id))
   q <- e2e_indexes(raw)
   q <- q[q$group=="primary" & complete.cases(q[triangulation_adjustment]),]
+  if(population=="primary_bmi_ge30")q<-q[q$bmi>=30,,drop=FALSE]
   p <- q[q$same_day_abg_state=="coobserved_day",]
   y <- ifelse(p$hypercapnia_acidemia_same_day==1,3L,ifelse(p$hypercapnia_coobserved==1,2L,1L))
   stopifnot(all(p$hypercapnia_acidemia_same_day<=p$hypercapnia_coobserved),r$n_model==nrow(p))
-  cats <- a$cooccurrence_categories
+  cats <- a$cooccurrence_categories[a$cooccurrence_categories$analysis_population_id==population,]
   e2e_near(cats$n[match(classes,cats$category_id)],tabulate(y,3))
   knots <- as.numeric(quantile(q$bmi,c(.05,.35,.65,.95),type=7))
   for(v in c("sex","race_ethnicity","location"))
@@ -67,7 +68,7 @@ e2e_same_day <- function(bundle,raw) {
     e2e_near(sum(pp[classes]),1);e2e_near(sum(pp[classes[-1]]),pp['any_hypercapnia'])
     stopifnot(all(pp>=0 & pp<=1))
   }
-  contrasts <- a$same_day_contrasts
+  contrasts <- a$same_day_contrasts[a$same_day_contrasts$model_id==id,]
   zc <- contrasts[contrasts$bmi_low==40 & contrasts$bmi_high==45,]
   for(k in 1:5) {
     key <- c(classes,"any_hypercapnia","with_minus_without_change")[k]
@@ -81,11 +82,12 @@ e2e_same_day <- function(bundle,raw) {
     e2e_near(c(row$difference_per1000,row$conf_low_per1000,row$conf_high_per1000),
       1000*c(d,d-qnorm(.975)*sqrt(variance),d+qnorm(.975)*sqrt(variance)),tolerance=2e-4)
   }
+  if(population=="primary") {
   # Original analysis must be unchanged when the optional module is absent.
   base <- bmi_run_analysis(raw[setdiff(names(raw),bmi_same_day_fields)],bundle$config)
   for(name in c("coefficients","coefficient_covariance","probability_curves","policy_totals","policy_contributions","policy_contribution_covariance")) {
     current<-a[[name]];original<-base[[name]]
-    current<-current[current$model_id!=id,,drop=FALSE];original<-original[original$model_id!=id,,drop=FALSE]
+    current<-current[!grepl("::same_day_abg/",current$model_id),,drop=FALSE];original<-original[!grepl("::same_day_abg/",original$model_id),,drop=FALSE]
     # Joint class labels add an all-NA metadata column to primary rows only.
     for(field in setdiff(names(current),names(original))) {
       stopifnot(all(is.na(current[[field]])));original[[field]]<-current[[field]][rep(NA_integer_,nrow(original))]
@@ -107,5 +109,6 @@ e2e_same_day <- function(bundle,raw) {
   bad <- raw;bad$sex[!is.na(bad$sex)] <- "1"
   deficient <- bmi_run_analysis(bad,bundle$config)
   stopifnot(deficient$model_registry$status[deficient$model_registry$model_id==id]=="rank_deficiency")
+  }
   invisible(data.frame(model_id=id,n=nrow(p),status="independent likelihood, joint covariance and signed contrasts confirmed"))
 }
