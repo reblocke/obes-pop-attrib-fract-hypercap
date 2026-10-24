@@ -67,7 +67,10 @@ regions/dotted lines flag existing local sparsity thresholds separately by class
 the full observed range remains visible. Missing covariate levels remain in the
 support audit. Captions retain the same-recorded-day/not-same-sample statement.
 
-Runtime identity: aggregate schema 10 / `bmi_hypercapnia_rfs_curve_audit_v5`.
+The joint model was released as aggregate schema 10 / `bmi_hypercapnia_rfs_curve_audit_v5`.
+Current development adds the independent ICD supplement under schema 11 /
+`bmi_hypercapnia_rfs_curve_audit_v6`; S1 calculations and the schema-10 clinical
+reading snapshot remain unchanged.
 Input schema 4 and `same_day_arterial_cooccurrence_v1` remain unchanged. The
 schema-9 reading packet linked below is immutable historical evidence, not the current
 joint result. The joint clinical run completed from merged `21b8bdf`; numerical review passed.

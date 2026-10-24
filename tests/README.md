@@ -19,6 +19,19 @@ source-reader environment. Its receipt records failures and unavailable tests;
 skipped dependencies do not count as passed. No test installs packages, reads
 clinical inputs, or asserts human/scientific approval.
 
+Use an existing Python environment with both `duckdb` and `pandas`. Put that
+environment's `bin` directory on `PATH` as well as setting `PREP_PYTHON`, because
+some boundary checks launch `python3` subprocesses. Activate the existing project
+R environment so `Rscript` and its libraries resolve correctly; the typed-input
+roundtrip sources the current R workflow. Set `TMPDIR` to an existing writable
+directory without spaces. Nothing in these commands installs dependencies.
+
+A complete run exits zero and records `status: passed`, no unavailable/failed/error
+checks, and `sources_unchanged: true` in its `receipt.json`, beside `run.log`.
+The runner hashes Python adapter/test files. When testing an isolated source copy,
+also verify the copied R/configuration files before and after execution and retain
+the source identity and runtime versions with the receipt.
+
 ## Why the remaining checks exist
 
 | Failure not established by a successful render | Independent check |
@@ -76,3 +89,11 @@ A complete caption can overflow a PDF float even when text bounds appear clean.
 The S1 E2E check compares its full saved caption with both assembled PDF texts;
 it catches clipping without freezing the caption's wording. This failure was
 reproduced in the initial joint-model report before shortening the caption.
+
+## ICD acuity supplement
+
+Failure scenarios were recorded in `docs/ICD_ACUITY_SUPPLEMENT.md` before coding.
+The E2E oracle independently fits the five-class likelihood and finite-difference
+contrasts, verifies original outputs, and renders S2 and both complete reports.
+The isolated Python source boundary is justified because typed-input E2E cannot
+observe original-key/code-system transport corruption or record identity conflicts.

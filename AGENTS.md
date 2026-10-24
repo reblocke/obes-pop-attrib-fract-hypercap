@@ -2,7 +2,7 @@
 
 ## Scope and change discipline
 
-The current analysis is schema 10 (`bmi_hypercapnia_rfs_curve_audit_v5`). Read
+The current analysis is schema 11 (`bmi_hypercapnia_rfs_curve_audit_v6`). Read
 `docs/BMI_HYPERCAPNIA_TRIANGULATION_PLAN.md` and `docs/SOURCE_CONTRACT.md` before
 substantive work. Configuration and the variable dictionary live in `config/`;
 the cohort ledger is the sole count authority.
@@ -115,3 +115,8 @@ numerical review and investigator scientific approval are separate states.
 The [same-day arterial supplement](docs/SAME_DAY_ABG_SUPPLEMENT.md) uses one joint three-category multinomial spline for
 recorded-day co-occurrence with a separate source gate. It does not
 establish same-sample pairing; original PIFs and primary analyses remain unchanged.
+
+The optional [ICD acuity supplement](docs/ICD_ACUITY_SUPPLEMENT.md) uses a joint
+five-category model on complete diagnosis capture, independent of gas evidence.
+Preserve all code flags and the agreed mixed-code precedence; never infer acuity
+from the binary composite or count incomplete capture as negative.

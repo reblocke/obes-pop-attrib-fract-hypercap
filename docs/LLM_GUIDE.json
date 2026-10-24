@@ -1,7 +1,7 @@
 {
   "document_type": "llm_collaborator_reading_guide",
-  "updated": "2026-10-20",
-  "purpose": "Read the current study and support later coauthor work with traceable evidence. This is documentation, not executable analysis configuration.",
+  "updated": "2026-10-23",
+  "purpose": "Read the current study with traceable evidence, including public researcher review and later coauthor work. This is documentation, not executable analysis configuration.",
   "repository_paths_relative_to": "repository root",
   "authority": {
     "operating_instructions": "AGENTS.md",
@@ -38,7 +38,17 @@
     "meeting": "ATS 2027",
     "deadline_date": "2026-11-04",
     "deadline_evidence": "owner reconfirmation; not new portal verification",
-    "analysis_output_sharing": "Reports, figures and aggregate result tables may be included in Git; raw/patient-level data and source-access secrets remain excluded."
+    "analysis_output_sharing": "Reports, figures and aggregate result tables may be included in Git; raw/patient-level data and source-access secrets remain excluded. See public_release_status for the later public-disclosure confirmation."
+  },
+  "public_release_status": {
+    "confirmation_date": "2026-10-23",
+    "source": "docs/DECISIONS.md",
+    "scope": "Code plus existing reports, figures and aggregate result tables",
+    "aggregate_disclosure": "Owner confirmed that public release of the exact existing outputs, including counts of 1-9, is cleared under the source-data agreement; not an independent legal determination.",
+    "scientific_review": "Unchanged: primary provisional; investigator interpretation and S1 approval pending",
+    "reuse_terms_and_preferred_citation": "Pending owner confirmation; no project license file or CITATION.cff is present in the repository",
+    "release_review": "docs/PUBLIC_RELEASE_REVIEW.md",
+    "visibility_change": "Separate release action; this guide does not assert publication"
   },
   "clinical_evidence": {
     "availability": "Versioned collaborator snapshot is included in a normal clone; no raw data are required to read it.",
@@ -168,7 +178,7 @@
     "source_boundary_checks": "make source-test PREP_PYTHON=\"/existing/environment/bin/python\"",
     "clinical_execution_authority": "docs/SOURCE_CONTRACT.md",
     "latest_recorded_local_test_limits": "Current same-day release checks and clinical qualification are recorded separately in WORKLOG.md; artificial results do not supply clinical estimates.",
-    "boundaries": "Reports, figures and aggregate result tables may be versioned for collaborator review. Do not include raw/patient-level data, identifiers, individual dates, model frames, individual predictions, credentials or source-access secrets. This guide does not authorize dependency installation, private-input access, refitting, changes to accepted evidence, unsolicited external messages or submission. Rendering uses saved aggregates only.",
+    "boundaries": "Reports, figures and aggregate result tables may be versioned; the owner confirmed public disclosure clearance for the exact existing outputs on 2026-10-23. Disclosure clearance is separate from reuse licensing, scientific review and submission approval. Do not include raw/patient-level data, identifiers, individual dates, model frames, model objects, individual predictions, credentials or source-access secrets. This guide does not authorize dependency installation, private-input access, refitting, changes to accepted evidence, unsolicited external messages or submission. Rendering uses saved aggregates only.",
     "package_integrity_check": "See results/2026-10-18/README.md for the dependency-free Python SHA-256 verification command."
   },
   "paired_abg_supplement": {
@@ -255,5 +265,14 @@
     },
     "visual_review": "see dated snapshot review receipt",
     "table_filter": "Use primary::same_day_abg/encounter/multinomial_spline. Category probabilities use the full co-observed reference N, not only hypercapnic patients. with_minus_without_change directly compares signed changes using joint covariance."
+  },
+  "icd_acuity_supplement": {
+    "plan": "docs/ICD_ACUITY_SUPPLEMENT.md",
+    "runtime_schema": 11,
+    "analysis_id": "bmi_hypercapnia_rfs_curve_audit_v6",
+    "figure": "S2-ICD-acuity",
+    "clinical_results": "pending qualified enrichment and merged Mini run",
+    "approval": "design approved; new figure and interpretation pending",
+    "primary_results": "unchanged; existing reading snapshots remain historical authorities"
   }
 }

@@ -3,13 +3,14 @@
 args <- commandArgs(TRUE)
 if (length(args)>1L) stop("Use no arguments for a fresh run, or one saved artificial RUN to resume")
 Sys.setenv(BMI_REPO_ROOT=normalizePath("."))
-test_files <- c("tests/run_e2e.R","tests/e2e_oracles.R","tests/same_day_e2e.R","tests/fixtures/bmi_curve_fixture.R")
+test_files <- c("tests/run_e2e.R","tests/e2e_oracles.R","tests/same_day_e2e.R","tests/icd_acuity_e2e.R","tests/fixtures/bmi_curve_fixture.R")
 initial_test_hashes <- as.list(setNames(vapply(test_files,function(path)
   digest::digest(file=path,algo="sha256"),character(1)),test_files))
 source("R/analysis.R")
 source("tests/fixtures/bmi_curve_fixture.R")
 source("tests/e2e_oracles.R")
 source("tests/same_day_e2e.R")
+source("tests/icd_acuity_e2e.R")
 require_tri_packages(c("jsonlite","digest","ggplot2","knitr","rmarkdown","lpSolve","nnet"))
 for (command in c("quarto","pdftotext","pdfinfo"))
   if (!nzchar(Sys.which(command))) stop("Required installed command unavailable: ",command)
@@ -63,6 +64,10 @@ tryCatch({
   check("same-day ABG independent models",{
     paired<-e2e_same_day(bundle,make_bmi_curve_fixture())
     utils::write.csv(paired,file.path(out,"same-day-independent-model-checks.csv"),row.names=FALSE)
+  })
+  check("ICD acuity independent multinomial analysis", {
+    result<-e2e_icd_acuity(bundle,make_bmi_curve_fixture())
+    utils::write.csv(result,file.path(out,"icd-acuity-independent-checks.csv"),row.names=FALSE)
   })
   check("adverse eligibility, RFS, policy and failure states",e2e_adverse_cases())
   check("persisted aggregate privacy and coverage", {
@@ -134,14 +139,14 @@ tryCatch({
       stopifnot(is.null(attr(pdf,"status")),length(pdf)>0,!any(grepl("\uFFFD",pdf,fixed=TRUE)))
     }
   })
-  check("complete S1 caption in assembled PDFs",{
+  check("complete supplemental captions in assembled PDFs",{
     captions <- utils::read.csv(file.path(review,"figures/captions.csv"),stringsAsFactors=FALSE)
     normalize <- function(x)gsub("[^[:alnum:]]","",tolower(gsub("₂","2",paste(x,collapse=" "),fixed=TRUE)))
-    expected <- normalize(captions$caption[captions$figure_id=="S1-same-day-ABG"])
+    expected <- vapply(c("S1-same-day-ABG","S2-ICD-acuity"),function(id)normalize(captions$caption[captions$figure_id==id]),character(1))
     stopifnot(nzchar(expected))
     for(name in c("bmi_hypercapnia","bmi_hypercapnia_audit")) {
       text <- system2("pdftotext",c(shQuote(file.path(review,paste0(name,".pdf"))),"-"),stdout=TRUE)
-      if(!grepl(expected,normalize(text),fixed=TRUE))stop("S1 caption clipped or missing in ",name)
+      if(!all(vapply(expected,function(x)grepl(x,normalize(text),fixed=TRUE),logical(1))))stop("Supplemental caption clipped or missing in ",name)
     }
   })
   check("every declared figure and required alternatives",{
@@ -151,7 +156,7 @@ tryCatch({
       path <- file.path(review,"figures",paste0(id,".",ext))
       stopifnot(file.exists(path),file.info(path)$size>0)
     }
-    required <- c("RFS-flow","RFS-evidence","S1-same-day-ABG",paste0("primary/",c("F1-A","F1-B","F1-C","F2","F2-bands")))
+    required <- c("RFS-flow","RFS-evidence","S1-same-day-ABG","S2-ICD-acuity",paste0("primary/",c("F1-A","F1-B","F1-C","F2","F2-bands")))
     stopifnot(all(required %in% captions$figure_id),all(file.exists(file.path(review,"figures",paste0(required,".jpg")))))
     display <- utils::read.csv(file.path(review,"figures/rfs-evidence-display.csv"))
     displayed <- display[display$displayed,]

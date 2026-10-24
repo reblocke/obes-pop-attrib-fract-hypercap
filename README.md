@@ -4,13 +4,36 @@
 BMI among adults with obesity receiving emergency or inpatient care, when the
 relevant outcome can be evaluated?
 
-This is a descriptive analysis of a selected 2022 TriNetX-derived cohort. Its main
+This research repository contains a descriptive analysis of body mass index
+(BMI) and documented hypercapnia in a selected 2022 TriNetX-derived cohort. Its main
 result is an adjusted BMI–hypercapnia probability curve. A secondary analysis
 compares modeled probabilities before and after a one-unit BMI reduction among
-patients whose observed BMI is above 30. The repository produces an expanded
-scientific report and a complete audit of cohort construction and modeling.
+patients whose observed BMI is above 30. It includes analysis code, scientific
+reports, figures and complete aggregate audit/result tables for researchers
+reviewing the methods or findings.
 
-## If you are helping write the abstract
+Start with **[the saved results](#read-the-results)** to review the study without
+running code, or **[the synthetic workflow](#reproduce-the-software-workflow)** to
+exercise the software without clinical data.
+
+## Study and release status
+
+The qualified primary clinical analysis completed on October 17, 2026; the joint
+same-day component analysis completed on October 20. Numerical reconciliation and
+scoped figure/report review are recorded separately from investigator review.
+Primary scientific approval is **provisional**. **F1-B and F2** are the working
+main figures; investigator interpretation and approval of supplemental S1 remain
+**pending**. The same-day update preserves the primary estimates and PIFs.
+
+On October 23, 2026, the owner confirmed that the existing reports, figures and
+aggregate tables are cleared for public release under the source-data agreement,
+including the existing small aggregate counts. Raw and patient-level data remain
+excluded. Disclosure clearance does not confer scientific or submission approval.
+See the [decision log](docs/DECISIONS.md) for dated decisions and publication
+planning, and the [public-release review](docs/PUBLIC_RELEASE_REVIEW.md) for checks
+and outstanding release tasks.
+
+## Read the results
 
 You do not need to run the code to review the study. The
 **[collaborator snapshot](results/2026-10-18/README.md)** contains the clinical
@@ -28,14 +51,14 @@ The [earlier binary supplement](results/2026-10-20-same-day-abg/README.md) is hi
 | Read in this order | What to look for |
 |---|---|
 | [Current scientific report](results/2026-10-20-same-day-components/bmi_hypercapnia.pdf) | Rationale, detailed methods, results, sensitivity analyses and interpretation limits |
-| [B/F2 figure PDF — 2 pages](results/2026-10-18/selected_figures.pdf) | Selected relationship and secondary-scenario figures with full captions; convenient for email |
+| [B/F2 figure PDF — 2 pages](results/2026-10-18/selected_figures.pdf) | Selected relationship and secondary-scenario figures with full captions |
 | [B: relationship](results/2026-10-18/figures/F1-B.pdf) / [F2: secondary scenario](results/2026-10-18/figures/F2.pdf) | Individual vector masters; SVG, PNG and JPG versions are beside them |
+| [Supplemental S1](results/2026-10-20-same-day-components/supplement_figure.pdf) | Captioned joint same-day component figure; investigator interpretation and approval pending |
 | [Offline gallery](results/2026-10-18/gallery.html) | B/F2 at full size, captions, format downloads and source-table links |
 | [Current complete audit](results/2026-10-20-same-day-components/bmi_hypercapnia_audit.pdf) | Full cohort profiles, model samples, coefficients, covariance and diagnostics |
 | [Current aggregate tables](results/2026-10-20-same-day-components/TABLES.md) | Complete CSV exports, with a machine-readable field/row/hash index |
 
-For email, start with the scientific, B/F2 and captioned S1 PDFs; the complete
-audit is a separate reference. Download PDFs with GitHub's **Download raw file** control when needed.
+Download PDFs with GitHub's **Download raw file** control when needed.
 For the gallery, clone/download the folder and open `gallery.html` locally; GitHub
 shows its HTML source. All gallery assets are local.
 
@@ -45,18 +68,10 @@ use standalone **F1-B** for the selected presentation. A/B/C contain the same
 estimates. The compact gallery covers B/F2; supporting figures remain in the full
 audit. Keep the snapshot folder together for its local links to work.
 
-**Current status:** the qualified clinical analysis completed on October 17, 2026;
-numerical verification and scoped figure/report QC are recorded. The owner granted
-provisional scientific approval and selected B/F2 for the working main figure set.
-The ATS 2027 deadline is **November 4, 2026**, reconfirmed by the owner. Final
-submission packaging and submission approval remain separate. **Abstract drafting
-is currently deferred at the owner's request.** See the [decision log](docs/DECISIONS.md).
-
-When preparing a later draft, trace each number to the supplied clinical report or
-saved aggregate table, retaining its population, outcome, timing window and
-denominator. Resolve wording, authorship/affiliations and final exhibit packaging
-with the project owner. Do not use artificial-example outputs or historical
-analysis versions as current findings.
+Trace each numerical claim to the supplied clinical report or saved aggregate
+table, retaining its population, outcome, timing window, denominator and interval
+type. Artificial-example outputs and historical analysis versions are not current
+clinical findings.
 
 ## What was analyzed
 
@@ -108,7 +123,9 @@ unmeasured confounding. The [source contract](docs/SOURCE_CONTRACT.md) and
 | [LLM reading guide](docs/LLM_GUIDE.json) / [agent instructions](AGENTS.md) | Structured evidence navigation and operating rules for assistants |
 | [Work log](WORKLOG.md) / [archive index](archive/README.md) | Execution evidence and recovery of superseded versions |
 
-The active analysis is `bmi_hypercapnia_rfs_curve_audit_v5` (aggregate schema 10).
+The current implementation is `bmi_hypercapnia_rfs_curve_audit_v6` (aggregate
+schema 11). The published joint same-day clinical snapshot remains schema 10;
+the ICD-acuity clinical supplement is pending its fresh run and reconciliation.
 `R/analysis.R` loads the current modules; `scripts/run_bmi_hypercapnia.R` audits
 and estimates; `scripts/render_bmi_hypercapnia.R` renders saved aggregates. The
 [scientific](reports/bmi_hypercapnia.qmd) and [audit](reports/bmi_hypercapnia_audit.qmd)
@@ -118,9 +135,10 @@ not another analysis configuration.
 The repository is laid out as follows:
 
 ```text
-results/2026-10-20-same-day-abg/  Completed co-occurrence supplement: reports, S1 and tables
-results/2026-10-20-paired-abg/  Source-feasibility supplement; no new clinical models
-results/2026-10-18/  Clinical reading snapshot: PDFs, B/F2, gallery, 49 CSVs and hashes
+results/2026-10-20-same-day-components/  Current integrated reports, joint S1 and tables
+results/2026-10-18/                    Primary snapshot: B/F2, reports and tables
+results/2026-10-20-same-day-abg/        Historical binary co-occurrence supplement
+results/2026-10-20-paired-abg/          Historical pairing-feasibility report; no new models
 docs/                Scientific/source guides, decisions, figure QC and LLM navigation
 config/              Executable study settings, variable dictionary and source examples
 R/                   Cohort audit, models, standardization and reporting modules
@@ -132,15 +150,16 @@ Code/, Documents/    Historical Stata code and older study documents; not curren
 data/, artifacts/    Local raw inputs and working runs; their contents stay out of Git
 ```
 
-For LLM-assisted review, begin with [LLM_GUIDE.json](docs/LLM_GUIDE.json) and the
-[table index](results/2026-10-18/table_index.csv), then read the relevant CSVs.
-The [snapshot manifest](results/2026-10-18/manifest.json) identifies the clinical
-run and file hashes. Use current guides for methods and the dated snapshot for
-reported numbers; historical files are background only.
+For LLM-assisted review, begin with [LLM_GUIDE.json](docs/LLM_GUIDE.json), then use
+the [current table index](results/2026-10-20-same-day-components/table_index.csv)
+or [original primary index](results/2026-10-18/table_index.csv) and the relevant
+CSVs. Each snapshot's manifest identifies its clinical run and file hashes. Use
+current guides for methods and the appropriate dated snapshot for reported numbers.
 
 ## Reproduce the software workflow
 
-Run from the repository root with existing **R ≥4.3**, Quarto,
+The recorded workflow uses macOS. Run from the repository root with Make,
+existing **R ≥4.3**, Quarto,
 XeLaTeX/TinyTeX and Poppler (`pdftotext`, `pdfinfo`). Required R packages are
 `ggplot2`, `jsonlite`, `digest`, `lpSolve`, `nnet`, `knitr` and `rmarkdown`; clinical input
 reading also uses `haven`. Nothing is installed automatically. The full audit
@@ -158,7 +177,9 @@ fresh `artifacts/triangulation/e2e-.../receipt.json` with `status: passed`, alon
 does not reproduce clinical estimates or confer scientific approval. `make fixture`
 runs the artificial example without the E2E assertions.
 
-For presentation changes, use an explicitly selected saved schema-10 run:
+For presentation changes, use an explicitly selected saved run that matches the
+checked-out analysis version. The current ICD-supplement development requires
+schema 11; the published clinical reading packet remains schema 10:
 
 ```bash
 make render RUN="artifacts/triangulation/<exact-saved-run>"
@@ -171,10 +192,12 @@ completed `render-receipt.json`. Rendering reads aggregates only and does not re
 models. Changed estimation sources require a new run; incompatible bundles fail
 instead of acquiring new labels.
 
-The versioned `results/2026-10-18/` folder is a reading snapshot, not a complete
-saved execution bundle. Its CSVs/PDFs can be inspected without data access, but it
-cannot be passed to `make render`: the binary bundle and private receipts are not
-included. The snapshot README provides a dependency-free hash-verification command.
+The versioned clinical `results/` folders are reading snapshots, not complete
+saved execution bundles. Their CSVs/PDFs can be inspected without data access;
+the binary analysis bundles and private receipts needed by `make render` are
+omitted. Each snapshot README provides a dependency-free Python hash-verification
+command. The historical pairing-feasibility README documents its separate
+aggregate-report command; it is not the current analysis renderer.
 
 Source-boundary checks are separate:
 
@@ -187,14 +210,17 @@ preparation also requires the pinned upstream readers. The same-day release pass
 the artificial E2E and all 33 source checks using the existing Mini environment,
 without skips or dependency installation. See [test scope](tests/README.md) and
 [dated receipts](WORKLOG.md). Artificial checks do not establish clinical results.
+The [public-release review](docs/PUBLIC_RELEASE_REVIEW.md) records verification
+of the documented release, installed versions and any unavailable dependencies.
 
 ## Data access and full clinical reproduction
 
-Reports, figures and aggregate analysis tables may be versioned and shared with
-the repository, as confirmed by the owner on October 18, 2026. The
-[versioned snapshot](results/2026-10-18/README.md) comprises the scientific report,
-complete audit, selected gallery/exports and saved aggregate tables. Logs,
-temporary runs and source-access receipts are not included in the reading packet.
+Reports, figures and aggregate analysis tables are included in the repository;
+the owner confirmed public disclosure clearance for the existing outputs on
+October 23, 2026. Each reading snapshot includes its own provenance and integrity
+manifest. Temporary runs and private source-access receipts remain outside the
+reading packets. Public disclosure clearance and reuse licensing are separate;
+see [citation, reuse and support](#citation-reuse-and-support).
 
 Raw records, patient-level inputs/derivations, identifiers, exact individual dates,
 model frames and individual predictions stay in ignored/private storage. Do not
@@ -215,21 +241,41 @@ joint multinomial spline to distinguish hypercapnia with and without documented
 same-day acidemia, with no documented hypercapnia as the reference. Any eligible
 hypercapnia–acidemia day takes priority. S1 stacks the two components across the
 full observed BMI range and shows their separate intervals on a common baseline.
-The input and primary models/PIFs are unchanged. Current software uses aggregate
+The input and primary models/PIFs are unchanged. The joint-component release uses aggregate
 schema 10; the schema-9 snapshot is preserved as historical evidence.
 
-The joint clinical run completed from merged `21b8bdf` on October 20. Its shared
-model/reference population has 22,195 patients: 8,809 with co-occurrence, 2,860
-with hypercapnia without documented same-day acidemia, and 10,526 without
-documented hypercapnia on eligible days. All eight primary-result comparisons
-passed at 1e-10, using the identical accepted input and manifest. See the
-[new reading packet](results/2026-10-20-same-day-components/README.md) for full-range
-probabilities, five-unit component contrasts, reports and separate review states.
-S1 interpretation and investigator figure approval remain pending.
+See the [current reading packet](results/2026-10-20-same-day-components/README.md)
+for the shared model/reference denominator, category counts, full-range
+probabilities, five-unit component contrasts, numerical reconciliation and
+separate review states. S1 interpretation and investigator figure approval
+remain pending.
 
 The [historical pairing-feasibility report](results/2026-10-20-paired-abg/README.md)
 remains available. Its raw-export trace confirmed that sample identifiers were
 not supplied in the original laboratory export. The new definition requires a
 common recorded date, not a specimen identifier. See the source contract for
 private enrichment and qualification; ordinary report rendering reads saved
-aggregates only. No abstract is drafted by this update.
+aggregates only.
+
+## Citation, reuse and support
+
+A project license and preferred citation are not yet documented in this repository.
+Authorship and code/output reuse terms await owner confirmation before release;
+no DOI or published-paper citation is asserted. For a traceable reference,
+identify the [repository](https://github.com/reblocke/obes-pop-attrib-fract-hypercap),
+the exact commit and the dated result snapshot used. Third-party assets retain
+their own notices. See the [release review](docs/PUBLIC_RELEASE_REVIEW.md).
+
+Use [repository issues](https://github.com/reblocke/obes-pop-attrib-fract-hypercap/issues)
+for code or documentation questions, including the command, software versions and
+sanitized error. Keep restricted records, credentials and private access paths
+out of issues. Clinical-data access requires a separate arrangement with the
+project owner; no public self-service access process is documented.
+
+## ICD acuity supplement (implementation; clinical results pending)
+
+The [ICD supplement plan](docs/ICD_ACUITY_SUPPLEMENT.md) adds a stacked S2 figure
+for chronic/OHS, acute-on-chronic or concurrent coding, acute, and unspecified
+acuity. It preserves existing clinical results and S1. A fresh code-level
+enrichment is required; the historical reading snapshots do not contain these
+new results. See the [source command](docs/SOURCE_CONTRACT.md#icd-acuity-enrichment).

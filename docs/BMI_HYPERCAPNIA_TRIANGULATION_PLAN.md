@@ -4,7 +4,7 @@ This is the authority for the RFS curve/audit analysis. The retained filename
 reflects the earlier triangulation design; that design is retired. Machine
 configuration is [bmi_hypercapnia_analysis.json](../config/bmi_hypercapnia_analysis.json),
 with input fields in the [variable dictionary](../config/variable_dictionary.csv).
-The active identity is `bmi_hypercapnia_rfs_curve_audit_v5`, aggregate schema 10,
+The active identity is `bmi_hypercapnia_rfs_curve_audit_v6`, aggregate schema 11,
 metadata-qualified input schema 4. Prior schemas fail explicitly; no replay or
 migration layer is maintained. See [decisions](DECISIONS.md) for dated history.
 
@@ -184,3 +184,11 @@ comparisons passed at 1e-10; the identical qualified input/manifest was reused.
 See the [joint reading snapshot](../results/2026-10-20-same-day-components/README.md)
 for all component magnitudes and review states. Investigator interpretation and
 S1 approval remain pending; no abstract was drafted.
+
+## ICD acuity supplement
+
+See [the approved ICD supplement](ICD_ACUITY_SUPPLEMENT.md). One additional joint
+model partitions complete-capture primary patients into no target diagnosis,
+chronic/OHS, acute-on-chronic or concurrent coding, acute and unspecified acuity.
+Primary and recorded-day analyses are preserved; no supplemental PIF is added.
+Clinical code-level qualification and the new run remain pending.

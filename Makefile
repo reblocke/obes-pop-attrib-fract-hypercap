@@ -17,15 +17,15 @@ preflight cohort-audit analyze:
 	Rscript --vanilla scripts/run_bmi_hypercapnia.R "$@" "$(INPUT)" "$(MANIFEST)" "$(CONFIG)"
 
 render:
-	@test -n "$(RUN)" || (echo 'Set RUN to an explicit saved version-10 aggregate run.'; exit 1)
+	@test -n "$(RUN)" || (echo 'Set RUN to an explicit saved version-11 aggregate run.'; exit 1)
 	Rscript --vanilla scripts/render_bmi_hypercapnia.R "$(RUN)" all
 
 render-html:
-	@test -n "$(RUN)" || (echo 'Set RUN to an explicit saved version-10 aggregate run.'; exit 1)
+	@test -n "$(RUN)" || (echo 'Set RUN to an explicit saved version-11 aggregate run.'; exit 1)
 	Rscript --vanilla scripts/render_bmi_hypercapnia.R "$(RUN)" html
 
 render-pdf:
-	@test -n "$(RUN)" || (echo 'Set RUN to an explicit saved version-10 aggregate run.'; exit 1)
+	@test -n "$(RUN)" || (echo 'Set RUN to an explicit saved version-11 aggregate run.'; exit 1)
 	Rscript --vanilla scripts/render_bmi_hypercapnia.R "$(RUN)" pdf
 
 # Rebuild prose/tables using source-matched figures from the same saved run.
@@ -51,3 +51,8 @@ enrich-rfs:
 enrich-same-day-abg:
 	@test -n "$(SOURCE_CONFIG)" -a -n "$(INPUT)" -a -n "$(MANIFEST)" -a -n "$(OUTPUT)" || (echo 'Set SOURCE_CONFIG INPUT MANIFEST and fresh OUTPUT.'; exit 1)
 	"$(PREP_PYTHON)" scripts/enrich_same_day_abg.py --source-config "$(SOURCE_CONFIG)" --input "$(INPUT)" --manifest "$(MANIFEST)" --output "$(OUTPUT)"
+
+.PHONY: enrich-icd-acuity
+enrich-icd-acuity:
+	@test -n "$(SOURCE_CONFIG)" -a -n "$(INPUT)" -a -n "$(MANIFEST)" -a -n "$(OUTPUT)" || (echo 'Set SOURCE_CONFIG INPUT MANIFEST and fresh OUTPUT.'; exit 1)
+	"$(PREP_PYTHON)" scripts/enrich_icd_acuity.py --source-config "$(SOURCE_CONFIG)" --input "$(INPUT)" --manifest "$(MANIFEST)" --output "$(OUTPUT)"
