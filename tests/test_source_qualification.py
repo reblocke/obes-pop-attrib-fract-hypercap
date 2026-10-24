@@ -89,7 +89,7 @@ class IndependentSourceChecks(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp:
             file=Path(temp)/'ARTIFICIAL.parquet'
             c.execute('COPY mapping TO ? (FORMAT PARQUET)',[str(file)])
-            prepared=pd.DataFrame({'patient_id':['p','s'],'encounter_id':['b','g'],'bmi':[35,24]})
+            prepared=pd.DataFrame({'patient_id':['p','s'],'encounter_id':['b','g'],'bmi':[35,24],'bmi_method':['prior','current']})
             census={'counts':{'n_frame_patients':4,'n_index_unresolved':2,'n_earliest_ties':1,'n_earlier_uncertainty':1}}
             checks,_=qa.check_indexes(c,file,prepared,census)
             self.assertTrue(all(v==0 for v in checks.values()),checks)

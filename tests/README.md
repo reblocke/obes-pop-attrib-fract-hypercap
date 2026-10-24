@@ -149,3 +149,5 @@ renders, complete table coverage, exact registry membership and aggregate-only
 rerender receipts. A small pre-change fixture snapshot is retained privately to
 verify unchanged numerical kernels on identical data; changed cohorts are not
 expected to reproduce historical clinical estimates.
+
+Qualification regression scenario: prepared inputs now retain BMI provenance. Joining the full prepared shape to the mapper must not make shared `bmi_method` names ambiguous; the independent source check retains that field, unlike the earlier reduced fixture. This catches a clinical qualification execution failure before any model runs.

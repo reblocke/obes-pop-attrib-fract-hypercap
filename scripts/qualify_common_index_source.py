@@ -58,7 +58,7 @@ def check_indexes(c, product, prepared, census):
             field_disagreements['prepared_'+name+'_disagreements']=c.execute(
                 f'SELECT count(*) FROM prepared_rows p JOIN source_mapping m USING(patient_id,encounter_id) '
                 f'WHERE p.{name} IS DISTINCT FROM m.{name}').fetchone()[0]
-    methods=c.execute('SELECT bmi_method,count(*) FROM source_mapping s JOIN prepared_rows p USING(patient_id,encounter_id) GROUP BY 1').fetchall()
+    methods=c.execute('SELECT s.bmi_method,count(*) FROM source_mapping s JOIN prepared_rows p USING(patient_id,encounter_id) GROUP BY 1').fetchall()
     blockers=c.execute('SELECT count(DISTINCT CASE WHEN m.encounter_type IS NULL THEN m.patient_id END),'
         "count(DISTINCT CASE WHEN m.bmi_evidence_state='unresolved' THEN m.patient_id END),"
         'count(DISTINCT CASE WHEN m.age_at_encounter IS NULL THEN m.patient_id END),'
