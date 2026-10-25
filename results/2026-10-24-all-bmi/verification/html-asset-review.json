@@ -1,0 +1,21 @@
+{
+  "status": "passed",
+  "assets": [
+    {
+      "report": "bmi_hypercapnia.html",
+      "asset_references": 25,
+      "local_assets": 0,
+      "missing": []
+    },
+    {
+      "report": "bmi_hypercapnia_audit.html",
+      "asset_references": 692,
+      "local_assets": 692,
+      "missing": []
+    }
+  ],
+  "browser_review": {
+    "scientific": "Results/cohort viewport inspected; 21 images loaded, zero broken images",
+    "audit": "All 692 local assets resolved; browser visual inspection not asserted"
+  }
+}

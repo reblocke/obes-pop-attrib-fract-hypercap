@@ -4,8 +4,10 @@ Current implementation: input schema 5, aggregate schema 13,
 `bmi_hypercapnia_rfs_curve_audit_v8`. The 2026-10-24 all-valid-BMI decision
 supersedes first-BMI-≥30 selection. Earlier outputs retain their original design;
 see [decisions](DECISIONS.md), [work log](../WORKLOG.md) and
-[archive recovery](../archive/README.md). New clinical estimates require fresh
-source qualification and execution; historical counts are not new-cohort counts.
+[archive recovery](../archive/README.md). The [verified all-BMI packet](../results/2026-10-24-all-bmi/README.md) records the
+completed source qualification, one clinical run and numerical/scoped visual review.
+Investigator interpretation and figure approval remain pending. Future runs require
+fresh qualification; historical counts are not new-cohort counts.
 
 ## Cohort and populations
 

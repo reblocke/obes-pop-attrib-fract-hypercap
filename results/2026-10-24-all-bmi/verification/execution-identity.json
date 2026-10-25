@@ -1,0 +1,19 @@
+{
+  "mode": "analyze",
+  "source_status": "identity_bound_source_declarations_passed",
+  "code_identity": {
+    "commit": "75e55eee42979904a04cdb5a3a529ed15bfb6025",
+    "tree": "b15078d245e75f1a5aed933658f8690b4d37b1e5",
+    "working_tree_clean": true
+  },
+  "clinical_data_opened": true,
+  "clinical_models_fitted": 35,
+  "input_sha256": "423ebf0d363abfbd5eb1a90a8599323f9dcef57534a96c1af73849fecb42a830",
+  "manifest_sha256": "c1b2227bfa928da6769526fabb400d1fda231584bacbc7212e0164752ebb127d",
+  "source_policy_id": "unadjusted_pco2_v1",
+  "population_scope_id": "original_selected_encounters_v1",
+  "bmi_policy_id": "available_encounter_or_prior_bmi_v1",
+  "analysis_elapsed_seconds": 2312.441,
+  "source_receipt_sha256": "c95d41f37fe63098962cf8c564c9382055d13b2526658510a8f9a1103ef764d2",
+  "projection_note": "Whitelisted aggregate execution metadata; private source paths and access evidence omitted."
+}

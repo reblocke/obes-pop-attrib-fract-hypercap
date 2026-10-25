@@ -1,0 +1,20 @@
+{
+  "status": "completed",
+  "bundle_manifest_sha256": "8787fb3900b56a27dda3170b474e150596e2de8dbe2e8e7437bba9ed562ba12c",
+  "clinical_input_reads": 0,
+  "model_refits": 0,
+  "render_sources": {
+    "R/reporting.R": "98e43a0f5e7afeb12d3c76ddf9354b45b1d202c63ebb38fa6d6c34c8800a2de0",
+    "R/report_views.R": "62fc753998cdb9c43bf2a9d6197204c6248815a715238d78fe9de377150ce226",
+    "R/rfs_reporting.R": "52cd9277155d73a83f53eef8792f354b26134995721f2e25bc53f3900bebdc3d",
+    "scripts/render_bmi_hypercapnia.R": "f8fadfb071153cce2597b1976ceca0bde14fc2da395868d4ab3e7b4d6f7b5fa3",
+    "reports/bmi_hypercapnia.qmd": "5129442235c28d6de2347cbc6fbe14c6b6d2543b85a0fc7a845f97731040102a",
+    "reports/bmi_hypercapnia_audit.qmd": "deed26e40cd087c44d5295a917dc51ffa7cff387dca92356a61b6e25c234bc95",
+    "reports/bmi_report.css": "8ba9c606c92efbde6ed3e866731818e533b90d5375b4ecf1d03d43a403e6c9ad",
+    "reports/table_passthrough.R": "1b0bdf8077836c942ef3dfeb3838bb4b2714059c5285aedebbea028d210186bb"
+  },
+  "failed_outputs": [],
+  "outputs": ["bmi_hypercapnia_audit.html", "bmi_hypercapnia_audit.pdf", "bmi_hypercapnia.html", "bmi_hypercapnia.pdf"],
+  "bundle_unchanged": true,
+  "sources_unchanged": true
+}

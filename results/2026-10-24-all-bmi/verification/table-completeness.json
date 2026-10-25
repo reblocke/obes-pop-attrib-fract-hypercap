@@ -1,0 +1,24 @@
+[
+  {
+    "report": "scientific",
+    "checks": 86,
+    "formats": [
+      "html",
+      "pdf"
+    ],
+    "complete_values": true,
+    "explicit_alias_entries": 0,
+    "alias_verification": "summary-coverage-review.json"
+  },
+  {
+    "report": "audit",
+    "checks": 1840,
+    "formats": [
+      "html",
+      "pdf"
+    ],
+    "complete_values": true,
+    "explicit_alias_entries": 302,
+    "alias_verification": "summary-coverage-review.json"
+  }
+]

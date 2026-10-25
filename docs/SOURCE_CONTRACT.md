@@ -106,3 +106,14 @@ RFS zero is not complete clinical absence. Outcome-dependent entry, selective ga
 measurement, prior BMI, diagnostic incorporation and confounding remain limitations.
 Numerical/source/visual verification does not establish causal identification or
 investigator approval. Current clinical execution status is in [WORKLOG.md](../WORKLOG.md).
+
+## Current qualified execution
+
+The [all-valid-BMI snapshot](../results/2026-10-24-all-bmi/README.md) binds the
+qualified input and source receipts to merged code `75e55ee` and the saved run.
+Its [source qualification](../results/2026-10-24-all-bmi/verification/qualification.json)
+contains all 46 discrepancy checks and unresolved-index counts. The separate
+acceptance, numerical and visual receipts distinguish their review scopes.
+Historical comparison is retained alongside the exact numeric-transport correction;
+no new scientific BMI rule or upstream export was introduced. This qualification
+does not authorize inference to untested patients or establish causal identification.

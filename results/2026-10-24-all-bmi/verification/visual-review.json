@@ -1,0 +1,112 @@
+{
+  "status": "scoped_visual_review_passed",
+  "review_date": "2026-10-24",
+  "reviewer": "Codex implementing-agent review",
+  "bundle_manifest_sha256": "8787fb3900b56a27dda3170b474e150596e2de8dbe2e8e7437bba9ed562ba12c",
+  "render_receipt_sha256": "42e3d3b6c38fc4dafd6f73858a46c7bc9435740625a7553e2cefc8e10964ba87",
+  "automated_geometry": {
+    "pdfs": 689,
+    "pages": 9543,
+    "flagged_issues": 0,
+    "scope": "Both assembled reports and every figure PDF master; booklet checked in the separate available-page pass"
+  },
+  "scientific_report": {
+    "sha256": "e91bc6d3274a4d205724e441ea4cfe74eaf0b5bcc21d4e352f328aa3afec044b",
+    "all_54_pages_overview_inspected": true,
+    "native_pages": [
+      2,
+      11,
+      12,
+      13,
+      15,
+      19,
+      27,
+      29,
+      33,
+      54
+    ]
+  },
+  "audit_report": {
+    "sha256": "45bad62e4536ef2bcc5f10db15546c751a4b1ef216d6f2fae7d68c6a9a014f31",
+    "page_count": 8802,
+    "overview_and_native_pages": [
+      1,
+      10,
+      35,
+      59,
+      64,
+      68,
+      253,
+      4401,
+      5772,
+      8164,
+      8165,
+      8166,
+      8302,
+      8795,
+      8802
+    ],
+    "grayscale_assembled_pages": [
+      64
+    ],
+    "scope": "Front/end, definitions, joint figures, covariance, partition/exclusions, complete coefficients, constant-capture failure and unassessed states; not manual reading of every audit page"
+  },
+  "scientific_figures": {
+    "review_width_mm": 190,
+    "data_label_minimum_points": 9,
+    "native_color_and_grayscale_scope": "Both populations B/F2/S1/ICD figures; A/C grayscale, specified/observed alternatives and RFS diagrams; unchanged inspected bytes reused",
+    "figure_pdf_sha256": {
+      "primary/F1-B": "b0ba181523b54f73a86b9cd73adae038b40c5a98d993e65f4a6b54db58ab7851",
+      "primary/F2": "4de276b3845dde9b53015a176b7b6a5f3cccfc2bafc1d1294a4fcc3c780bd421",
+      "primary/S1-same-day-ABG": "897b1525bf4aee118338824d9d61a3b5d6f77acd304b25a16a162100f238bba7",
+      "primary/S2-ICD-acuity": "421ed144a27099dc3e172982cbd0d3712a15393955ed39921bcd7d94074521e1",
+      "primary/S2-ICD-specified": "0414ee80d4d4abe0c4d81f2088a6c80489a86cdb2728d02c81b787e21a1b24e5",
+      "primary/S2-ICD-observed": "20891ff97ddafe8fb40face75bf79e4cc8b1801d50533fe2839a205a24bd4b1e",
+      "primary/F1-A": "870023a01d771663cb7f7cebbb1fb5c164f8e173ef6e118a9ccb10345dc7cfd1",
+      "primary/F1-C": "db5e0d518b24d5213806243f963531120a0b85c1671c8bd18e4f32c3100f5e48",
+      "primary_bmi_ge30/F1-B": "c497a37ef8ef3e18bb5662ccc9e3c3efb4294a38a10afee9ae61f3e514da6f4d",
+      "primary_bmi_ge30/F2": "8d9209ed9a0d33d8dbf7f0c15e0e8b11d58d86f376ffe7fd3255b3bf73862b14",
+      "primary_bmi_ge30/S1-same-day-ABG": "c3e4d0f5c83251d94e539e7efef196cae23a09d30c9bc91d0758f7707aa55505",
+      "primary_bmi_ge30/S2-ICD-acuity": "ba3784d381ca74aaf553e1c52585c0f882cfdbc839c2646504365533afb345c7",
+      "primary_bmi_ge30/S2-ICD-specified": "9d690ac83156e0659fe12231b6bc89ed77fc64d873bd7f7ea8d0eef73a47441d",
+      "primary_bmi_ge30/S2-ICD-observed": "66a26c5ef2a0c43516c3c88bb8e58fcff4e94d7af6bf770f1e13266d4d41414d",
+      "primary_bmi_ge30/F1-A": "2d4273431c6b6ca1bca8d5b9175a74774bd54cade1b0399d0a66d63210bcb0a7",
+      "primary_bmi_ge30/F1-C": "4849233266f55c28c4f507b9d4f2334f64c01a044471574a8de382469570de95",
+      "RFS-flow": "1bc92fc2ee15e81f6550054000fd0f4b58a759be2226551b765dbbdd51881602",
+      "RFS-entry": "d9ee42aa23541130107b15ea484c519c3677d8f62520dda952c5819774a90a3a",
+      "RFS-evidence": "ab4200c6dd8c260aa3f8b9de03bf101dd0823699f5225fc9e630628789609686"
+    }
+  },
+  "audit_templates_native_grayscale": [
+    "primary_current/F1-B",
+    "all_obesity/F1-B",
+    "primary/F3-bmi-1",
+    "primary/F3-bmi-ecdf-1",
+    "primary/F3-bmi-kde-1",
+    "primary/F3-bmi-lag-days-1",
+    "primary/F3-race-ethnicity-1",
+    "primary/F4-1",
+    "primary/F5-timing-abg",
+    "primary/F5-matched-abg",
+    "combined/F0-main",
+    "obesity_only/F3-bmi-1"
+  ],
+  "booklet": {
+    "sha256": "bb22063a082b44eb0f8990fd4a8c66f5961657a544b177d7768dce93199ab43d",
+    "all_eight_captioned_pages_native_inspected": true,
+    "caption_font_points": 9.5
+  },
+  "findings": {
+    "blocking_layout_findings": [],
+    "interpretive_notes": [
+      "Immutable report review flags show bundle-creation state; later separate numerical/visual receipts record current review.",
+      "Inherited dictionary wording about collected index-day gases means recorded result date, as clarified in Methods/source contract.",
+      "Dense full-precision audit tables wrap numeric tokens; complete CSVs are available for exact retrieval."
+    ],
+    "checks": "Captions, symbols, interval visibility, population identity, denominators, sparse warnings, grayscale distinction, clipping and collisions"
+  },
+  "investigator_interpretation": "pending",
+  "figure_approval": "pending",
+  "human_full_audit_reading": "not asserted",
+  "abstract_drafting": "not performed"
+}

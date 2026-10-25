@@ -1,0 +1,6 @@
+"outcome_id","window","status","n_model","reason","likelihood_ratio","df","p_value","analysis_population_id","ascertainment_window"
+"abg","encounter","assessed",71318,"same-row nested comparison; no model selection",230.790225250865,2,7.66547988188779e-51,"primary","encounter"
+"any_gas","encounter","assessed",126074,"same-row nested comparison; no model selection",425.290462200122,2,4.46015067183968e-93,"primary","encounter"
+"icd","encounter","assessed",380206,"same-row nested comparison; no model selection",1495.97772805876,2,0,"primary","encounter"
+"abg","index_calendar_day","assessed",41785,"same-row nested comparison; no model selection",100.748311030038,2,1.32672902175944e-22,"primary","index_calendar_day"
+"any_gas","index_calendar_day","assessed",92324,"same-row nested comparison; no model selection",296.736313020971,2,3.66883632499133e-65,"primary","index_calendar_day"

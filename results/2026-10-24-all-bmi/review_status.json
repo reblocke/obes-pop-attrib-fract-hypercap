@@ -1,0 +1,46 @@
+{
+  "source_qualification": "passed: 46 discrepancy checks; automated and implementing-agent source review",
+  "clinical_estimation": "one completed run from clean merged 75e55ee",
+  "numerical_review": "167 registered checks and 3472 independent aggregate checks passed",
+  "model_positions": 36,
+  "model_status": {
+    "constant_outcome": 1,
+    "successful": 35
+  },
+  "constant_position": "primary::observation/icd/encounter: capture is 100%, not ICD positivity",
+  "rendering": "completed; aggregate only; zero clinical reads and model refits",
+  "table_completeness": [
+    {
+      "report": "scientific",
+      "checks": 86,
+      "formats": [
+        "html",
+        "pdf"
+      ],
+      "complete_values": true,
+      "explicit_alias_entries": 0,
+      "alias_verification": "summary-coverage-review.json"
+    },
+    {
+      "report": "audit",
+      "checks": 1840,
+      "formats": [
+        "html",
+        "pdf"
+      ],
+      "complete_values": true,
+      "explicit_alias_entries": 302,
+      "alias_verification": "summary-coverage-review.json"
+    }
+  ],
+  "visual_review": "scoped agent pass; exact scope in verification/visual-review.json",
+  "investigator_interpretation": "pending",
+  "figure_approval": "pending; historical selection does not transfer",
+  "abstract_drafting": "not performed",
+  "submission_approval": "not granted",
+  "pdf_pages": {
+    "bmi_hypercapnia": 54,
+    "bmi_hypercapnia_audit": 8802,
+    "key_figures": 8
+  }
+}
