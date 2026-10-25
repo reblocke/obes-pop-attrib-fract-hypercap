@@ -12,20 +12,25 @@ not to untested patients or the general population.
 
 ## Start here
 
-The all-BMI update is being verified. **Published snapshots below use the earlier
-first-BMI-≥30 design** and must not be relabeled as all-BMI results. Current-result
-links will advance only after a fresh qualified clinical run and review.
+The verified all-BMI snapshot contains **380,206 primary patients** and a nested
+**175,271-patient BMI≥30 secondary**, selected at the same new index. All three
+endpoint families are integrated. Source qualification, numerical review and
+scoped visual review passed; investigator interpretation and new figure approval
+remain pending.
 
 | Read without running code | Contents |
 |---|---|
-| [Previous integrated scientific PDF](results/2026-10-24-icd-bias-reduced/bmi_hypercapnia.pdf) | Detailed methods/results for the earlier BMI-restricted cohort |
-| [Previous complete audit PDF](results/2026-10-24-icd-bias-reduced/bmi_hypercapnia_audit.pdf) | Cohort accounting, full model output and diagnostics |
-| [Previous aggregate table index](results/2026-10-24-icd-bias-reduced/TABLES.md) | Complete CSVs, definitions, row counts and hashes |
-| [Selected B/F2 figure PDF](results/2026-10-18/selected_figures.pdf) / [gallery](results/2026-10-18/gallery.html) | Historical selected relationship and burden layouts |
-| [Joint same-day components](results/2026-10-20-same-day-components/README.md) | With/without documented same-day acidemia and stacked S1 |
-| [ICD component figures](results/2026-10-24-icd-bias-reduced/supplement_figures.pdf) / [gallery](results/2026-10-24-icd-bias-reduced/gallery.html) | Firth joint curves, four-category sensitivity and observed proportions |
+| [Scientific PDF](results/2026-10-24-all-bmi/bmi_hypercapnia.pdf) / [HTML](results/2026-10-24-all-bmi/bmi_hypercapnia.html) | Integrated methods, results and verification-oriented detail |
+| [Complete audit PDF](results/2026-10-24-all-bmi/bmi_hypercapnia_audit.pdf) / [HTML](results/2026-10-24-all-bmi/bmi_hypercapnia_audit.html) | Exhaustive cohort accounting, coefficients, covariance and diagnostics |
+| [Key-figure PDF booklet](results/2026-10-24-all-bmi/key_figures.pdf) / [gallery](results/2026-10-24-all-bmi/gallery.html) | B/F2 and both component figures, primary and secondary |
+| [Aggregate tables](results/2026-10-24-all-bmi/TABLES.md) / [packet README](results/2026-10-24-all-bmi/README.md) | Complete CSVs, result navigation, verification and historical reconciliation |
 | [Current scientific specification](docs/BMI_HYPERCAPNIA_TRIANGULATION_PLAN.md) | Exact all-BMI design, endpoints, models and estimand |
 | [LLM reading guide](docs/LLM_GUIDE.json) | Machine-readable navigation, evidence rules and dated approval state |
+
+For an email introduction, start with the scientific PDF and eight-figure booklet;
+include the complete audit or its link for detailed checking. The audit preserves
+all required rows and is much larger than the scientific report. Earlier dated
+snapshots remain unchanged and retain their BMI-restricted design.
 
 Download PDFs using GitHub's **Download raw file** control. Galleries open locally
 after cloning/downloading their complete folder; GitHub otherwise shows HTML source.

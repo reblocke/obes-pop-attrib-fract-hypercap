@@ -1,0 +1,9 @@
+{
+  "scope": "Independent arithmetic on saved clinical aggregate CSVs; no clinical input or model fitting",
+  "bundle_manifest_sha256": "8787fb3900b56a27dda3170b474e150596e2de8dbe2e8e7437bba9ed562ba12c",
+  "checks": 3472,
+  "failures": [],
+  "status": "passed",
+  "script_sha256": "1056442e39a7c316fd911f441ad9d9c8f8cc5473416d5e4dae1e7b6bc7cc4929",
+  "investigator_approval": "not asserted"
+}

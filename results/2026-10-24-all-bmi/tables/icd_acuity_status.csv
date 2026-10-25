@@ -1,0 +1,3 @@
+"module","status","reason","n_primary_complete","n_complete_capture","analysis_population_id"
+"icd_acuity_v1","qualified","Complete encounter diagnosis capture; inherited five-code composite",380206,380206,"primary"
+"icd_acuity_v1","qualified","Complete encounter diagnosis capture; inherited five-code composite",175271,175271,"primary_bmi_ge30"

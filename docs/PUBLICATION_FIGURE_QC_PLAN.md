@@ -1,113 +1,64 @@
-# Publication figure refinement — 2026-10-17
+# Figure design and review
 
-## Current owner selection — 2026-10-18
+The current all-valid-BMI analysis uses aggregate schema 13 / v8. Figures read
+the saved aggregate bundle; rendering must not reopen clinical inputs or refit.
+The scientific specification and saved configuration control definitions and
+population identities. This document controls presentation and review scope.
 
-The owner selected **primary/F1-B and primary/F2** as the working main figures.
-This supersedes the earlier F1-A recommendation below; A/C remain alternatives.
-The existing scientific PDF embeds A, which uses the same values as B. Use the
-standalone B export for the selected layout. The saved review and its original
-recommendations remain unchanged. Scientific approval is provisional; final
-submission packaging and approval are separate. Abstract drafting remains deferred.
+## Comparisons to preserve
 
-## Collaborator snapshot — 2026-10-18
+- **F1-B:** BMI–hypercapnia probability, usable-evidence availability and patient
+  frequency across the observed BMI range. Mark BMI 30, retain pointwise intervals
+  and local sparse-support warnings. A/C remain layout alternatives.
+- **F2:** absolute observed/shifted burden on a common 0–1,000 scale beside signed
+  original-BMI-band contributions. Print PIF, confidence limits and shifted share.
+  BMI≤30 remains visible in baseline burden and contributes zero scenario change.
+- **Same-day components:** a coherent stacked joint probability plus component
+  curves on a common baseline, their pointwise intervals and population frequency.
+  State “same recorded-day co-occurrence; not verified same-sample pairing.”
+- **ICD components:** joint coding categories, component intervals, observed band
+  proportions and the four-category sensitivity. Identify each model/reference
+  denominator; coding does not establish physiological acidemia or compensation.
+- **Flow and supporting figures:** distinguish records, encounters and patients;
+  show the fixed-index RFS partition, nested BMI≥30 secondary and overlapping
+  endpoint samples. Obesity-only remains descriptive audit material.
 
-[The versioned snapshot](../results/2026-10-18/README.md) contains exact B/F2 exports
-and a new two-page PDF with full captions. The vector figures remain at their
-original approximately 190-mm width; captions use an embedded 9.5-point Unicode
-font. Both new pages were inspected, including grayscale, and a missing CO₂
-caption glyph was repaired. Original reports/exports and all 49 aggregate CSVs
-match their source hashes; no models were refitted.
+Show primary and BMI≥30-secondary counterparts separately, with comparable axes
+where appropriate. Current-measurement and all-OBESITY-route sensitivities retain
+their own labels and denominators. Never add component-specific PIFs or derive
+paired burden from marginal curves multiplied by BMI density.
 
-The compact HTML gallery has local assets, full captions and source-table links.
-Its links were checked directly; browser visual inspection was unavailable because
-the browser security policy blocks local file URLs. This limitation is recorded
-separately from the completed PDF inspection. The complete audit is an unchanged
-copy with the prior scoped review, not a claim of new visual review of every page.
-See the [review receipt](../results/2026-10-18/review_status.json).
+## Export and verification
 
-## Brief and scope
+Apply `figure-and-medical-illustration-qc`. Use 190-mm review width, data labels
+at least 9 points, direct labels, grayscale-safe distinctions, self-contained
+captions and alt text. Keep editable R, SVG/PDF masters and 300-dpi PNG/JPG
+exports for the scientific candidates. Preserve zero, negative contributions,
+all finite interval limits and explicit unavailable states. Print confidence
+limits beside estimated percentages; descriptive shares are labeled separately.
 
-Refine every current scientific figure and its alternatives, and propagate the
-same readable plotting conventions to the complete audit atlas. The audience is
-ATS/manuscript investigators and reviewers. Use the existing 190-mm width; no
-unverified journal-specific compliance claim is intended. The source is the
-qualified schema-7 aggregate run, not clinical records. Preserve all original
-estimates, confidence limits, denominators, binning, support states and prior
-exports. No estimation, new clinical data access or scientific recoding.
+Check coordinates, intervals, denominators and covariance against the same saved
+tables. `make test` exercises artificial analysis-to-report integration and
+adverse cases. Clinical numerical review is separate. Check all PDF pages and
+masters for bounds, broken symbols and text collisions; inspect native-size
+scientific figures in color/grayscale and assembled scientific pages. Inspect
+representative audit templates and record the exact scope. Automated geometry
+does not imply manual reading of every audit page.
 
-## Reader's comparisons
+Retain a source-bound QC manifest, inspection receipt, gallery and captioned
+figure booklet. Required missing figures must fail the render. Report source/hash
+verification, numerical checks, actual visual inspection and investigator approval
+as separate states. New results do not inherit historical figure approval.
 
-- F1 A–C: compare BMI–hypercapnia relationships across the three outcomes while
-  retaining usable-evidence probabilities and the full BMI frequency distribution.
-  Short outcome labels and one combined model/reference N free space for curves.
-  Keep pointwise bands, sparse/extrapolated line styles and the ICD capture note.
-- F2: compare observed and shifted standardized probabilities using direct labels
-  and saved model-based 95% intervals, next to signed original-BMI-band contributions. Keep
-  the band-specific paired means in a separate audit figure, with no invented
-  uncertainty where the saved bundle contains none.
-- F5: compare timing windows or matched definitions on common BMI and probability
-  scales. Replace internal identifiers with named outcomes/windows.
-- RFS evidence/flow and F0: show the denominator, source partition and exact
-  interval endpoints clearly. Obesity-only remains flow/audit material.
-- F3/F4: retain all stages, categories, tails, failures and diagnostics. Improve
-  shared typography and labels without altering aggregation or model diagnostics.
+## Historical selection
 
-## Source changes and verification
+The owner selected B/F2 for the October 18 results. B remains the preferred
+relationship layout; the earlier A recommendation and schema-7 review are
+historical. Their original exports and receipts remain in
+[the October 18 snapshot](../results/2026-10-18/README.md). Later same-day and ICD
+snapshots retain their own manifests and review states; see
+[the reading guide](LLM_GUIDE.json). Historical files are not relabeled or replaced.
 
-Edit `R/reporting.R`, `R/report_views.R`, `R/rfs_reporting.R` and the audit report's
-figure list. Keep captions and alt text synchronized. Export SVG/PDF masters and
-300-dpi PNG/JPG candidates into a fresh review. All data labels must remain at
-least 9 points after embedding; use a concise hierarchy rather than smaller text.
-
-Check exact plotted coordinates, confidence limits and sample sizes against the
-same bundle, including unavailable, negative and zero states. Run focused
-artificial output checks through `make test`, including actual HTML/PDF integration.
-Run `scripts/check_report_exports.py` for full export bounds/symbol/collision
-coverage. Inspect every proposed scientific export and assembled scientific
-page, plus the complete atlas contact sheets and native examples of each audit
-template. Record the actual inspection scope and unresolved limitations in the
-skill's QC manifest/review receipt. Successful export is not visual or scientific
-approval.
-
-## Silent-failure risks
-
-Repeated titles can compress data panels; PDF height limits can shrink otherwise
-readable text; automatic scales can obscure comparisons or clip intervals;
-shortened labels can lose outcome/denominator meaning. Preserve full-range views,
-explicit inset labels, exact uncertainty and self-contained captions. Keep
-aggregate integrity and render-source hashes separate from visual judgments.
-
-## Completed review
-
-The final review is `20261017T205353-20587` under the unchanged clinical run
-`curve-analyze-20261017T175520-51541`. The scientific report has 34 pages and the
-complete audit has 2,970 pages. All 1,242 figure sets retain vector masters and
-300-dpi PNG reviews; all 39 key layouts additionally have JPG candidates. Eight
-unassessed supporting layouts remain explicitly outside the submission candidates.
-F1-A was recommended at that review, with B/C preserved for comparison; the
-owner's subsequent B/F2 selection is recorded above.
-
-The historical 74-check acceptance run and 27 focused RFS checks passed for this
-dated review; current verification uses the E2E workflow in `tests/README.md`. Twenty-nine
-saved-aggregate coordinate checks and 47 printed-annotation checks pass; all
-native figure fonts are at least 9 points. Both HTML/PDF reports pass integration
-and complete table/coefficient/covariance coverage. No clinical input was read
-and no model was refitted. Render-source and bundle hashes were verified.
-
-A real report-font defect was reproduced on 16 pages and repaired without
-installing packages. Both the failed review and its corrected successor remain
-preserved. The final geometry/symbol check covers every report page and figure;
-all 3,765 reused figure export files match their already inspected hashes.
-
-Actual pixel inspection covers all 39 key layouts at native size in grayscale,
-all 34 atlas overview sheets, seven native audit-template examples, all scientific
-page overviews, 11 native scientific pages, and 25 audit overviews/10 native audit
-pages. It does not assert native inspection of every audit figure or manual
-reading of every audit page. Investigator approval and final venue-size/portal
-checks remain separate. `PUBLICATION_QC_REVIEW.md`, the unified manifest and the
-visual receipt in the private review record the exact scope and evidence.
-
-The private `CURRENT_REVIEW.md` links the reports, comparison gallery, QC findings
-and acceptance evidence. Subsequent release verification is recorded in `WORKLOG.md`;
-generated outputs remain ignored. Original inputs, models, historical exports and scientific definitions
-remain unchanged.
+The current verified packet is linked from [README](../README.md). Its review
+receipt documents actual inspection and remaining investigator decisions.
+No figure selection authorizes abstract drafting or submission.

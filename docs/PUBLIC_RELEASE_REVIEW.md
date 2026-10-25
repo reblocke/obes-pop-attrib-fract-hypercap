@@ -87,3 +87,30 @@ Detailed final-audit evidence, runtime identities and source hashes are retained
 under ignored `artifacts/triangulation/final-public-release-20261024/`. Earlier
 preparation and source-resolution evidence remains in its original ignored
 folders. See [WORKLOG.md](../WORKLOG.md) for commands, results and limitations.
+
+## All-valid-BMI aggregate follow-up
+
+The [new reading snapshot](../results/2026-10-24-all-bmi/README.md) publishes the
+clinical run from merged `75e55ee` (input schema 5, aggregate schema 13/v8).
+Source qualification passed 46 checks; estimation completed once. Separate
+receipts record 167 registered numerical checks, 3,472 independent aggregate
+checks, aggregate-only rendering and scoped visual review. Full printed tables
+and explicitly aliased descriptive profiles retain every value. The summary
+reconstruction verifier and source-bound receipts are included in the packet.
+
+The scientific report has 54 pages, the complete audit 8,802 and the captioned
+key-figure booklet eight. Automated geometry covers both reports and all figure
+masters; manual inspection is scoped to the pages and templates identified in
+the visual receipt. It does not certify manual reading of every audit page.
+In-report creation-time review flags remain immutable; the later receipts state
+the current review status. New scientific interpretation and figure approval
+remain pending, and no abstract was drafted.
+
+The owner authorized aggregate publication and the retrieval-only Mini task.
+Its temporary GitHub branch transfers only the audit PDF and aggregate receipts
+and summary mappings. The final snapshot excludes raw data, row-level keys/dates,
+RDS, model objects, source-access configuration and logs. The six historical
+snapshots and their 441 manifest entries verified unchanged. No history rewrite
+or disclosure-permission change is part of this follow-up. Final package checks
+and review are recorded in WORKLOG and the release PR; no hosted CI or independent
+human approval is implied.

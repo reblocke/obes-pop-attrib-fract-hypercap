@@ -1,0 +1,220 @@
+{
+  "status": "passed",
+  "scope": "Artificial E2E plus independent source boundaries, not clinical qualification",
+  "source_e2e_receipt_sha256": "7a5d0541636eb6916c3ac47929f2e18cd34a433f902f595e03e0a59f3e212db4",
+  "source_boundary_receipt_sha256": "c6cb1c6a70e4bc5e903dae62277861316b331d02afabc4806d18ae458126ccd8",
+  "current_source_hashes_match": true,
+  "e2e": {
+    "status": "passed",
+    "scope": "Artificial typed-input analysis/report end to end",
+    "source_boundary_checks": "separate: make source-test; not asserted by this receipt",
+    "clinical_input_reads": 0,
+    "human_visual_review": "not performed by automated test",
+    "scientific_review": "not asserted",
+    "test_sources": {
+      "tests/run_e2e.R": "8f79081f9faf98fb4c0d28c6b55f0e0d5920642fe539a37756aab8f058aad316",
+      "tests/e2e_oracles.R": "5d6188f03b52a1418345e7f5ef7964f728d87847fb34dbff62b13e933fe4101d",
+      "tests/same_day_e2e.R": "0ad7875af7dee351928cb02f2e7c909fd4941a474dc9e49e64ea616247f197ad",
+      "tests/icd_acuity_e2e.R": "b28fc71e5c8020b247b7060854cd06d161ac6aed48a2b94d6b8854e6400b4600",
+      "tests/icd_bias_reduction_oracle.R": "0e87bb0eebc85953053303875f6716f33dfed1ed9e5142caa2d0f7d5d29a5223",
+      "tests/fixtures/bmi_curve_fixture.R": "575d2a9c2c4893b4d351fa6551d0b9db48a25e7dc1ca594c5166313e723e6c28",
+      "tests/fixtures/icd_firth_reference.csv": "3b4ca820da271e74c61be80771f0e2b0b1d2599614a0f6831c02a8d075b67c86"
+    },
+    "run": "curve-fixture-20261024T094715-56931",
+    "bundle_manifest_sha256": "8a1f2377aa5d93019786dd14d4130eaacd1f0cb4c066b05d39c7cea5ab30ec81",
+    "estimation_sources": {
+      "R/analysis.R": "00deaa64f902837a4cfb046ee4c92e502937447d1cbf3a870ccfceb6f354685d",
+      "R/input_contract.R": "da778ae1ecdd0e5c422f14ea4ca541a9a8b00b2ec2a0b4e2b48fa049b11b1371",
+      "R/cohort_audit.R": "64fdc79a85dd898c6cd683dcf236a9053397ccf4b935d7464f2253d947af4a36",
+      "R/bmi_models.R": "5ecb04940e5c74bd442ecca0296f38b96e124cd46dcf317f36cdc49fdaa83210",
+      "R/standardization.R": "b6f37f911aa811dd7aeb328f0c2602026f78563b93385cce93a42ea514be65e3",
+      "R/rfs_analysis.R": "791ce713ad59683197dca77c1f5ecd13a7bbfb5073ce02ef4cc234a82ed5cd7e",
+      "R/same_day_abg.R": "60a5ea2e0c0fcc651f67364cff1b5fbb61d5a69f69cd55176c8d1459a0640e43",
+      "R/same_day_multinomial.R": "1c96475e707b873c7f468f2b07864c276475526f23a70b1167c59f3f10466506",
+      "R/icd_bias_reduction.R": "28da2059a68440ee7f1c163b773cac554458067ef6eac4fecc48039cda9f984d",
+      "R/icd_acuity.R": "e27e1856fca5f2b0fe7f1b47308e33e4b2e793618622206df0ea14b12f4831f3",
+      "config/bmi_hypercapnia_analysis.json": "6ad11490368238a97712b7d273c613da2c3a247b797c22b380f0705b2c26c9c8",
+      "config/variable_dictionary.csv": "f5db5aa938c43a086adbca71fbd2b651c0d053b59d8a65e6b5370b054860c780",
+      "config/common_index_source_policy.json": "bebad842c52f658b65215eeb44052afc8df32b85e02fe412f4eb713112b36763",
+      "config/common_index_bmi_policy.json": "988b2f7a2c1f968b30773502f76635520d37a4183ab64b182c1c813ae2f7ac59"
+    },
+    "review": "20261024T094719-56960",
+    "artifact_index_sha256": "d9b03cb1853cb4f61f97f335f0beea259b83b5696e800bf532b34c9ec5d174eb",
+    "repeat_command": "Rscript --vanilla tests/run_e2e.R",
+    "finished_utc": "2026-10-24 16:08:02 UTC"
+  },
+  "source_boundaries": {
+    "status": "passed",
+    "scope": "Artificial source boundaries; no clinical source qualification or human review",
+    "python": "Existing pinned source environment; no installation",
+    "tests": [
+      {
+        "test": "test_icd_acuity.AcuitySourceBoundary.test_corrupt_records_fail",
+        "status": "passed"
+      },
+      {
+        "test": "test_icd_acuity.AcuitySourceBoundary.test_transport_to_flags",
+        "status": "passed"
+      },
+      {
+        "test": "test_original_population.OriginalPopulationChecks.test_captured_history_and_returns_cannot_expand_original_keys",
+        "status": "passed"
+      },
+      {
+        "test": "test_original_population.OriginalPopulationChecks.test_independent_qualification_rejects_added_history_key",
+        "status": "passed"
+      },
+      {
+        "test": "test_original_population.OriginalPopulationChecks.test_manifest_cannot_relabel_broader_mapping_as_original",
+        "status": "passed"
+      },
+      {
+        "test": "test_original_population.OriginalPopulationChecks.test_original_first_flag_is_verified_not_used_as_bmi_eligibility",
+        "status": "passed"
+      },
+      {
+        "test": "test_original_population.OriginalPopulationChecks.test_original_membership_requires_matching_captured_setting",
+        "status": "passed"
+      },
+      {
+        "test": "test_preparation.PreparationChecks.test_adjusted_and_total_co2_never_enter_primary",
+        "status": "passed"
+      },
+      {
+        "test": "test_preparation.PreparationChecks.test_expanded_coverage_and_original_keys",
+        "status": "passed"
+      },
+      {
+        "test": "test_preparation.PreparationChecks.test_explicit_units_and_numeric_missingness",
+        "status": "passed"
+      },
+      {
+        "test": "test_preparation.PreparationChecks.test_full_source_hash_receipt_reuse_requires_exact_identity_and_digest",
+        "status": "passed"
+      },
+      {
+        "test": "test_preparation.PreparationChecks.test_identity_and_failure_receipts",
+        "status": "passed"
+      },
+      {
+        "test": "test_preparation.PreparationChecks.test_incomplete_or_duplicate_stream_cannot_be_accepted",
+        "status": "passed"
+      },
+      {
+        "test": "test_preparation.PreparationChecks.test_mapped_csv_preserves_stored_float32_values",
+        "status": "passed"
+      },
+      {
+        "test": "test_preparation.PreparationChecks.test_maxima_testing_and_calendar_day_reconcile",
+        "status": "passed"
+      },
+      {
+        "test": "test_preparation.PreparationChecks.test_reader_pin_and_restricted_output_guard",
+        "status": "passed"
+      },
+      {
+        "test": "test_preparation.PreparationChecks.test_retired_population_schema_rejected_before_source_access",
+        "status": "passed"
+      },
+      {
+        "test": "test_preparation.PreparationChecks.test_strict_validity_bounds_and_inclusive_outcome_thresholds",
+        "status": "passed"
+      },
+      {
+        "test": "test_preparation.PreparationChecks.test_typed_R_roundtrip_preserves_keys_dates_missingness_and_precision",
+        "status": "passed"
+      },
+      {
+        "test": "test_preparation.PreparationChecks.test_unadjusted_specimens_and_conflicts",
+        "status": "passed"
+      },
+      {
+        "test": "test_rfs_enrichment.RfsMetadataTests.test_dictionary_rejected",
+        "status": "passed"
+      },
+      {
+        "test": "test_rfs_enrichment.RfsMetadataTests.test_duplicate_rejected",
+        "status": "passed"
+      },
+      {
+        "test": "test_rfs_enrichment.RfsMetadataTests.test_flags_follow_exact_encounter_not_patient",
+        "status": "passed"
+      },
+      {
+        "test": "test_rfs_enrichment.RfsMetadataTests.test_uncovered_rejected",
+        "status": "passed"
+      },
+      {
+        "test": "test_rfs_enrichment.RfsMetadataTests.test_unknown_not_zero",
+        "status": "passed"
+      },
+      {
+        "test": "test_same_day_abg.CooccurrenceBoundary.test_no_cross_date_or_cross_key_linkage",
+        "status": "passed"
+      },
+      {
+        "test": "test_same_day_abg.CooccurrenceBoundary.test_partial_dates_and_measurements",
+        "status": "passed"
+      },
+      {
+        "test": "test_same_day_abg.CooccurrenceBoundary.test_record_identity_duplicates_and_conflicts",
+        "status": "passed"
+      },
+      {
+        "test": "test_same_day_abg.CooccurrenceBoundary.test_specimen_units_and_validity",
+        "status": "passed"
+      },
+      {
+        "test": "test_same_day_abg.CooccurrenceBoundary.test_thresholds_and_multiple_values",
+        "status": "passed"
+      },
+      {
+        "test": "test_same_day_abg.CooccurrenceBoundary.test_unavailable_is_not_assessed_zero",
+        "status": "passed"
+      },
+      {
+        "test": "test_source_qualification.IndependentSourceChecks.test_components_reconcile_independently_and_detect_corruption",
+        "status": "passed"
+      },
+      {
+        "test": "test_source_qualification.IndependentSourceChecks.test_gas_specimens_later_day_and_captured_absence",
+        "status": "passed"
+      },
+      {
+        "test": "test_source_qualification.IndependentSourceChecks.test_known_missing_bmi_uncertain_setting_and_index_ties",
+        "status": "passed"
+      },
+      {
+        "test": "test_source_qualification.IndependentSourceChecks.test_qualification_cannot_rebind_another_preparation_config",
+        "status": "passed"
+      }
+    ],
+    "sources_unchanged": true,
+    "source_snapshot_scope": "Repository Python tests/adapters and R launchers/readers; not a claim that every file was imported",
+    "sources": {
+      "scripts/check_report_exports.py": "d157be7c026fa7f2b627ed0ccadba6a7721d69fefbdf5387a825aee16d2ddaf5",
+      "scripts/map_common_index_covariates.py": "48a7a6bcd058597194d4b27ab11aa93bb4de0a71aaf7200bc420f29f433b686b",
+      "scripts/original_encounter_population.py": "23cbe4043cb6b5072168689da60f70cf4b4862cd7d8e1c802bab032601e93546",
+      "scripts/prepare_common_index_input.py": "d04f40ef335ea9b840e78f3a5efca6d20c194ab35ecf4ab443baceabc8eaa292",
+      "scripts/qualify_common_index_source.py": "4675f5b90b511609a8e598ec6015fe9e4ce0876f281df617ce5042201b188e34",
+      "scripts/read_source_csv.R": "64abef167545ad977c66899f228a4c8270bb566fa3b4b6e5369bcf3fc626068c",
+      "scripts/render_bmi_hypercapnia.R": "f8fadfb071153cce2597b1976ceca0bde14fc2da395868d4ab3e7b4d6f7b5fa3",
+      "scripts/review_bmi_run.R": "42bd937db5bd0016075be8e06892a53f460d079368f816c8126f6f6c13b107fb",
+      "scripts/run_bmi_hypercapnia.R": "2bc3a5643d29cc6974b6be03a0d297e32c6a38905de608df2a1aeaf03b05d09a",
+      "scripts/select_common_index_mapping.R": "20bbbfecd0b83449c6d507a401f3f8306212cb3211f2974c9f996054e6f8ad10",
+      "scripts/source_components.py": "ef307c18a29fdf885d5a225252956c59b2292dc370d9444d30261e53204423e2",
+      "scripts/write_common_index_input.R": "da605456de874073347830b6215013c5e77d2543e99ed788ff8172e24a8fc84b",
+      "tests/run_source_checks.py": "2d7664f642b4ab3fad76477514439c4d875cddde5218f5f7d774c740aae7582a",
+      "tests/test_icd_acuity.py": "b3ce5c2b2c6f8c75134d0ab7194da6e0b635f7898a5905f20a9ce3fef6f671eb",
+      "tests/test_original_population.py": "28d683a563a71ab1acf2fe1c35cf676d7f5d6b69aebcbd2902afbca8585319ed",
+      "tests/test_preparation.py": "3a0ac94f9245d03b58e0b7c01e029458642e671e6d51d87d42685a60a1f802de",
+      "tests/test_rfs_enrichment.py": "5060b52020a3084cb5d3965963f1c6641f296fe85fe7695e053b7764fed7ec3e",
+      "tests/test_same_day_abg.py": "bddf93346a5889608d5ab26c21a307916a6770186b2ed834796fc5010fb22160",
+      "tests/test_source_qualification.py": "7552834c8e481f972dd0e1cbe47e519bd662ed1bac71d48e0e48a5a191d8fb80"
+    }
+  },
+  "repeat_commands": [
+    "make test",
+    "make source-test PREP_PYTHON=/existing/source-environment/bin/python"
+  ]
+}

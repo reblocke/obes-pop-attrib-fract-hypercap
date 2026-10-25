@@ -1,0 +1,29 @@
+{
+  "status": "documented_transport_corrections_only",
+  "input_sha256": "423ebf0d363abfbd5eb1a90a8599323f9dcef57534a96c1af73849fecb42a830",
+  "numeric_transport_review_sha256": "61fdb28b25573f4fc601681d687d503d82e8b41ad958ab1252322314e16a9767",
+  "mapper_numeric_disagreements": {
+    "bmi": 0,
+    "reported_bmi": 0,
+    "height_inches": 0,
+    "weight_pounds": 0
+  },
+  "corrected_fields": [
+    {
+      "field": "reported_bmi",
+      "n_changed": "1105",
+      "max_absolute_difference": "3.5527136788005e-15",
+      "legacy_parser_reproduces_prior": "TRUE"
+    },
+    {
+      "field": "weight_pounds",
+      "n_changed": "29018",
+      "max_absolute_difference": "5.6843418860808e-14",
+      "legacy_parser_reproduces_prior": "TRUE"
+    }
+  ],
+  "all_other_common_key_fields_identical": true,
+  "index_keys_and_counts_unchanged_by_retyping": true,
+  "scientific_definition_change": false,
+  "investigator_review": "not asserted"
+}

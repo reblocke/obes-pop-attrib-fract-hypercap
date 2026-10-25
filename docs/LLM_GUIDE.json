@@ -1,7 +1,7 @@
 {
   "document_type": "llm_collaborator_reading_guide",
   "updated": "2026-10-24",
-  "purpose": "Read the current study with traceable evidence, including public researcher review and later coauthor work. This is documentation, not executable analysis configuration.",
+  "purpose": "Current human/LLM reading navigation, evidence boundaries and approval state. This is documentation, not a second analysis configuration.",
   "repository_paths_relative_to": "repository root",
   "authority": {
     "operating_instructions": "AGENTS.md",
@@ -13,347 +13,22 @@
     "current_decisions": "docs/DECISIONS.md",
     "figure_review_scope": "docs/PUBLICATION_FIGURE_QC_PLAN.md",
     "execution_history": "WORKLOG.md",
-    "retired_versions": "archive/README.md",
-    "clinical_reading_snapshot": "results/2026-10-18/README.md",
-    "current_integrated_report": "results/2026-10-24-icd-bias-reduced/README.md"
+    "retired_versions": "archive/README.md"
   },
   "reading_order": [
-    "AGENTS.md",
     "README.md",
-    "results/2026-10-18/README.md",
-    "results/2026-10-24-icd-bias-reduced/README.md",
-    "results/2026-10-20-same-day-components/README.md",
-    "docs/DECISIONS.md",
+    "results/2026-10-24-all-bmi/README.md",
+    "results/2026-10-24-all-bmi/review_status.json",
     "docs/BMI_HYPERCAPNIA_TRIANGULATION_PLAN.md",
+    "docs/SOURCE_CONTRACT.md",
     "config/bmi_hypercapnia_analysis.json"
   ],
-  "conflict_handling": "Treat this file as a dated navigation/status snapshot. Use current owner instructions and canonical documents; surface disagreements rather than silently changing definitions or relabeling old results. All existing clinical snapshots currently use the superseded first-BMI>=30 design; never label them all-BMI results.",
-  "owner_status_snapshot": {
-    "date": "2026-10-18",
-    "source": "docs/DECISIONS.md",
-    "scientific_approval": "provisional",
-    "main_figure_selection": "F1-B/F2 layouts retained; new results/figures require review",
-    "final_submission_packaging": "pending",
-    "submission_approval": "not granted",
-    "abstract_drafting": "deferred until a new owner instruction authorizes it",
-    "meeting": "ATS 2027",
-    "deadline_date": "2026-11-04",
-    "deadline_evidence": "owner reconfirmation; not new portal verification",
-    "analysis_output_sharing": "Reports, figures and aggregate result tables may be included in Git; raw/patient-level data and source-access secrets remain excluded. See public_release_status for the later public-disclosure confirmation.",
-    "new_all_bmi_scientific_approval": "pending; old provisional approval applies only to dated results"
-  },
-  "public_release_status": {
-    "confirmation_date": "2026-10-23",
-    "source": "docs/DECISIONS.md",
-    "scope": "Code plus existing reports, figures and aggregate result tables",
-    "aggregate_disclosure": "Owner confirmed that public release of the exact existing outputs, including counts of 1-9, is cleared under the source-data agreement; not an independent legal determination.",
-    "scientific_review": "Unchanged: primary provisional; investigator interpretation/approval of S1 and ICD supplement pending",
-    "reuse_terms_and_preferred_citation": "Pending owner confirmation; no project license file or CITATION.cff is present in the repository",
-    "release_review": "docs/PUBLIC_RELEASE_REVIEW.md",
-    "visibility_change": "Owner authorized public visibility on 2026-10-24 after final audit and squash-merged release PR; live visibility is recorded by GitHub",
-    "private_drafts": "reports/ATS Abstract 2027/ is local-only and ignored; do not add or publish its contents"
-  },
-  "clinical_evidence": {
-    "availability": "Versioned collaborator snapshot is included in a normal clone; no raw data are required to read it.",
-    "package_directory": "results/2026-10-18",
-    "package_manifest": "results/2026-10-18/manifest.json",
-    "table_index": "results/2026-10-18/table_index.csv",
-    "review_status": "results/2026-10-18/review_status.json",
-    "required_mode": "clinical",
-    "analysis_id": "bmi_hypercapnia_rfs_curve_audit_v2",
-    "bundle_schema": 7,
-    "source_run_id": "curve-analyze-20261017T175520-51541",
-    "source_review_id": "20261017T205353-20587",
-    "source_bundle_manifest_sha256": "4ebe313e3098e6292eeec7aac53df739faffd16777faa3a5547e078cebcfc959",
-    "packet_files_relative_to_package": {
-      "scientific_report": "bmi_hypercapnia.pdf",
-      "complete_audit": "bmi_hypercapnia_audit.pdf",
-      "selected_figures_pdf": "selected_figures.pdf",
-      "gallery": "gallery.html",
-      "captions": "captions.csv",
-      "saved_analysis_configuration": "analysis_config.json"
-    },
-    "selected_figures_relative_to_package": [
-      {
-        "figure_id": "primary/F1-B",
-        "role": "main_relationship",
-        "pdf": "figures/F1-B.pdf",
-        "png": "figures/F1-B.png",
-        "png_sha256": "fbadf0b2630ab787f915814b6fa9e7ccfa02cee84cbe97b92b10baeb234521b9"
-      },
-      {
-        "figure_id": "primary/F2",
-        "role": "main_secondary_scenario",
-        "pdf": "figures/F2.pdf",
-        "png": "figures/F2.png",
-        "png_sha256": "5e6f7e240a8dcdd3bee6721ddcab0514a2aa2a26c400ed36aa81f82be4cb1be9"
-      }
-    ],
-    "presentation_note": "The saved scientific PDF embeds F1-A; standalone F1-B has identical values. Use B/F2 for the working main set. Older reports and CSVs retain their original pending-review wording; review_status.json and current decisions record subsequent owner approval separately.",
-    "execution_limit": "Reading snapshot only, not a complete renderable run; the binary aggregate object and private receipts are omitted. Do not pass this package to make render.",
-    "if_unavailable": "Obtain the versioned snapshot from this repository. State any evidence gap; never fill numerical claims from fixtures, older analyses, remembered counts or plausible estimates.",
-    "role": "Immutable primary snapshot; selected B/F2. Current integrated reports are in icd_estimability_update."
-  },
-  "numerical_evidence": {
-    "paths_relative_to": "results/2026-10-18/tables",
-    "verify_first": "Check clinical mode and analysis/schema identity in the package manifest. Verify each file against manifest.files[path].sha256 and its source_sha256 when present; the original bundle-manifest identity is recorded separately.",
-    "common_result_keys": [
-      "analysis_population_id",
-      "model_id",
-      "outcome_id",
-      "ascertainment_window",
-      "model_form",
-      "reference_population_id"
-    ],
-    "main_result_filter": {
-      "analysis_population_id": "primary",
-      "ascertainment_window": "encounter",
-      "model_form": "spline"
-    },
-    "claim_sources": {
-      "cohort_counts": {
-        "table": "cohort_nodes.csv",
-        "instructions": "Retain population_id, grain and status; overlapping outcome samples are not disjoint branches."
-      },
-      "probability_curves": {
-        "table": "probability_curves.csv",
-        "fields": [
-          "bmi",
-          "probability",
-          "conf_low",
-          "conf_high",
-          "n_model",
-          "n_reference",
-          "within_training_bmi_range",
-          "locally_sparse",
-          "status"
-        ]
-      },
-      "secondary_scenario": {
-        "table": "policy_totals.csv",
-        "policy_id": "bmi_gt30_minus1_v1",
-        "fields": [
-          "p_observed",
-          "p_shifted",
-          "PIF",
-          "PIF_low",
-          "PIF_high",
-          "difference_per1000",
-          "difference_low_per1000",
-          "difference_high_per1000",
-          "n_model",
-          "n_reference",
-          "n_shifted",
-          "status"
-        ]
-      },
-      "model_samples_and_failures": {
-        "table": "model_registry.csv",
-        "instructions": "Use the matching model_id; never infer success from a plotted or missing row."
-      }
-    },
-    "scale_rules": {
-      "probability_and_PIF_fields": "Stored as fractions: multiply by 100 when expressing percentages, including their confidence limits.",
-      "difference_per1000_fields": "Already scaled per 1,000: do not multiply by 100 or 1,000 again."
-    },
-    "writing_rule": "Retain population, outcome, ascertainment window, reference, N, interval type and source table for every numerical claim. Report failure/unavailable states explicitly.",
-    "table_index": "results/2026-10-18/table_index.csv",
-    "stage_key_note": "population_id in cohort/descriptive tables identifies a stage within analysis_population_id; these fields are not universally interchangeable.",
-    "main_model_ids": [
-      "primary::abg/encounter/spline",
-      "primary::any_gas/encounter/spline",
-      "primary::icd/encounter/spline"
-    ],
-    "main_result_selection_rule": "Apply the scalar main_result_filter AND restrict model_id to main_model_ids. The scalar filters alone also select matched-sample sensitivities, which are separate results."
-  },
-  "interpretation_guardrails": [
-    "Select the first valid-available-BMI index; derive secondary populations only afterward. New indexes may differ from historical obese indexes.",
-    "Primary retains any non-OBESITY pathway including OBESITY overlap. Obesity-only is flow/audit only, without an adjusted comparison or weighting analysis.",
-    "Gas curves apply to outcome-evaluable patients. Known diagnosis capture is not ICD positivity; missing or unusable evidence is not negative.",
-    "The secondary policy is observed BMI >30 minus exactly one, no floor/reselection; BMI<=30 is unchanged. PIF is conditional on the population and model.",
-    "Do not infer incidence reduction, causal weight-loss effects, untested-patient risk, or absence of selection bias. No current MAR/MNAR or IPW analysis.",
-    "Pointwise model-based intervals do not quantify selection or measurement bias; retain sparse/support warnings."
-  ],
-  "execution_navigation": {
-    "working_directory": "repository root",
-    "artificial_e2e": "make test",
-    "source_checks": "make source-test PREP_PYTHON=...",
-    "prepare": "make prepare SOURCE_CONFIG=... OUTPUT=...",
-    "qualify": "make qualify SOURCE_CONFIG=... PREPARED=... OUTPUT=...",
-    "preflight": "make preflight INPUT=... MANIFEST=...",
-    "estimate": "make analyze INPUT=... MANIFEST=...",
-    "saved_aggregate_render": "make render RUN=...",
-    "clinical_boundary": "clean merged Mini checkout; qualified schema-5 input; no source reads/refits during rendering"
-  },
-  "paired_abg_supplement": {
-    "specification": "docs/PAIRED_ABG_SUPPLEMENT.md",
-    "software_analysis_id": "bmi_hypercapnia_rfs_curve_audit_v3",
-    "bundle_schema": 8,
-    "clinical_status": "unavailable_no_same_sample_identifiers_in_accepted_source",
-    "new_models": 2,
-    "new_PIFs": 0,
-    "original_reading_snapshot": "unchanged; schema 7",
-    "scientific_review": "pending; original approval does not certify new results",
-    "feasibility_report": "results/2026-10-20-paired-abg/README.md",
-    "clinical_models_fitted": 0,
-    "role": "historical; superseded by same-day co-occurrence; no sample pairing recovered"
-  },
-  "same_day_abg_supplement": {
-    "specification": "docs/SAME_DAY_ABG_SUPPLEMENT.md",
-    "software_analysis_id": "bmi_hypercapnia_rfs_curve_audit_v4",
-    "bundle_schema": 9,
-    "clinical_status": "completed_source_qualified_and_numerically_reconciled",
-    "models": 2,
-    "new_PIFs": 0,
-    "interpretation": "same recorded-day co-occurrence; not verified same-sample pairing",
-    "original_reading_snapshot": "unchanged; schema 7",
-    "scientific_review": "pending for new results and S1; original provisional approval and B/F2 selection unchanged",
-    "clinical_models_fitted": 2,
-    "source_run_id": "curve-analyze-20261020T174425-15236",
-    "software_commit": "b89d485eb795b24a973e025bb546192901496b4d",
-    "package_directory": "results/2026-10-20-same-day-abg",
-    "package_manifest": "results/2026-10-20-same-day-abg/manifest.json",
-    "table_index": "results/2026-10-20-same-day-abg/table_index.csv",
-    "review_status": "results/2026-10-20-same-day-abg/review/clinical-visual-review.json",
-    "source_review": "automated identity, source coverage and policy checks passed; no investigator approval asserted",
-    "numerical_review": "passed: original fields/indexes identical, prior estimates agree within 1e-10, exactly two new models and no new PIFs",
-    "figure_id": "S1-same-day-ABG",
-    "shared_model_N": 22195,
-    "endpoint_event_counts": {
-      "hypercapnia_coobserved": 11669,
-      "hypercapnia_acidemia_same_day": 8809
-    },
-    "claim_sources": {
-      "counts": "tables/cooccurrence_reconciliation.csv",
-      "availability": "tables/cooccurrence_availability.csv",
-      "day_and_record_counts": "tables/cooccurrence_measurements.csv",
-      "curve_coordinates": "tables/probability_curves.csv",
-      "contrasts": "tables/fixed_bmi_contrasts.csv",
-      "curve_order_check": "tables/same_day_curve_crossings.csv"
-    },
-    "table_filter": "Select family same_day_abg in model_registry; use those exact model IDs in curve/contrast tables. Retain the shared reference population. Do not confuse observed raw proportions with adjusted probabilities.",
-    "role": "historical binary model snapshot; superseded runtime, preserved results"
-  },
-  "same_day_joint_supplement": {
-    "specification": "docs/SAME_DAY_ABG_SUPPLEMENT.md",
-    "software_analysis_id": "bmi_hypercapnia_rfs_curve_audit_v5",
-    "bundle_schema": 10,
-    "clinical_status": "completed; numerical review passed",
-    "model": "one multinomial spline; shared co-observed primary population",
-    "categories": [
-      "no_hypercapnia",
-      "without_acidemia",
-      "with_acidemia"
-    ],
-    "precedence": "any qualifying hypercapnia-acidemia day takes priority",
-    "figure": "stacked components over full observed BMI range; common-baseline intervals and frequency panel",
-    "interpretation": "same recorded-day co-occurrence; not verified same-sample pairing",
-    "new_PIFs": 0,
-    "scientific_review": "pending; original B/F2 approval does not approve new supplement",
-    "software_commit": "21b8bdf411ed6313604fb36e10e565d4733efdf0",
-    "clinical_run": "curve-analyze-20261020T230537-20006",
-    "reading_snapshot": "results/2026-10-20-same-day-components/",
-    "shared_model_N": 22195,
-    "category_counts": {
-      "no_hypercapnia": 10526,
-      "without_acidemia": 2860,
-      "with_acidemia": 8809
-    },
-    "numerical_review": "eight primary-result comparison tables unchanged within 1e-10; exact input/manifest identities retained",
-    "claim_sources": {
-      "curves": "tables/probability_curves.csv",
-      "component_changes": "tables/same_day_contrasts.csv",
-      "joint_probability_covariance": "tables/same_day_probability_covariance.csv",
-      "category_counts": "tables/cooccurrence_categories.csv",
-      "reconciliation": "tables/cooccurrence_reconciliation.csv"
-    },
-    "visual_review": "see dated snapshot review receipt",
-    "table_filter": "Use primary::same_day_abg/encounter/multinomial_spline. Category probabilities use the full co-observed reference N, not only hypercapnic patients. with_minus_without_change directly compares signed changes using joint covariance."
-  },
-  "icd_acuity_supplement": {
-    "plan": "docs/ICD_ACUITY_SUPPLEMENT.md",
-    "runtime_schema": 11,
-    "analysis_id": "bmi_hypercapnia_rfs_curve_audit_v6",
-    "figure": "S2-ICD-acuity",
-    "clinical_results": "source qualified; run completed; planned model nonestimable due to separation",
-    "approval": "design approved; new interpretation pending; S2 is an unavailable-model display, not estimated curves",
-    "primary_results": "11 original primary/S1 comparison tables unchanged within 1e-10; PIFs unchanged",
-    "reading_snapshot": "results/2026-10-24-icd-acuity",
-    "package_manifest": "results/2026-10-24-icd-acuity/manifest.json",
-    "table_index": "results/2026-10-24-icd-acuity/table_index.csv",
-    "clinical_run": "curve-analyze-20261024T022943-53435",
-    "software_commit": "c0970484db8708845c023712d8e5204aad368d91",
-    "model_id": "primary::icd_acuity/encounter/multinomial_spline",
-    "model_status": "separation",
-    "shared_reference_N": 176922,
-    "category_counts": {
-      "no_target": 168288,
-      "chronic_ohs": 1769,
-      "acute_chronic": 3443,
-      "acute": 3294,
-      "unspecified": 128
-    },
-    "separation_evidence": "Zero unspecified outcomes in retained Asian (995), American Indian/Alaska Native (1475) and Native Hawaiian/Pacific Islander (339) strata; no adjustment change or fallback fit.",
-    "claim_sources": {
-      "counts": "tables/icd_acuity_categories.csv",
-      "patterns": "tables/icd_acuity_patterns.csv",
-      "status": "tables/model_registry.csv",
-      "diagnostic": "review/zero-category-adjustment-cells.csv"
-    },
-    "guardrail": "No adjusted ICD-acuity probabilities or contrasts exist for this run. Source acceptance does not imply model estimability or clinical validation of coding.",
-    "role": "Historical separated maximum-likelihood fit; preserved without relabeling."
-  },
-  "icd_estimability_update": {
-    "date": "2026-10-24",
-    "runtime_schema": 12,
-    "analysis_id": "bmi_hypercapnia_rfs_curve_audit_v7",
-    "full_model": "Firth mean bias reduced five-category multinomial",
-    "sensitivity": "unpenalized four-category multinomial excluding final unspecified-only category; separate reference denominator",
-    "companion": "Observed five-unit BMI-band category proportions, Wilson intervals, frequency",
-    "state": "clinical estimation, numerical verification and scoped agent visual review completed; investigator interpretation and figure approval pending",
-    "historical_snapshot": "results/2026-10-24-icd-acuity/",
-    "source_and_primary_S1_PIF": "preserve; unchanged source contract",
-    "clinical_run": "curve-analyze-20261024T053607-55109",
-    "software_commit": "29687c9d6461a11aee9b19b622375d2860f3bd4e",
-    "reading_snapshot": "results/2026-10-24-icd-bias-reduced",
-    "package_manifest": "results/2026-10-24-icd-bias-reduced/manifest.json",
-    "table_index": "results/2026-10-24-icd-bias-reduced/table_index.csv",
-    "figure_ids": [
-      "S2-ICD-acuity",
-      "S2-ICD-specified",
-      "S2-ICD-observed"
-    ],
-    "models": {
-      "primary::icd_acuity/encounter/multinomial_spline": {
-        "status": "successful",
-        "estimator": "firth_mean_bias_reduced_v1",
-        "reference_N": 176922,
-        "underlying_ML_separation_detected": true
-      },
-      "primary::icd_acuity_specified/encounter/multinomial_spline": {
-        "status": "successful",
-        "estimator": "maximum_likelihood",
-        "reference_N": 176794,
-        "excluded_unspecified_only": 128
-      }
-    },
-    "numerical_review": "137 aggregate checks passed; all 11 original primary/S1/PIF tables unchanged within 1e-10",
-    "new_PIFs": 0,
-    "claim_sources": {
-      "curves": "tables/probability_curves.csv",
-      "component_changes": "tables/icd_acuity_contrasts.csv",
-      "joint_covariance": "tables/icd_acuity_probability_covariance.csv",
-      "observed_BMI_bands": "tables/icd_acuity_observed_bands.csv",
-      "counts": "tables/icd_acuity_categories.csv",
-      "status": "tables/model_registry.csv"
-    },
-    "guardrail": "Filter by exact model ID. Sensitivity has a different denominator. Firth finite estimates do not resolve sparse support, diagnostic incorporation or selection bias. Intervals are pointwise conditional information-based intervals. No abstract authorized."
-  },
+  "conflict_handling": "Use current owner instructions and authoritative documents. Verify the exact dated snapshot manifest before quoting numbers. Historical snapshots are immutable and cannot be relabeled under current definitions.",
   "current_runtime": {
     "analysis_id": "bmi_hypercapnia_rfs_curve_audit_v8",
     "input_schema": 5,
     "aggregate_schema": 13,
-    "clinical_status": "pending new all-BMI qualification and execution",
+    "clinical_status": "qualified, estimated once, numerically reviewed and scoped visual review complete; investigator approval pending",
     "index_rule": "First adult 2022 original ED/inpatient encounter with any valid available BMI before gases/adjustment/RFS",
     "secondary": "BMI >=30 subset at the new primary index; no later substitution",
     "endpoint_families": [
@@ -366,5 +41,184 @@
       "primary_bmi_ge30"
     ],
     "scenario": "Observed BMI >30 minus one; BMI <=30 unchanged; full model-reference denominator"
-  }
+  },
+  "current_results": {
+    "status": "verified aggregate reading snapshot; investigator interpretation and figure approval pending",
+    "package_directory": "results/2026-10-24-all-bmi",
+    "readme": "results/2026-10-24-all-bmi/README.md",
+    "manifest": "results/2026-10-24-all-bmi/manifest.json",
+    "scientific_pdf": "results/2026-10-24-all-bmi/bmi_hypercapnia.pdf",
+    "audit_pdf": "results/2026-10-24-all-bmi/bmi_hypercapnia_audit.pdf",
+    "figure_booklet": "results/2026-10-24-all-bmi/key_figures.pdf",
+    "gallery": "results/2026-10-24-all-bmi/gallery.html",
+    "table_index": "results/2026-10-24-all-bmi/TABLES.md",
+    "review_status": "results/2026-10-24-all-bmi/review_status.json",
+    "run_id": "curve-analyze-20261024T123452-59248",
+    "bundle_manifest_sha256": "8787fb3900b56a27dda3170b474e150596e2de8dbe2e8e7437bba9ed562ba12c",
+    "software_commit": "75e55eee42979904a04cdb5a3a529ed15bfb6025",
+    "execution_limit": "Published snapshots are reading packages, not runnable bundles. make render requires the protected saved aggregate run."
+  },
+  "approval_state": {
+    "new_all_bmi_interpretation": "pending",
+    "new_figure_approval": "pending",
+    "preferred_layouts": [
+      "primary/F1-B",
+      "primary/F2"
+    ],
+    "historical_approval": "Provisional owner scientific approval and B/F2 selection applied to the dated October 18 results, not new all-BMI estimates or components.",
+    "submission_approval": "not granted",
+    "abstract_drafting": "not authorized",
+    "meeting": "ATS 2027",
+    "deadline_date": "2026-11-04",
+    "deadline_evidence": "owner reconfirmation; not new portal verification"
+  },
+  "public_release_status": {
+    "confirmation_date": "2026-10-23",
+    "source": "docs/DECISIONS.md",
+    "scope": "Code plus existing reports, figures and aggregate result tables",
+    "aggregate_disclosure": "Owner confirmed that public release of the exact existing outputs, including counts of 1-9, is cleared under the source-data agreement; not an independent legal determination.",
+    "reuse_terms_and_preferred_citation": "Pending owner confirmation; no project license file or CITATION.cff is present in the repository",
+    "release_review": "docs/PUBLIC_RELEASE_REVIEW.md",
+    "visibility_change": "Owner authorized public visibility on 2026-10-24 after final audit and squash-merged release PR; live visibility is recorded by GitHub",
+    "private_drafts": "reports/ATS Abstract 2027/ is local-only and ignored; do not add or publish its contents",
+    "current_package_authorization": "Owner explicitly authorized all-BMI clinical execution and aggregate delivery/release in the current implementation request; raw data remain excluded."
+  },
+  "numerical_navigation": {
+    "verify_first": "Check clinical mode, analysis/schema identity and manifest.files[path].sha256. Record the source bundle manifest identity. Do not infer results from remembered values or artificial data.",
+    "main_result_selection": {
+      "analysis_population_id": "primary",
+      "model_ids": [
+        "primary::abg/encounter/spline",
+        "primary::any_gas/encounter/spline",
+        "primary::icd/encounter/spline"
+      ],
+      "secondary_rule": "Use the corresponding primary_bmi_ge30:: IDs; do not mix references or treat this subset as independently indexed."
+    },
+    "claim_sources": {
+      "cohort_and_membership": [
+        "cohort_nodes.csv",
+        "population_registry.csv",
+        "rfs_summary.csv",
+        "rfs_combinations.csv"
+      ],
+      "model_status_and_samples": [
+        "model_registry.csv",
+        "model_fit_diagnostics.csv",
+        "model_sample_audit.csv"
+      ],
+      "binary_and_component_curves": [
+        "probability_curves.csv",
+        "model_support.csv",
+        "prediction_support.csv"
+      ],
+      "binary_BMI_shift": [
+        "policy_totals.csv",
+        "policy_contributions.csv",
+        "policy_contribution_covariance.csv"
+      ],
+      "same_day_components": [
+        "cooccurrence_categories.csv",
+        "cooccurrence_reconciliation.csv",
+        "same_day_contrasts.csv",
+        "same_day_probability_covariance.csv"
+      ],
+      "ICD_components": [
+        "icd_acuity_categories.csv",
+        "icd_acuity_patterns.csv",
+        "icd_acuity_observed_bands.csv",
+        "icd_acuity_contrasts.csv",
+        "icd_acuity_probability_covariance.csv"
+      ]
+    },
+    "retain_for_every_claim": [
+      "analysis_population_id",
+      "model_id",
+      "outcome_id",
+      "ascertainment_window",
+      "reference_population_id",
+      "model/reference N",
+      "interval type",
+      "source table and manifest"
+    ],
+    "scale_rules": {
+      "probability_and_PIF_fields": "Stored as fractions: multiply by 100 when expressing percentages, including their confidence limits.",
+      "difference_per1000_fields": "Already scaled per 1,000: do not multiply by 100 or 1,000 again."
+    },
+    "guards": [
+      "Scalar outcome/window filters alone may also select matched-sample checks; use exact model IDs.",
+      "PIF uses every patient in the specific model reference. BMI<=30 contributes baseline burden and zero shift difference.",
+      "Five-category Firth ICD and four-category unpenalized sensitivity have different denominators.",
+      "The joint component families have no PIFs.",
+      "Retain explicit nonestimable, failed, unavailable and sparse-support states.",
+      "Cohort population_id can identify a stage within analysis_population_id; the fields are not interchangeable."
+    ],
+    "table_directory": "results/2026-10-24-all-bmi/tables",
+    "qualification": "results/2026-10-24-all-bmi/verification/qualification.json",
+    "prior_comparison": "results/2026-10-24-all-bmi/verification/prior-run-reconciliation-annotated.csv"
+  },
+  "interpretation_guardrails": [
+    "Select the first valid-available-BMI index; derive secondary populations only afterward. New indexes may differ from historical obese indexes.",
+    "Primary retains any non-OBESITY pathway including OBESITY overlap. Obesity-only is flow/audit only, without an adjusted comparison or weighting analysis.",
+    "Gas curves apply to outcome-evaluable patients. Known diagnosis capture is not ICD positivity; missing or unusable evidence is not negative.",
+    "The secondary policy is observed BMI >30 minus exactly one, no floor/reselection; BMI<=30 is unchanged. PIF is conditional on the population and model.",
+    "Do not infer incidence reduction, causal weight-loss effects, untested-patient risk, or absence of selection bias. No current MAR/MNAR or IPW analysis.",
+    "Pointwise model-based intervals do not quantify selection or measurement bias; retain sparse/support warnings.",
+    "Same recorded-day co-occurrence is not verified same-sample pairing. Without documented acidemia does not establish compensation.",
+    "ICD acuity categories describe documented codes. They are not physiological acidemia categories or validation of respiratory failure."
+  ],
+  "execution_navigation": {
+    "working_directory": "repository root",
+    "artificial_e2e": "make test",
+    "source_checks": "make source-test PREP_PYTHON=...",
+    "prepare": "make prepare SOURCE_CONFIG=... OUTPUT=...",
+    "qualify": "make qualify SOURCE_CONFIG=... PREPARED=... OUTPUT=...",
+    "preflight": "make preflight INPUT=... MANIFEST=...",
+    "estimate": "make analyze INPUT=... MANIFEST=...",
+    "saved_aggregate_render": "make render RUN=...",
+    "clinical_boundary": "clean merged Mini checkout; qualified schema-5 input; no source reads/refits during rendering"
+  },
+  "historical_snapshots": [
+    {
+      "directory": "results/2026-10-18",
+      "readme": "results/2026-10-18/README.md",
+      "manifest": "results/2026-10-18/manifest.json",
+      "purpose": "Original BMI-restricted primary analysis and selected B/F2 layouts",
+      "rule": "Use only that dated design and approval state."
+    },
+    {
+      "directory": "results/2026-10-20-paired-abg",
+      "readme": "results/2026-10-20-paired-abg/README.md",
+      "manifest": "results/2026-10-20-paired-abg/manifest.json",
+      "purpose": "Unavailable same-sample pairing feasibility",
+      "rule": "Use only that dated design and approval state."
+    },
+    {
+      "directory": "results/2026-10-20-same-day-abg",
+      "readme": "results/2026-10-20-same-day-abg/README.md",
+      "manifest": "results/2026-10-20-same-day-abg/manifest.json",
+      "purpose": "Historical binary recorded-day models",
+      "rule": "Use only that dated design and approval state."
+    },
+    {
+      "directory": "results/2026-10-20-same-day-components",
+      "readme": "results/2026-10-20-same-day-components/README.md",
+      "manifest": "results/2026-10-20-same-day-components/manifest.json",
+      "purpose": "Joint recorded-day components in the historical BMI-restricted cohort",
+      "rule": "Use only that dated design and approval state."
+    },
+    {
+      "directory": "results/2026-10-24-icd-acuity",
+      "readme": "results/2026-10-24-icd-acuity/README.md",
+      "manifest": "results/2026-10-24-icd-acuity/manifest.json",
+      "purpose": "Historical separated, nonestimable unpenalized five-category ICD fit",
+      "rule": "Use only that dated design and approval state."
+    },
+    {
+      "directory": "results/2026-10-24-icd-bias-reduced",
+      "readme": "results/2026-10-24-icd-bias-reduced/README.md",
+      "manifest": "results/2026-10-24-icd-bias-reduced/manifest.json",
+      "purpose": "Last historical BMI-restricted integrated analysis; Firth ICD model",
+      "rule": "Use only that dated design and approval state."
+    }
+  ]
 }

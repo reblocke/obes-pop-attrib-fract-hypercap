@@ -265,3 +265,23 @@ a fresh qualified Mini run are authorized. New numerical, visual and investigato
 review states remain separate; prior B/F2/S1/ICD approval does not transfer. No
 abstract drafting. Exact current definitions are centralized in the scientific
 specification and source contract; earlier dated decisions remain historical.
+
+## 2026-10-24 — All-valid-BMI clinical verification completed
+
+The new selection and all three endpoint families ran once from merged `75e55ee`.
+The current [reading packet](../results/2026-10-24-all-bmi/README.md) contains the
+integrated reports, primary/secondary figures, full aggregate tables and separate
+source/numerical/visual receipts. The primary has 380,206 patients; the BMI≥30
+secondary has 175,271 at their same selected index. All six joint component fits
+succeeded. A constant ICD-capture observation model means known capture for all
+patients, not universal ICD positivity.
+
+Retain the corrected exact decimal transport as an engineering correction: analysis
+BMI, covariates and outcomes are unchanged on common keys; final-bit changes in raw
+reported BMI/weight provenance are explained separately. The broader selection's
+changed indexes and newly unresolved ties are expected design consequences, not
+reasons to restore the old obesity-index rule.
+
+Numerical and scoped visual review passed. New investigator interpretation, figure
+approval and submission approval remain pending. B/F2 are preferred layouts; no
+historical scientific approval is transferred. No abstract was drafted.

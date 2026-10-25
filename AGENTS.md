@@ -18,19 +18,14 @@ approval state, selected figure identities and result-table navigation. It is a
 documentation companion, not a second analysis configuration. Keep it aligned
 with `docs/DECISIONS.md`; do not treat access to the repository as permission to
 draft, rerun, share or submit beyond the owner's current request.
-The historical BMI-restricted reading snapshot is `results/2026-10-18/`; verify its manifest and
-use its aggregate tables only for that dated design’s numerical claims. It is not a runnable bundle.
-The latest historical BMI-restricted integrated report and ICD curves are in
-`results/2026-10-24-icd-bias-reduced/`; verify its manifest. The five-category
-Firth model and four-category unpenalized sensitivity both fitted successfully;
-their model/reference denominators differ. Numerical verification does not confer
-investigator interpretation or figure approval. The historical unpenalized fit in
-`results/2026-10-24-icd-acuity/` remains nonestimable; never relabel that snapshot.
-Joint same-day component results remain in
-`results/2026-10-20-same-day-components/`; verify that separate manifest.
-For the historical binary recorded-day supplemental endpoints, use the separate
-`results/2026-10-20-same-day-abg/` snapshot and its review state. Original B/F2
-selection and provisional approval do not approve S1 or its interpretation.
+The current all-valid-BMI reading packet is `results/2026-10-24-all-bmi/`.
+Verify its manifest before numerical claims; use its tables for the current
+primary and nested-secondary results. Source qualification, clinical execution,
+numerical review and scoped visual review are complete. Investigator interpretation
+and new figure approval remain pending. The snapshot is not a runnable bundle.
+Historical BMI-restricted, pairing-feasibility, same-day and ICD snapshots remain
+unchanged; their identities and limitations are indexed in `docs/LLM_GUIDE.json`.
+Never relabel them or transfer historical B/F2 approval to the new results.
 
 ## Scientific invariants
 
@@ -127,5 +122,6 @@ is co-occurrence, not verified sample pairing; ICD acuity is coding, not physiol
 
 Use one `make prepare` for covariates/RFS/gases/recorded-day evidence/code flags.
 Authenticate new selection/source identities; old-run comparison is a separate
-reconciliation, not an input-acceptance prerequisite. Current results and approvals
-must remain marked pending until the new clinical run is verified.
+reconciliation, not an input-acceptance prerequisite. Future runs must repeat
+qualification and review; the current verified reading packet does not confer
+scientific or submission approval.
