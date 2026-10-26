@@ -25,6 +25,7 @@ remain pending.
 | [Complete audit PDF](results/2026-10-26-setting-adjusted/bmi_hypercapnia_audit.pdf) / [HTML](results/2026-10-26-setting-adjusted/bmi_hypercapnia_audit.html) | Exhaustive cohort accounting, coefficients, covariance and diagnostics |
 | [Key-figure PDF booklet](results/2026-10-26-setting-adjusted/key_figures.pdf) / [gallery](results/2026-10-26-setting-adjusted/gallery.html) | F1-main, F2, both component families and nested secondary counterparts |
 | [Aggregate tables](results/2026-10-26-setting-adjusted/TABLES.md) / [packet README](results/2026-10-26-setting-adjusted/README.md) | Complete CSVs, result navigation, verification and historical reconciliation |
+| [BMI 30–40 contrast addendum](results/2026-10-26-setting-adjusted-landmarks/README.md) | Setting-adjusted probability differences, acidemia contribution and prediction-only verification |
 | [Current scientific specification](docs/BMI_HYPERCAPNIA_TRIANGULATION_PLAN.md) | Exact all-BMI design, endpoints, models and estimand |
 | [LLM reading guide](docs/LLM_GUIDE.json) | Machine-readable navigation, evidence rules and dated approval state |
 

@@ -1,0 +1,33 @@
+{
+  "status": "numerically_verified",
+  "scope": "fixed saved-fit BMI 30/40 post-estimation; not a clinical model rerun",
+  "clinical_models_fitted": 0,
+  "bundle_manifest_sha256": "7d7c71b1913c6ab8463200dd953b5494ce2c807c10674946c05b55a8f5599476",
+  "estimation_sources": {
+    "R/analysis.R": "00deaa64f902837a4cfb046ee4c92e502937447d1cbf3a870ccfceb6f354685d",
+    "R/input_contract.R": "c6a0de569e953b0044b7678fde4b0309cbbdd809c7db4db62dd898379578a562",
+    "R/cohort_audit.R": "7d765d06d0a8d6d2e0dc8bf6a03be5aa8a1f35944454996e98d6b9bd75b0fe7c",
+    "R/bmi_models.R": "2777bc80c96b7f74c6e51c58533c514adc8e233f71a9cc7556ef403b5a7d4435",
+    "R/standardization.R": "b968fe4a3438188c383d7b0dc001dd2a748f8a9695bf82caf1f5c408052d167f",
+    "R/rfs_analysis.R": "2a66676c4dc9bdc0e64b3b6c8c88f963d8b2dba92197b918331ed0f94f3d5fc4",
+    "R/same_day_abg.R": "60a5ea2e0c0fcc651f67364cff1b5fbb61d5a69f69cd55176c8d1459a0640e43",
+    "R/same_day_multinomial.R": "42da2a3dbd565e4666cd4a3c98ec92f16213ec91196d92263dfdeac75d739e10",
+    "R/icd_bias_reduction.R": "28da2059a68440ee7f1c163b773cac554458067ef6eac4fecc48039cda9f984d",
+    "R/icd_acuity.R": "e27e1856fca5f2b0fe7f1b47308e33e4b2e793618622206df0ea14b12f4831f3",
+    "config/bmi_hypercapnia_analysis.json": "ed1f7ed897aacbfa34c6f0aec4d260b137edae13d3a5ffd00f7b09a5a69eb36f",
+    "config/variable_dictionary.csv": "6786d843333da19ffec22119c662f7998d17b10dae22ca9dcfbc325f8fc221a4",
+    "config/common_index_source_policy.json": "bebad842c52f658b65215eeb44052afc8df32b85e02fe412f4eb713112b36763",
+    "config/common_index_bmi_policy.json": "988b2f7a2c1f968b30773502f76635520d37a4183ab64b182c1c813ae2f7ac59"
+  },
+  "input_sha256": "423ebf0d363abfbd5eb1a90a8599323f9dcef57534a96c1af73849fecb42a830",
+  "input_manifest_sha256": "c1b2227bfa928da6769526fabb400d1fda231584bacbc7212e0164752ebb127d",
+  "predictor_source_sha256": "e0ad463434ad53ceb844ae2f99bcf9e7b4998e2dadee014ea196aa6bde24f6b0",
+  "clinical_input_read": true,
+  "primary_n": 380206,
+  "reference_n": [71318, 126074, 53607],
+  "maximum_saved_prediction_error": 0,
+  "basis_id": "6094fd99aa4f5725f0a36afa82b83866f82625b4c83f87058d2bc53eafb813ec",
+  "definition": "acidemia share = standardized p(with acidemia) / standardized p(total hypercapnia); pointwise model-based uncertainty, empirical reference fixed",
+  "scientific_review": "pending investigator",
+  "release_actions": false
+}

@@ -1,0 +1,15 @@
+"model_id","metric","estimate","conf_low","conf_high","variance","scale","n_reference"
+"primary::abg/encounter/spline","probability_at_30",44.2883610949112,43.8049417399473,44.7728648170117,0.0609750652363643,100,71318
+"primary::abg/encounter/spline","probability_at_40",56.3291594356595,55.5987288168318,57.056854912632,0.138386753170416,100,71318
+"primary::abg/encounter/spline","difference_40_minus_30_pp",12.0407983407483,11.3087739287242,12.7728227527725,0.139493813369179,100,71318
+"primary::any_gas/encounter/spline","probability_at_30",38.7433702187687,38.3897528582694,39.0981777638159,0.0326621779569048,100,126074
+"primary::any_gas/encounter/spline","probability_at_40",47.2468576936065,46.702010053581,47.7923619483429,0.0773769326438173,100,126074
+"primary::any_gas/encounter/spline","difference_40_minus_30_pp",8.50348747483786,7.96000594857081,9.04696900110492,0.0768906249371682,100,126074
+"primary::same_day_abg/encounter/multinomial_spline","without_acidemia_difference_40_minus_30_pp",3.28088879359146,2.70018819397062,3.86158939321231,0.087782585246893,100,53607
+"primary::same_day_abg/encounter/multinomial_spline","with_acidemia_difference_40_minus_30_pp",8.18725412177754,7.34141270052046,9.03309554303462,0.186243753560509,100,53607
+"primary::same_day_abg/encounter/multinomial_spline","any_hypercapnia_difference_40_minus_30_pp",11.468142915369,10.6237749790039,12.3125108517341,0.185595432683209,100,53607
+"primary::same_day_abg/encounter/multinomial_spline","acidemia_share_at_30",76.6093243657656,75.9123215161811,77.2921917417779,0.123918587315568,100,53607
+"primary::same_day_abg/encounter/multinomial_spline","acidemia_share_at_40",75.5443336200237,74.5304864376568,76.5305317748151,0.26035717960876,100,53607
+"primary::same_day_abg/encounter/multinomial_spline","acidemia_share_change_40_minus_30_pp",-1.06499074574181,-2.07798425180015,-0.0519972396834736,0.267126602474147,100,53607
+"primary::same_day_abg/encounter/multinomial_spline","acidemia_fraction_of_total_probability_increase",71.3912808917424,66.6167906687203,76.1657711147646,5.93414063608652,100,53607
+"primary::same_day_abg/encounter/multinomial_spline","with_minus_without_probability_increase_pp",4.90636532818608,3.72638033647349,6.08635031989867,0.362457244931596,100,53607

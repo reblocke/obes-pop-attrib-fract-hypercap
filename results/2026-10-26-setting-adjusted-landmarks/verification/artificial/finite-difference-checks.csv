@@ -1,0 +1,4 @@
+"check","maximum_absolute_gradient_error","tolerance","passed"
+"primary::abg/encounter/spline",6.37208646958598e-10,5e-06,TRUE
+"primary::any_gas/encounter/spline",1.33050329087503e-09,5e-06,TRUE
+"joint acidemia-share change",7.95626675653693e-10,5e-06,TRUE

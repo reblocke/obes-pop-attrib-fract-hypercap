@@ -165,7 +165,16 @@
     "prior_comparison": "results/2026-10-26-setting-adjusted/verification/comparison-receipt.json",
     "fresh_preflight": "results/2026-10-26-setting-adjusted/verification/fresh-preflight.json",
     "numerical_refresh_ledger": "results/2026-10-26-setting-adjusted/verification/abstract-values-to-refresh.csv",
-    "setting_audit": "N is setting \u00d7 original BMI-band denominator; M usable, H positive among usable; observation=M/N with Wilson limits. n_reference is the full adjustment-complete population."
+    "setting_audit": "N is setting \u00d7 original BMI-band denominator; M usable, H positive among usable; observation=M/N with Wilson limits. n_reference is the full adjustment-complete population.",
+    "bmi_30_40_addendum": {
+      "readme": "results/2026-10-26-setting-adjusted-landmarks/README.md",
+      "manifest": "results/2026-10-26-setting-adjusted-landmarks/manifest.json",
+      "estimates": "results/2026-10-26-setting-adjusted-landmarks/landmark-estimands.csv",
+      "verification": "results/2026-10-26-setting-adjusted-landmarks/postestimation-receipt.json",
+      "scope": "Prediction-only BMI 30/40 contrasts from the exact setting-adjusted run; no refitting or primary-snapshot changes",
+      "units": "Already scaled by 100: probabilities/shares are percentages, differences are percentage points; do not rescale",
+      "acidemia_fraction": "Change in with-acidemia probability divided by change in joint total probability; distinct from acidemia share at one BMI and from PIF"
+    }
   },
   "interpretation_guardrails": [
     "Select the first valid-available-BMI index; derive secondary populations only afterward. New indexes may differ from historical obese indexes.",

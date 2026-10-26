@@ -1117,3 +1117,33 @@ reformatting them to silence Git whitespace warnings. Scoped whitespace checks
 pass for authored documentation and editable/replay source. The inherited
 dictionary's collection-date wording is explicitly qualified as recorded-result
 calendar date in the new packet; no source definition or estimator was changed.
+
+## 2026-10-26 — Setting-adjusted BMI 30–40 numerical addendum
+
+Owner requested exact numerical substitutions and then committed/pushed/reviewed
+release. PRs #32/#33 were confirmed merged, with no submitted GitHub reviews or
+inline threads; local main matched origin/main. The only new material was the
+ignored prediction-only BMI30/40 calculation. Publish it separately at
+`results/2026-10-26-setting-adjusted-landmarks/`, preserving all 1,952 parent
+snapshot payload hashes, primary results, figure exports and abstract files.
+
+Failure scenarios recorded before the calculation: lost encounter-setting factor,
+wrong numeric basis/reference sample, accidental refit, historical contrast
+interval reuse and covariance errors. Updated the frozen predictor to reuse
+current shared formulas/factors. The existing saved E2E fixture reproduced its
+saved probabilities and intervals exactly; independent finite-difference checks
+passed. Clean merged Mini checkout and absence of concurrent research jobs were
+checked before private writes. One low-priority prediction-only calculation
+reconstructed authorized reference covariates from the same accepted input;
+clinical fitting entrypoints were blocked. Saved probabilities, intervals and
+40/45 contrasts reproduced exactly. Source/input/manifest/bundle hashes remained
+unchanged, no model was fitted, and retrieved aggregate hashes matched the Mini.
+
+Combined-gas 30→40 change: 8.5035 percentage points (95% CI 7.9600–9.0470).
+With-acidemia fraction of joint total increase: 71.3913% (66.6168–76.1658).
+The addendum includes frozen source, clinical/artificial receipts and estimates;
+README/LLM navigation distinguishes scaled percentages from percentage points.
+No new clinical run, primary estimator, scientific definition, figure, abstract
+file or approval state changed. Full analysis/source E2E evidence from the
+released code remains applicable; this release validates artifact identity,
+numerical reconciliation, isolated fixture replay and documentation links.
