@@ -9,6 +9,7 @@ and implementations are recoverable through the [archive index](../archive/READM
 
 | Date | Decision |
 |---|---|
+| 2026-10-26 | Setting-adjusted v9 clinical estimation and aggregate-only reporting completed from merged `a978145`. Source, indexes, model/reference Ns, events and numeric bases match the prior run. Publish a separate reviewed aggregate packet at `results/2026-10-26-setting-adjusted/`; old snapshots and abstract files remain unchanged. Investigator interpretation and new-figure approval remain separate and pending. |
 | 2026-10-25 | Add categorical index encounter setting (EMER reference; IMP inpatient) to every fitted model, without interaction. Reuse the accepted schema-5 input; schema 14 / analysis v9 identifies a fresh estimation. Membership, knots and empirical reference setting remain fixed. Panel D label becomes “Portion with blood gas obtained”, operationally defined as a captured usable PCO₂ result. New results and figure approval remain pending. |
 | 2026-10-25 | Promote shared F1-main to the preferred primary report/ATS display: A combined gas, B nested arterial, C stacked same-day components, D red ABG/blue VBG usable-evidence ascertainment; BMI 30/40 landmarks with intervals. Reuse saved primary observation models; no new clinical fits or secondary ascertainment models. Layout requested; revised-export approval remains separate. |
 | 2026-10-13 | Secondary scenario: observed BMI >30 minus exactly one; BMI=30 unchanged, no floor or reselection. Supersedes both BMI-to-40 and unrestricted minus-one proposals. |

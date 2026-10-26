@@ -1,0 +1,1066 @@
+{
+  "status": "passed",
+  "plotted_value_checks": [
+    {
+      "file": "F1-main-landmarks.csv",
+      "rows": 12,
+      "matching_fields": [
+        "probability",
+        "conf_low",
+        "conf_high",
+        "n_model",
+        "n_reference"
+      ]
+    },
+    {
+      "file": "F1-main-plotted-curves.csv",
+      "rows": 2504,
+      "matching_fields": [
+        "probability",
+        "conf_low",
+        "conf_high",
+        "n_model",
+        "n_reference"
+      ]
+    }
+  ],
+  "technical_exports": [
+    {
+      "figure_id": "primary/F1-A",
+      "format": "png",
+      "width_px": 2244,
+      "height_px": 2244,
+      "dpi": [
+        299.9994,
+        299.9994
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "primary/F1-A",
+      "format": "jpg",
+      "width_px": 2244,
+      "height_px": 2244,
+      "dpi": [
+        300,
+        300
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "primary/F1-B",
+      "format": "png",
+      "width_px": 2244,
+      "height_px": 2480,
+      "dpi": [
+        299.9994,
+        299.9994
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "primary/F1-B",
+      "format": "jpg",
+      "width_px": 2244,
+      "height_px": 2480,
+      "dpi": [
+        300,
+        300
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "primary/F1-C",
+      "format": "png",
+      "width_px": 2244,
+      "height_px": 2244,
+      "dpi": [
+        299.9994,
+        299.9994
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "primary/F1-C",
+      "format": "jpg",
+      "width_px": 2244,
+      "height_px": 2244,
+      "dpi": [
+        300,
+        300
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "primary/F2",
+      "format": "png",
+      "width_px": 2244,
+      "height_px": 2303,
+      "dpi": [
+        299.9994,
+        299.9994
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "primary/F2",
+      "format": "jpg",
+      "width_px": 2244,
+      "height_px": 2303,
+      "dpi": [
+        300,
+        300
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "primary/F2-bands",
+      "format": "png",
+      "width_px": 2244,
+      "height_px": 1417,
+      "dpi": [
+        299.9994,
+        299.9994
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "primary/F2-bands",
+      "format": "jpg",
+      "width_px": 2244,
+      "height_px": 1417,
+      "dpi": [
+        300,
+        300
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "primary/F5-timing-abg",
+      "format": "png",
+      "width_px": 2244,
+      "height_px": 2007,
+      "dpi": [
+        299.9994,
+        299.9994
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "primary/F5-timing-abg",
+      "format": "jpg",
+      "width_px": 2244,
+      "height_px": 2007,
+      "dpi": [
+        300,
+        300
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "primary/F5-timing-any_gas",
+      "format": "png",
+      "width_px": 2244,
+      "height_px": 2007,
+      "dpi": [
+        299.9994,
+        299.9994
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "primary/F5-timing-any_gas",
+      "format": "jpg",
+      "width_px": 2244,
+      "height_px": 2007,
+      "dpi": [
+        300,
+        300
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "primary/F5-matched-abg",
+      "format": "png",
+      "width_px": 2244,
+      "height_px": 2007,
+      "dpi": [
+        299.9994,
+        299.9994
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "primary/F5-matched-abg",
+      "format": "jpg",
+      "width_px": 2244,
+      "height_px": 2007,
+      "dpi": [
+        300,
+        300
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "primary/F5-matched-any_gas",
+      "format": "png",
+      "width_px": 2244,
+      "height_px": 2007,
+      "dpi": [
+        299.9994,
+        299.9994
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "primary/F5-matched-any_gas",
+      "format": "jpg",
+      "width_px": 2244,
+      "height_px": 2007,
+      "dpi": [
+        300,
+        300
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "primary_bmi_ge30/F1-A",
+      "format": "png",
+      "width_px": 2244,
+      "height_px": 2244,
+      "dpi": [
+        299.9994,
+        299.9994
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "primary_bmi_ge30/F1-A",
+      "format": "jpg",
+      "width_px": 2244,
+      "height_px": 2244,
+      "dpi": [
+        300,
+        300
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "primary_bmi_ge30/F1-B",
+      "format": "png",
+      "width_px": 2244,
+      "height_px": 2480,
+      "dpi": [
+        299.9994,
+        299.9994
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "primary_bmi_ge30/F1-B",
+      "format": "jpg",
+      "width_px": 2244,
+      "height_px": 2480,
+      "dpi": [
+        300,
+        300
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "primary_bmi_ge30/F1-C",
+      "format": "png",
+      "width_px": 2244,
+      "height_px": 2244,
+      "dpi": [
+        299.9994,
+        299.9994
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "primary_bmi_ge30/F1-C",
+      "format": "jpg",
+      "width_px": 2244,
+      "height_px": 2244,
+      "dpi": [
+        300,
+        300
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "primary_bmi_ge30/F2",
+      "format": "png",
+      "width_px": 2244,
+      "height_px": 2303,
+      "dpi": [
+        299.9994,
+        299.9994
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "primary_bmi_ge30/F2",
+      "format": "jpg",
+      "width_px": 2244,
+      "height_px": 2303,
+      "dpi": [
+        300,
+        300
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "primary_bmi_ge30/F2-bands",
+      "format": "png",
+      "width_px": 2244,
+      "height_px": 1417,
+      "dpi": [
+        299.9994,
+        299.9994
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "primary_bmi_ge30/F2-bands",
+      "format": "jpg",
+      "width_px": 2244,
+      "height_px": 1417,
+      "dpi": [
+        300,
+        300
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "primary_bmi_ge30/F5-timing-abg",
+      "format": "png",
+      "width_px": 2244,
+      "height_px": 2007,
+      "dpi": [
+        299.9994,
+        299.9994
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "primary_bmi_ge30/F5-timing-abg",
+      "format": "jpg",
+      "width_px": 2244,
+      "height_px": 2007,
+      "dpi": [
+        300,
+        300
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "primary_bmi_ge30/F5-timing-any_gas",
+      "format": "png",
+      "width_px": 2244,
+      "height_px": 2007,
+      "dpi": [
+        299.9994,
+        299.9994
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "primary_bmi_ge30/F5-timing-any_gas",
+      "format": "jpg",
+      "width_px": 2244,
+      "height_px": 2007,
+      "dpi": [
+        300,
+        300
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "primary_bmi_ge30/F5-matched-abg",
+      "format": "png",
+      "width_px": 2244,
+      "height_px": 2007,
+      "dpi": [
+        299.9994,
+        299.9994
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "primary_bmi_ge30/F5-matched-abg",
+      "format": "jpg",
+      "width_px": 2244,
+      "height_px": 2007,
+      "dpi": [
+        300,
+        300
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "primary_bmi_ge30/F5-matched-any_gas",
+      "format": "png",
+      "width_px": 2244,
+      "height_px": 2007,
+      "dpi": [
+        299.9994,
+        299.9994
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "primary_bmi_ge30/F5-matched-any_gas",
+      "format": "jpg",
+      "width_px": 2244,
+      "height_px": 2007,
+      "dpi": [
+        300,
+        300
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "primary_current/F1-A",
+      "format": "png",
+      "width_px": 2244,
+      "height_px": 2244,
+      "dpi": [
+        299.9994,
+        299.9994
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "primary_current/F1-A",
+      "format": "jpg",
+      "width_px": 2244,
+      "height_px": 2244,
+      "dpi": [
+        300,
+        300
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "primary_current/F1-B",
+      "format": "png",
+      "width_px": 2244,
+      "height_px": 2480,
+      "dpi": [
+        299.9994,
+        299.9994
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "primary_current/F1-B",
+      "format": "jpg",
+      "width_px": 2244,
+      "height_px": 2480,
+      "dpi": [
+        300,
+        300
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "primary_current/F1-C",
+      "format": "png",
+      "width_px": 2244,
+      "height_px": 2244,
+      "dpi": [
+        299.9994,
+        299.9994
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "primary_current/F1-C",
+      "format": "jpg",
+      "width_px": 2244,
+      "height_px": 2244,
+      "dpi": [
+        300,
+        300
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "primary_current/F2",
+      "format": "png",
+      "width_px": 2244,
+      "height_px": 2303,
+      "dpi": [
+        299.9994,
+        299.9994
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "primary_current/F2",
+      "format": "jpg",
+      "width_px": 2244,
+      "height_px": 2303,
+      "dpi": [
+        300,
+        300
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "primary_current/F2-bands",
+      "format": "png",
+      "width_px": 2244,
+      "height_px": 1417,
+      "dpi": [
+        299.9994,
+        299.9994
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "primary_current/F2-bands",
+      "format": "jpg",
+      "width_px": 2244,
+      "height_px": 1417,
+      "dpi": [
+        300,
+        300
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "primary_current/F5-timing-abg",
+      "format": "png",
+      "width_px": 2244,
+      "height_px": 2007,
+      "dpi": [
+        299.9994,
+        299.9994
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "primary_current/F5-timing-abg",
+      "format": "jpg",
+      "width_px": 2244,
+      "height_px": 2007,
+      "dpi": [
+        300,
+        300
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "primary_current/F5-timing-any_gas",
+      "format": "png",
+      "width_px": 2244,
+      "height_px": 2007,
+      "dpi": [
+        299.9994,
+        299.9994
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "primary_current/F5-timing-any_gas",
+      "format": "jpg",
+      "width_px": 2244,
+      "height_px": 2007,
+      "dpi": [
+        300,
+        300
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "primary_current/F5-matched-abg",
+      "format": "png",
+      "width_px": 2244,
+      "height_px": 2007,
+      "dpi": [
+        299.9994,
+        299.9994
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "primary_current/F5-matched-abg",
+      "format": "jpg",
+      "width_px": 2244,
+      "height_px": 2007,
+      "dpi": [
+        300,
+        300
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "primary_current/F5-matched-any_gas",
+      "format": "png",
+      "width_px": 2244,
+      "height_px": 2007,
+      "dpi": [
+        299.9994,
+        299.9994
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "primary_current/F5-matched-any_gas",
+      "format": "jpg",
+      "width_px": 2244,
+      "height_px": 2007,
+      "dpi": [
+        300,
+        300
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "all_obesity/F1-A",
+      "format": "png",
+      "width_px": 2244,
+      "height_px": 2244,
+      "dpi": [
+        299.9994,
+        299.9994
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "all_obesity/F1-A",
+      "format": "jpg",
+      "width_px": 2244,
+      "height_px": 2244,
+      "dpi": [
+        300,
+        300
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "all_obesity/F1-B",
+      "format": "png",
+      "width_px": 2244,
+      "height_px": 2480,
+      "dpi": [
+        299.9994,
+        299.9994
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "all_obesity/F1-B",
+      "format": "jpg",
+      "width_px": 2244,
+      "height_px": 2480,
+      "dpi": [
+        300,
+        300
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "all_obesity/F1-C",
+      "format": "png",
+      "width_px": 2244,
+      "height_px": 2244,
+      "dpi": [
+        299.9994,
+        299.9994
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "all_obesity/F1-C",
+      "format": "jpg",
+      "width_px": 2244,
+      "height_px": 2244,
+      "dpi": [
+        300,
+        300
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "all_obesity/F2",
+      "format": "png",
+      "width_px": 2244,
+      "height_px": 2303,
+      "dpi": [
+        299.9994,
+        299.9994
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "all_obesity/F2",
+      "format": "jpg",
+      "width_px": 2244,
+      "height_px": 2303,
+      "dpi": [
+        300,
+        300
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "all_obesity/F2-bands",
+      "format": "png",
+      "width_px": 2244,
+      "height_px": 1417,
+      "dpi": [
+        299.9994,
+        299.9994
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "all_obesity/F2-bands",
+      "format": "jpg",
+      "width_px": 2244,
+      "height_px": 1417,
+      "dpi": [
+        300,
+        300
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "all_obesity/F5-timing-abg",
+      "format": "png",
+      "width_px": 2244,
+      "height_px": 2007,
+      "dpi": [
+        299.9994,
+        299.9994
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "all_obesity/F5-timing-abg",
+      "format": "jpg",
+      "width_px": 2244,
+      "height_px": 2007,
+      "dpi": [
+        300,
+        300
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "all_obesity/F5-timing-any_gas",
+      "format": "png",
+      "width_px": 2244,
+      "height_px": 2007,
+      "dpi": [
+        299.9994,
+        299.9994
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "all_obesity/F5-timing-any_gas",
+      "format": "jpg",
+      "width_px": 2244,
+      "height_px": 2007,
+      "dpi": [
+        300,
+        300
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "all_obesity/F5-matched-abg",
+      "format": "png",
+      "width_px": 2244,
+      "height_px": 2007,
+      "dpi": [
+        299.9994,
+        299.9994
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "all_obesity/F5-matched-abg",
+      "format": "jpg",
+      "width_px": 2244,
+      "height_px": 2007,
+      "dpi": [
+        300,
+        300
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "all_obesity/F5-matched-any_gas",
+      "format": "png",
+      "width_px": 2244,
+      "height_px": 2007,
+      "dpi": [
+        299.9994,
+        299.9994
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "all_obesity/F5-matched-any_gas",
+      "format": "jpg",
+      "width_px": 2244,
+      "height_px": 2007,
+      "dpi": [
+        300,
+        300
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "F0-primary-gas",
+      "format": "png",
+      "width_px": 2244,
+      "height_px": 2007,
+      "dpi": [
+        299.9994,
+        299.9994
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "F0-primary-gas",
+      "format": "jpg",
+      "width_px": 2244,
+      "height_px": 2007,
+      "dpi": [
+        300,
+        300
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "F1-main",
+      "format": "png",
+      "width_px": 2244,
+      "height_px": 2952,
+      "dpi": [
+        299.9994,
+        299.9994
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "F1-main",
+      "format": "jpg",
+      "width_px": 2244,
+      "height_px": 2952,
+      "dpi": [
+        300,
+        300
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "RFS-evidence",
+      "format": "png",
+      "width_px": 2244,
+      "height_px": 1003,
+      "dpi": [
+        299.9994,
+        299.9994
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "RFS-evidence",
+      "format": "jpg",
+      "width_px": 2244,
+      "height_px": 1003,
+      "dpi": [
+        300,
+        300
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "primary/S1-same-day-ABG",
+      "format": "png",
+      "width_px": 2244,
+      "height_px": 2480,
+      "dpi": [
+        299.9994,
+        299.9994
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "primary/S1-same-day-ABG",
+      "format": "jpg",
+      "width_px": 2244,
+      "height_px": 2480,
+      "dpi": [
+        300,
+        300
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "primary/S2-ICD-acuity",
+      "format": "png",
+      "width_px": 2244,
+      "height_px": 2362,
+      "dpi": [
+        299.9994,
+        299.9994
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "primary/S2-ICD-acuity",
+      "format": "jpg",
+      "width_px": 2244,
+      "height_px": 2362,
+      "dpi": [
+        300,
+        300
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "primary/S2-ICD-specified",
+      "format": "png",
+      "width_px": 2244,
+      "height_px": 2362,
+      "dpi": [
+        299.9994,
+        299.9994
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "primary/S2-ICD-specified",
+      "format": "jpg",
+      "width_px": 2244,
+      "height_px": 2362,
+      "dpi": [
+        300,
+        300
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "primary/S2-ICD-observed",
+      "format": "png",
+      "width_px": 2244,
+      "height_px": 2244,
+      "dpi": [
+        299.9994,
+        299.9994
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "primary/S2-ICD-observed",
+      "format": "jpg",
+      "width_px": 2244,
+      "height_px": 2244,
+      "dpi": [
+        300,
+        300
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "primary_bmi_ge30/S1-same-day-ABG",
+      "format": "png",
+      "width_px": 2244,
+      "height_px": 2480,
+      "dpi": [
+        299.9994,
+        299.9994
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "primary_bmi_ge30/S1-same-day-ABG",
+      "format": "jpg",
+      "width_px": 2244,
+      "height_px": 2480,
+      "dpi": [
+        300,
+        300
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "primary_bmi_ge30/S2-ICD-acuity",
+      "format": "png",
+      "width_px": 2244,
+      "height_px": 2362,
+      "dpi": [
+        299.9994,
+        299.9994
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "primary_bmi_ge30/S2-ICD-acuity",
+      "format": "jpg",
+      "width_px": 2244,
+      "height_px": 2362,
+      "dpi": [
+        300,
+        300
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "primary_bmi_ge30/S2-ICD-specified",
+      "format": "png",
+      "width_px": 2244,
+      "height_px": 2362,
+      "dpi": [
+        299.9994,
+        299.9994
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "primary_bmi_ge30/S2-ICD-specified",
+      "format": "jpg",
+      "width_px": 2244,
+      "height_px": 2362,
+      "dpi": [
+        300,
+        300
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "primary_bmi_ge30/S2-ICD-observed",
+      "format": "png",
+      "width_px": 2244,
+      "height_px": 2244,
+      "dpi": [
+        299.9994,
+        299.9994
+      ],
+      "pdf_width_points": 538.0
+    },
+    {
+      "figure_id": "primary_bmi_ge30/S2-ICD-observed",
+      "format": "jpg",
+      "width_px": 2244,
+      "height_px": 2244,
+      "dpi": [
+        300,
+        300
+      ],
+      "pdf_width_points": 538.0
+    }
+  ],
+  "clinical_input_reads": 0,
+  "model_refits": 0,
+  "visual_inspection": "separate receipt; technical success does not assert visual or scientific approval"
+}

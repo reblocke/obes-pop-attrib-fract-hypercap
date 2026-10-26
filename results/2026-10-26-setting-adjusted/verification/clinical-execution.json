@@ -1,0 +1,37 @@
+{
+  "mode": "analyze",
+  "source_status": "identity_bound_source_declarations_passed",
+  "clinical_data_opened": true,
+  "code_identity": {
+    "commit": "a978145b84857d99fcfd280f67d83a04d9c9325c",
+    "tree": "a21caf28867ea6d80d816e93c711730a77658a34",
+    "working_tree_clean": true
+  },
+  "input_sha256": "423ebf0d363abfbd5eb1a90a8599323f9dcef57534a96c1af73849fecb42a830",
+  "manifest_sha256": "c1b2227bfa928da6769526fabb400d1fda231584bacbc7212e0164752ebb127d",
+  "source_policy_id": "unadjusted_pco2_v1",
+  "population_scope_id": "original_selected_encounters_v1",
+  "bmi_policy_id": "available_encounter_or_prior_bmi_v1",
+  "analysis_elapsed_seconds": 3599.987,
+  "clinical_models_fitted": 35,
+  "source_evidence_hashes": {
+    "lineage": "e43af835292da4154d4996fb6b36c711631d45eac90c4bc3c36b94d8bc86f8db",
+    "fields": "4e96b197230d6ec4f2466804c50a3f6e835f591cad1e1db5f767e7a34a453d84",
+    "population": "dce1562636056e70e4782628bfaa3e4bbf6ea237abe0b1836c25b221ad3c7f4b",
+    "index_day": "4e96b197230d6ec4f2466804c50a3f6e835f591cad1e1db5f767e7a34a453d84",
+    "selection": "cb7e9d7bfb814d96c7174b290fae9818ba3aa24398f18f316dc6df5bd68e886e",
+    "rfs": "d08bf9fe461ebfd6b509db29091dc894f451032da0cad4cd034b0f05492539ac",
+    "same_day_abg": "61447e478f9a250ddcb52e450fdcee9113f2b1b544198b6bc3c7574f9622b1cc",
+    "icd_acuity": "2561251d17f178cb7690eb49d381f274c1e4102990cce039c9d6401fb0fe995e",
+    "cohort_audit": "70f641c01a724253c5e5c10a8e7bbd8163b7474254892d67d901317057c131f4",
+    "transport_repair": "3851b479d794c8d67c8175a06fed73ec18449cfc014ef9ecc0e2aac6b4c98cb7",
+    "qualification": "792fdfb5b57c477a794f3da545e76a72c50c036b1616ed5ddf1dd7a095bc1975",
+    "acceptance": "155f525087f5ccab2c0f322505a6fc264446ec62bea47ba284498386cbe2b1c1",
+    "prior_comparison": "80cefa26aff72fb617cc6bf8bea0b20d7cea8980df77c3970e6f059e82dd0829",
+    "numeric_transport": "61fdb28b25573f4fc601681d687d503d82e8b41ad958ab1252322314e16a9767",
+    "transport_corrections": "43660ed198b6032071d5e1e9171a72575be1630f5b200e303f0bf9febc8a8f09"
+  },
+  "source_acceptance": "Existing accepted input reused; exact identity reauthenticated; fresh preflight recorded separately",
+  "clinical_estimation_runs": 1,
+  "investigator_scientific_review": "pending"
+}

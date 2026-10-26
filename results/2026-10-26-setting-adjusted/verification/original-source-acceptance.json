@@ -1,0 +1,24 @@
+{
+  "status": "accepted_for_documented_evidence_analysis",
+  "reviewer": "Codex automated and implementing-agent source review under owner execution authorization",
+  "human_scientific_review": "not asserted",
+  "investigator_approval": "pending",
+  "qualification_sha256": "792fdfb5b57c477a794f3da545e76a72c50c036b1616ed5ddf1dd7a095bc1975",
+  "comparison_receipt_sha256": "ad6c188f1ea61058d478b6efae6ec67e5bb9756260bd22b717e18c037ff1953f",
+  "input_sha256": "423ebf0d363abfbd5eb1a90a8599323f9dcef57534a96c1af73849fecb42a830",
+  "merged_code": "75e55eee42979904a04cdb5a3a529ed15bfb6025",
+  "gates": {
+    "lineage": "Accepted product, original receipt, canonical database/sidecar, mapper and pinned reader identities verified.",
+    "population_scope": "All 763569 mapped original acute encounters independently reconciled; all-valid-BMI selection, no gas/completeness prefilter.",
+    "keys_chronology": "Original keys, dates, duplicate/conflict states and unresolved earliest indexes reconciled independently.",
+    "bmi_adjustment": "Approved BMI hierarchy, float transport/rounding, prior dates and inherited adjustment fields reconciled.",
+    "gas_draws": "Reviewed source testing states and unusable/unspecified/adjusted evidence audited; source flags do not assert exhaustive clinical acquisition.",
+    "gas_units_windows": "Ordinary specimen-specific maxima, units, validity, boundaries and recorded index-day evidence independently reproduced.",
+    "icd_capture": "Complete reviewed capture; all five original code flags and captured absence independently reproduced."
+  },
+  "limitations": [
+    "Selected historical source membership is not exhaustive clinical ascertainment",
+    "Gas outcomes remain outcome-evaluable, without inference to untested patients",
+    "Source acceptance does not establish causal identification"
+  ]
+}

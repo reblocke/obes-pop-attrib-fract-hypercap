@@ -1,0 +1,3 @@
+"model_id","n_grid","maximum_probability_sum_error","maximum_component_sum_error","status","analysis_population_id","population_id","outcome_id","ascertainment_window","model_form"
+"primary::same_day_abg/encounter/multinomial_spline",305,1.06581410364015e-14,1.11022302462516e-16,"assessed","primary","primary","three_category","encounter","multinomial_spline"
+"primary_bmi_ge30::same_day_abg/encounter/multinomial_spline",225,1.35447209004269e-14,1.11022302462516e-16,"assessed","primary_bmi_ge30","primary_bmi_ge30","three_category","encounter","multinomial_spline"

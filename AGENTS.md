@@ -18,7 +18,7 @@ approval state, selected figure identities and result-table navigation. It is a
 documentation companion, not a second analysis configuration. Keep it aligned
 with `docs/DECISIONS.md`; do not treat access to the repository as permission to
 draft, rerun, share or submit beyond the owner's current request.
-The current all-valid-BMI reading packet is `results/2026-10-24-all-bmi/`.
+The current setting-adjusted reading packet is `results/2026-10-26-setting-adjusted/`.
 Verify its manifest before numerical claims; use its tables for the current
 primary and nested-secondary results. Source qualification, clinical execution,
 numerical review and scoped visual review are complete. Investigator interpretation

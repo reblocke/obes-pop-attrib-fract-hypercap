@@ -1,0 +1,12 @@
+{
+  "bundle_sha256": "8c04a1c4d6e61952adcb2f3f9d06e98810d8f21cebf8eea05c836d85dca12e09",
+  "source_tables": {
+    "probability_curves": "da0b35d74bb123f16168258da7995262e0b6c98ad3aa1a3dced9ef3ac92008c8",
+    "observation_curves": "ce47dfdb8ad744d3495cb482719f50378bbabee0c188325e5296939ab127e6d5",
+    "policy_totals": "49cab2da011faabe3146f0380038d1a82825a984aa5bba255385d73c893822d9",
+    "policy_contributions": "3b735c8141caacc4b1f756d10bd16ad31f9cc127e57d5411fe5f13767cd17a70"
+  },
+  "candidates": ["F1-A", "F1-B", "F1-C"],
+  "same_saved_values": true,
+  "visual_inspection": "pending"
+}

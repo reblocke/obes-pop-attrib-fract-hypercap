@@ -4,10 +4,11 @@ Current implementation: input schema 5, aggregate schema 14,
 `bmi_hypercapnia_rfs_curve_audit_v9`. The 2026-10-24 all-valid-BMI decision
 supersedes first-BMI-≥30 selection. Earlier outputs retain their original design;
 see [decisions](DECISIONS.md), [work log](../WORKLOG.md) and
-[archive recovery](../archive/README.md). The [verified all-BMI packet](../results/2026-10-24-all-bmi/README.md) records the
-completed source qualification, one clinical run and numerical/scoped visual review.
-The October 24 packet predates encounter-setting adjustment; schema-14 clinical
-results are pending. See [setting update](ENCOUNTER_SETTING_UPDATE.md).
+[archive recovery](../archive/README.md). The [verified setting-adjusted packet](../results/2026-10-26-setting-adjusted/README.md)
+records the reused accepted source, one schema-14 clinical run and numerical/scoped
+visual review. Every fitted model adds EMER-reference/IMP inpatient setting.
+Samples, events and spline bases match the immutable [October 24 packet](../results/2026-10-24-all-bmi/README.md).
+See [setting implementation and verification](ENCOUNTER_SETTING_UPDATE.md).
 Investigator interpretation and figure approval remain pending. Future runs require
 fresh qualification; historical counts are not new-cohort counts.
 

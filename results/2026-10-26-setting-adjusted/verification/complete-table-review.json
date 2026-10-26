@@ -1,0 +1,9 @@
+{
+  "status": "passed",
+  "table_checks": 118,
+  "alias_mappings_reconstructed": 25468,
+  "summary_values_reconstructed": 510066,
+  "clinical_input_reads": 0,
+  "model_refits": 0,
+  "investigator_review": "not asserted"
+}

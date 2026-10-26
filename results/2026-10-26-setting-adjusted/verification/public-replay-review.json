@@ -1,0 +1,34 @@
+{
+  "status": "passed",
+  "value_exports": [
+    {
+      "file": "F1-main-plotted-curves.csv",
+      "rows": 2504,
+      "all_quantities_and_identities_identical": true,
+      "byte_identical": false
+    },
+    {
+      "file": "F1-main-landmarks.csv",
+      "rows": 12,
+      "all_quantities_and_identities_identical": true,
+      "byte_identical": true
+    },
+    {
+      "file": "F1-main-frequencies.csv",
+      "rows": 68,
+      "all_quantities_and_identities_identical": true,
+      "byte_identical": false
+    },
+    {
+      "file": "F1-main-printed-landmarks.csv",
+      "rows": 6,
+      "all_quantities_and_identities_identical": true,
+      "byte_identical": true
+    }
+  ],
+  "missing_metadata_serialization": "CSV type inference converts empty/NA reason or pattern markers; no status, number, identity or printed label differs",
+  "missing_marker_differences": 1930,
+  "clinical_input_reads": 0,
+  "model_refits": 0,
+  "supplied_inputs": "Five authenticated public CSVs, saved configuration and matching repository source; no clinical input or analysis.rds supplied"
+}

@@ -1051,3 +1051,69 @@ Before estimator edits: recorded failures in `docs/ENCOUNTER_SETTING_UPDATE.md`,
 Working branch: `codex/encounter-setting-adjustment`. Mini reachable as reblocke; existing accepted prepared-02 input is present. The older dirty Research checkout is excluded; a clean release checkout will be used. Shared adjustment/factor/formula definitions now cover binary/joint/Firth estimation, prediction, diagnostics and support. Added a separate raw setting-by-BMI evidence audit. Smoke verification, complete E2E/source checks and clinical execution remain in progress.
 
 Verification completed before clinical execution: source boundary 35/35 passed (`source-tests-20261025T223215-49506`), full artificial numerical/HTML/PDF E2E passed (`e2e-20261025T223618-49911`). The initial `make test` render was explicitly interrupted after a final display-label guard edit changed its render-source snapshot; the documented resume command reused the unchanged saved artificial estimates and completed every E2E check with frozen sources. The 1,800-patient smoke run retained secondary same-day separation; all positions fitted in the full 6,000-patient fixture and its independent checks passed. Historical schema-13 runtime and the old private wrapper reject setting-adjusted relabeling. Native/grayscale artificial F1-main inspected; clinical review remains pending.
+
+
+## 2026-10-26 — Setting-adjusted clinical execution and reviewed aggregate release
+
+Source implementation PR #32 squash-merged at `a978145b84857d99fcfd280f67d83a04d9c9325c`.
+Used a fresh clean Mini release checkout, leaving the older dirty Research checkout
+untouched. The first preflight attempt failed before data loading because R's temp
+path contained spaces; its actual failure is preserved under `attempt-01-runtime-path`.
+An existing no-space temporary directory resolved the runtime issue without source,
+input or dependency changes. All 15 evidence hashes and the accepted schema-5
+input/manifest were reauthenticated. Fresh preflight reproduced all 160 shared
+cohort nodes, with zero models fitted.
+
+One `make analyze` completed in 3,599.987 seconds and saved
+`curve-analyze-20261026T001917-75549` (bundle manifest SHA256
+`7d7c71b1913c6ab8463200dd953b5494ce2c807c10674946c05b55a8f5599476`).
+All 35 fitted positions, including six joint models, include setting and EMER
+reference. The ICD-capture observation position remains constant, as before.
+The registered numerical reviewer passed 167 checks. Independent old/new aggregate
+comparison passed 15,558 checks with unchanged samples, events, references and
+numeric bases; independent setting/BMI Wilson/count checks passed 1,566 checks.
+Primary arterial/combined-gas PIFs are 1.0106%/0.8334%, versus 1.0106%/0.8407%
+previously. The new adjustment does not reverse ascertainment's BMI-30/40/50 pattern.
+
+`make render` completed scientific and audit HTML/PDF from this saved bundle;
+zero clinical input reads or model refits, unchanged bundle and render sources.
+Every standalone scientific identity (47) was inspected at native 190-mm width
+in color and grayscale; all 94 PNG/JPG exports have verified 300-dpi metadata.
+All 54 scientific pages were visually inspected. All 8,902 audit pages/2,539,006
+words passed automated geometry/symbol checks; 23 audit pages were sampled visually.
+Complete-table checks passed 118 checks and reconstructed 25,468 alias mappings /
+510,066 values. The pre-audit scientific preview matches 211 completed-render files
+byte-for-byte. A private validation helper initially failed on the legitimate
+constant-observation row's absent BMI; the helper was corrected, then all 12
+landmarks and 2,504 F1-main curve rows reconciled. No estimator changed.
+
+Created `results/2026-10-26-setting-adjusted/` on `codex/encounter-setting-results`:
+64 aggregate CSVs, complete reports, vector masters, scientific rasters, nine-key-
+figure/18-page booklet, galleries, comparison ledgers and separate review receipts.
+Booklet inspection found that Arial lacked subscript 2; installed Arial Unicode
+covers every caption character. Rebuilt/reinspected all 18 pages; vector figure
+page content streams are unchanged. The first packet-link check found an omitted
+stylesheet; copied the authenticated report CSS and repeated the checks. Final
+packet hashes, 794 local HTML references, 9,723 QC paths and 64 aggregate headers
+passed. All 2,328 protected historical/abstract hashes remain unchanged.
+
+Working evidence is retained under ignored
+`artifacts/triangulation/encounter-setting-20261025/`; successful receipts distinguish
+software, reused-source authentication, clinical estimation, numerical review and
+scoped visual inspection. Investigator interpretation/new-figure approval remain
+pending. Existing abstract DOCX/text are unchanged; no abstract revision or submission.
+
+
+The new ignored `reports/ATS Abstract 2027/2026-10-26-setting-adjusted-review/`
+is figure-only: byte-identical F1-main/ATS-1, nested flow, F2/components, caption,
+booklet and numerical ledger. No Word/text draft was copied or revised. The
+public F1 replay succeeded using five CSVs/configuration and matching source,
+without `analysis.rds` or clinical inputs. All plotted numbers, identifiers and
+printed landmarks match; CSV type inference changes only empty/NA reason/pattern
+serialization, explicitly recorded in the replay receipt. No clinical refit.
+
+Release review retained byte-exact generated Quarto HTML and CSV CRLFs rather than
+reformatting them to silence Git whitespace warnings. Scoped whitespace checks
+pass for authored documentation and editable/replay source. The inherited
+dictionary's collection-date wording is explicitly qualified as recorded-result
+calendar date in the new packet; no source definition or estimator was changed.

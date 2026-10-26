@@ -1,0 +1,5 @@
+"model_id","n_grid","maximum_probability_sum_error","maximum_component_sum_error","status","analysis_population_id","population_id","outcome_id","ascertainment_window","model_form"
+"primary::icd_acuity/encounter/multinomial_spline",321,1.02140518265514e-14,1.11022302462516e-16,"assessed","primary","primary","five_category","encounter","multinomial_spline"
+"primary::icd_acuity_specified/encounter/multinomial_spline",321,9.32587340685131e-15,2.22044604925031e-16,"assessed","primary","primary","four_category","encounter","multinomial_spline"
+"primary_bmi_ge30::icd_acuity/encounter/multinomial_spline",241,8.43769498715119e-15,2.22044604925031e-16,"assessed","primary_bmi_ge30","primary_bmi_ge30","five_category","encounter","multinomial_spline"
+"primary_bmi_ge30::icd_acuity_specified/encounter/multinomial_spline",241,9.88098491916389e-15,1.11022302462516e-16,"assessed","primary_bmi_ge30","primary_bmi_ge30","four_category","encounter","multinomial_spline"

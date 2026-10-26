@@ -1,0 +1,6 @@
+"panel","model_id","source_population_id","n_model","n_reference","status","reason"
+"A","primary::any_gas/encounter/spline","primary::C_any_gas_encounter",126074,126074,"successful",""
+"B","primary::abg/encounter/spline","primary::C_abg_encounter",71318,71318,"successful",""
+"C","primary::same_day_abg/encounter/multinomial_spline","primary::C_same_day_abg",53607,53607,"successful",""
+"D","primary::observation/abg/encounter","primary::C",380206,380206,"successful",""
+"D","primary::observation/vbg/encounter","primary::C",380206,380206,"successful",""

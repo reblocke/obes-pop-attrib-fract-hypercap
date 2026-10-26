@@ -1,0 +1,11 @@
+{
+  "status": "passed",
+  "checks": 1566,
+  "stratum_rows": 354,
+  "pooled_bands": 177,
+  "independent_formula": "Wilson binomial 95% using NormalDist().inv_cdf(.975); proportions M/N within setting and BMI band",
+  "reconciliation": "Sum setting N/M/H equals existing pooled evidence-by-BMI ledger",
+  "bundle_manifest_sha256": "7d7c71b1913c6ab8463200dd953b5494ce2c807c10674946c05b55a8f5599476",
+  "clinical_input_reads": 0,
+  "model_refits": 0
+}

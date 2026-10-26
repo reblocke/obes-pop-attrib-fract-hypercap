@@ -1,0 +1,8 @@
+{
+  "issue": "Arial regular lacks U+2082; caption-only CO2 subscript displayed as empty glyph",
+  "original_booklet_sha256": "e806cb0e342def24fb6af6a7acc64ed198de0221c1fd84949caf7fa660cefeb0",
+  "repair": "Use installed Arial Unicode font and check every caption character before export",
+  "font_sha256": "876af2cd4854644e7f3e7feb2f688997fdb3343c6df6693611209c9dfb47ccec",
+  "missing_characters_after_repair": [],
+  "scientific_figures_and_estimates_changed": false
+}

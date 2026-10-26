@@ -38,7 +38,7 @@ source keys and evidence, not an identical prior clinical run.
 The setting-adjusted analysis reuses schema-5 `encounter_type` from the authenticated
 original encounter list: EMER emergency and IMP inpatient. It is also an additive
 categorical adjustment in every model, with EMER reference. Recheck input/evidence
-hashes and setting completeness before the new run; the adjustment change alone
+hashes and setting completeness before each future run; the adjustment change alone
 does not require new preparation or upstream data. Historical source receipts
 retain their actual producer and review identities.
 
@@ -130,3 +130,15 @@ acceptance, numerical and visual receipts distinguish their review scopes.
 Historical comparison is retained alongside the exact numeric-transport correction;
 no new scientific BMI rule or upstream export was introduced. This qualification
 does not authorize inference to untested patients or establish causal identification.
+
+## Encounter-setting release evidence — 2026-10-26
+
+The [schema-14 reading packet](../results/2026-10-26-setting-adjusted/README.md)
+reuses the exact accepted all-BMI schema-5 input and reviewed manifest. All 15
+referenced evidence hashes were reauthenticated; fresh preflight reproduced all
+160 shared cohort nodes. No preparation, new extraction or upstream rebuild was
+performed. The 380,206-patient primary reference has 156,509 EMER and 223,697 IMP
+encounters, with no missing setting. All model/reference samples, event counts and
+numeric spline bases match the earlier run. The packet distinguishes reused
+source acceptance, fresh identity/preflight verification, clinical execution,
+numerical review and scoped visual review from investigator approval.

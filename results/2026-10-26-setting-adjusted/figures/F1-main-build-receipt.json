@@ -1,0 +1,19 @@
+{
+  "figure_id": "F1-main",
+  "clinical_input_reads": 0,
+  "model_refits": 0,
+  "width_mm": 190,
+  "height_mm": 250,
+  "dpi": 300,
+  "models": ["primary::any_gas/encounter/spline", "primary::abg/encounter/spline", "primary::same_day_abg/encounter/multinomial_spline", "primary::observation/abg/encounter", "primary::observation/vbg/encounter"],
+  "min_data_font_pt": 9,
+  "plotted_tables": ["probability_curves", "observation_curves", "distribution_bins", "model_registry", "cohort_nodes"],
+  "table_hashes": {
+    "probability_curves": "e9f332842655df0d37f96d2f853ecf8cf44e7439b2315fede0d96e0bc6f9dfd4",
+    "observation_curves": "f516dba5f2796480cf1a44941459a74120b5bc3415838a2445177188a2d7a7f5",
+    "distribution_bins": "89951ac89a9f6efe2708f2ee1a47a9bbe0744a797fa473a1ab011937dc76045e",
+    "model_registry": "4a4328325f7a7cc8bd2b5a5c2c5a0670a7c56224a05c66874eae16ba3621caeb",
+    "cohort_nodes": "df06ab01abac19f3f82a58cd47d8e7c84fd09e4462c8b075f33b0be1583097dd"
+  },
+  "visual_review": "pending"
+}
