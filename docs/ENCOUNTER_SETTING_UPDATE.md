@@ -41,3 +41,35 @@ Use input schema 5; new aggregate schema 14 and analysis identity
 Panel D uses “Portion with blood gas obtained”. Its caption defines obtained as a
 captured usable PCO₂ result; tests without usable captured results are unidentified.
 Scientific/visual approval of regenerated results remains separate. No abstract edit.
+
+## Execution and delivery — completed 2026-10-26
+
+Code was reviewed and squash-merged in [PR #32](https://github.com/reblocke/obes-pop-attrib-fract-hypercap/pull/32)
+at `a978145b84857d99fcfd280f67d83a04d9c9325c`. Source-boundary checks passed
+35/35; the complete artificial numerical/HTML/PDF E2E receipt passed. The original
+interrupted test invocation and successful documented resumption remain distinct
+in the work log; no skipped check is claimed as passed.
+
+A fresh clean Mini checkout reauthenticated the existing input/manifest and all
+15 evidence files. Preflight reproduced all 160 shared cohort nodes. One clinical
+estimation completed in 3,599.987 seconds, saved as
+`curve-analyze-20261026T001917-75549`. All 35 fitted positions include setting and
+EMER reference, including all six joint component fits; ICD capture remains the
+single constant position. The numerical reviewer passed 167 checks; independent
+comparison passed 15,558 sample/basis checks, and 1,566 raw setting-availability
+checks reproduced Wilson intervals and pooled counts.
+
+The [new reading packet](../results/2026-10-26-setting-adjusted/README.md) contains
+64 aggregate tables, scientific/audit HTML and PDFs, all scientific export formats,
+full old/new curves and BMI-30/40/50/PIF comparison ledgers. Every scientific figure
+and all 54 scientific PDF pages were visually inspected, including grayscale.
+All 8,902 audit pages received automated geometry/symbol checks, with 23 pages
+visually sampled; complete-table verification reconstructed 510,066 profile values.
+The 18-page figure booklet uses a glyph-checked Unicode caption font. All rendering
+and review used aggregates only, with zero clinical reads or model refits.
+
+Primary arterial PIF remains 1.01%; combined gas is 0.83% and ICD is 2.86%.
+Setting adjustment does not reverse the lower ascertainment probabilities at BMI
+40/50 than 30. Existing abstract prose was not revised. The private figure-only
+working packet is separate from earlier drafts. Investigator interpretation and
+approval of new exports remain pending; execution is not submission approval.

@@ -1,0 +1,32 @@
+{
+  "source_qualification": "Existing accepted source reused; input/manifest plus all 15 evidence hashes reauthenticated; fresh preflight reproduced all 160 shared cohort nodes",
+  "clinical_estimation": "One completed run from clean merged a978145; exact source retained",
+  "numerical_review": "167 registered checks, 15558 old/new sample/basis checks and 1566 independent setting-availability checks passed",
+  "model_positions": 36,
+  "model_status": {
+    "successful": 35,
+    "constant_outcome": 1
+  },
+  "constant_position": "primary::observation/icd/encounter: complete capture is 100%, not ICD positivity",
+  "setting_adjustment": "Every fitted binary and joint position includes setting; EMER reference / IMP inpatient; no interaction",
+  "rendering": "Complete HTML/PDF; zero clinical reads and model refits; immutable aggregate/source guards passed",
+  "complete_tables": {
+    "status": "passed",
+    "table_checks": 118,
+    "alias_mappings_reconstructed": 25468,
+    "summary_values_reconstructed": 510066,
+    "clinical_input_reads": 0,
+    "model_refits": 0,
+    "investigator_review": "not asserted"
+  },
+  "visual_review": "All 47 scientific figure identities in color/grayscale, every scientific PDF page and documented audit samples; automated audit checks cover every page",
+  "investigator_interpretation": "pending",
+  "figure_approval": "pending; layout preference is not approval of new exports",
+  "abstract_revision": "not performed; numerical refresh ledger only",
+  "submission_approval": "not granted",
+  "pdf_pages": {
+    "scientific": 54,
+    "complete_audit": 8902,
+    "figure_booklet": 18
+  }
+}

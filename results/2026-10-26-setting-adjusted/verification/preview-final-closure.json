@@ -1,0 +1,8 @@
+{
+  "status": "passed",
+  "files_identical": 211,
+  "scope": "The scientific PDF, HTML/assets and scientific exports inspected before audit completion are byte-identical to the completed render",
+  "render_receipt_exception": "The in-progress preview receipt is not reused; completed receipt is authoritative",
+  "clinical_input_reads": 0,
+  "model_refits": 0
+}

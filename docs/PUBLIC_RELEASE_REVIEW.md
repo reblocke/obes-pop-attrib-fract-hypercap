@@ -114,3 +114,14 @@ snapshots and their 441 manifest entries verified unchanged. No history rewrite
 or disclosure-permission change is part of this follow-up. Final package checks
 and review are recorded in WORKLOG and the release PR; no hosted CI or independent
 human approval is implied.
+
+## Encounter-setting aggregate follow-up — 2026-10-26
+
+The [new schema-14 packet](../results/2026-10-26-setting-adjusted/README.md) releases
+the owner-authorized setting-adjusted reports, figures and aggregate tables from
+one clean merged clinical run. It preserves the exact accepted input and every
+historical snapshot. Numerical/sample comparison, full-table reconstruction,
+scientific-page/figure inspection and scoped audit review have separate receipts.
+Private inputs, model objects, patient-level rows and ATS drafts are excluded.
+The [packet review states](../results/2026-10-26-setting-adjusted/review_status.json)
+retain pending investigator interpretation, figure approval and submission approval.

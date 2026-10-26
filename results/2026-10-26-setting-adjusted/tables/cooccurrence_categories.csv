@@ -1,0 +1,7 @@
+"category_id","n","N","status","definition","analysis_population_id"
+"no_hypercapnia",28606,53607,"qualified","No documented hypercapnia on co-observed days","primary"
+"without_acidemia",6200,53607,"qualified","Hypercapnia without documented same-day acidemia on any eligible day","primary"
+"with_acidemia",18801,53607,"qualified","Any eligible day with hypercapnia and acidemia; takes priority over other days","primary"
+"no_hypercapnia",10325,21748,"qualified","No documented hypercapnia on co-observed days","primary_bmi_ge30"
+"without_acidemia",2784,21748,"qualified","Hypercapnia without documented same-day acidemia on any eligible day","primary_bmi_ge30"
+"with_acidemia",8639,21748,"qualified","Any eligible day with hypercapnia and acidemia; takes priority over other days","primary_bmi_ge30"

@@ -1,0 +1,73 @@
+{
+  "time_utc": "2026-10-26T05:09:03.697361+00:00",
+  "status": "passed",
+  "scope": "Existing accepted typed input, reviewed manifest and every referenced evidence file reauthenticated; no preparation or upstream rebuild",
+  "input_sha256": "423ebf0d363abfbd5eb1a90a8599323f9dcef57534a96c1af73849fecb42a830",
+  "manifest_sha256": "c1b2227bfa928da6769526fabb400d1fda231584bacbc7212e0164752ebb127d",
+  "input_schema": 5,
+  "evidence": {
+    "lineage": {
+      "sha256": "e43af835292da4154d4996fb6b36c711631d45eac90c4bc3c36b94d8bc86f8db",
+      "matched": true
+    },
+    "fields": {
+      "sha256": "4e96b197230d6ec4f2466804c50a3f6e835f591cad1e1db5f767e7a34a453d84",
+      "matched": true
+    },
+    "population": {
+      "sha256": "dce1562636056e70e4782628bfaa3e4bbf6ea237abe0b1836c25b221ad3c7f4b",
+      "matched": true
+    },
+    "index_day": {
+      "sha256": "4e96b197230d6ec4f2466804c50a3f6e835f591cad1e1db5f767e7a34a453d84",
+      "matched": true
+    },
+    "selection": {
+      "sha256": "cb7e9d7bfb814d96c7174b290fae9818ba3aa24398f18f316dc6df5bd68e886e",
+      "matched": true
+    },
+    "rfs": {
+      "sha256": "d08bf9fe461ebfd6b509db29091dc894f451032da0cad4cd034b0f05492539ac",
+      "matched": true
+    },
+    "same_day_abg": {
+      "sha256": "61447e478f9a250ddcb52e450fdcee9113f2b1b544198b6bc3c7574f9622b1cc",
+      "matched": true
+    },
+    "icd_acuity": {
+      "sha256": "2561251d17f178cb7690eb49d381f274c1e4102990cce039c9d6401fb0fe995e",
+      "matched": true
+    },
+    "cohort_audit": {
+      "sha256": "70f641c01a724253c5e5c10a8e7bbd8163b7474254892d67d901317057c131f4",
+      "matched": true
+    },
+    "transport_repair": {
+      "sha256": "3851b479d794c8d67c8175a06fed73ec18449cfc014ef9ecc0e2aac6b4c98cb7",
+      "matched": true
+    },
+    "qualification": {
+      "sha256": "792fdfb5b57c477a794f3da545e76a72c50c036b1616ed5ddf1dd7a095bc1975",
+      "matched": true
+    },
+    "acceptance": {
+      "sha256": "155f525087f5ccab2c0f322505a6fc264446ec62bea47ba284498386cbe2b1c1",
+      "matched": true
+    },
+    "prior_comparison": {
+      "sha256": "80cefa26aff72fb617cc6bf8bea0b20d7cea8980df77c3970e6f059e82dd0829",
+      "matched": true
+    },
+    "numeric_transport": {
+      "sha256": "61fdb28b25573f4fc601681d687d503d82e8b41ad958ab1252322314e16a9767",
+      "matched": true
+    },
+    "transport_corrections": {
+      "sha256": "43660ed198b6032071d5e1e9171a72575be1630f5b200e303f0bf9febc8a8f09",
+      "matched": true
+    }
+  },
+  "source_acceptance": "2026-10-24 accepted source retained; fresh preflight follows",
+  "human_review": "No new human approval asserted",
+  "clinical_models_fitted": 0
+}

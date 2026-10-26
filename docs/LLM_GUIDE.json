@@ -1,6 +1,6 @@
 {
   "document_type": "llm_collaborator_reading_guide",
-  "updated": "2026-10-25",
+  "updated": "2026-10-26",
   "purpose": "Current human/LLM reading navigation, evidence boundaries and approval state. This is documentation, not a second analysis configuration.",
   "repository_paths_relative_to": "repository root",
   "authority": {
@@ -17,8 +17,8 @@
   },
   "reading_order": [
     "README.md",
-    "results/2026-10-24-all-bmi/README.md",
-    "results/2026-10-24-all-bmi/review_status.json",
+    "results/2026-10-26-setting-adjusted/README.md",
+    "results/2026-10-26-setting-adjusted/review_status.json",
     "docs/BMI_HYPERCAPNIA_TRIANGULATION_PLAN.md",
     "docs/SOURCE_CONTRACT.md",
     "config/bmi_hypercapnia_analysis.json"
@@ -28,7 +28,7 @@
     "analysis_id": "bmi_hypercapnia_rfs_curve_audit_v9",
     "input_schema": 5,
     "aggregate_schema": 14,
-    "clinical_status": "setting-adjusted implementation; new clinical estimation and review pending; current_results is the verified earlier v8 snapshot",
+    "clinical_status": "One setting-adjusted clinical run completed; numerical and scoped visual review passed; investigator interpretation/figure approval pending",
     "index_rule": "First adult 2022 original ED/inpatient encounter with any valid available BMI before gases/adjustment/RFS",
     "secondary": "BMI >=30 subset at the new primary index; no later substitution",
     "endpoint_families": [
@@ -44,19 +44,19 @@
     "adjustment": "Fixed BMI spline or registered linear BMI; linear age; inherited sex, race/ethnicity, geographic region; categorical index encounter setting EMER reference / IMP inpatient; no interaction"
   },
   "current_results": {
-    "status": "verified earlier all-BMI v8 reading snapshot; does not include encounter-setting adjustment; replacement pending",
-    "package_directory": "results/2026-10-24-all-bmi",
-    "readme": "results/2026-10-24-all-bmi/README.md",
-    "manifest": "results/2026-10-24-all-bmi/manifest.json",
-    "scientific_pdf": "results/2026-10-24-all-bmi/bmi_hypercapnia.pdf",
-    "audit_pdf": "results/2026-10-24-all-bmi/bmi_hypercapnia_audit.pdf",
-    "figure_booklet": "results/2026-10-24-all-bmi/key_figures.pdf",
-    "gallery": "results/2026-10-24-all-bmi/gallery.html",
-    "table_index": "results/2026-10-24-all-bmi/TABLES.md",
-    "review_status": "results/2026-10-24-all-bmi/review_status.json",
-    "run_id": "curve-analyze-20261024T123452-59248",
-    "bundle_manifest_sha256": "8787fb3900b56a27dda3170b474e150596e2de8dbe2e8e7437bba9ed562ba12c",
-    "software_commit": "75e55eee42979904a04cdb5a3a529ed15bfb6025",
+    "status": "Verified setting-adjusted v9 aggregate reading snapshot; investigator interpretation and new-figure approval pending",
+    "package_directory": "results/2026-10-26-setting-adjusted",
+    "readme": "results/2026-10-26-setting-adjusted/README.md",
+    "manifest": "results/2026-10-26-setting-adjusted/manifest.json",
+    "scientific_pdf": "results/2026-10-26-setting-adjusted/bmi_hypercapnia.pdf",
+    "audit_pdf": "results/2026-10-26-setting-adjusted/bmi_hypercapnia_audit.pdf",
+    "figure_booklet": "results/2026-10-26-setting-adjusted/key_figures.pdf",
+    "gallery": "results/2026-10-26-setting-adjusted/gallery.html",
+    "table_index": "results/2026-10-26-setting-adjusted/TABLES.md",
+    "review_status": "results/2026-10-26-setting-adjusted/review_status.json",
+    "run_id": "curve-analyze-20261026T001917-75549",
+    "bundle_manifest_sha256": "7d7c71b1913c6ab8463200dd953b5494ce2c807c10674946c05b55a8f5599476",
+    "software_commit": "a978145b84857d99fcfd280f67d83a04d9c9325c",
     "execution_limit": "Published snapshots are reading packages, not runnable bundles. make render requires the protected saved aggregate run."
   },
   "approval_state": {
@@ -82,7 +82,7 @@
     "release_review": "docs/PUBLIC_RELEASE_REVIEW.md",
     "visibility_change": "Owner authorized public visibility on 2026-10-24 after final audit and squash-merged release PR; live visibility is recorded by GitHub",
     "private_drafts": "reports/ATS Abstract 2027/ is local-only and ignored; do not add or publish its contents",
-    "current_package_authorization": "Owner explicitly authorized all-BMI clinical execution and aggregate delivery/release in the current implementation request; raw data remain excluded."
+    "current_package_authorization": "Owner explicitly authorized this setting-adjusted clinical run and reviewed aggregate follow-up release; raw data and ATS drafts remain excluded."
   },
   "numerical_navigation": {
     "verify_first": "Check clinical mode, analysis/schema identity and manifest.files[path].sha256. Record the source bundle manifest identity. Do not infer results from remembered values or artificial data.",
@@ -129,6 +129,12 @@
         "icd_acuity_observed_bands.csv",
         "icd_acuity_contrasts.csv",
         "icd_acuity_probability_covariance.csv"
+      ],
+      "encounter_setting": [
+        "encounter_setting_audit.csv",
+        "factor_references.csv",
+        "coefficients.csv",
+        "coefficient_covariance.csv"
       ]
     },
     "retain_for_every_claim": [
@@ -143,7 +149,8 @@
     ],
     "scale_rules": {
       "probability_and_PIF_fields": "Stored as fractions: multiply by 100 when expressing percentages, including their confidence limits.",
-      "difference_per1000_fields": "Already scaled per 1,000: do not multiply by 100 or 1,000 again."
+      "difference_per1000_fields": "Already scaled per 1,000: do not multiply by 100 or 1,000 again.",
+      "pct_shifted": "Already a percentage from 0 to 100; do not multiply by 100 again"
     },
     "guards": [
       "Scalar outcome/window filters alone may also select matched-sample checks; use exact model IDs.",
@@ -153,9 +160,12 @@
       "Retain explicit nonestimable, failed, unavailable and sparse-support states.",
       "Cohort population_id can identify a stage within analysis_population_id; the fields are not interchangeable."
     ],
-    "table_directory": "results/2026-10-24-all-bmi/tables",
-    "qualification": "results/2026-10-24-all-bmi/verification/qualification.json",
-    "prior_comparison": "results/2026-10-24-all-bmi/verification/prior-run-reconciliation-annotated.csv"
+    "table_directory": "results/2026-10-26-setting-adjusted/tables",
+    "qualification": "results/2026-10-26-setting-adjusted/verification/source-reauthentication.json",
+    "prior_comparison": "results/2026-10-26-setting-adjusted/verification/comparison-receipt.json",
+    "fresh_preflight": "results/2026-10-26-setting-adjusted/verification/fresh-preflight.json",
+    "numerical_refresh_ledger": "results/2026-10-26-setting-adjusted/verification/abstract-values-to-refresh.csv",
+    "setting_audit": "N is setting \u00d7 original BMI-band denominator; M usable, H positive among usable; observation=M/N with Wilson limits. n_reference is the full adjustment-complete population."
   },
   "interpretation_guardrails": [
     "Select the first valid-available-BMI index; derive secondary populations only afterward. New indexes may differ from historical obese indexes.",
@@ -220,11 +230,18 @@
       "manifest": "results/2026-10-24-icd-bias-reduced/manifest.json",
       "purpose": "Last historical BMI-restricted integrated analysis; Firth ICD model",
       "rule": "Use only that dated design and approval state."
+    },
+    {
+      "directory": "results/2026-10-24-all-bmi",
+      "readme": "results/2026-10-24-all-bmi/README.md",
+      "manifest": "results/2026-10-24-all-bmi/manifest.json",
+      "purpose": "Earlier all-valid-BMI v8 analysis without encounter-setting adjustment; unchanged comparison source",
+      "rule": "Use only its dated adjustment and review state; never relabel as setting-adjusted."
     }
   ],
   "current_visual_revision": {
-    "directory": "artifacts/triangulation/encounter-setting-20261025",
-    "availability": "local implementation directory; setting-adjusted clinical exports pending",
+    "directory": "results/2026-10-26-setting-adjusted",
+    "availability": "Tracked aggregate reading packet with reviewed native/assembled exports",
     "figure_id": "F1-main",
     "panel_order": [
       "combined gas hypercapnia",
@@ -237,8 +254,8 @@
       40
     ],
     "ascertainment": "At least one valid ordinary unadjusted specimen-authenticated PCO2 result during the fixed encounter; not every order or draw",
-    "models": "All registered model families refitted with additive encounter setting under schema 14; execution pending",
-    "approval": "owner-requested layout; actual export review recorded separately; investigator export approval pending",
+    "models": "All 35 fitted registered positions include additive setting; constant ICD capture remains explicit; source/samples/bases unchanged",
+    "approval": "Implementing-agent numerical/visual review passed; investigator interpretation and export approval pending",
     "panel_d_y_label": "Portion with blood gas obtained",
     "obtained_definition": "Captured usable PCO2 result; tests without usable captured results are not identified"
   }

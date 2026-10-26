@@ -1,0 +1,72 @@
+{
+  "analysis_id": "bmi_hypercapnia_rfs_curve_audit_v9",
+  "bundle_schema": 14,
+  "population_scope_id": "original_selected_encounters_v1",
+  "bmi_policy_id": "available_encounter_or_prior_bmi_v1",
+  "source_policy_id": "unadjusted_pco2_v1",
+  "quantile_type": 7,
+  "knot_probabilities": [
+    0.05,
+    0.35,
+    0.65,
+    0.95
+  ],
+  "factor_references": {
+    "sex": "0",
+    "race_ethnicity": "0",
+    "location": "0",
+    "encounter_type": "EMER"
+  },
+  "grid_step": 0.25,
+  "bmi_bin_width": 5,
+  "chunk_size": 10000,
+  "sparse_n": 30,
+  "sparse_events": 5,
+  "ecdf_grid_size": 101,
+  "kde_min_n": 50,
+  "kde_min_distinct": 10,
+  "fixed_bmi_contrast": [
+    40,
+    45
+  ],
+  "policies": [
+    {
+      "policy_id": "bmi_gt30_minus1_v1",
+      "enabled": true,
+      "threshold": 30,
+      "transformation": "minus_one",
+      "target": "model_observed",
+      "label": "One-unit BMI reduction for observed BMI >30; no floor"
+    }
+  ],
+  "maxit": 25,
+  "multinomial_maxit": 1000,
+  "standardization_policy": "outcome_observed_v1",
+  "rfs_policy_id": "historical_source_membership_v1",
+  "analysis_populations": [
+    "primary",
+    "primary_bmi_ge30",
+    "primary_current",
+    "all_obesity"
+  ],
+  "full_model_populations": [
+    "primary"
+  ],
+  "descriptive_populations": [
+    "obesity_only"
+  ],
+  "diagnostic_bin_width": 1,
+  "diagnostic_bmi_range": [
+    35,
+    55
+  ],
+  "same_day_abg_enabled": true,
+  "icd_acuity_enabled": true,
+  "icd_acuity_estimator": "firth_mean_bias_reduced_v1",
+  "icd_acuity_specified_sensitivity": true,
+  "component_populations": [
+    "primary",
+    "primary_bmi_ge30"
+  ],
+  "adjustment_set_id": "inherited_plus_encounter_setting_v1"
+}

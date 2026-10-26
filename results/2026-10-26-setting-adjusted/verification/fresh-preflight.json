@@ -1,0 +1,22 @@
+{
+  "mode": "preflight",
+  "source_status": "identity_bound_source_declarations_passed",
+  "code_identity": {
+    "commit": "a978145b84857d99fcfd280f67d83a04d9c9325c",
+    "tree": "a21caf28867ea6d80d816e93c711730a77658a34",
+    "working_tree_clean": true
+  },
+  "input_sha256": "423ebf0d363abfbd5eb1a90a8599323f9dcef57534a96c1af73849fecb42a830",
+  "manifest_sha256": "c1b2227bfa928da6769526fabb400d1fda231584bacbc7212e0164752ebb127d",
+  "clinical_models_fitted": 0,
+  "analysis_elapsed_seconds": 552.718,
+  "status": "passed",
+  "common_cohort_nodes": 160,
+  "changed_counts": [],
+  "source_reused": true,
+  "primary_N": 380206,
+  "primary_ABG_N": 71318,
+  "primary_combined_gas_N": 126074,
+  "primary_same_day_N": 53607,
+  "secondary_N": 175271
+}

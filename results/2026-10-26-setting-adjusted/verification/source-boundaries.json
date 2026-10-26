@@ -1,0 +1,172 @@
+{
+  "status": "passed",
+  "scope": "Artificial source boundaries; no clinical source qualification or human review",
+  "python": "existing isolated source-boundary runtime (python3); original executable path withheld",
+  "tests": [
+    {
+      "test": "test_icd_acuity.AcuitySourceBoundary.test_corrupt_records_fail",
+      "status": "passed"
+    },
+    {
+      "test": "test_icd_acuity.AcuitySourceBoundary.test_transport_to_flags",
+      "status": "passed"
+    },
+    {
+      "test": "test_original_population.OriginalPopulationChecks.test_captured_history_and_returns_cannot_expand_original_keys",
+      "status": "passed"
+    },
+    {
+      "test": "test_original_population.OriginalPopulationChecks.test_independent_qualification_rejects_added_history_key",
+      "status": "passed"
+    },
+    {
+      "test": "test_original_population.OriginalPopulationChecks.test_manifest_cannot_relabel_broader_mapping_as_original",
+      "status": "passed"
+    },
+    {
+      "test": "test_original_population.OriginalPopulationChecks.test_original_first_flag_is_verified_not_used_as_bmi_eligibility",
+      "status": "passed"
+    },
+    {
+      "test": "test_original_population.OriginalPopulationChecks.test_original_membership_requires_matching_captured_setting",
+      "status": "passed"
+    },
+    {
+      "test": "test_preparation.PreparationChecks.test_adjusted_and_total_co2_never_enter_primary",
+      "status": "passed"
+    },
+    {
+      "test": "test_preparation.PreparationChecks.test_expanded_coverage_and_original_keys",
+      "status": "passed"
+    },
+    {
+      "test": "test_preparation.PreparationChecks.test_explicit_units_and_numeric_missingness",
+      "status": "passed"
+    },
+    {
+      "test": "test_preparation.PreparationChecks.test_full_source_hash_receipt_reuse_requires_exact_identity_and_digest",
+      "status": "passed"
+    },
+    {
+      "test": "test_preparation.PreparationChecks.test_identity_and_failure_receipts",
+      "status": "passed"
+    },
+    {
+      "test": "test_preparation.PreparationChecks.test_incomplete_or_duplicate_stream_cannot_be_accepted",
+      "status": "passed"
+    },
+    {
+      "test": "test_preparation.PreparationChecks.test_mapped_csv_preserves_stored_float32_values",
+      "status": "passed"
+    },
+    {
+      "test": "test_preparation.PreparationChecks.test_maxima_testing_and_calendar_day_reconcile",
+      "status": "passed"
+    },
+    {
+      "test": "test_preparation.PreparationChecks.test_reader_pin_and_restricted_output_guard",
+      "status": "passed"
+    },
+    {
+      "test": "test_preparation.PreparationChecks.test_retired_population_schema_rejected_before_source_access",
+      "status": "passed"
+    },
+    {
+      "test": "test_preparation.PreparationChecks.test_strict_validity_bounds_and_inclusive_outcome_thresholds",
+      "status": "passed"
+    },
+    {
+      "test": "test_preparation.PreparationChecks.test_typed_R_roundtrip_preserves_keys_dates_missingness_and_precision",
+      "status": "passed"
+    },
+    {
+      "test": "test_preparation.PreparationChecks.test_unadjusted_specimens_and_conflicts",
+      "status": "passed"
+    },
+    {
+      "test": "test_rfs_enrichment.RfsMetadataTests.test_dictionary_rejected",
+      "status": "passed"
+    },
+    {
+      "test": "test_rfs_enrichment.RfsMetadataTests.test_duplicate_rejected",
+      "status": "passed"
+    },
+    {
+      "test": "test_rfs_enrichment.RfsMetadataTests.test_flags_follow_exact_encounter_not_patient",
+      "status": "passed"
+    },
+    {
+      "test": "test_rfs_enrichment.RfsMetadataTests.test_uncovered_rejected",
+      "status": "passed"
+    },
+    {
+      "test": "test_rfs_enrichment.RfsMetadataTests.test_unknown_not_zero",
+      "status": "passed"
+    },
+    {
+      "test": "test_same_day_abg.CooccurrenceBoundary.test_no_cross_date_or_cross_key_linkage",
+      "status": "passed"
+    },
+    {
+      "test": "test_same_day_abg.CooccurrenceBoundary.test_partial_dates_and_measurements",
+      "status": "passed"
+    },
+    {
+      "test": "test_same_day_abg.CooccurrenceBoundary.test_record_identity_duplicates_and_conflicts",
+      "status": "passed"
+    },
+    {
+      "test": "test_same_day_abg.CooccurrenceBoundary.test_specimen_units_and_validity",
+      "status": "passed"
+    },
+    {
+      "test": "test_same_day_abg.CooccurrenceBoundary.test_thresholds_and_multiple_values",
+      "status": "passed"
+    },
+    {
+      "test": "test_same_day_abg.CooccurrenceBoundary.test_unavailable_is_not_assessed_zero",
+      "status": "passed"
+    },
+    {
+      "test": "test_source_qualification.IndependentSourceChecks.test_components_reconcile_independently_and_detect_corruption",
+      "status": "passed"
+    },
+    {
+      "test": "test_source_qualification.IndependentSourceChecks.test_gas_specimens_later_day_and_captured_absence",
+      "status": "passed"
+    },
+    {
+      "test": "test_source_qualification.IndependentSourceChecks.test_known_missing_bmi_uncertain_setting_and_index_ties",
+      "status": "passed"
+    },
+    {
+      "test": "test_source_qualification.IndependentSourceChecks.test_qualification_cannot_rebind_another_preparation_config",
+      "status": "passed"
+    }
+  ],
+  "sources_unchanged": true,
+  "source_snapshot_scope": "Repository Python tests/adapters and R launchers/readers; not a claim that every file was imported",
+  "sources": {
+    "scripts/check_report_exports.py": "d157be7c026fa7f2b627ed0ccadba6a7721d69fefbdf5387a825aee16d2ddaf5",
+    "scripts/map_common_index_covariates.py": "48a7a6bcd058597194d4b27ab11aa93bb4de0a71aaf7200bc420f29f433b686b",
+    "scripts/original_encounter_population.py": "23cbe4043cb6b5072168689da60f70cf4b4862cd7d8e1c802bab032601e93546",
+    "scripts/prepare_common_index_input.py": "d04f40ef335ea9b840e78f3a5efca6d20c194ab35ecf4ab443baceabc8eaa292",
+    "scripts/qualify_common_index_source.py": "4675f5b90b511609a8e598ec6015fe9e4ce0876f281df617ce5042201b188e34",
+    "scripts/read_source_csv.R": "64abef167545ad977c66899f228a4c8270bb566fa3b4b6e5369bcf3fc626068c",
+    "scripts/render_bmi_hypercapnia.R": "74a2a73e7d4c06440331de0e3597c7e682d6bc8dfb8fcab846f13d93e74105e5",
+    "scripts/review_bmi_run.R": "42bd937db5bd0016075be8e06892a53f460d079368f816c8126f6f6c13b107fb",
+    "scripts/run_bmi_hypercapnia.R": "2bc3a5643d29cc6974b6be03a0d297e32c6a38905de608df2a1aeaf03b05d09a",
+    "scripts/select_common_index_mapping.R": "20bbbfecd0b83449c6d507a401f3f8306212cb3211f2974c9f996054e6f8ad10",
+    "scripts/source_components.py": "ef307c18a29fdf885d5a225252956c59b2292dc370d9444d30261e53204423e2",
+    "scripts/write_common_index_input.R": "da605456de874073347830b6215013c5e77d2543e99ed788ff8172e24a8fc84b",
+    "tests/run_source_checks.py": "2d7664f642b4ab3fad76477514439c4d875cddde5218f5f7d774c740aae7582a",
+    "tests/test_icd_acuity.py": "b3ce5c2b2c6f8c75134d0ab7194da6e0b635f7898a5905f20a9ce3fef6f671eb",
+    "tests/test_original_population.py": "28d683a563a71ab1acf2fe1c35cf676d7f5d6b69aebcbd2902afbca8585319ed",
+    "tests/test_preparation.py": "3a0ac94f9245d03b58e0b7c01e029458642e671e6d51d87d42685a60a1f802de",
+    "tests/test_rfs_enrichment.py": "5060b52020a3084cb5d3965963f1c6641f296fe85fe7695e053b7764fed7ec3e",
+    "tests/test_same_day_abg.py": "bddf93346a5889608d5ab26c21a307916a6770186b2ed834796fc5010fb22160",
+    "tests/test_source_qualification.py": "7552834c8e481f972dd0e1cbe47e519bd662ed1bac71d48e0e48a5a191d8fb80"
+  },
+  "original_receipt_sha256": "b11c1d94c3465322896dec10bcec0a71722d3072d3bb73d2c6482f7330d37c82",
+  "publication_note": "Local workspace prefixes removed from receipt paths; scientific files are unchanged"
+}

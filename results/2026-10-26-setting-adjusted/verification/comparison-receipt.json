@@ -1,0 +1,19 @@
+{
+  "status": "passed",
+  "checks": 15558,
+  "failures": 0,
+  "source_input_unchanged": true,
+  "source_manifest_unchanged": true,
+  "new_bundle_manifest_sha256": "7d7c71b1913c6ab8463200dd953b5494ce2c807c10674946c05b55a8f5599476",
+  "prior_snapshot_manifest_sha256": "13948f1b8ba81af206a95bad52c21b3c43b02478de3d9e5735c3e82f471dd505",
+  "new_code_identity": {
+    "commit": "a978145b84857d99fcfd280f67d83a04d9c9325c",
+    "tree": "a21caf28867ea6d80d816e93c711730a77658a34",
+    "working_tree_clean": true
+  },
+  "clinical_input_reads": 0,
+  "model_refits": 0,
+  "comparison_source_sha256": "01b581829f2fe59c1fb2fb199e3d2d53b98a98aca4b782934a439fc5a2e2dcfb",
+  "comparison_uncertainty": "Old/new differences are descriptive; no cross-model difference interval is inferred",
+  "investigator_review": "pending"
+}

@@ -1,0 +1,2 @@
+"policy_id","enabled","threshold","transformation","target","label","analysis_population_id"
+"bmi_gt30_minus1_v1",TRUE,30,"minus_one","model_observed","One-unit BMI reduction for observed BMI >30; no floor","combined"

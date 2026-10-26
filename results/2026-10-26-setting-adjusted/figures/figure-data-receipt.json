@@ -1,0 +1,15 @@
+{
+  "same_saved_values": true,
+  "clinical_reads": 0,
+  "model_refits": 0,
+  "visual_inspection": "pending",
+  "populations": [
+    "primary",
+    "primary_bmi_ge30",
+    "primary_current",
+    "all_obesity"
+  ],
+  "descriptive_populations": [
+    "obesity_only"
+  ]
+}
