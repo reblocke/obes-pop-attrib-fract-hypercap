@@ -7,7 +7,11 @@ triangulation_columns <- c(
   "has_abg", "has_vbg", "abg_pco2", "vbg_pco2", "icd_hypercapnia"
 )
 
-triangulation_adjustment <- c("bmi", "age_at_encounter", "sex", "race_ethnicity", "location")
+# The same additive adjustment is used for every binary and joint model.
+bmi_adjustment_covariates <- c("age_at_encounter", "sex", "race_ethnicity", "location", "encounter_type")
+bmi_adjustment_factors <- setdiff(bmi_adjustment_covariates, "age_at_encounter")
+bmi_factor_contrasts <- setNames(as.list(rep("contr.treatment",length(bmi_adjustment_factors))),bmi_adjustment_factors)
+triangulation_adjustment <- c("bmi", bmi_adjustment_covariates)
 
 triangulation_index_day_columns <- c(
   "abg_pco2_index_day", "vbg_pco2_index_day",

@@ -47,6 +47,20 @@ tryCatch({
   check("independent bias reduction verification", {
     utils::write.csv(e2e_icd_bias_reduction(),file.path(out,"bias-reduction-oracle.csv"),row.names=FALSE)
   })
+  check("complete Unicode tables retain text with bounded formatting cost", {
+    rows <- rep('primary & BMI ≥30 & C|abg/encounter & 0123456789abcdef0123456789abcdef & 0.123456789 \\\\',1600)
+    text <- paste(rows,collapse="\n")
+    expected <- paste(bmi_break_table_tokens(rows),collapse="\n")
+    # Exercise the formatter used by the report writer, preserving every byte.
+    small <- system.time(bmi_break_table_tokens(paste(rows[1:800],collapse="\n")))[['elapsed']]
+    large <- system.time(actual <- bmi_break_table_tokens(text))[['elapsed']]
+    stopifnot(identical(as.character(actual),expected))
+    writeLines(actual,file.path(out,"unicode-table-formatted.tex"))
+    utils::write.csv(data.frame(rows=c(800,1600),elapsed=c(small,large)),file.path(out,"unicode-table-format-timing.csv"),row.names=FALSE)
+    # A loose scaling bound is only enforced for measurable work; tiny noisy
+    # timings cannot independently establish a performance regression.
+    if(small>.1)stopifnot(large/small<3.5)
+  })
   if (!length(args)) {
     message("Running public fixture and both complete reports; log: ",file.path(out,"run.log"))
     log <- command("scripts/run_bmi_hypercapnia.R","fixture",file.path(out,"run.log"))
@@ -97,10 +111,92 @@ tryCatch({
       !any(a$numerical_reconciliation$passed %in% FALSE))
   })
 
+  check("nested gas-flow exports agree with independent fixed indexes", {
+    q <- e2e_indexes(make_bmi_curve_fixture());q <- q[q$group=="primary",]
+    c <- q[complete.cases(q[c("bmi","age_at_encounter","sex","race_ethnicity","location","encounter_type")]),]
+    expected <- c(primary=nrow(q),adjustment_complete=nrow(c),incomplete_adjustment=nrow(q)-nrow(c),
+      gas=sum(!is.na(c$any_gas_encounter)),no_gas=sum(is.na(c$any_gas_encounter)),
+      arterial=sum(!is.na(c$abg_encounter)),
+      venous_only=sum(is.na(c$abg_encounter)&!is.na(c$vbg_encounter)),
+      coobserved=sum(c$same_day_abg_state=="coobserved_day"),
+      no_coobserved=sum(!is.na(c$abg_encounter)&c$same_day_abg_state!="coobserved_day"))
+    # This fixture independently supplies dual-specimen, normal-gas and
+    # hypercapnic/nonacidemic patients, so positive-only filtering cannot pass.
+    stopifnot(sum(!is.na(c$abg_encounter)&!is.na(c$vbg_encounter))>0,
+      sum(c$same_day_abg_state=="coobserved_day"&c$hypercapnia_coobserved==0,na.rm=TRUE)>0,
+      sum(c$same_day_abg_state=="coobserved_day"&c$hypercapnia_coobserved==1&
+        c$hypercapnia_acidemia_same_day==0,na.rm=TRUE)>0)
+    folder <- file.path(out,"primary-gas-flow")
+    bmi_primary_gas_figure(bundle,folder)
+    display <- utils::read.csv(file.path(folder,"primary-gas-flow-display.csv"))
+    stopifnot(!anyDuplicated(display$stage_id),setequal(display$stage_id,names(expected)))
+    e2e_near(display$n[match(names(expected),display$stage_id)],expected)
+    pdf <- system2("pdftotext",c(shQuote(file.path(folder,"F0-primary-gas.pdf")),"-"),stdout=TRUE)
+    stopifnot(is.null(attr(pdf,"status")),!any(grepl("BMI",pdf,fixed=TRUE)))
+    joined <- gsub("[[:space:]]","",paste(pdf,collapse=""))
+    for(n in unique(expected[setdiff(names(expected),"adjustment_complete")]))
+      stopifnot(grepl(format(n,big.mark=",",trim=TRUE,scientific=FALSE),joined,fixed=TRUE))
+    unavailable <- bundle
+    ids <- unavailable$analysis$cohort_nodes$population_id %in%
+      paste0("primary::",c("C_same_day_abg","no_coobserved_abg"))
+    unavailable$analysis$cohort_nodes$n[ids] <- NA_real_
+    unavailable$analysis$cohort_nodes$status[ids] <- "unavailable"
+    bmi_primary_gas_figure(unavailable,file.path(folder,"unavailable"))
+    pending <- utils::read.csv(file.path(folder,"unavailable","primary-gas-flow-display.csv"))
+    stopifnot(all(is.na(pending$n[pending$stage_id %in% c("coobserved","no_coobserved")])),
+      all(pending$status[pending$stage_id %in% c("coobserved","no_coobserved")]=="unavailable"))
+    bad <- bundle
+    bad$analysis$cohort_nodes$n[bad$analysis$cohort_nodes$population_id=="primary::C_abg_encounter"] <- expected['gas']+1
+    rejected <- tryCatch({bmi_primary_gas_figure(bad,file.path(folder,"invalid"));FALSE},error=function(e)TRUE)
+    stopifnot(rejected)
+    utils::write.csv(data.frame(stage_id=names(expected),independent_n=unname(expected),
+      exported_n=display$n[match(names(expected),display$stage_id)]),
+      file.path(out,"independent-gas-flow-checks.csv"),row.names=FALSE)
+  })
+
   # A copied aggregate bundle is sufficient; no fixture/raw input is persisted.
   aggregate_only <- file.path(out,"aggregate-only")
   dir.create(aggregate_only)
   stopifnot(all(file.copy(file.path(run,c(names(bundle$manifest$files),"bundle_manifest.json")),aggregate_only)))
+  check("F1-main panel identities, saved values, frequencies and unavailable states", {
+    folder <- file.path(out,"main-figure");bmi_main_relationship_figure(bundle,folder)
+    panels <- read.csv(file.path(folder,"F1-main-panels.csv"))
+    expected_ids <- c("primary::any_gas/encounter/spline","primary::abg/encounter/spline",
+      "primary::same_day_abg/encounter/multinomial_spline",
+      "primary::observation/abg/encounter","primary::observation/vbg/encounter")
+    stopifnot(identical(panels$model_id,expected_ids),identical(panels$panel,c("A","B","C","D","D")))
+    values <- read.csv(file.path(folder,"F1-main-landmarks.csv"))
+    stopifnot(nrow(values)==12L,setequal(values$bmi,c(30,40)))
+    for(i in seq_len(nrow(values))) {
+      source <- if(values$panel[i]=="D")bundle$analysis$observation_curves else bundle$analysis$probability_curves
+      row <- source[source$model_id==values$model_id[i] & source$outcome_id==values$outcome_id[i] & source$bmi==values$bmi[i],]
+      stopifnot(nrow(row)==1L)
+      for(field in c("probability","conf_low","conf_high","n_model","n_reference"))e2e_near(values[[field]][i],row[[field]])
+    }
+    counts <- read.csv(file.path(folder,"F1-main-frequencies.csv"))
+    for(panel in c("A","B","C","D")) {
+      d <- counts[counts$panel==panel,];e2e_near(sum(d$n),unique(panels$n_reference[panels$panel==panel]))
+    }
+    d <- counts[counts$panel=="D",];stopifnot(all(d$source_population_id=="primary::C"))
+    # The saved ABG model includes dual-specimen patients: compare its full N,
+    # independently reconstructed above, rather than constructing a new subset.
+    q <- e2e_indexes(make_bmi_curve_fixture());q <- q[q$group=="primary",]
+    c <- q[complete.cases(q[c("bmi","age_at_encounter","sex","race_ethnicity","location","encounter_type")]),]
+    e2e_near(panels$n_model[panels$panel=="B"],sum(!is.na(c$abg_encounter)))
+    printed <- read.csv(file.path(folder,"F1-main-printed-landmarks.csv"))
+    stopifnot(nrow(printed)==6L,all(c("bmi30","bmi40") %in% names(printed)))
+    pdf <- paste(system2("pdftotext",c(shQuote(file.path(folder,"F1-main.pdf")),"-"),stdout=TRUE),collapse=" ")
+    stopifnot(grepl("BMI 40",pdf,fixed=TRUE),!grepl("BMI 50",pdf,fixed=TRUE))
+    stopifnot(grepl("Portion with blood gas obtained",gsub("[[:space:]]+"," ",pdf),fixed=TRUE))
+    unavailable <- bundle
+    ix <- unavailable$analysis$model_registry$model_id==expected_ids[5]
+    unavailable$analysis$model_registry$status[ix] <- "separation"
+    unavailable$analysis$model_registry$failure_reason[ix] <- "Artificial unavailable VBG model"
+    bmi_main_relationship_figure(unavailable,file.path(folder,"unavailable"))
+    failed <- read.csv(file.path(folder,"unavailable/F1-main-panels.csv"))
+    stopifnot(failed$status[failed$model_id==expected_ids[5]]=="separation")
+  })
+
   source_files <- c("R/reporting.R","R/report_views.R","R/rfs_reporting.R","scripts/render_bmi_hypercapnia.R",
     "reports/bmi_hypercapnia.qmd","reports/bmi_hypercapnia_audit.qmd","reports/bmi_report.css","reports/table_passthrough.R")
   reviews <- list.dirs(file.path(run,"reviews"),recursive=FALSE,full.names=TRUE)
@@ -120,6 +216,10 @@ tryCatch({
   receipt$review <- normalizePath(review,mustWork=TRUE)
   check("aggregate-only report and complete table exports",{
     r <- jsonlite::read_json(file.path(review,"render-receipt.json"),simplifyVector=TRUE)
+    stopifnot(dir.exists(r$report_input_directory),
+      startsWith(normalizePath(r$report_input_directory),normalizePath(review)))
+    for(name in c("bmi_hypercapnia.qmd","bmi_hypercapnia_audit.qmd","bmi_report.css"))
+      stopifnot(identical(tri_sha256(file.path(r$report_input_directory,name)),tri_sha256(file.path("reports",name))))
     stopifnot(r$status=="completed",r$clinical_input_reads==0,r$model_refits==0,r$bundle_unchanged,r$sources_unchanged)
     a <- bundle$analysis
     coverage <- utils::read.csv(file.path(review,"audit-table-coverage.csv"),stringsAsFactors=FALSE)
@@ -156,6 +256,7 @@ tryCatch({
     captions <- utils::read.csv(file.path(review,"figures/captions.csv"),stringsAsFactors=FALSE)
     normalize <- function(x)gsub("[^[:alnum:]]","",tolower(gsub("₂","2",paste(x,collapse=" "),fixed=TRUE)))
     expected <- vapply(as.vector(outer(c("primary","primary_bmi_ge30"),c("S1-same-day-ABG","S2-ICD-acuity","S2-ICD-specified","S2-ICD-observed"),paste,sep="/")),function(id)normalize(captions$caption[captions$figure_id==id]),character(1))
+    expected <- c(expected,normalize(captions$caption[captions$figure_id=="F1-main"]))
     stopifnot(nzchar(expected))
     for(name in c("bmi_hypercapnia","bmi_hypercapnia_audit")) {
       text <- system2("pdftotext",c(shQuote(file.path(review,paste0(name,".pdf"))),"-"),stdout=TRUE)
@@ -169,7 +270,7 @@ tryCatch({
       path <- file.path(review,"figures",paste0(id,".",ext))
       stopifnot(file.exists(path),file.info(path)$size>0)
     }
-    required <- c("RFS-flow","RFS-evidence",as.vector(outer(c("primary","primary_bmi_ge30"),c("S1-same-day-ABG","S2-ICD-acuity","S2-ICD-specified","S2-ICD-observed","F1-A","F1-B","F1-C","F2","F2-bands"),paste,sep="/")))
+    required <- c("F1-main","F0-primary-gas","RFS-flow","RFS-evidence",as.vector(outer(c("primary","primary_bmi_ge30"),c("S1-same-day-ABG","S2-ICD-acuity","S2-ICD-specified","S2-ICD-observed","F1-A","F1-B","F1-C","F2","F2-bands"),paste,sep="/")))
     stopifnot(all(required %in% captions$figure_id),all(file.exists(file.path(review,"figures",paste0(required,".jpg")))))
     display <- utils::read.csv(file.path(review,"figures/rfs-evidence-display.csv"))
     displayed <- display[display$displayed,]
@@ -178,6 +279,18 @@ tryCatch({
     for (i in seq_len(nrow(displayed))) {
       e2e_near(displayed$N[i],nrow(q));e2e_near(displayed$M[i],sum(!is.na(q[[paste0(displayed$outcome_id[i],"_encounter")]])))
     }
+  })
+  check("scientific gas flow and complete audit flows survive assembly", {
+    captions <- utils::read.csv(file.path(review,"figures/captions.csv"),stringsAsFactors=FALSE)
+    normalize <- function(x)gsub("[^[:alnum:]]","",tolower(gsub("₂","2",paste(x,collapse=" "),fixed=TRUE)))
+    texts <- lapply(c("bmi_hypercapnia","bmi_hypercapnia_audit"),function(name)
+      normalize(system2("pdftotext",c(shQuote(file.path(review,paste0(name,".pdf"))),"-"),stdout=TRUE)))
+    caption <- function(id)normalize(captions$caption[match(id,captions$figure_id)])
+    stopifnot(all(vapply(texts,function(text)grepl(caption("F0-primary-gas"),text,fixed=TRUE),logical(1))),
+      !grepl(caption("combined/F0-main"),texts[[1]],fixed=TRUE),
+      !grepl(caption("RFS-flow"),texts[[1]],fixed=TRUE),
+      grepl(caption("combined/F0-main"),texts[[2]],fixed=TRUE),
+      grepl(caption("RFS-flow"),texts[[2]],fixed=TRUE))
   })
   check("printed figure probabilities and confidence limits",{
     normalize_text <- function(text) gsub("[[:space:]]+","",gsub("\u2212","-",paste(text,collapse=""),fixed=TRUE))

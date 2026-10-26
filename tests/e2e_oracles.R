@@ -64,7 +64,7 @@ e2e_saved_values <- function(bundle, raw) {
   a <- bundle$analysis
   for(name in names(a))if("model_id" %in% names(a[[name]]))a[[name]]<-a[[name]][!grepl("::(same_day_abg|icd_acuity|icd_acuity_specified)/",a[[name]]$model_id),,drop=FALSE]
   config <- bundle$config; q <- e2e_indexes(raw)
-  complete <- complete.cases(q[c("bmi", "age_at_encounter", "sex", "race_ethnicity", "location")])
+  complete <- complete.cases(q[c("bmi", "age_at_encounter", "sex", "race_ethnicity", "location", "encounter_type")])
   c <- q[complete, , drop=FALSE]
   e2e_near(a$cohort_nodes$n[a$cohort_nodes$population_id == "combined::Q"], nrow(q))
   for (group in c("primary", "obesity_only", "unresolved")) {
@@ -110,8 +110,8 @@ e2e_saved_values <- function(bundle, raw) {
     z <- a$policy_totals[a$policy_totals$model_id==row$model_id,]
     failure <- if(!nrow(d))"no_evaluable_sample"else if(length(unique(d$y))<2)"constant_outcome"else NULL
     if(is.null(failure) && form=="spline" && (anyNA(knots)||anyDuplicated(knots)))failure <- "rank_deficiency"
-    for (name in c("sex", "race_ethnicity", "location")) {
-      levels <- sort(unique(d[[name]])); ref <- config$factor_references[[name]]
+    for (name in c("sex", "race_ethnicity", "location", "encounter_type")) {
+      levels <- sort(unique(d[[name]])); ref <- if(name=="encounter_type")"EMER"else config$factor_references[[name]]
       if(is.null(failure) && !ref %in% levels)failure <- "rank_deficiency"
       d[[name]] <- factor(d[[name]], levels=c(ref, setdiff(levels, ref)))
     }
@@ -123,7 +123,7 @@ e2e_saved_values <- function(bundle, raw) {
       data
     }
     formula <- as.formula(paste("y ~", if (form == "spline") "bmi_ns1 + bmi_ns2 + bmi_ns3" else "bmi",
-      "+ age_at_encounter + sex + race_ethnicity + location"))
+      "+ age_at_encounter + sex + race_ethnicity + location + encounter_type"))
     if(is.null(failure)) {
       x <- tryCatch(model.matrix(formula,add_basis(d)),error=function(e)NULL)
       if(is.null(x)||qr(x)$rank<ncol(x)||nrow(x)<=ncol(x))failure <- "rank_deficiency"
@@ -141,7 +141,7 @@ e2e_saved_values <- function(bundle, raw) {
     if(is.null(failure)) {
       fit <- suppressWarnings(glm(formula,data=add_basis(d),family=binomial(),na.action=na.fail,
         control=glm.control(maxit=config$maxit),
-        contrasts=list(sex="contr.treatment",race_ethnicity="contr.treatment",location="contr.treatment")))
+        contrasts=list(sex="contr.treatment",race_ethnicity="contr.treatment",location="contr.treatment",encounter_type="contr.treatment")))
       if(!fit$converged||fit$boundary)failure <- "convergence_failure"
     }
     if(!is.null(failure)) {
@@ -153,6 +153,15 @@ e2e_saved_values <- function(bundle, raw) {
       next
     }
     stopifnot(row$status %in% c("successful","fitted_with_concerns"))
+    stopifnot("encounter_typeIMP" %in% names(coef(fit)))
+    if(row$model_id=="primary::abg/encounter/spline") {
+      reduced <- update(fit,.~.-encounter_type,
+        contrasts=list(sex="contr.treatment",race_ethnicity="contr.treatment",location="contr.treatment"))
+      fixed <- add_basis(d); fixed$bmi <- 40; fixed <- add_basis(fixed)
+      delta <- mean(predict(fit,newdata=fixed,type="response"))-
+        mean(predict(reduced,newdata=fixed,type="response"))
+      stopifnot(abs(delta)>1e-3)
+    }
     cf <- a$coefficients[a$coefficients$model_id == row$model_id & a$coefficients$status == "estimated", ]
     stopifnot(setequal(cf$term,names(coef(fit))),!anyDuplicated(cf$term))
     e2e_near(cf$estimate[match(names(coef(fit)), cf$term)], coef(fit))
@@ -231,6 +240,23 @@ e2e_saved_values <- function(bundle, raw) {
       curve_points=nrow(curves), paired_scenarios=nrow(z), status="independent oracle matched")
   }
   stopifnot(length(fitted) > 0L)
+  # Independent stratified evidence denominators, including dual specimens.
+  audit <- bundle$analysis$encounter_setting_audit
+  stopifnot(nrow(audit)>0)
+  for(i in seq_len(nrow(audit))) {
+    r <- audit[i,];d <- c[if(r$analysis_population_id=="all_obesity")c$OBESITY_rfs %in% 1 else c$group=="primary",]
+    if(r$analysis_population_id=="primary_bmi_ge30")d <- d[d$bmi>=30,]
+    if(r$analysis_population_id=="primary_current")d <- d[d$current %in% TRUE,]
+    z <- d[d$encounter_type==r$setting & d$bmi>=r$bin_low & d$bmi<r$bin_high,]
+    y <- z[[paste0(r$outcome_id,"_encounter")]]
+    n <- nrow(z);m <- sum(!is.na(y));h <- sum(y==1,na.rm=TRUE)
+    e2e_near(c(r$N,r$M,r$H,r$n_reference),c(n,m,h,nrow(d)))
+    if(n) {
+      p <- m/n;zz <- qnorm(.975)
+      ci <- (p+zz^2/(2*n)+c(-1,1)*zz*sqrt(p*(1-p)/n+zz^2/(4*n*n)))/(1+zz^2/n)
+      e2e_near(c(r$observation,r$observation_low,r$observation_high),c(p,ci))
+    } else stopifnot(is.na(r$observation),is.na(r$observation_low),is.na(r$observation_high))
+  }
   do.call(rbind, fitted)
 }
 
@@ -276,6 +302,17 @@ e2e_adverse_cases <- function() {
   stopifnot(fit_bmi_model(spec,train,basis,cfg)$row$status == "separation")
   basis$status <- "duplicated_or_unavailable_knots"
   stopifnot(fit_bmi_model(spec,train,basis,cfg)$row$status == "rank_deficiency")
+  # Both an absent declared reference and a single reference-only level fail;
+  # no reduced model can silently omit setting.
+  for(setting in c("EMER","IMP")) {
+    one <- full;one$encounter_type <- setting
+    failed <- bmi_run_analysis(one,cfg)
+    stopifnot(!any(failed$model_registry$status %in% c("successful","fitted_with_concerns")),
+      all(grepl("encounter_type",failed$model_registry$formula_text,fixed=TRUE)))
+  }
+  uncertain <- d;uncertain$encounter_type[11] <- NA_character_
+  selected <- construct_cohort_and_memberships(uncertain)$members$Q
+  stopifnot(!d$patient_id[11] %in% selected$patient_id)
   pending <- bmi_run_analysis(make_bmi_curve_fixture(12,with_index_day=FALSE),cfg)
   z <- pending$cohort_nodes[grepl("index_calendar_day",pending$cohort_nodes$population_id), ]
   stopifnot(nrow(z)>0, all(is.na(z$n)))

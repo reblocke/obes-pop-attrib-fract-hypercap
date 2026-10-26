@@ -7,9 +7,7 @@ population identities. This document controls presentation and review scope.
 
 ## Comparisons to preserve
 
-- **F1-B:** BMI–hypercapnia probability, usable-evidence availability and patient
-  frequency across the observed BMI range. Mark BMI 30, retain pointwise intervals
-  and local sparse-support warnings. A/C remain layout alternatives.
+- **F1-main:** preferred primary four-panel relationship figure, ordered combined gas, nested arterial, stacked arterial components, then red ABG/blue VBG usable-evidence ascertainment. Each panel has its own reference-frequency strip. Print BMI 30/40 kg/m² estimates and intervals; retain C total uncertainty and D specimen-specific intervals. F1 A–C and existing secondary/supporting figures remain available.
 - **F2:** absolute observed/shifted burden on a common 0–1,000 scale beside signed
   original-BMI-band contributions. Print PIF, confidence limits and shifted share.
   BMI≤30 remains visible in baseline burden and contributes zero scenario change.
@@ -52,8 +50,8 @@ as separate states. New results do not inherit historical figure approval.
 
 ## Historical selection
 
-The owner selected B/F2 for the October 18 results. B remains the preferred
-relationship layout; the earlier A recommendation and schema-7 review are
+The owner selected B/F2 for the October 18 results. B was the preferred
+relationship layout; the October 25 F1-main request supersedes it for the primary analysis only; the earlier A recommendation and schema-7 review are
 historical. Their original exports and receipts remain in
 [the October 18 snapshot](../results/2026-10-18/README.md). Later same-day and ICD
 snapshots retain their own manifests and review states; see

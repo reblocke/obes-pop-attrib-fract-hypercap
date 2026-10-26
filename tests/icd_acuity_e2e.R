@@ -1,7 +1,7 @@
 # Independent classification/likelihood/gradient checks planned before production edits.
 e2e_icd_acuity <- function(bundle,raw,population="primary") {
   a<-bundle$analysis;id<-paste0(population,"::icd_acuity/encounter/multinomial_spline")
-  q<-e2e_indexes(raw);q<-q[q$group=="primary" & complete.cases(q[triangulation_adjustment]),]
+  q<-e2e_indexes(raw);q<-q[q$group=="primary" & complete.cases(q[c("bmi","age_at_encounter","sex","race_ethnicity","location","encounter_type")]),]
   if(population=="primary_bmi_ge30")q<-q[q$bmi>=30,,drop=FALSE]
   p<-q[q$icd_capture_state=="complete",]
   classes<-c("no_target","chronic_ohs","acute_chronic","acute","unspecified")
@@ -12,10 +12,11 @@ e2e_icd_acuity <- function(bundle,raw,population="primary") {
   e2e_near(a$icd_acuity_categories$n[a$icd_acuity_categories$analysis_population_id==population],tabulate(y,5))
   knots<-as.numeric(quantile(q$bmi,c(.05,.35,.65,.95),type=7))
   for(v in c("sex","race_ethnicity","location"))p[[v]]<-factor(p[[v]],levels=c("0",setdiff(sort(unique(p[[v]])),"0")))
+  p$encounter_type <- factor(p$encounter_type,levels=c("EMER","IMP"))
   design<-function(bmi) {
     d<-p;b<-splines::ns(bmi,knots=knots[2:3],Boundary.knots=knots[c(1,4)])
     for(k in 1:3)d[[paste0("bmi_ns",k)]]<-b[,k]
-    model.matrix(~bmi_ns1+bmi_ns2+bmi_ns3+age_at_encounter+sex+race_ethnicity+location,d)
+    model.matrix(~bmi_ns1+bmi_ns2+bmi_ns3+age_at_encounter+sex+race_ethnicity+location+encounter_type,d)
   }
   x<-design(p$bmi);scale<-apply(abs(x),2,max);z<-sweep(x,2,scale,"/")
   softmax<-function(beta,x) {eta<-cbind(0,x%*%matrix(beta,ncol=4));eta<-eta-apply(eta,1,max);pr<-exp(eta);pr/rowSums(pr)}

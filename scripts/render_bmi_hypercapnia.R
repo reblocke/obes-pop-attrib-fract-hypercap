@@ -37,12 +37,21 @@ if(nzchar(reuse)) {
   receipt$previous_render_receipt_sha256<-tri_sha256(file.path(reuse,"render-receipt.json"))
   receipt$figure_data_receipt_sha256<-tri_sha256(marker)
 } else bmi_export_figures(bundle,file.path(review,"figures"))
+# Quarto writes intermediate files beside its input. Give each fresh review its
+# own exact source copies so concurrent jobs cannot overwrite/clean each other.
+report_inputs<-file.path(review,"report-inputs");dir.create(report_inputs)
+for(name in c("bmi_hypercapnia.qmd","bmi_hypercapnia_audit.qmd","bmi_report.css")) {
+  original<-file.path(root,"reports",name);staged<-file.path(report_inputs,name)
+  if(!file.copy(original,staged)||!identical(tri_sha256(original),tri_sha256(staged)))stop("Report input staging failed: ",name)
+}
+receipt$report_input_directory<-report_inputs
+jsonlite::write_json(receipt,file.path(review,"render-receipt.json"),auto_unbox=TRUE,pretty=TRUE)
 Sys.setenv(BMI_RUN_DIR=run,BMI_REVIEW_DIR=review)
 formats<-if(format=="all")c("html","pdf")else format
 failures<-character()
 for(report in c("bmi_hypercapnia","bmi_hypercapnia_audit"))for(f in formats) {
   log<-file.path(review,paste0(report,"-",f,".log"))
-  status<-system2("quarto",c("render",shQuote(file.path(root,"reports",paste0(report,".qmd"))),"--to",f,"--output-dir",shQuote(review)),stdout=log,stderr=log)
+  status<-system2("quarto",c("render",shQuote(file.path(report_inputs,paste0(report,".qmd"))),"--to",f,"--output-dir",shQuote(review)),stdout=log,stderr=log)
   if(status!=0||!file.exists(file.path(review,paste0(report,".",f))))failures<-c(failures,paste(report,f))
 }
 receipt$status<-if(length(failures))"failed"else"completed";receipt$failed_outputs<-failures
