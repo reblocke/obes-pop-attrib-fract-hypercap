@@ -1,4 +1,4 @@
-bmi_table_names <- c("cohort_nodes","cohort_edges","exclusion_reasons","exclusion_overlaps","variable_summary","category_counts","distribution_bins","distribution_curves","missingness_patterns","comissingness","evidence_by_bmi","observation_patterns","timing_audit","variable_dictionary","source_audit","population_registry","stage_summary","policy_registry","model_registry","model_sample_audit","coefficients","coefficient_covariance","factor_references","model_fit_diagnostics","model_residual_bins","model_influence_summary","model_support","bmi_basis","prediction_support","probability_curves","observation_curves","fixed_bmi_contrasts","policy_totals","policy_contributions","policy_contribution_covariance","linear_spline_comparison","coverage_index","numerical_reconciliation")
+bmi_table_names <- c("cohort_nodes","cohort_edges","exclusion_reasons","exclusion_overlaps","variable_summary","category_counts","distribution_bins","distribution_curves","missingness_patterns","comissingness","evidence_by_bmi","encounter_setting_audit","observation_patterns","timing_audit","variable_dictionary","source_audit","population_registry","stage_summary","policy_registry","model_registry","model_sample_audit","coefficients","coefficient_covariance","factor_references","model_fit_diagnostics","model_residual_bins","model_influence_summary","model_support","bmi_basis","prediction_support","probability_curves","observation_curves","fixed_bmi_contrasts","policy_totals","policy_contributions","policy_contribution_covariance","linear_spline_comparison","coverage_index","numerical_reconciliation")
 bmi_validate_ledger <- function(a) {
   tests<-list();add<-function(id,ok,note="")tests[[length(tests)+1L]]<<-data.frame(check_id=id,passed=if(length(ok)==1L && is.na(ok))NA else isTRUE(ok),status=if(length(ok)==1L && is.na(ok))"not_assessed"else if(isTRUE(ok))"passed"else"failed",note=note)
   nodes<-a$cohort_nodes;edges<-a$cohort_edges
@@ -14,6 +14,17 @@ bmi_validate_ledger <- function(a) {
   e<-a$evidence_by_bmi
   if(nrow(e))for(i in which(e$status=="assessed"))add(paste0("evidence:",i),e$H[i]<=e$M[i]&&e$M[i]<=e$N[i]&&
     (e$M[i]==0||abs(e$observation[i]*e$positivity[i]-e$documented[i])<1e-12))
+  s<-a$encounter_setting_audit
+  if(nrow(s)) {
+    add("setting_evidence_bounds",all(s$H<=s$M & s$M<=s$N & s$setting %in% c("EMER","IMP")))
+    keys<-paste(s$population_id,s$outcome_id,s$bin_low,sep="|")
+    for(ix in split(seq_len(nrow(s)),keys)) {
+      z<-s[ix,];pooled<-e[e$population_id==z$population_id[1]&e$outcome_id==z$outcome_id[1]&
+        e$bin_low==z$bin_low[1]&e$window=="encounter",,drop=FALSE]
+      add(paste0("setting_partition:",keys[ix[1]]),nrow(pooled)==1L && nrow(z)==2L &&
+        sum(z$N)==pooled$N && sum(z$M)==pooled$M && sum(z$H)==pooled$H)
+    }
+  }
   r<-bmi_bind(tests)
   if(any(r$passed %in% FALSE))stop("Cohort/evidence reconciliation failure: ",paste(r$check_id[r$passed %in% FALSE],collapse=", "))
   r
@@ -29,10 +40,13 @@ bmi_bind <- function(x) {
 }
 bmi_config <- function(path = "config/bmi_hypercapnia_analysis.json") {
   x <- jsonlite::read_json(path, simplifyVector = FALSE)
-  if (!identical(x$analysis_id, "bmi_hypercapnia_rfs_curve_audit_v8") || x$bundle_schema != 13 ||
+  if (!identical(x$analysis_id, "bmi_hypercapnia_rfs_curve_audit_v9") || x$bundle_schema != 14 ||
       x$population_scope_id != "original_selected_encounters_v1" || x$source_policy_id != "unadjusted_pco2_v1" ||
       x$bmi_policy_id != "available_encounter_or_prior_bmi_v1") stop("Unreviewed analysis/source/population policy")
   if (!identical(x$standardization_policy,"outcome_observed_v1")) stop("Full-cohort MAR/MNAR projections are superseded")
+  if (!identical(x$adjustment_set_id,"inherited_plus_encounter_setting_v1") ||
+      !setequal(names(x$factor_references),bmi_adjustment_factors) ||
+      !identical(x$factor_references$encounter_type,"EMER")) stop("Unreviewed adjustment/reference specification")
   if (!identical(unlist(x$analysis_populations,use.names=FALSE),c("primary","primary_bmi_ge30","primary_current","all_obesity")) ||
       !identical(unlist(x$full_model_populations,use.names=FALSE),"primary") ||
       !identical(unlist(x$descriptive_populations,use.names=FALSE),"obesity_only")) stop("Unreviewed population roles; obesity-only is descriptive")
@@ -219,7 +233,24 @@ derive_evidence_states <- function(ctx,config) {
     if(ctx$day_status=="pending")t<-data.frame(primary="unassessed",day="pending_source",n=NA_integer_,outcome_id=o)
     timing[[o]]<-t
   }
-  list(evidence_by_bmi=bmi_bind(rows),observation_patterns=bmi_bind(patterns),timing_audit=bmi_bind(timing))
+  list(evidence_by_bmi=bmi_bind(rows),observation_patterns=bmi_bind(patterns),timing_audit=bmi_bind(timing),
+    encounter_setting_audit=bmi_setting_evidence(ctx$members$C,config))
+}
+# Raw observation proportions on the same adjustment-complete reference as the
+# observation models. These are descriptive strata, never additional fitted models.
+bmi_setting_evidence <- function(d,config) {
+  rows<-list();bin<-config$bmi_bin_width*floor(d$bmi/config$bmi_bin_width)
+  for(b in sort(unique(bin)))for(setting in c("EMER","IMP"))for(o in c("abg","vbg","any_gas")) {
+    z<-d[bin==b & d$encounter_type==setting,,drop=FALSE]
+    y<-if(o=="vbg")ifelse(is.na(z$vbg_pco2),NA_integer_,as.integer(z$vbg_pco2>=50))else z[[o]]
+    n<-nrow(z);m<-sum(!is.na(y));h<-sum(y==1,na.rm=TRUE);ci<-bmi_wilson(m,n)
+    rows[[length(rows)+1L]]<-data.frame(population_id="C",setting=setting,outcome_id=o,window="encounter",
+      bin_low=b,bin_high=b+config$bmi_bin_width,N=n,M=m,H=h,n_reference=nrow(d),
+      bmi_population_n=sum(bin==b),setting_population_n=sum(d$encounter_type==setting),
+      observation=if(n)m/n else NA_real_,observation_low=ci[1],observation_high=ci[2],
+      status=if(n)"assessed"else"empty_stratum")
+  }
+  bmi_bind(rows)
 }
 bmi_pattern_bins <- function(ctx,config) {
   rows<-list()

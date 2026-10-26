@@ -38,6 +38,94 @@ bmi_rfs_evidence_plot <- function(availability) {
     ggplot2::theme(panel.grid.major.y=ggplot2::element_blank(),panel.grid.minor=ggplot2::element_blank())
 }
 
+# This is a display of the existing indexed/model populations, not new selection.
+# Adjustment loss is separate from unavailable gas evidence, even when zero.
+bmi_primary_gas_flow_data <- function(a) {
+  keys<-c(primary="Q",adjustment_complete="C",incomplete_adjustment="missing_adjustment",
+    gas="C_any_gas_encounter",no_gas="unknown_any_gas_encounter",
+    arterial="C_abg_encounter",coobserved="C_same_day_abg",no_coobserved="no_coobserved_abg")
+  rows<-lapply(names(keys),function(id) {
+    key<-paste0("primary::",keys[[id]])
+    z<-a$cohort_nodes[a$cohort_nodes$population_id==key,,drop=FALSE]
+    if(nrow(z)!=1L)stop("Missing or duplicate primary gas-flow ledger node: ",key)
+    data.frame(stage_id=id,n=z$n,status=z$status,source_population_id=key,
+      kind=if(id %in% c("primary","gas","arterial","coobserved"))"stage"else if(id=="adjustment_complete")"control"else"departure")
+  })
+  d<-do.call(rbind,rows)
+  n<-setNames(d$n,d$stage_id)
+  required<-c("primary","adjustment_complete","incomplete_adjustment","gas","no_gas","arterial")
+  if(any(d$status[match(required,d$stage_id)]!="assessed"))stop("Unassessed primary gas-flow ledger counts")
+  if(any(!is.finite(n[required]))||any(n[required]<0)||any(n[required]!=floor(n[required])))
+    stop("Invalid primary gas-flow ledger counts")
+  if(n['primary']!=n['adjustment_complete']+n['incomplete_adjustment']||
+     n['adjustment_complete']!=n['gas']+n['no_gas']||n['arterial']>n['gas'])
+    stop("Non-nested primary gas-flow ledger counts")
+  last<-d$stage_id %in% c("coobserved","no_coobserved")
+  if(all(d$status[last]=="assessed")) {
+    if(any(!is.finite(d$n[last]))||any(d$n[last]<0)||any(d$n[last]!=floor(d$n[last]))||
+       sum(d$n[last])!=n['arterial'])stop("Non-nested recorded-day ledger counts")
+  }else {
+    if(any(d$status[last]=="assessed"))stop("Inconsistent recorded-day evidence status")
+    d$n[last]<-NA_real_
+  }
+  d<-rbind(d,data.frame(stage_id="venous_only",n=unname(n['gas']-n['arterial']),status="assessed",
+    source_population_id="primary::C_any_gas_encounter minus primary::C_abg_encounter",kind="departure"))
+  row.names(d)<-NULL
+  d
+}
+
+bmi_primary_gas_figure <- function(bundle,output) {
+  dir.create(output,recursive=TRUE,showWarnings=FALSE)
+  d<-bmi_primary_gas_flow_data(bundle$analysis)
+  utils::write.csv(d,file.path(output,"primary-gas-flow-display.csv"),row.names=FALSE)
+  n<-setNames(d$n,d$stage_id)
+  number<-function(x)if(is.na(x))"Unavailable"else paste0("N = ",format(x,big.mark=",",trim=TRUE,scientific=FALSE))
+  draw<-function() {
+    grid::grid.newpage()
+    grid::grid.text("Primary gas analyses and nested arterial phenotyping",x=.025,y=.98,just=c("left","top"),gp=grid::gpar(fontsize=11,fontface="bold"))
+    grid::grid.text("Fixed first qualifying 2022 ED/inpatient encounter; one patient per index",x=.025,y=.945,just=c("left","top"),gp=grid::gpar(fontsize=9.5))
+    if(bundle$manifest$mode=="fixture")grid::grid.text("ARTIFICIAL DATA ONLY",x=.975,y=.915,just="right",gp=grid::gpar(fontsize=9,col="grey30"))
+    ys<-c(.82,.61,.40,.19)
+    labels<-c("Potentially eligible\nprimary cohort","Usable arterial or venous PCO₂",
+      "Usable arterial PCO₂\n(with or without venous results)","Usable arterial PCO₂ and pH\non a common recorded date")
+    roles<-c("Selected primary population","Combined-gas analysis","Nested arterial analysis","Same-day component analysis")
+    ids<-c("primary","gas","arterial","coobserved")
+    arrow<-grid::arrow(length=grid::unit(1.7,"mm"),type="open")
+    for(i in 1:3) {
+      grid::grid.lines(x=c(.31,.31),y=c(ys[i]-.0725,ys[i+1]+.0725),arrow=arrow,gp=grid::gpar(col="grey25",lwd=.8))
+      grid::grid.lines(x=c(.31,.665),y=rep(mean(ys[c(i,i+1)]),2),arrow=arrow,gp=grid::gpar(col="grey45",lwd=.7))
+    }
+    for(i in 1:4) {
+      grid::grid.rect(x=.31,y=ys[i],width=.56,height=.145,gp=grid::gpar(fill="white",col="grey25",lwd=.8))
+      grid::grid.text(labels[i],x=.31,y=ys[i]+.034,gp=grid::gpar(fontsize=10,lineheight=1.02))
+      grid::grid.text(number(n[ids[i]]),x=.31,y=ys[i]-.012,gp=grid::gpar(fontsize=12,fontface="bold"))
+      grid::grid.text(roles[i],x=.31,y=ys[i]-.049,gp=grid::gpar(fontsize=9.1))
+    }
+    first<-if(n['incomplete_adjustment']>0)paste0("Incomplete adjustment\n",number(n['incomplete_adjustment']),
+      "\nNo usable gas after adjustment\n",number(n['no_gas']))else paste0("No usable arterial or\nvenous PCO₂\n",number(n['no_gas']))
+    side<-c(first,paste0("Usable venous evidence only\n",number(n['venous_only'])),
+      paste0("No qualifying recorded-day\narterial PCO₂/pH co-observation\n",number(n['no_coobserved'])))
+    for(i in 1:3) {
+      y<-mean(ys[c(i,i+1)])
+      grid::grid.rect(x=.82,y=y,width=.31,height=if(i==1&&n['incomplete_adjustment']>0).17 else .135,
+        gp=grid::gpar(fill="grey97",col="grey55",lwd=.6))
+      grid::grid.text(side[i],x=.82,y=y,gp=grid::gpar(fontsize=9.1,lineheight=1.08))
+    }
+    grid::grid.text("Arterial includes both-specimen patients; departures retain prior eligibility.",x=.025,y=.065,just="left",gp=grid::gpar(fontsize=9))
+    grid::grid.text("Same recorded-day co-occurrence; not verified same-sample pairing.",x=.025,y=.035,just="left",gp=grid::gpar(fontsize=9,fontface="bold"))
+  }
+  bmi_export(draw,file.path(output,"F0-primary-gas"),height_mm=170)
+  caption<-paste("F0-primary-gas. Nested gas-evaluable populations at the fixed first qualifying 2022 emergency/inpatient encounter, one patient per index.",
+    "The starting box is the existing primary source-entry cohort, not all TriNetX acute-care patients. Existing eligibility and index selection remain unchanged.",
+    "Analysis samples retain the specified adjustment-completeness rules; any adjustment exclusions are listed separately from unavailable gas evidence.",
+    "The arterial population includes patients with both arterial and venous results. Venous-only patients remain in the combined-gas analysis; patients without qualifying pH co-observation remain in the arterial analysis.",
+    "No usable gas does not establish that no test was ordered or drawn. Normal and elevated PCO₂ are eligible; the last stage requires usable arterial pH, not acidemia.",
+    "Usable arterial PCO₂ and pH must share at least one recorded date within that same index encounter; the date need not be its first calendar day.",
+    "Same recorded-day co-occurrence; not verified same-sample pairing. Results may originate from different samples or treatment periods. Counts and evidence statuses come from the cohort ledger; unavailable recorded-day evidence is not zero.")
+  if(bundle$manifest$mode=="fixture")caption<-paste("ARTIFICIAL DATA ONLY.",caption)
+  data.frame(figure_id="F0-primary-gas",caption=caption,alt_text=caption,source_tables="cohort_nodes")
+}
+
 # Population-aware views; all numerical figures read saved aggregates only.
 bmi_export_figures <- function(bundle,output) {
   dir.create(output,recursive=TRUE,showWarnings=FALSE)
@@ -65,6 +153,8 @@ bmi_export_figures <- function(bundle,output) {
     if(nrow(atlas)){plotted<-!is.na(atlas$figure_id);atlas$figure_id[plotted]<-paste0(group,"/",atlas$figure_id[plotted]);atlas$analysis_population_id<-group;all_atlas[[group]]<-atlas}
   }
   a<-bundle$analysis
+  all_captions[["primary-gas"]]<-bmi_primary_gas_figure(bundle,output)
+  all_captions[["main-relationship"]]<-bmi_main_relationship_figure(bundle,output)
   partition<-a$cohort_edges[a$cohort_edges$partition_id=="rfs_index",,drop=FALSE]
   secondary<-a$cohort_edges[a$cohort_edges$from=="primary::Q" & a$cohort_edges$to=="primary_bmi_ge30::Q",,drop=FALSE]
   if(nrow(partition)) {
@@ -110,14 +200,14 @@ bmi_export_figures <- function(bundle,output) {
     all_captions[[paste0(group,"-components")]]<-caps
     component_ids<-c(component_ids,caps$figure_id)
   }
-  for(id in c("RFS-flow","RFS-entry","RFS-evidence",component_ids))if(file.exists(file.path(output,paste0(id,".png")))) {
-    all_manifests[[id]]<-data.frame(figure_id=id,panel_id="all",file_path=file.path(output,paste0(id,".png")),export_paths=paste(file.path(output,paste0(id,c(".svg",".pdf",".png",".jpg"))),collapse=";"),source_path="R/rfs_reporting.R",figure_type=if(grepl("(^|/)S2-ICD",id))"ICD probabilities and sampling support"else"source-entry audit",intended_use="private research review",width_px=round(190/25.4*300),dpi_x=300,dpi_y=300,color_mode=if(grepl("(^|/)S[12]-",id))"RGB; grayscale review required"else"grayscale",vector_status="SVG/PDF",qc_status="exported; actual visual review pending")
+  for(id in c("F1-main","F0-primary-gas","RFS-flow","RFS-entry","RFS-evidence",component_ids))if(file.exists(file.path(output,paste0(id,".png")))) {
+    all_manifests[[id]]<-data.frame(figure_id=id,panel_id="all",file_path=file.path(output,paste0(id,".png")),export_paths=paste(file.path(output,paste0(id,c(".svg",".pdf",".png",".jpg"))),collapse=";"),source_path=if(id=="F1-main")"R/reporting.R"else"R/rfs_reporting.R",figure_type=if(id=="F1-main")"probability curves and ascertainment"else if(id=="F0-primary-gas")"cohort flow"else if(grepl("(^|/)S2-ICD",id))"ICD probabilities and sampling support"else"source-entry audit",intended_use="private research review",width_px=round(190/25.4*300),dpi_x=300,dpi_y=300,color_mode=if(id=="F1-main" || grepl("(^|/)S[12]-",id))"RGB; grayscale review required"else"grayscale",vector_status="SVG/PDF",qc_status="exported; actual visual review pending")
   }
   utils::write.csv(bmi_bind(all_captions),file.path(output,"captions.csv"),row.names=FALSE)
   utils::write.csv(bmi_bind(all_manifests),file.path(output,"figure-qc-manifest.csv"),row.names=FALSE)
   utils::write.csv(bmi_bind(all_atlas),file.path(output,"atlas-index.csv"),row.names=FALSE)
   captions<-bmi_bind(all_captions)
-  html<-c("<!doctype html><meta charset='utf-8'><title>RFS figure comparison</title><style>body{font:16px sans-serif;max-width:1100px;margin:auto}img{width:100%}</style><h1>RFS figure alternatives</h1><p>F1-B and F2 retain the previously selected layouts; approval of new results is pending. S1 and S2 are integrated physiological and diagnosis components, with separate primary and BMI ≥30 views. Counts and all alternatives use the same saved aggregates.</p>")
+  html<-c("<!doctype html><meta charset='utf-8'><title>RFS figure comparison</title><style>body{font:16px sans-serif;max-width:1100px;margin:auto}img{width:100%}</style><h1>RFS figure alternatives</h1><p>F1-main is the preferred primary relationship figure; F1 A–C remain alternatives and F2 shows modeled burden. Approval of revised exports remains pending. S1 and S2 are integrated physiological and diagnosis components, with separate primary and BMI ≥30 views. Counts and all alternatives use the same saved aggregates.</p>")
   for(i in seq_len(nrow(captions))) {
     id<-captions$figure_id[i]
     html<-c(html,paste0("<article><h2>",id,"</h2><a href='",id,".png'><img loading='lazy' src='",id,".png' alt='",id,"'></a><p>",captions$caption[i],"</p></article>"))
@@ -202,7 +292,7 @@ bmi_same_day_figure <- function(bundle,output) {
     grid::popViewport()
   }
   bmi_export(draw,file.path(output,"S1-same-day-ABG"),height_mm=210)
-  caption<-paste("Same recorded-day co-occurrence; not verified same-sample pairing. Fixed-index patients with both arterial analytes share inherited adjustment and their analysis population’s fixed BMI spline.",
+  caption<-paste("Same recorded-day co-occurrence; not verified same-sample pairing. Fixed-index patients with both arterial analytes share inherited plus categorical encounter-setting adjustment and their analysis population’s fixed BMI spline.",
     "Any eligible day with PaCO₂ ≥45 mm Hg and pH <7.35 assigns the with-acidemia category; remaining hypercapnic patients have no documented same-day acidemia. Different samples may contribute.",
     "A: band thicknesses give component probabilities; the upper boundary is total hypercapnia. B: components share a baseline. Shading denotes pointwise 95% intervals using full joint covariance. C: shared-population BMI frequencies.",
     "Fading/dotted lines mark local windows below 30 patients or five events/non-events; marginal checks do not establish joint support. These recorded outcomes do not establish simultaneous physiology, acute respiratory failure or compensation. Selection, treatment timing and confounding remain limitations.")
@@ -280,7 +370,7 @@ bmi_icd_model_figure <- function(bundle,output,specified=FALSE) {
   }
   bmi_export(draw,file.path(output,figure_id),height_mm=200)
   caption<-paste(if(specified)"Unpenalized four-category sensitivity excluding unspecified-only encounters and standardizing over the remaining patients."else"Mean-bias-reduced five-category multinomial spline; all diagnosis-evaluable patients in the stated population retained.",
-    "Encounter-wide coding, no gas requirement; inherited adjustment and the population-specific spline basis. Bands partition the composite; thickness gives component probability. Shading: pointwise 95% intervals from joint information covariance, conditional on the empirical reference and basis. Fading/dots: local sparsity; histogram N equals model/reference N.",
+    "Encounter-wide coding, no gas requirement; inherited plus categorical encounter-setting adjustment and the population-specific spline basis. Bands partition the composite; thickness gives component probability. Shading: pointwise 95% intervals from joint information covariance, conditional on the empirical reference and basis. Fading/dots: local sparsity; histogram N equals model/reference N.",
     "Acute-on-chronic includes explicit or concurrent acute/chronic coding. OHS (obesity hypoventilation syndrome) is analytically chronic; this does not establish chronic respiratory failure. Source selection and diagnostic incorporation limit physiological interpretation.")
   if(!nrow(z))caption<-paste("Adjusted ICD-acuity curves and intervals are unavailable:",why,
     "This is a model-status display, not an estimated relationship. The accompanying table reports observed category counts only when source evidence is qualified. Fixed indexes and inherited adjustment are retained; no fallback estimator was used.")

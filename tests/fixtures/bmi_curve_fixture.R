@@ -5,7 +5,7 @@ make_bmi_curve_fixture <- function(n_patients=6000L,seed=20261016L,with_index_da
   age<-pmin(90,pmax(18,32+.65*bmi+stats::rnorm(n_patients,0,12)))
   d<-data.frame(patient_id=sprintf("ARTIFICIAL-P%06d",patient),encounter_id=sprintf("ARTIFICIAL-E%06d-%d",patient,visit),
     encounter_date=as.Date("2022-01-01")+rep(sample(0:200,n_patients,replace=TRUE),each=2)+(visit-1)*30,
-    age_at_encounter=age[patient],encounter_type=sample(c("EMER","IMP"),n,TRUE),bmi=bmi[patient]+(visit-1)*rnorm(n),
+    age_at_encounter=age[patient],encounter_type=ifelse(rbinom(n,1,plogis(-.4+.08*(bmi[patient]-30))),"IMP","EMER"),bmi=bmi[patient]+(visit-1)*rnorm(n),
     sex=rep(sample(c("0","1","2"),n_patients,TRUE,prob=c(.45,.45,.10)),each=2),
     race_ethnicity=rep(sample(as.character(0:6),n_patients,TRUE,prob=c(.3,.15,.15,.1,.1,.1,.1)),each=2),
     location=rep(sample(as.character(0:3),n_patients,TRUE),each=2),stringsAsFactors=FALSE)
@@ -18,11 +18,12 @@ make_bmi_curve_fixture <- function(n_patients=6000L,seed=20261016L,with_index_da
   d$height_inches<-65;d$weight_pounds<-d$bmi*65^2/703
   d$bmi_reason<-"artificial valid source";d$raw_race<-d$race_ethnicity;d$raw_ethnicity<-"0"
   d$obesity_trigger<-"trigger_unresolved"
-  d$has_abg<-rbinom(n,1,plogis(-.1+.025*(d$bmi-40)));d$has_vbg<-rbinom(n,1,.45)
-  latent<-42+.23*(d$bmi-30)+.025*(d$age_at_encounter-50)+rnorm(n,0,6)
+  inpatient<-as.integer(d$encounter_type=="IMP")
+  d$has_abg<-rbinom(n,1,plogis(-.7+.025*(d$bmi-40)+1.2*inpatient));d$has_vbg<-rbinom(n,1,plogis(-.5+.5*inpatient))
+  latent<-40+.23*(d$bmi-30)+.025*(d$age_at_encounter-50)+3.5*inpatient+rnorm(n,0,6)
   d$abg_pco2<-ifelse(d$has_abg==1&runif(n)>.09,pmax(12,latent+rnorm(n,0,2)),NA_real_)
   d$vbg_pco2<-ifelse(d$has_vbg==1&runif(n)>.07,pmax(13,latent+5+rnorm(n,0,3)),NA_real_)
-  d$icd_hypercapnia<-rbinom(n,1,plogis(-1.3+.04*(d$bmi-35)+.008*(d$age_at_encounter-50)))
+  d$icd_hypercapnia<-rbinom(n,1,plogis(-1.6+.04*(d$bmi-35)+.008*(d$age_at_encounter-50)+.7*inpatient))
   d$icd_hypercapnia[runif(n)<.02]<-NA
   d$bmi[runif(n)<.02]<-NA_real_;d$bmi_evidence_state<-ifelse(is.na(d$bmi),"missing","valid")
   d$sex[runif(n)<.01]<-NA_character_

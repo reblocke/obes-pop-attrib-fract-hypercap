@@ -1,6 +1,6 @@
 {
-  "analysis_id": "bmi_hypercapnia_rfs_curve_audit_v8",
-  "bundle_schema": 13,
+  "analysis_id": "bmi_hypercapnia_rfs_curve_audit_v9",
+  "bundle_schema": 14,
   "population_scope_id": "original_selected_encounters_v1",
   "bmi_policy_id": "available_encounter_or_prior_bmi_v1",
   "source_policy_id": "unadjusted_pco2_v1",
@@ -14,7 +14,8 @@
   "factor_references": {
     "sex": "0",
     "race_ethnicity": "0",
-    "location": "0"
+    "location": "0",
+    "encounter_type": "EMER"
   },
   "grid_step": 0.25,
   "bmi_bin_width": 5,
@@ -66,5 +67,6 @@
   "component_populations": [
     "primary",
     "primary_bmi_ge30"
-  ]
+  ],
+  "adjustment_set_id": "inherited_plus_encounter_setting_v1"
 }

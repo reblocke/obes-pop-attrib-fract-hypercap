@@ -69,6 +69,10 @@ bmi_report_table(a$coverage_index,"Coverage index",keys="kind")
 bmi_report_table(a$variable_dictionary,"Complete variable dictionary",keys="variable_id")
 ```
 
+## Encounter-setting adjustment
+
+Every fitted model adds index encounter setting (EMER emergency reference; IMP inpatient) to the inherited adjustment, without interaction. Each fixed-BMI/scenario prediction retains observed setting. Setting-stratified evidence tables are raw proportions with Wilson 95% intervals on the adjustment-complete reference; these do not constitute additional fitted models.
+
 ## Detailed observational cohort construction
 
 Source records, encounter versions and patients have distinct counting units. Global pre-index accounting belongs to the combined reference. Subgroup ledgers begin with already fixed indexes and do not rerun eligibility or selection. First-failure exclusions are exclusive at their declared grain; all-reason counts overlap. Gas and ICD samples are parallel overlapping analytic branches.
@@ -78,10 +82,10 @@ Obesity-only is retained here solely for cohort reconciliation, source-quality c
 ```{r}
 #| label: detailed-flow
 #| results: asis
-figure("RFS-flow");figure("RFS-entry");figure("RFS-evidence");for(group in unlist(bundle$config$component_populations))for(id in c("S1-same-day-ABG","S2-ICD-acuity","S2-ICD-specified","S2-ICD-observed"))figure(paste0(group,"/",id))
+figure("F0-primary-gas");figure("combined/F0-main");figure("RFS-flow");figure("RFS-entry");figure("RFS-evidence");for(group in unlist(bundle$config$component_populations))for(id in c("S1-same-day-ABG","S2-ICD-acuity","S2-ICD-specified","S2-ICD-observed"))figure(paste0(group,"/",id))
 ids<-tools::file_path_sans_ext(list.files(file.path(review,"figures"),pattern="^F0-detail-.*\\.png$",recursive=TRUE))
 for(id in ids){figure(id);page()}
-for(t in c(bmi_icd_tables,"cooccurrence_status","cooccurrence_reconciliation","cooccurrence_availability","cooccurrence_measurements","cooccurrence_categories","same_day_contrasts","same_day_probability_covariance","same_day_curve_reconciliation","rfs_summary","rfs_outcomes","rfs_combinations","rfs_by_bmi","bmi_provenance","demographic_crosswalk","prior_run_reconciliation","rfs_semantics","expected_models","cohort_nodes","cohort_edges","exclusion_reasons","exclusion_overlaps","population_registry","timing_audit","observation_patterns","evidence_by_bmi","numerical_reconciliation")) {
+for(t in c(bmi_icd_tables,"cooccurrence_status","cooccurrence_reconciliation","cooccurrence_availability","cooccurrence_measurements","cooccurrence_categories","same_day_contrasts","same_day_probability_covariance","same_day_curve_reconciliation","rfs_summary","rfs_outcomes","rfs_combinations","rfs_by_bmi","bmi_provenance","demographic_crosswalk","prior_run_reconciliation","rfs_semantics","expected_models","cohort_nodes","cohort_edges","exclusion_reasons","exclusion_overlaps","population_registry","timing_audit","observation_patterns","evidence_by_bmi","encounter_setting_audit","numerical_reconciliation")) {
  cat("\n### ",gsub("_"," ",t),"\n\n",sep="");bmi_report_table(a[[t]],t,keys=intersect(c("population_id","outcome_id"),names(a[[t]])))
 }
 ```
@@ -129,11 +133,12 @@ bmi_report_table(a$linear_spline_comparison,"Same-sample linear-versus-spline co
 
 ## Relationship, support and scenario reconciliation
 
-Curves are policy-independent. Gas curves and scenarios standardize to their outcome-observed training populations; ICD curves use C_icd with known diagnosis capture. Observation models describe evidence availability over C. No physiological outcomes are projected to untested patients. Full-cohort MAR/MNAR projections remain only in the frozen historical run. No cross-model difference test is inferred from independent interval overlap.
+Curves are policy-independent. Gas curves and scenarios standardize to their outcome-observed training populations; ICD curves use C_icd with known diagnosis capture. Observation models describe usable captured PCO₂ evidence over the adjustment-complete primary population C, not every order or draw. Usability requires ordinary unadjusted, specimen-authenticated numeric PCO₂ in reviewed mm Hg units with strict 5<ABG<200 or 10<VBG<250 validity; normal and elevated values count throughout the index encounter, including later results. No pH is required. Unusable or absent captured results do not prove no testing. ABG and VBG evidence can overlap. No physiological outcomes are projected to untested patients. Full-cohort MAR/MNAR projections remain only in the frozen historical run. No cross-model difference test is inferred from independent interval overlap.
 
 ```{r}
 #| label: audit-relationships
 #| results: asis
+figure("F1-main");page()
 for(group in unlist(bundle$config$analysis_populations))for(id in c("F1-A","F1-B","F1-C","F2","F2-bands")){figure(paste0(group,"/",id));page()}
 for(t in c("fixed_bmi_contrasts","prediction_support","policy_registry","policy_totals","policy_contributions","policy_contribution_covariance")) {
  cat("\n### ",gsub("_"," ",t),"\n\n",sep="")

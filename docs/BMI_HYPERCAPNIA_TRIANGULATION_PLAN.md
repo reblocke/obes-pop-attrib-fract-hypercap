@@ -1,11 +1,13 @@
 # BMI–hypercapnia: integrated scientific specification
 
-Current implementation: input schema 5, aggregate schema 13,
-`bmi_hypercapnia_rfs_curve_audit_v8`. The 2026-10-24 all-valid-BMI decision
+Current implementation: input schema 5, aggregate schema 14,
+`bmi_hypercapnia_rfs_curve_audit_v9`. The 2026-10-24 all-valid-BMI decision
 supersedes first-BMI-≥30 selection. Earlier outputs retain their original design;
 see [decisions](DECISIONS.md), [work log](../WORKLOG.md) and
 [archive recovery](../archive/README.md). The [verified all-BMI packet](../results/2026-10-24-all-bmi/README.md) records the
 completed source qualification, one clinical run and numerical/scoped visual review.
+The October 24 packet predates encounter-setting adjustment; schema-14 clinical
+results are pending. See [setting update](ENCOUNTER_SETTING_UPDATE.md).
 Investigator interpretation and figure approval remain pending. Future runs require
 fresh qualification; historical counts are not new-cohort counts.
 
@@ -70,7 +72,10 @@ modules retain explicit positions. Complete diagnosis capture is not positivity.
 ## Models and inference
 
 Use three natural-spline BMI columns, linear age, and inherited sex, race/ethnicity
-and region categories/reference levels. Completeness means nonmissing inherited
+and region categories/reference levels, plus categorical index encounter setting
+(EMER emergency reference; IMP inpatient) in every model. No BMI-by-setting
+interaction or weighting is added; predictions retain observed setting.
+Completeness means nonmissing specified
 analysis values, including named Unknown categories. Do not silently recode raw
 race/ethnicity or drop Unknown categories. The inherited White category includes
 non-Hispanic or unknown ethnicity.
@@ -99,6 +104,10 @@ Use the full observed BMI range with local patient/event/covariate support diagn
 Flag sparse/extrapolated regions. Supported five-unit contrasts, including 40–45,
 are audit summaries rather than the main display; no multiplicity-adjusted or
 between-population test is implied.
+
+## Usable-evidence ascertainment
+
+The primary ABG and VBG observation models describe at least one captured, encounter-linked ordinary unadjusted PCO₂ result with authenticated specimen assignment, reviewed units convertible to mm Hg and strict validity limits of 5<arterial<200 or 10<venous<250 mm Hg. Normal and elevated results count; pH is not required. Evidence can occur at any time within the index encounter, including later or post-treatment results. These models use the full adjustment-complete primary reference and the existing fixed spline/adjustment, not outcome-evaluable gas subsets. Captured usable evidence is not every test ordered or drawn; absent usable evidence does not establish no testing or physiological normality. Separate specimens overlap and cannot be summed.
 
 ## Secondary modeled burden
 
@@ -151,7 +160,7 @@ immutable. No compatibility/migration layer is maintained.
 The scientific mini-paper presents cohort, overall curves, physiological components,
 diagnostic components, burden, nested secondary and other sensitivities, then
 interpretation. The separate audit retains exhaustive tables and contrasts.
-F1-B is the preferred relationship layout; F2 shows absolute burden and signed
+F1-main is the preferred primary relationship figure: combined-gas hypercapnia (A), nested arterial hypercapnia (B), stacked same-day arterial components (C), and separate ABG/VBG usable-evidence ascertainment (D). Its landmark table uses BMI 30 and 40 kg/m² with pointwise intervals. The existing F1 A–C alternatives and secondary/supporting figures remain available; F2 shows absolute burden and signed
 contributions, including unshifted lower-BMI baseline burden. S1 and ICD displays
 are integrated with population-labeled counterparts. Retain A/C alternatives,
 editable sources, SVG/PDF and 300-dpi PNG/JPG, captions and gallery.

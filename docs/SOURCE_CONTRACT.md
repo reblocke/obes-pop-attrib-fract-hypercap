@@ -33,6 +33,19 @@ RFS and outcome fields cannot promote a later encounter. The nested BMI≥30
 secondary is filtered at this index. Authenticate new indexes against accepted
 source keys and evidence, not an identical prior clinical run.
 
+## Encounter setting as adjustment
+
+The setting-adjusted analysis reuses schema-5 `encounter_type` from the authenticated
+original encounter list: EMER emergency and IMP inpatient. It is also an additive
+categorical adjustment in every model, with EMER reference. Recheck input/evidence
+hashes and setting completeness before the new run; the adjustment change alone
+does not require new preparation or upstream data. Historical source receipts
+retain their actual producer and review identities.
+
+## Usable evidence versus documented testing
+
+F1-main ascertainment uses the existing saved `observation/abg/encounter` and `observation/vbg/encounter` models. Their binary endpoints are availability of at least one ordinary unadjusted, specimen-authenticated numeric PCO₂ result after reviewed unit conversion and strict 5<ABG<200 or 10<VBG<250 mm Hg screening. Normal and elevated results qualify, without pH or encounter-start-day restrictions. Temperature-adjusted, nonnumeric, conflicting/ambiguous-specimen, unsupported-unit and out-of-range records do not establish usable evidence. These endpoints differ from `has_abg`/`has_vbg` captured numeric testing evidence and do not establish all orders or draws. Absence of usable captured evidence is not a clinical negative.
+
 ## One preparation transaction
 
 `make prepare` uses [prepare_common_index_input.py](../scripts/prepare_common_index_input.py)

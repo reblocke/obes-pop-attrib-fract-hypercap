@@ -2,7 +2,7 @@
 
 ## Scope and change discipline
 
-The current analysis is schema 13 (`bmi_hypercapnia_rfs_curve_audit_v8`; input schema 5). Read
+The current analysis is schema 14 (`bmi_hypercapnia_rfs_curve_audit_v9`; input schema 5). Read
 `docs/BMI_HYPERCAPNIA_TRIANGULATION_PLAN.md` and `docs/SOURCE_CONTRACT.md` before
 substantive work. Configuration and the variable dictionary live in `config/`;
 the cohort ledger is the sole count authority.
@@ -55,11 +55,11 @@ Never relabel them or transfer historical B/F2 approval to the new results.
   from its covariate-complete reference's type-7 .05/.35/.65/.95 quantiles.
   Reuse that numeric basis across outcomes and predictions; current-measurement
   primary models reuse the primary basis. Age is linear; inherited sex,
-  race/ethnicity and region coding/references remain unchanged.
+  race/ethnicity and region coding/references remain unchanged. All fitted models also adjust for index encounter setting (EMER reference; IMP inpatient), with no interaction. Predictions retain observed setting.
 - Standardize gas curves over their outcome-evaluable populations and ICD over
   known-capture patients. Matched models use identical paired samples. Preserve
   every configured model position, including failure/nonestimable/pending states.
-  No fallback estimators, hidden na.omit, pooled categories or new adjustment.
+  No fallback estimators, hidden na.omit, pooled categories or adjustment outside the approved shared set.
 - The secondary scenario subtracts exactly one unit from observed BMI >30,
   with no floor, reselection or covariate/RFS change. Paired predictions and signed
   original-BMI-band contributions/covariance reconcile to total difference and PIF.
@@ -102,6 +102,7 @@ numerical review and investigator scientific approval are separate states.
 - Preserve the scientific mini-paper and complete audit: all applicable variables,
   coefficients, covariance matrices, diagnostics and failures; no table previews.
   Required missing figures must fail the render.
+- F1-main is the preferred primary relationship composition; retain F1 A–C alternatives and existing secondary/sensitivity figures. Panel D uses saved ABG/VBG usable-evidence observation models, not all blood-gas draws; no secondary ascertainment models are implied.
 - Apply `figure-and-medical-illustration-qc`: clear substantive comparison,
   self-contained captions/alt text, 190-mm review width, >=9-point data labels,
   explicit denominators/windows/intervals, grayscale readability and full ranges.

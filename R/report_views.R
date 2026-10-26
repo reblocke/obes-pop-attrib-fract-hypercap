@@ -98,6 +98,11 @@ bmi_figure <- function(id,review,captions) {
   ext<-if(knitr::is_latex_output())"pdf"else"svg";path<-file.path(review,"figures",paste0(id,".",ext))
   if(!file.exists(path))stop("Required figure missing: ",id)
   row<-captions[captions$figure_id==id,,drop=FALSE];if(nrow(row)!=1)stop("Figure caption identity missing: ",id)
+  if(knitr::is_latex_output() && identical(id,"F1-main")) {
+    cat("\n\\clearpage\n\\begin{center}\n\\includegraphics[width=190mm,height=.94\\textheight,keepaspectratio]{\\detokenize{",path,"}}\n\\end{center}\n\\clearpage\n\\noindent ",
+      gsub("PCO₂","PCO$_2$",bmi_latex_escape(row$caption),fixed=TRUE),"\n\\clearpage\n",sep="")
+    return(invisible(NULL))
+  }
   # A dedicated figure page keeps the complete caption with its vector image.
   if(knitr::is_latex_output()) {
     cat("\n\\clearpage\n\\begin{figure}[p]\n\\centering\n\\includegraphics[width=\\linewidth,height=.80\\textheight,keepaspectratio]{\\detokenize{",path,"}}\n\\caption{",gsub("PCO₂","PCO$_2$",bmi_latex_escape(row$caption),fixed=TRUE),"}\n\\end{figure}\n\\clearpage\n",sep="")
@@ -113,6 +118,9 @@ bmi_coverage <- function(d,caption,represented_rows=nrow(d),representation="prin
   }
 }
 bmi_break_table_tokens <- function(text) {
+  # Avoid quadratic UTF-8 substring scans across a complete long table.
+  if(length(text)==1L && grepl("\n",text,fixed=TRUE))
+    return(paste(bmi_break_table_tokens(strsplit(paste0(text,"\n"),"\n",fixed=TRUE)[[1]]),collapse="\n"))
   punctuation<-gregexpr("[/|,:;]",text,perl=TRUE)
   regmatches(text,punctuation)<-lapply(regmatches(text,punctuation),function(x)paste0(x,"\\allowbreak{}"))
   # Optional breaks preserve every character of long hashes without crossing cells.

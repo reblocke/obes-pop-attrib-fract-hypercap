@@ -31,12 +31,12 @@ bmi_multinomial_fit <- function(p,basis,config,qualified,reason,spec=bmi_same_da
   bias_reduced<-identical(spec$estimator,"firth_mean_bias_reduced_v1")
   started <- proc.time()[3]
   id <- paste0(spec$family,"/encounter/multinomial_spline")
-  formula <- ~bmi_ns1+bmi_ns2+bmi_ns3+age_at_encounter+sex+race_ethnicity+location
+  formula <- bmi_model_formula()
   p$.category <- spec$category(p)
   row <- data.frame(model_id=id,family=spec$family,outcome_id=c(`3`="three_category",`4`="four_category",`5`="five_category")[[as.character(K)]],
     window="encounter",training_population_id=paste0("C_",spec$family),field=".category",model_form="multinomial_spline",
     source_status=if(qualified)"qualified"else"pending",source_reason=reason,
-    formula_text=paste("category",paste(deparse(formula),collapse=" ")),basis_id=basis$basis_id,
+    formula_text=paste("category",paste(deparse(formula),collapse=" ")),basis_id=basis$basis_id,adjustment_set_id=config$adjustment_set_id,
     weight_specification="none",covariance_method="joint multinomial observed information; empirical reference fixed",
     n_eligible=if(qualified)nrow(p)else NA_integer_,n_excluded_outcome=0L,n_excluded_adjustment=0L,
     n_model=if(qualified)nrow(p)else NA_integer_,n_patients=if(qualified)length(unique(p$patient_id))else NA_integer_,
@@ -57,14 +57,14 @@ bmi_multinomial_fit <- function(p,basis,config,qualified,reason,spec=bmi_same_da
   if(any(counts==0))return(fail("absent_category",paste("Absent planned categories:",paste(names(counts)[counts==0],collapse=", "))))
   if(basis$status!="resolved")return(fail("rank_deficiency",basis$status))
   refs <- list(data.frame(model_id=id,variable_id="outcome",level=classes,is_reference=seq_len(K)==1))
-  for(v in c("sex","race_ethnicity","location")) {
+  for(v in bmi_adjustment_factors) {
     ref<-config$factor_references[[v]];levels<-sort(unique(as.character(p[[v]])))
     if(!ref %in% levels||length(levels)<2)return(fail("rank_deficiency",paste("Missing factor variation/reference:",v)))
     p[[v]]<-factor(p[[v]],levels=c(ref,setdiff(levels,ref)))
     refs[[v]]<-data.frame(model_id=id,variable_id=v,level=levels(p[[v]]),is_reference=levels(p[[v]])==ref)
   }
   p<-bmi_add_basis(p,basis)
-  x<-model.matrix(formula,p,contrasts.arg=list(sex="contr.treatment",race_ethnicity="contr.treatment",location="contr.treatment"))
+  x<-model.matrix(formula,p,contrasts.arg=bmi_factor_contrasts)
   row$n_parameters<-(K-1L)*ncol(x);row$model_rank<-(K-1L)*qr(x)$rank
   if(qr(x)$rank<ncol(x)||nrow(x)<=row$n_parameters)return(fail("rank_deficiency","Joint design is rank deficient or undersized"))
   scale<-apply(abs(x),2,max);scale[scale==0]<-1
@@ -126,7 +126,7 @@ bmi_multinomial_fit <- function(p,basis,config,qualified,reason,spec=bmi_same_da
       note="Firth mean bias reduction; AIC not used for model comparison"))
   }
   residuals<-support<-list()
-  for(k in seq_len(K))for(variable in c("bmi","age_at_encounter","sex","race_ethnicity","location")) {
+  for(k in seq_len(K))for(variable in triangulation_adjustment) {
     grp<-if(variable=="bmi")config$bmi_bin_width*floor(p$bmi/config$bmi_bin_width)else if(variable=="age_at_encounter")10*floor(p[[variable]]/10)else as.character(p[[variable]])
     for(g in unique(grp)) {
       ix<-which(grp==g)
@@ -146,7 +146,7 @@ bmi_multinomial_mean <- function(m,b,config) {
   K<-length(m$spec$classes);sums<-numeric(K);gradient<-matrix(0,K,length(m$beta));n<-nrow(m$data)
   for(start in seq(1,n,by=config$chunk_size)) {
     d<-m$data[start:min(n,start+config$chunk_size-1),,drop=FALSE];d$bmi<-b;d<-bmi_add_basis(d,m$basis)
-    x<-model.matrix(m$formula,d,contrasts.arg=list(sex="contr.treatment",race_ethnicity="contr.treatment",location="contr.treatment"))
+    x<-model.matrix(m$formula,d,contrasts.arg=bmi_factor_contrasts)
     if(!identical(colnames(x),m$design_names))stop("Joint prediction design changed")
     eta<-cbind(0,x%*%matrix(m$beta,ncol=K-1L));eta<-eta-apply(eta,1,max)
     pr<-exp(eta);pr<-pr/rowSums(pr);sums<-sums+colSums(pr)
@@ -173,7 +173,7 @@ bmi_multinomial_predictions <- function(m,config) {
   for(i in seq_along(grid)) {
     b<-grid[i];value<-values[[i]];v<-value$g%*%m$v%*%t(value$g)
     local<-m$data[abs(m$data$bmi-b)<=config$bmi_bin_width/2,,drop=FALSE]
-    missing_levels<-sum(vapply(c("sex","race_ethnicity","location"),function(name)length(setdiff(unique(as.character(m$data[[name]])),unique(as.character(local[[name]])))),integer(1)))
+    missing_levels<-sum(vapply(bmi_adjustment_factors,function(name)length(setdiff(unique(as.character(m$data[[name]])),unique(as.character(local[[name]])))),integer(1)))
     for(k in seq_len(K+1L)) {
       events<-if(k==K+1L)sum(local$.category!=classes[1])else sum(local$.category==outcomes[k])
       ci<-bmi_probability_interval(value$p[k],value$g[k,],m$v)

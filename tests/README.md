@@ -1,5 +1,16 @@
 # Verification
 
+## Encounter-setting update: failures recorded before estimation edits
+
+See `docs/ENCOUNTER_SETTING_UPDATE.md`. The E2E fixture deliberately correlates
+setting with BMI, gas availability and outcomes. Independent binary and joint
+likelihood oracles explicitly include EMER/IMP; they do not import the production
+adjustment list or formula. A reduced-model comparison must detect omission.
+Single-setting and absent-reference cases must retain explicit failures. Saved
+setting-by-BMI counts/intervals must reproduce independent fixed-index aggregation.
+The real reports must contain the factor/reference, its full covariance and the
+new display label. Input/schema guards and aggregate-only rendering remain required.
+
 `make test` runs the shipped artificial fixture launcher, saves the current
 aggregate bundle, and renders both scientific and audit reports as HTML and PDF.
 It checks the persisted output against independently reconstructed indexes,
@@ -155,3 +166,46 @@ Qualification regression scenario: prepared inputs now retain BMI provenance. Jo
 The source boundary also exercises the actual prepared-CSV reader with an exactly promoted float32 BMI below 30. Pandas default parsing can change the last binary digit even when the typed RDS and mapper agree. The independent parquet oracle requires exact transport; a numerical tolerance is not a substitute.
 
 Typed transport failures also include base R decimal parsing at lower float32 BMI values. The existing Python-to-R boundary writes independent binary-double oracles for 10.1 and 15.9 as stored float32 values, then checks the actual RDS byte-level numeric values, keys, dates, missingness and gas-threshold precision. Both selection and final typing must use the same exact numeric reader.
+
+## Primary gas-flow revision (2026-10-25, before implementation)
+
+A nested flow can accidentally use arterial-only patients, filter on positive
+hypercapnia/acidemia, treat missing adjustment as absent gas, show an unavailable
+recorded-day module as zero, or imply that departure removes a patient from an
+already eligible broader analysis. These errors can survive otherwise correct
+models and plausible report pages. The existing E2E is extended before renderer
+changes: independent fixture indexes/measurements determine stage/departure Ns,
+real exported tables/PDFs must agree, and the completed report must contain the
+new figure/caption while the audit preserves detailed source-entry accounting.
+Explicit missing-module and nesting-corruption checks exercise the same figure
+entrypoint. No new unit-test framework or clinical execution is introduced.
+
+Audit render failure observed during this change: whole-table UTF-8 token
+processing rescans large strings at every punctuation boundary, making complete
+PDF assembly disproportionately slow. Before the focused fix, the E2E records a
+Unicode long-table fixture, compares the complete report formatter output with
+independent line-wise formatting, and retains both text and timing evidence.
+Equality protects every table character; a size-scaling check catches the actual
+rendering failure without fixing an arbitrary wall-clock limit.
+
+## F1-main composition: pre-implementation failure scenarios
+
+The A/B order can be reversed without breaking a render; an arterial subset can
+incorrectly exclude dual-specimen patients. Observation curves can be mistaken
+for hypercapnia probabilities, and D can repeat C's smaller frequency sample.
+Landmarks can silently retain BMI 50 or lose their exact intervals. Stacked
+components can use mismatched grids, failed models can disappear, and a second
+ATS implementation can drift from the scientific report. The E2E checks the
+exported panel/model ledger, exact saved BMI 30/40 values, frequency sums and
+component partition, explicit unavailable-model export, and both assembled PDFs.
+Underlying estimates retain the independent regression oracles.
+
+### Reproduced Quarto intermediate collision
+
+Concurrent artificial and clinical report jobs in the same checkout collided on
+shared report intermediates: the clinical audit HTML could not reopen its QMD,
+and the artificial report job failed. Each render must stage its own exact QMD
+and CSS inputs inside its fresh review directory before invoking Quarto. The
+E2E checks source-copy hashes and private staging paths; the clinical and
+artificial full-report runs also exercise this concurrently. This is render
+isolation only, with unchanged scientific methods and aggregate values.

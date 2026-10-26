@@ -9,6 +9,10 @@ bmi_add_basis <- function(d,basis) {
   for(j in 1:3)d[[paste0("bmi_ns",j)]]<-b[,j]
   d
 }
+bmi_model_formula <- function(form="spline",response=NULL) {
+  terms<-c(if(form=="spline")paste0("bmi_ns",1:3)else"bmi",bmi_adjustment_covariates)
+  stats::reformulate(terms,response=response)
+}
 bmi_model_registry <- function(day_status, role="full") {
   rows<-list();add<-function(id,family,outcome,window,population,field,form="spline") {
     rows[[length(rows)+1L]]<<-data.frame(model_id=id,family=family,outcome_id=outcome,window=window,
@@ -37,8 +41,8 @@ bmi_observation_fields <- function(d) {
 }
 fit_bmi_model <- function(spec,d,basis,config,n_reference=nrow(d)) {
   start<-proc.time()[3]
-  formula<-stats::as.formula(paste(".outcome ~",if(spec$model_form=="spline")"bmi_ns1 + bmi_ns2 + bmi_ns3"else"bmi","+ age_at_encounter + sex + race_ethnicity + location"))
-  row<-cbind(spec,data.frame(formula_text=paste(deparse(formula),collapse=" "),basis_id=basis$basis_id,
+  formula<-bmi_model_formula(spec$model_form,".outcome")
+  row<-cbind(spec,data.frame(formula_text=paste(deparse(formula),collapse=" "),basis_id=basis$basis_id,adjustment_set_id=config$adjustment_set_id,
     weight_specification="none",covariance_method="model-based binomial; empirical reference fixed",
     n_eligible=if(spec$source_status=="pending")NA_integer_ else n_reference,
     n_excluded_outcome=if(spec$source_status=="pending")NA_integer_ else n_reference-nrow(d),n_excluded_adjustment=0L,
@@ -53,7 +57,7 @@ fit_bmi_model <- function(spec,d,basis,config,n_reference=nrow(d)) {
   if(length(unique(d$.outcome))<2)return(fail("constant_outcome","Outcome has no variation; raw proportions remain available"))
   if(spec$model_form=="spline"&&basis$status!="resolved")return(fail("rank_deficiency",basis$status))
   refs<-list()
-  for(v in c("sex","race_ethnicity","location")) {
+  for(v in bmi_adjustment_factors) {
     ref<-config$factor_references[[v]];lev<-sort(unique(as.character(d[[v]])))
     if(!ref %in% lev)return(fail("rank_deficiency",paste("Declared reference absent:",v,ref)))
     d[[v]]<-factor(d[[v]],levels=c(ref,setdiff(lev,ref)))
@@ -69,7 +73,7 @@ fit_bmi_model <- function(spec,d,basis,config,n_reference=nrow(d)) {
   if(separation)return(fail("separation","Complete or quasi-complete separation"))
   warnings<-character()
   fit<-tryCatch(withCallingHandlers(stats::glm(formula,d,family=stats::binomial(),na.action=stats::na.fail,control=stats::glm.control(maxit=config$maxit),
-    contrasts=list(sex="contr.treatment",race_ethnicity="contr.treatment",location="contr.treatment")),
+    contrasts=bmi_factor_contrasts),
     warning=function(w){warnings<<-c(warnings,conditionMessage(w));invokeRestart("muffleWarning")}),error=function(e)e)
   row$warnings<-paste(unique(warnings),collapse=" | ")
   if(inherits(fit,"error"))return(fail("convergence_failure",conditionMessage(fit)))
@@ -105,7 +109,7 @@ bmi_model_diagnostics <- function(model,config) {
     }
   }
   group("BMI",config$bmi_bin_width*floor(d$bmi/config$bmi_bin_width));group("age",10*floor(d$age_at_encounter/10))
-  for(v in c("sex","race_ethnicity","location"))group(v,as.character(d[[v]]))
+  for(v in bmi_adjustment_factors)group(v,as.character(d[[v]]))
   cuts<-unique(stats::quantile(p,seq(0,1,.1),type=config$quantile_type))
   group("fitted_probability",if(length(cuts)>1)cut(p,c(-Inf,cuts[-c(1,length(cuts))],Inf),labels=FALSE)else rep(1,n))
   # Fixed-bin residual/probability histograms prevent export of individual predictions.
@@ -124,7 +128,7 @@ bmi_model_diagnostics <- function(model,config) {
       data.frame(model_id=id,metric=name,n=n,minimum=q[1],median=q[2],q95=q[3],q99=q[4],maximum=q[5],threshold=item$threshold,n_flagged=sum(item$z>item$threshold),status="full_sample_assessed; flags do not exclude patients",row.names=NULL)}))
   },error=function(e)data.frame(model_id=id,metric="influence",status=paste("unavailable:",conditionMessage(e))))
   support<-list()
-  for(v in c("age_at_encounter","sex","race_ethnicity","location")) {
+  for(v in bmi_adjustment_covariates) {
     grp<-if(v=="age_at_encounter")as.character(10*floor(d[[v]]/10))else as.character(d[[v]])
     key<-paste(config$bmi_bin_width*floor(d$bmi/config$bmi_bin_width),grp,sep=":")
     support[[v]]<-bmi_bind(lapply(split(seq_len(n),key),function(ix)data.frame(model_id=id,variable_id=v,level=grp[ix[1]],bin_low=config$bmi_bin_width*floor(d$bmi[ix[1]]/config$bmi_bin_width),n=length(ix),events=sum(y[ix]),nonevents=sum(1-y[ix]),sparse=length(ix)<config$sparse_n||min(sum(y[ix]),sum(1-y[ix]))<config$sparse_events)))

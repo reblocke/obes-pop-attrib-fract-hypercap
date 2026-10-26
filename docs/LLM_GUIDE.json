@@ -1,6 +1,6 @@
 {
   "document_type": "llm_collaborator_reading_guide",
-  "updated": "2026-10-24",
+  "updated": "2026-10-25",
   "purpose": "Current human/LLM reading navigation, evidence boundaries and approval state. This is documentation, not a second analysis configuration.",
   "repository_paths_relative_to": "repository root",
   "authority": {
@@ -25,10 +25,10 @@
   ],
   "conflict_handling": "Use current owner instructions and authoritative documents. Verify the exact dated snapshot manifest before quoting numbers. Historical snapshots are immutable and cannot be relabeled under current definitions.",
   "current_runtime": {
-    "analysis_id": "bmi_hypercapnia_rfs_curve_audit_v8",
+    "analysis_id": "bmi_hypercapnia_rfs_curve_audit_v9",
     "input_schema": 5,
-    "aggregate_schema": 13,
-    "clinical_status": "qualified, estimated once, numerically reviewed and scoped visual review complete; investigator approval pending",
+    "aggregate_schema": 14,
+    "clinical_status": "setting-adjusted implementation; new clinical estimation and review pending; current_results is the verified earlier v8 snapshot",
     "index_rule": "First adult 2022 original ED/inpatient encounter with any valid available BMI before gases/adjustment/RFS",
     "secondary": "BMI >=30 subset at the new primary index; no later substitution",
     "endpoint_families": [
@@ -40,10 +40,11 @@
       "primary",
       "primary_bmi_ge30"
     ],
-    "scenario": "Observed BMI >30 minus one; BMI <=30 unchanged; full model-reference denominator"
+    "scenario": "Observed BMI >30 minus one; BMI <=30 unchanged; full model-reference denominator",
+    "adjustment": "Fixed BMI spline or registered linear BMI; linear age; inherited sex, race/ethnicity, geographic region; categorical index encounter setting EMER reference / IMP inpatient; no interaction"
   },
   "current_results": {
-    "status": "verified aggregate reading snapshot; investigator interpretation and figure approval pending",
+    "status": "verified earlier all-BMI v8 reading snapshot; does not include encounter-setting adjustment; replacement pending",
     "package_directory": "results/2026-10-24-all-bmi",
     "readme": "results/2026-10-24-all-bmi/README.md",
     "manifest": "results/2026-10-24-all-bmi/manifest.json",
@@ -62,7 +63,7 @@
     "new_all_bmi_interpretation": "pending",
     "new_figure_approval": "pending",
     "preferred_layouts": [
-      "primary/F1-B",
+      "F1-main",
       "primary/F2"
     ],
     "historical_approval": "Provisional owner scientific approval and B/F2 selection applied to the dated October 18 results, not new all-BMI estimates or components.",
@@ -220,5 +221,25 @@
       "purpose": "Last historical BMI-restricted integrated analysis; Firth ICD model",
       "rule": "Use only that dated design and approval state."
     }
-  ]
+  ],
+  "current_visual_revision": {
+    "directory": "artifacts/triangulation/encounter-setting-20261025",
+    "availability": "local implementation directory; setting-adjusted clinical exports pending",
+    "figure_id": "F1-main",
+    "panel_order": [
+      "combined gas hypercapnia",
+      "nested arterial hypercapnia",
+      "stacked same-day arterial components",
+      "ABG and VBG usable-evidence ascertainment"
+    ],
+    "landmarks_kg_m2": [
+      30,
+      40
+    ],
+    "ascertainment": "At least one valid ordinary unadjusted specimen-authenticated PCO2 result during the fixed encounter; not every order or draw",
+    "models": "All registered model families refitted with additive encounter setting under schema 14; execution pending",
+    "approval": "owner-requested layout; actual export review recorded separately; investigator export approval pending",
+    "panel_d_y_label": "Portion with blood gas obtained",
+    "obtained_definition": "Captured usable PCO2 result; tests without usable captured results are not identified"
+  }
 }

@@ -56,7 +56,7 @@ standardize_probability_curves <- function(model,reference,reference_id,config) 
     local <- model$data[abs(model$data$bmi-b) <= config$bmi_bin_width/2,,drop=FALSE]
     n_events <- sum(local[[model$row$field]]==1)
     n_nonevents <- nrow(local)-n_events
-    coverage <- vapply(c("sex","race_ethnicity","location"), function(name)
+    coverage <- vapply(bmi_adjustment_factors, function(name)
       length(setdiff(unique(as.character(reference[[name]])), unique(as.character(local[[name]])))), integer(1))
     cbind(base,bmi=b,probability=result$probability,conf_low=ci[1],conf_high=ci[2],within_training_bmi_range=b>=bounds[1]&&b<=bounds[2],local_n=nrow(local),local_events=n_events,local_nonevents=n_nonevents,locally_sparse=nrow(local)<config$sparse_n||n_events<config$sparse_events||n_nonevents<config$sparse_events,missing_local_factor_levels=sum(coverage),status="estimated",reason="")
   }))

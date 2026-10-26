@@ -47,6 +47,8 @@ validate_analysis_bundle <- function(a) {
   bmi_validate_icd_bundle(a)
   bmi_validate_ledger(a)
   if(nrow(a$model_registry)) {
+    if(any(a$model_registry$adjustment_set_id!="inherited_plus_encounter_setting_v1") ||
+       any(!grepl("encounter_type",a$model_registry$formula_text,fixed=TRUE)))stop("Missing setting-adjustment identity/formula")
     if(nrow(a$expected_models) && !setequal(a$model_registry$model_id,a$expected_models$model_id))stop("Configured model registry mismatch")
     if(anyDuplicated(a$model_registry$model_id))stop("Model registry identity/count mismatch")
     for(id in a$model_registry$model_id) {
@@ -55,6 +57,10 @@ validate_analysis_bundle <- function(a) {
         c<-a$coefficients[a$coefficients$model_id==id & a$coefficients$status=="estimated",,drop=FALSE]
         v<-a$coefficient_covariance[a$coefficient_covariance$model_id==id,,drop=FALSE]
         if(nrow(c)!=r$n_parameters||nrow(v)!=nrow(c)^2||!setequal(c$term,v$term1)||!setequal(c$term,v$term2))stop("Coefficient/covariance coverage failure")
+        f<-a$factor_references[a$factor_references$model_id==id & a$factor_references$variable_id=="encounter_type",,drop=FALSE]
+        if(nrow(f)!=2L || !setequal(f$level,c("EMER","IMP")) ||
+           !identical(as.character(f$level[f$is_reference]),"EMER") ||
+           !any(grepl("encounter_typeIMP",c$term,fixed=TRUE)))stop("Missing encounter-setting coefficient/reference")
       }
     }
   }
@@ -81,7 +87,7 @@ bmi_write_bundle <- function(a,path,config,receipt,mode="fixture") {
   jsonlite::write_json(receipt,file.path(path,"input_receipt.json"),auto_unbox=TRUE,pretty=TRUE,digits=NA)
   writeLines(capture.output(sessionInfo()),file.path(path,"session-info.txt"))
   files<-list.files(path,full.names=TRUE)
-  manifest<-list(schema_version=13L,analysis_id=config$analysis_id,run_id=basename(path),mode=mode,
+  manifest<-list(schema_version=14L,analysis_id=config$analysis_id,run_id=basename(path),mode=mode,
     created_utc=format(Sys.time(),tz="UTC",usetz=TRUE),estimation_sources=bmi_hash_files(bmi_estimation_files()),
     files=as.list(setNames(vapply(files,tri_sha256,character(1)),basename(files))),
     source_status=if(mode=="fixture")"artificial_only"else receipt$source_status,
@@ -95,7 +101,7 @@ bmi_write_bundle <- function(a,path,config,receipt,mode="fixture") {
 bmi_read_bundle <- function(path,check_sources=TRUE) {
   mf<-file.path(path,"bundle_manifest.json");if(!file.exists(mf))stop("Missing bundle manifest")
   m<-jsonlite::read_json(mf,simplifyVector=FALSE)
-  if(!identical(m$schema_version,13L)||!identical(m$analysis_id,"bmi_hypercapnia_rfs_curve_audit_v8"))stop("Superseded analysis; rerun under the current design")
+  if(!identical(m$schema_version,14L)||!identical(m$analysis_id,"bmi_hypercapnia_rfs_curve_audit_v9"))stop("Superseded analysis; rerun under the current design")
   for(name in names(m$files)) {
     if(basename(name)!=name||!file.exists(file.path(path,name))||!identical(tri_sha256(file.path(path,name)),m$files[[name]]))stop("Bundle hash mismatch: ",name)
   }
@@ -255,7 +261,7 @@ bmi_export_population_figures <- function(bundle,output) {
       limits<-range(a$distribution_bins$lower[a$distribution_bins$variable_id=="gas_pattern_bmi"],a$distribution_bins$upper[a$distribution_bins$variable_id=="gas_pattern_bmi"],na.rm=TRUE)
       for(name in c("p","obs","freq")) {obj<-get(name);if(is.data.frame(obj[[o]]$data)&&nrow(obj[[o]]$data))obj[[o]]<-obj[[o]]+ggplot2::coord_cartesian(xlim=limits);assign(name,obj)}
     }
-    caption<-paste("F1. BMI–hypercapnia relationships at the first eligible adult 2022 acute-care encounter. ABG denotes PaCO₂ ≥45 mm Hg; ABG or VBG denotes PaCO₂ ≥45 or PvCO₂ ≥50 mm Hg. ICD denotes the five-code composite, including E66.2. The vertical dot-dash line marks BMI 30, the scenario eligibility boundary, not the cohort boundary. Gas curves standardize over outcome-evaluable patients; ICD uses known diagnosis capture. Model/ref N is the common model and reference count. Availability and BMI frequency use all adjustment-complete patients (C); the four frequency groups are mutually exclusive. Adjustment: age, sex, race/ethnicity and region with a fixed natural BMI spline. Shading and fine boundaries show pointwise model-based 95% CIs; dotted segments are locally sparse and dashed segments exceed training BMI support. Open availability points use Wilson intervals when no model is estimable. Known capture is distinct from ICD positivity. ABG/VBG: arterial/venous blood gas. Conditional model uncertainty excludes selection and measurement assumptions; no population transport or causal effect is inferred.")
+    caption<-paste("F1. BMI–hypercapnia relationships at the first eligible adult 2022 acute-care encounter. ABG denotes PaCO₂ ≥45 mm Hg; ABG or VBG denotes PaCO₂ ≥45 or PvCO₂ ≥50 mm Hg. ICD denotes the five-code composite, including E66.2. The vertical dot-dash line marks BMI 30, the scenario eligibility boundary, not the cohort boundary. Gas curves standardize over outcome-evaluable patients; ICD uses known diagnosis capture. Model/ref N is the common model and reference count. Availability and BMI frequency use all adjustment-complete patients (C); the four frequency groups are mutually exclusive. Adjustment: age, sex, race/ethnicity, geographic region and encounter setting (EMER reference; IMP inpatient) with a fixed natural BMI spline. Shading and fine boundaries show pointwise model-based 95% CIs; dotted segments are locally sparse and dashed segments exceed training BMI support. Open availability points use Wilson intervals when no model is estimable. Known capture is distinct from ICD positivity. ABG/VBG: arterial/venous blood gas. Conditional model uncertainty excludes selection and measurement assumptions; no population transport or causal effect is inferred.")
     if(identical(bundle$manifest$source_group,"primary_bmi_ge30"))caption<-sub("the scenario eligibility boundary, not the cohort boundary","the scenario eligibility boundary and this secondary population’s BMI cutoff",caption,fixed=TRUE)
     add("F1-A",function()bmi_draw_relationship(p,obs,freq[[1]],"A"),190,caption)
     add("F1-B",function()bmi_draw_relationship(p,obs,freq[[1]],"B"),210,caption)
@@ -482,4 +488,217 @@ bmi_number <- function(x,digits=3) vapply(x,function(z) {
 bmi_latex_escape <- function(text) {
   replacements<-setNames(c("\\textbackslash{}","\\{","\\}","\\$","\\&","\\#","\\%","\\_","\\textasciitilde{}","\\textasciicircum{}"),c("\\","{","}","$","&","#","%","_","~","^"))
   vapply(text,function(x){chars<-strsplit(x,"",fixed=TRUE)[[1]];mapped<-unname(replacements[chars]);paste0(ifelse(is.na(mapped),chars,mapped),collapse="")},character(1))
+}
+
+# Shared primary relationship exhibit. Only persisted aggregate tables enter here;
+# the private ATS wrapper and both Quarto reports use these identical exports.
+bmi_main_relationship_figure <- function(bundle, output) {
+  a <- bundle$analysis; config <- bundle$config
+  if(!identical(config$analysis_id,"bmi_hypercapnia_rfs_curve_audit_v9") ||
+     !identical(config$adjustment_set_id,"inherited_plus_encounter_setting_v1") ||
+     !"adjustment_set_id" %in% names(a$model_registry) ||
+     any(a$model_registry$adjustment_set_id!=config$adjustment_set_id))
+    stop("F1-main requires authenticated setting-adjusted results; historical estimates cannot acquire new labels")
+  dir.create(output, recursive=TRUE, showWarnings=FALSE)
+  ids <- c("primary::any_gas/encounter/spline", "primary::abg/encounter/spline",
+    "primary::same_day_abg/encounter/multinomial_spline",
+    "primary::observation/abg/encounter", "primary::observation/vbg/encounter")
+  references <- paste0("primary::",c("C_any_gas_encounter","C_abg_encounter","C_same_day_abg","C","C"))
+  panels <- do.call(rbind,lapply(seq_along(ids),function(i) {
+    r <- a$model_registry[a$model_registry$model_id==ids[i],,drop=FALSE]
+    node <- a$cohort_nodes[a$cohort_nodes$population_id==references[i],,drop=FALSE]
+    if(nrow(r)>1L || nrow(node)!=1L)stop("Ambiguous F1-main model/reference: ",ids[i])
+    data.frame(panel=c("A","B","C","D","D")[i],model_id=ids[i],
+      source_population_id=references[i],n_model=if(nrow(r))r$n_model else NA_real_,
+      n_reference=node$n,status=if(nrow(r))r$status else "unavailable_model",
+      reason=if(nrow(r))r$failure_reason else "Model is not registered")
+  }))
+  get_curve <- function(i, observation=FALSE) {
+    d <- if(observation)a$observation_curves else a$probability_curves
+    d <- d[d$model_id==ids[i],,drop=FALSE]
+    if(!panels$status[i] %in% c("successful","fitted_with_concerns"))return(d[FALSE,,drop=FALSE])
+    if(!nrow(d) || any(!is.finite(d$probability)) || any(d$conf_low>d$probability | d$conf_high<d$probability))
+      stop("Missing or invalid saved F1-main curve: ",ids[i])
+    if(any(d$n_model!=panels$n_model[i]) || any(d$n_reference!=panels$n_reference[i]))
+      stop("F1-main reference mismatch: ",ids[i])
+    d
+  }
+  combined <- get_curve(1); arterial <- get_curve(2); joint <- get_curve(3)
+  abg_observed <- get_curve(4,TRUE); vbg_observed <- get_curve(5,TRUE)
+  with <- joint[joint$outcome_id=="with_acidemia",,drop=FALSE]
+  without <- joint[joint$outcome_id=="without_acidemia",,drop=FALSE]
+  total <- joint[joint$outcome_id=="any_hypercapnia",,drop=FALSE]
+  if(nrow(joint) && (!identical(with$bmi,without$bmi) || !identical(with$bmi,total$bmi) ||
+    max(abs(with$probability+without$probability-total$probability))>1e-9))stop("F1-main component partition mismatch")
+  fmt <- function(x)if(length(x)!=1L || !is.finite(x))"Unavailable"else format(x,big.mark=",",trim=TRUE)
+  frequency <- function(i) {
+    d <- a$distribution_bins[a$distribution_bins$population_id==references[i] & a$distribution_bins$variable_id=="bmi",,drop=FALSE]
+    if(!is.finite(panels$n_reference[i]) || !nrow(d))return(d)
+    if(sum(d$n)!=panels$n_reference[i] || any(d$n_reference!=panels$n_reference[i]))stop("F1-main frequency/reference mismatch")
+    d$panel <- panels$panel[i];d$source_population_id <- references[i];d
+  }
+  freqs <- lapply(1:4,frequency)
+  view <- bmi_bind(list(combined,arterial,joint,abg_observed,vbg_observed))
+  if(!nrow(view))stop("F1-main has no saved curves")
+  series <- list(combined,arterial,with,without,abg_observed,vbg_observed)
+  series_models <- ids[c(1,2,3,3,4,5)]
+  series_outcomes <- c("any_gas","abg","with_acidemia","without_acidemia","abg","vbg")
+  series_labels <- c("Combined-gas hypercapnia","Arterial hypercapnia","With same-day acidemia",
+    "Without documented same-day acidemia","ABG ascertainment","VBG ascertainment")
+  landmarks <- do.call(rbind,lapply(seq_along(series),function(i)do.call(rbind,lapply(c(30,40),function(b) {
+    z <- series[[i]][series[[i]]$bmi==b,,drop=FALSE]
+    if(nrow(z)>1L)stop("Duplicate F1-main landmark")
+    r <- panels[panels$model_id==series_models[i],,drop=FALSE]
+    data.frame(panel=r$panel,series=series_labels[i],model_id=series_models[i],outcome_id=series_outcomes[i],bmi=b,
+      probability=if(nrow(z))z$probability else NA_real_,conf_low=if(nrow(z))z$conf_low else NA_real_,
+      conf_high=if(nrow(z))z$conf_high else NA_real_,n_model=r$n_model,n_reference=r$n_reference,
+      status=if(nrow(z))"estimated"else r$status)
+  }))))
+  ci <- function(i,b) {
+    z <- landmarks[landmarks$series==series_labels[i] & landmarks$bmi==b,]
+    if(!is.finite(z$probability))return(paste0("Unavailable: ",z$status))
+    sprintf("%.1f%% (%.1f–%.1f)",100*z$probability,100*z$conf_low,100*z$conf_high)
+  }
+  printed <- data.frame(label=series_labels,bmi30=vapply(1:6,ci,character(1),b=30),bmi40=vapply(1:6,ci,character(1),b=40))
+  for(name in c("panels","landmarks","printed","view")) {
+    file <- switch(name,panels="panels",landmarks="landmarks",printed="printed-landmarks",view="plotted-curves")
+    utils::write.csv(get(name),file.path(output,paste0("F1-main-",file,".csv")),row.names=FALSE)
+  }
+  utils::write.csv(bmi_bind(freqs),file.path(output,"F1-main-frequencies.csv"),row.names=FALSE)
+  bounds <- range(view$bmi,na.rm=TRUE);bounds <- c(floor(bounds[1]/10)*10,ceiling(bounds[2]/10)*10)
+  xs <- function()ggplot2::scale_x_continuous(breaks=seq(bounds[1],bounds[2],20),expand=ggplot2::expansion(mult=0))
+  ys <- function()ggplot2::scale_y_continuous(limits=c(0,1),breaks=c(0,.25,.5,.75,1),
+    labels=function(x)paste0(100*x,"%"),expand=ggplot2::expansion(mult=c(0,.015)))
+  theme <- ggplot2::theme_classic(base_size=9,base_family="sans")+
+    ggplot2::theme(plot.title=ggplot2::element_text(size=10,face="bold",margin=ggplot2::margin(b=3)),
+      plot.subtitle=ggplot2::element_text(size=9,margin=ggplot2::margin(b=5)),
+      axis.text=ggplot2::element_text(size=9,colour="grey15"),axis.title=ggplot2::element_text(size=9),
+      axis.title.y=ggplot2::element_text(margin=ggplot2::margin(r=3)),plot.margin=ggplot2::margin(3,6,3,3),legend.position="none")
+  segments <- function(z) {
+    z$sparse <- z$locally_sparse | !z$within_training_bmi_range
+    z$segment <- cumsum(c(TRUE,head(z$sparse,-1)!=tail(z$sparse,-1)));z
+  }
+  shade_sparse <- function(z) {
+    xx <- sort(unique(z$bmi[z$sparse]));d <- data.frame(xmin=numeric(),xmax=numeric())
+    if(length(xx)) {
+      groups <- cumsum(c(TRUE,diff(xx)>config$grid_step+1e-7))
+      d <- do.call(rbind,lapply(split(xx,groups),function(v)data.frame(xmin=min(v)-config$grid_step/2,xmax=max(v)+config$grid_step/2)))
+    }
+    ggplot2::geom_rect(data=d,ggplot2::aes(xmin=xmin,xmax=xmax,ymin=0,ymax=1),inherit.aes=FALSE,fill="white",alpha=.48)
+  }
+  unavailable <- function(title,i)bmi_empty_plot(title,paste(panels$status[i],panels$reason[i],sep=": "))+theme
+  curve <- function(z,title,i) {
+    if(!nrow(z))return(unavailable(title,i))
+    z <- segments(z)
+    ggplot2::ggplot(z,ggplot2::aes(bmi,probability))+
+      ggplot2::geom_ribbon(ggplot2::aes(ymin=conf_low,ymax=conf_high),fill="grey45",alpha=.22)+shade_sparse(z)+
+      ggplot2::geom_vline(xintercept=30,linetype="dashed",linewidth=.3,colour="grey45")+
+      ggplot2::geom_line(ggplot2::aes(linetype=sparse,group=segment),linewidth=.65)+
+      ggplot2::geom_point(data=z[z$bmi %in% c(30,40),],size=1.3)+
+      ggplot2::scale_linetype_manual(values=c("FALSE"="solid","TRUE"="dotted"))+xs()+ys()+
+      ggplot2::coord_cartesian(xlim=bounds)+ggplot2::labs(title=title,subtitle=paste0("Model/reference N = ",fmt(panels$n_reference[i])),
+        x=NULL,y="Hypercapnia probability")+theme
+  }
+  pA <- curve(combined,"A  Arterial ≥45 or venous ≥50 mm Hg",1)
+  pB <- curve(arterial,"B  Arterial PCO₂ ≥45 mm Hg",2)
+  if(nrow(joint)) {
+    stack <- segments(data.frame(bmi=with$bmi,with=with$probability,total=total$probability,
+      conf_low=total$conf_low,conf_high=total$conf_high,
+      locally_sparse=with$locally_sparse|without$locally_sparse|total$locally_sparse,
+      within_training_bmi_range=with$within_training_bmi_range&without$within_training_bmi_range&total$within_training_bmi_range))
+    pC <- ggplot2::ggplot(stack,ggplot2::aes(bmi))+
+      ggplot2::geom_ribbon(ggplot2::aes(ymin=0,ymax=with),fill="#7099A7")+
+      ggplot2::geom_ribbon(ggplot2::aes(ymin=with,ymax=total),fill="#E3C49E")+shade_sparse(stack)+
+      ggplot2::geom_ribbon(ggplot2::aes(ymin=conf_low,ymax=conf_high),fill="grey20",alpha=.18)+
+      ggplot2::geom_vline(xintercept=30,linetype="dashed",linewidth=.3,colour="grey45")+
+      ggplot2::geom_line(ggplot2::aes(y=total,linetype=sparse,group=segment),linewidth=.65)+
+      ggplot2::geom_line(ggplot2::aes(y=with,linetype=sparse,group=segment),linewidth=.5,colour="#245669")+
+      ggplot2::annotate("text",x=bounds[1]+.46*diff(bounds),y=.22,label="With same-day\nacidemia",size=9/2.8453,colour="#132B34",lineheight=1.05)+
+      ggplot2::annotate("segment",x=bounds[1]+.43*diff(bounds),y=.72,xend=bounds[1]+.54*diff(bounds),yend=.59,linewidth=.3,colour="#A36229")+
+      ggplot2::annotate("text",x=bounds[1]+.30*diff(bounds),y=.81,label="Without documented\nsame-day acidemia",size=9/2.8453,colour="#583411",lineheight=1.05)+
+      ggplot2::scale_linetype_manual(values=c("FALSE"="solid","TRUE"="dotted"))+xs()+ys()+ggplot2::coord_cartesian(xlim=bounds)+
+      ggplot2::labs(title="C  Components of ABG Hypercapnia",subtitle=paste0("Shared model/reference N = ",fmt(panels$n_reference[3])),x=NULL,y="Hypercapnia probability")+theme
+  } else pC <- unavailable("C  Components of ABG Hypercapnia",3)
+  observation <- bmi_bind(lapply(list(abg_observed,vbg_observed),function(z)if(nrow(z))segments(z)else z))
+  if(nrow(observation)) {
+    observation$pattern <- ifelse(observation$sparse,"sparse",observation$outcome_id)
+    pD <- ggplot2::ggplot(observation,ggplot2::aes(bmi,probability,colour=outcome_id,fill=outcome_id))+
+      ggplot2::geom_ribbon(ggplot2::aes(ymin=conf_low,ymax=conf_high,group=outcome_id),alpha=.20,colour=NA)+
+      shade_sparse(observation)+ggplot2::geom_vline(xintercept=30,linetype="dashed",linewidth=.3,colour="grey45")+
+      ggplot2::geom_line(ggplot2::aes(linetype=pattern,group=interaction(outcome_id,segment)),linewidth=.75)+
+      ggplot2::geom_point(data=observation[observation$bmi %in% c(30,40),],ggplot2::aes(shape=outcome_id),size=1.4)+
+      ggplot2::scale_colour_manual(values=c(abg="#B23A32",vbg="#2464A0"))+
+      ggplot2::scale_fill_manual(values=c(abg="#B23A32",vbg="#2464A0"))+
+      ggplot2::scale_linetype_manual(values=c(abg="solid",vbg="longdash",sparse="dotted"))+
+      ggplot2::scale_shape_manual(values=c(abg=16,vbg=17))+xs()+ys()+ggplot2::coord_cartesian(xlim=bounds)+
+      ggplot2::labs(title="D  ABG and VBG ascertainment",subtitle=paste0("Model/reference N = ",fmt(panels$n_reference[4])),x=NULL,y="Portion with blood gas obtained")+theme
+    for(i in 4:5) {
+      kind <- if(i==4)"abg"else"vbg";colour <- if(i==4)"#B23A32"else"#2464A0"
+      d <- observation[observation$outcome_id==kind,,drop=FALSE];yy <- if(i==4).45 else .64
+      label_x <- bounds[1]+if(i==4).57*diff(bounds)else .25*diff(bounds)
+      label <- if(nrow(d))toupper(kind)else paste(toupper(kind),panels$status[i])
+      pD <- pD+ggplot2::annotate("text",x=label_x,y=yy,label=label,size=9/2.8453,colour=colour)
+      if(nrow(d)) {
+        j <- which.min(abs(d$bmi-(bounds[1]+if(i==4).38*diff(bounds)else .14*diff(bounds))))
+        pD <- pD+ggplot2::annotate("segment",x=label_x,y=yy-.035,xend=d$bmi[j],yend=d$probability[j]+.012,colour=colour,linewidth=.3)
+      }
+    }
+  } else pD <- unavailable("D  ABG and VBG ascertainment",4)
+  histogram <- function(d,x=FALSE) {
+    if(!nrow(d))return(bmi_empty_plot("BMI frequency","Unavailable")+theme)
+    ggplot2::ggplot(d,ggplot2::aes((lower+upper)/2,n))+
+      ggplot2::geom_col(ggplot2::aes(width=upper-lower),fill="grey55")+
+      ggplot2::geom_vline(xintercept=30,linetype="dashed",linewidth=.3,colour="grey35")+xs()+
+      ggplot2::scale_y_continuous(breaks=function(l){ticks<-pretty(l,n=2);c(0,max(ticks[ticks>0&ticks<=l[2]]))},
+        labels=function(x)ifelse(x>=1000,paste0(x/1000,"k"),x),expand=ggplot2::expansion(mult=c(0,.08)))+
+      ggplot2::coord_cartesian(xlim=bounds)+ggplot2::labs(x=if(x)"BMI (kg/m²)"else NULL,y="Patients")+theme+
+      ggplot2::theme(plot.margin=ggplot2::margin(0,6,0,3))
+  }
+  plots <- list(pA,pB,histogram(freqs[[1]]),histogram(freqs[[2]]),pC,pD,histogram(freqs[[3]],TRUE),histogram(freqs[[4]],TRUE))
+  # Measure and align on a discard device; no stray Rplots.pdf side effect.
+  grDevices::pdf(NULL);on.exit(grDevices::dev.off(),add=TRUE)
+  grobs <- lapply(plots,ggplot2::ggplotGrob)
+  widths <- do.call(grid::unit.pmax,lapply(grobs,`[[`,"widths"))
+  for(i in seq_along(grobs))grobs[[i]]$widths <- widths
+  draw <- function() {
+    grid::grid.newpage()
+    grid::grid.text("Hypercapnia across the range of BMIs",x=.025,y=.985,just=c("left","top"),gp=grid::gpar(fontsize=11,fontface="bold"))
+    if(identical(bundle$manifest$mode,"fixture"))grid::grid.text("ARTIFICIAL DATA ONLY",x=.975,y=.975,just="right",gp=grid::gpar(fontsize=9))
+    grid::pushViewport(grid::viewport(x=.5,y=.603,width=.985,height=.715,
+      layout=grid::grid.layout(4,2,heights=grid::unit(c(3.7,1,3.7,1),"null"))))
+    for(i in seq_along(grobs)) {
+      grid::pushViewport(grid::viewport(layout.pos.row=(i-1L)%/%2L+1L,layout.pos.col=(i-1L)%%2L+1L))
+      grid::grid.draw(grobs[[i]]);grid::popViewport()
+    }
+    grid::popViewport()
+    grid::grid.text("Landmarks: standardized probability, % (pointwise 95% CI)",x=.025,y=.222,just="left",gp=grid::gpar(fontsize=9,fontface="bold"))
+    for(i in 0:6) {
+      label <- if(i==0)c("Outcome / evidence","BMI 30 kg/m²","BMI 40 kg/m²")else unlist(printed[i,],use.names=FALSE)
+      grid::grid.text(label,x=c(.025,.565,.785),y=.200-i*.019,just="left",gp=grid::gpar(fontsize=9,fontface=if(i==0)"bold"else"plain"))
+    }
+    grid::grid.text("95% CI: gray bands (A–C total), red/blue (D); component intervals in table.",x=.025,y=.060,just="left",gp=grid::gpar(fontsize=9))
+    grid::grid.text("Dotted/faded: sparse evidence. Frequency strips use each panel’s reference.",x=.025,y=.043,just="left",gp=grid::gpar(fontsize=9))
+    grid::grid.text("Same recorded-day co-occurrence; not verified same-sample pairing.",x=.025,y=.026,just="left",gp=grid::gpar(fontsize=9,fontface="bold"))
+  }
+  bmi_export(draw,file.path(output,"F1-main"),height_mm=250)
+  caption <- paste("F1-main. Hypercapnia across the range of BMIs in the selected primary historical source-entry population at fixed first 2022 emergency/inpatient indexes.",
+    "BMI: body mass index; ABG: arterial blood gas; VBG: venous blood gas; PCO₂: partial pressure of carbon dioxide; CI: confidence interval.",
+    "A: arterial PCO₂ ≥45 or venous PCO₂ ≥50 mm Hg (model/reference N =",paste0(fmt(panels$n_reference[1]),")."),
+    "B: arterial PCO₂ ≥45 mm Hg (N =",paste0(fmt(panels$n_reference[2]),");"),"B includes patients with both specimens; these samples overlap and must not be summed.",
+    "C: joint multinomial components in patients with usable arterial PCO₂ and arterial pH on a common recorded date (N =",paste0(fmt(panels$n_reference[3]),")."),
+    "Blue height gives hypercapnia with documented same-day acidemia (pH <7.35); orange thickness gives hypercapnia without such a day. Any eligible day with both findings takes priority. The upper boundary and gray 95% interval describe their total, not the orange component alone. Different samples or treatment periods may contribute.",
+    "Same recorded-day co-occurrence; not verified same-sample pairing.",
+    "D: separate ABG (red, solid) and VBG (blue, long-dashed) models describe usable captured PCO₂ evidence across the full adjustment-complete primary reference (N =",paste0(fmt(panels$n_reference[4]),")."),
+    "Obtained denotes a captured, usable PCO₂ result; tests without usable captured results are not identified. Either or both specimens may be available. Normal and elevated results count, with no pH requirement, at any time within the fixed encounter.",
+    "All models reuse the primary fixed three-degree-of-freedom BMI spline and adjust for age, sex, race/ethnicity, geographic region and encounter setting (EMER reference; IMP inpatient). A–C standardize over their own outcome-evaluable reference; D over all adjustment-complete primary patients. Shading and table intervals are pointwise model-based 95% confidence intervals conditional on the empirical reference and fixed basis, not intervals for a BMI 30–40 contrast.",
+    "Frequency strips describe each panel’s corresponding reference. The vertical line marks BMI 30 (kg/m²); dotted/faded segments indicate sparse or out-of-range support. Full saved curve ranges are retained. Historical selection, selective measurement, treatment timing and residual confounding limit interpretation; these results do not establish acute respiratory failure, compensation, causal effects or physiological outcomes in untested patients.")
+  if(identical(bundle$manifest$mode,"fixture"))caption <- paste("ARTIFICIAL DATA ONLY.",caption)
+  alt <- "Combined-gas and nested arterial hypercapnia curves above a stacked arterial with/without documented same-day-acidemia decomposition and red ABG/blue VBG usable-evidence ascertainment curves. Each panel retains its reference-population BMI frequency strip, pointwise 95% intervals and sparse-support warnings. The table gives six series at BMI 30 and 40 kg/m². Same recorded-day co-occurrence; not verified same-sample pairing."
+  writeLines(caption,file.path(output,"F1-main-caption.txt"));writeLines(alt,file.path(output,"F1-main-alt-text.txt"))
+  jsonlite::write_json(list(figure_id="F1-main",clinical_input_reads=0,model_refits=0,width_mm=190,height_mm=250,dpi=300,
+    models=ids,min_data_font_pt=9,plotted_tables=c("probability_curves","observation_curves","distribution_bins","model_registry","cohort_nodes"),
+    table_hashes=lapply(a[c("probability_curves","observation_curves","distribution_bins","model_registry","cohort_nodes")],function(x)digest::digest(x,algo="sha256")),
+    visual_review="pending"),file.path(output,"F1-main-build-receipt.json"),auto_unbox=TRUE,pretty=TRUE)
+  data.frame(figure_id="F1-main",caption=caption,alt_text=alt,
+    source_tables="probability_curves;observation_curves;distribution_bins;model_registry;cohort_nodes")
 }

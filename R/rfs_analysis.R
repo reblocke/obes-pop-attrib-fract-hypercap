@@ -151,6 +151,8 @@ bmi_run_analysis <- function(raw,config,source_status="artificial",audit_only=FA
   unresolved<-q[q$rfs_group=="unresolved",,drop=FALSE]
   results[["unresolved"]]<-bmi_namespace(bmi_run_population_analysis(unresolved,config,source_status,audit_only=TRUE,ctx=bmi_fixed_population(ctx,unresolved)),"unresolved")
   result<-setNames(lapply(bmi_table_names,function(name)bmi_bind(lapply(results,`[[`,name))),bmi_table_names)
+  result$encounter_setting_audit<-result$encounter_setting_audit[
+    result$encounter_setting_audit$analysis_population_id %in% unlist(config$analysis_populations),,drop=FALSE]
   result$variable_dictionary<-combined$variable_dictionary
   result$policy_registry<-combined$policy_registry
   for(name in names(audits))result[[name]]<-audits[[name]]
