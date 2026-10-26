@@ -1,0 +1,20 @@
+{
+  "status": "passed",
+  "scope": "Aggregate addendum only; not new clinical estimation or investigator approval",
+  "parent_payload_hashes_verified": 1952,
+  "clinical_models_fitted": 0,
+  "clinical_exact_saved_prediction_checks": 24,
+  "artificial_exact_saved_prediction_checks": 24,
+  "clinical_independent_gradient_checks": 3,
+  "artificial_independent_gradient_checks": 3,
+  "joint_component_count": "Two changes sum to total; full-covariance ratio variance independently reconstructed",
+  "clinical_reference_n": [
+    71318,
+    126074,
+    53607
+  ],
+  "frozen_public_source_fixture_replay": "Four output files byte-identical to prior artificial verification",
+  "privacy_review": "Allowlisted text formats, aggregate CSV headers and configured credential/private-path scan passed; no patient records, input files or fitted objects included",
+  "abstract_files": "unchanged; no draft text included",
+  "review_limit": "Numerical/release checks; no new scientific or figure approval"
+}

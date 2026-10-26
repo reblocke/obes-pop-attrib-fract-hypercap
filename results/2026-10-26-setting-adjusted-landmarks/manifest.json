@@ -1,0 +1,65 @@
+{
+  "document_type": "aggregate_prediction_addendum",
+  "analysis_id": "bmi_hypercapnia_rfs_curve_audit_v9",
+  "aggregate_schema": 14,
+  "package_date": "2026-10-26",
+  "parent_snapshot": "results/2026-10-26-setting-adjusted",
+  "parent_snapshot_manifest_sha256": "202acd46df9d4480d5dbe7fb765202b2b70b08c27585468b149e73044f045618",
+  "run_id": "curve-analyze-20261026T001917-75549",
+  "source_bundle_manifest_sha256": "7d7c71b1913c6ab8463200dd953b5494ce2c807c10674946c05b55a8f5599476",
+  "source_input_sha256": "423ebf0d363abfbd5eb1a90a8599323f9dcef57534a96c1af73849fecb42a830",
+  "source_input_manifest_sha256": "c1b2227bfa928da6769526fabb400d1fda231584bacbc7212e0164752ebb127d",
+  "postestimation_checkout": "d6b911bf0e00b9e7c0a5c17eaffe4308fa834904",
+  "clinical_models_fitted": 0,
+  "scope": "Author-requested BMI30/40 descriptive contrasts; preserved primary snapshot and scientific definitions",
+  "files": {
+    "README.md": {
+      "sha256": "8219aa84ba5928da7cd143886db4bd5d0025be3d9c756dd40a4e6eab76dea8c4",
+      "bytes": 4498
+    },
+    "finite-difference-checks.csv": {
+      "sha256": "ad79711df41455c5810b7d6754d44e8c3554e6296b4a14b222031f52fb27f4c9",
+      "bytes": 257
+    },
+    "landmark-estimands.csv": {
+      "sha256": "e610ba74e1fa77d48c14be83e0e95c725d3e2ebdb4f2295d01ad720d7accf0db",
+      "bytes": 2275
+    },
+    "postestimation-receipt.json": {
+      "sha256": "a8658234ce2d4a90b7421e07bff92172f5e8004a242919b22e6a7c554ff0c665",
+      "bytes": 2387
+    },
+    "prediction-reproduction.csv": {
+      "sha256": "b69f518acee2aa9245919804cea653f87ff94d66f6f47f1c61d99246ffeb4ada",
+      "bytes": 1654
+    },
+    "source/postestimate.R": {
+      "sha256": "e0ad463434ad53ceb844ae2f99bcf9e7b4998e2dadee014ea196aa6bde24f6b0",
+      "bytes": 10711
+    },
+    "source/verify_gradients.R": {
+      "sha256": "aa6609d843a0170504cec2d7306446e2844242555a67bb79024228871209261d",
+      "bytes": 523
+    },
+    "verification/artificial/finite-difference-checks.csv": {
+      "sha256": "2ce1bd13fe13bc5d18ed25b1999b65a55d3695ad227e8d25b0ff602c554ac823",
+      "bytes": 257
+    },
+    "verification/artificial/landmark-estimands.csv": {
+      "sha256": "02b475d7ae437054491be0c4c7b46aa90502bb317ca3b2e8576c732c2c185e0e",
+      "bytes": 2239
+    },
+    "verification/artificial/postestimation-receipt.json": {
+      "sha256": "7d741341f9f91d3923b59d4d8a5b0a0cffff99ec5cd95d0f513bb057a5bb24d7",
+      "bytes": 2241
+    },
+    "verification/artificial/prediction-reproduction.csv": {
+      "sha256": "b69f518acee2aa9245919804cea653f87ff94d66f6f47f1c61d99246ffeb4ada",
+      "bytes": 1654
+    },
+    "verification/release-review.json": {
+      "sha256": "b0eb3d1ae98961a3b489823d255de2f31ba850944b84e412a694bda772cf59c8",
+      "bytes": 994
+    }
+  }
+}
